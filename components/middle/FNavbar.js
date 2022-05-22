@@ -7,6 +7,7 @@ import FNextLink from '../low/FNextLink';
 import FMenuToggle from "../low/FMenuToggle";
 import { motion, useCycle } from "framer-motion";
 import Link from 'next/link';
+import Image from 'next/image';
 
 const blackBox = {
     visible: {
@@ -103,8 +104,10 @@ const FNavbar = observer(function FNavbar() {
                                 md:pr-3 md:col-start-1 md:justify-self-start"
                 >
                     {/* Логотип */}
-                    <img
+                    <Image
                         className="block h-16 w-auto"
+                        width={64} 
+                        height={64}
                         src='/logo.png'
                         alt="Workflow"
                     />

@@ -34,7 +34,11 @@ module.exports = async (phase, { defaultConfig }) => {
             // #Google Drive info
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_DASHBOARD: '1s2KFHjOhXQ9kQ8QcGGofR47PeFNwhD2j',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS: '1oWbuTn70nfV9UMQ90KrIKO4yKbmm4nH0',
-        }
+        },
+
+        images: {
+            domains: ['drive.google.com', 'ui-avatars.com'],
+          }
 
     }
 

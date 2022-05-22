@@ -8,6 +8,7 @@ import { FInputFile } from "../low/FInputFile";
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { changeUser } from "../../src/mobx/mobxUser";
 import { ApiError } from "../../middleware/exceptions";
+import Image from 'next/image';
 
 const inputs = {
   initial: {
@@ -125,6 +126,10 @@ const FFormProfile = observer(function FFormProfile() {
 
         const responce = await changeUser(MOBXuser.user.id, uriAvatar, inputSurname, inputFirstName, inputPatronymic, inputPositions);
 
+        if (uriAvatar) {
+          setUriAvatar(null);
+        }
+
         MOBXuser.setUser(responce.user);
 
       }
@@ -163,8 +168,10 @@ const FFormProfile = observer(function FFormProfile() {
           <div
             className="bg-white w-full flex items-center justify-center p-4"
           >
-            <img
+            <Image
               className="object-cover w-44 h-44 rounded-full"
+              width={176} 
+              height={176}
               src={uriAvatar ? uriAvatar : MOBXuser?.avatar}
               alt=""
             />

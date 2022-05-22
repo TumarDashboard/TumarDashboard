@@ -15,33 +15,54 @@ class GoogleDrive {
     });
   }
 
+  // function to find file
+  async findFile(query) {
+    return await this.drive.files.list({
+      q: query,
+      fields: 'nextPageToken, files(id, name)'
+    }).then(responce => {
+      if (responce.data.files.length > 0)
+        return responce.data.files[0].id
+      else
+        return null;
+    })
+  }
+
+  async deleteFile(fileID) {
+    await this.drive.files.delete({
+      fileId: fileID,
+    });
+  }
+
   //function to upload the file
-  async uploadUserAvatar(uiAvatarsSrc) {
+  async uploadUserAvatar(mongoUserID, uiAvatarsSrc) {
     try {
 
+      const existsFile = await this.findFile(`'${process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS}' in parents and name contains '${mongoUserID}'`);
+
+      if (existsFile) {
+        this.deleteFile(existsFile);
+      }
+
       const regex = /^data:.+\/(.+);base64,(.*)$/;
-      
       const matches = uiAvatarsSrc.match(regex);
       const type = matches[1];
       const data = matches[2];
       const buffer = Buffer.from(data, 'base64');
-      const bufferStream = new stream.PassThrough(); 
+      const bufferStream = new stream.PassThrough();
       bufferStream.end(buffer);
-      console.log(process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS);
+
       const response = await this.drive.files.create({
         requestBody: {
-          // name: 'hero.png',
-          parents: [ process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS ]
+          name: `${mongoUserID}.${type}`,
+          parents: [process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS]
         },
         media: {
           body: bufferStream,
         },
       });
 
-      // report the response from the request
-      console.log(response.data);
-
-      return response;
+      return response.data.id;
 
     } catch (error) {
       //report the error message

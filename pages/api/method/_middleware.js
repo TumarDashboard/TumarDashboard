@@ -14,7 +14,7 @@ export default catchErrorsMiddleware( async (req, ev) => {
             accesToken,
             new TextEncoder().encode( process.env.NEXT_PRIVATE_JWT_ACCESS_SECRET )
             ).catch(error=>{
-
+                console.log(error);
                 throw ApiError.UnauthorizedError();
                 
             })

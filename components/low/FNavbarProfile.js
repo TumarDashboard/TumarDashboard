@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import FNextLink from '../low/FNextLink';
+import Image from 'next/image';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -12,16 +13,18 @@ export default function FNavbarProfile({ uiAvatarsSrc, logout }) {
     <Disclosure as="nav" className="bg-color_A">
       {({ open }) => (
         <Menu as="div" className="ml-3 relative items-center content-center">
-            <Menu.Button
-              className="bg-color_A flex text-sm rounded-full 
+          <Menu.Button
+            className="bg-color_A flex text-sm rounded-full 
               focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-color_A focus:ring-white">
-              <span className="sr-only">Open user menu</span>
-              <img
-                className="h-8 w-8 rounded-full"
-                src={uiAvatarsSrc}
-                alt=""
-              />
-            </Menu.Button>
+            <span className="sr-only">Open user menu</span>
+            <Image
+              className="h-8 w-8 rounded-full"
+              width={32} 
+              height={32}
+              src={uiAvatarsSrc}
+              alt=""
+            />
+          </Menu.Button>
           <Transition
             as={Fragment}
             enter="transition ease-out duration-100"

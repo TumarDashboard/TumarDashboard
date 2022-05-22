@@ -44,19 +44,16 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   await mongoConnect();
 
-  const responce = await mongoUserModel.find({},
-    {
-      password: 0,
-      activationLink: 0,
-      __v: 0
-    });
-
+  const responce = await mongoUserModel.find({},'-password -activationLink -__v').lean();
+  
   const users = responce.map((user) => {
     return {
       email: user.email,
       isActivated: user.isActivated,
       initials: [user.surname, user.firstName, user.patronymic].join(' '),
-      uiAvatarsSrc: `https://ui-avatars.com/api/?name=${user.surname}+${user.firstName}&size=256&font-size=0.33&length=2`,
+      uiAvatarsSrc: user.uiAvatarsSrc 
+                  ? user.uiAvatarsSrc 
+                  :`https://ui-avatars.com/api/?name=${user.surname}+${user.firstName}&size=256&font-size=0.33&length=2`,
       id: JSON.stringify(user._id)
     }
   })

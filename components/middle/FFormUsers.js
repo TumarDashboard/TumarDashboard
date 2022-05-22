@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import Image from 'next/image';
 
 const inputs = {
   initial: {
@@ -46,8 +47,10 @@ export default function FFormUsers(users) {
 
                 <td className="p-2 md:border text-left block md:table-cell flex flex-row items-center">
                   <div className="flex flex-row items-center">
-                    <img
+                    <Image
                       className="h-8 w-8 rounded-full"
+                      width={32} 
+                      height={32}
                       src={user.uiAvatarsSrc}
                       alt=""
                     />

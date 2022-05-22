@@ -24,47 +24,10 @@ class UserService {
 
         try {
 
-            // const validationSchema = Yup.object().shape({
-            //     surname: Yup.string()
-            //         .min(minlengthPassword, `Фамилия должна содержать от ${minlengthFullName} до ${maxlengthFullName} символов`)
-            //         .max(maxlengthPassword, `Фамилия должна содержать от ${minlengthFullName} до ${maxlengthFullName} символов`)
-            //         .matches(/(?=.*[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ])^[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ]+/,
-            //             'Для фамилии могут использоваться буквы только русского и казахского алфавитов')
-            //         .required('Не указана фамилия'),
-            //     firstName: Yup.string()
-            //         .min(minlengthPassword, `Имя должно содержать от ${minlengthFullName} до ${maxlengthFullName} символов`)
-            //         .max(maxlengthPassword, `Имя должно содержать от ${minlengthFullName} до ${maxlengthFullName} символов`)
-            //         .matches(/(?=.*[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ])^[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ]+/,
-            //             'Для имени могут использоваться буквы только русского и казахского алфавитов')
-            //         .required('Не указано имя'),
-            //     patronymic: Yup.string()
-            //         .min(minlengthPassword, `Отчество должно содержать от ${minlengthFullName} до ${maxlengthFullName} символов`)
-            //         .max(maxlengthPassword, `Отчество должно содержать от ${minlengthFullName} до ${maxlengthFullName} символов`)
-            //         .matches(/(?=.*[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ])^[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ]+/,
-            //             'Для отчества могут использоваться буквы только русского и казахского алфавитов')
-            //         .required('Не указано отчество'),
-            //     email: Yup.string()
-            //         .required('Не указан электронный адрес')
-            //         .min(minlengthEmail, `Электронный адрес должен содержать от ${minlengthEmail} до ${maxlengthEmail} символов`)
-            //         .max(maxlengthEmail, `Электронный адрес должен содержать от ${minlengthEmail} до ${maxlengthEmail} символов`)
-            //         .email('Электронный адрес указан не корректно'),
-            //     password: Yup.string()
-            //         .min(minlengthPassword, `Пароль должен содержать от ${minlengthPassword} до ${maxlengthPassword} символов`)
-            //         .max(maxlengthPassword, `Пароль должен содержать от ${minlengthPassword} до ${maxlengthPassword} символов`)
-            //         .matches(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Пароль должен содержать как минимум одну строчную букву, одну заглавную букву и одну цифру')
-            //         .required('Не указан пароль')
-            // });
-
-            // await validationSchema.validate({ surname, firstName, patronymic, email, password }, { abortEarly: false }).catch((e) => {
-            //     console.log(e);
-            //     throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
-        
-            // });
-
-            await validateYup( { surname, firstName, patronymic, email, password } ).catch((e) => {
+            await validateYup({ surname, firstName, patronymic, email, password }).catch((e) => {
 
                 throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
-        
+
             });
 
             await mongoConnect();
@@ -79,7 +42,7 @@ class UserService {
 
             const activationLink = v4();
 
-            const User = await mongoUserModel.create({
+            const mongoUser = await mongoUserModel.create({
                 surname: surname,
                 firstName: firstName,
                 patronymic: patronymic,
@@ -98,7 +61,7 @@ class UserService {
 
             });
 
-            const dtoUser = new DTOUser(User);
+            const dtoUser = new DTOUser(mongoUser);
 
             const tokens = await tokenService.generateTokens({ ...dtoUser });
 
@@ -109,7 +72,7 @@ class UserService {
         } catch (error) {
 
             try {
-                
+
                 await mongoUserModel.deleteOne({
                     email: email
                 }).lean()
@@ -117,7 +80,7 @@ class UserService {
             } catch (error) {
                 console.log(error);
                 throw error;
-                
+
             }
 
             throw error;
@@ -129,17 +92,17 @@ class UserService {
 
         await mongoConnect();
 
-        const User = await mongoUserModel.findOne({ activationLink });
+        const mongoUser = await mongoUserModel.findOne({ activationLink });
 
-        if (!User) {
+        if (!mongoUser) {
             throw ApiError.BadRequest('Неккоректная ссылка активации');
         }
 
-        User.isActivated = true;
+        mongoUser.isActivated = true;
 
-        await User.save();
+        await mongoUser.save();
 
-        const dtoUser = new DTOUser(User);
+        const dtoUser = new DTOUser(mongoUser);
 
         const tokens = await tokenService.generateTokens({ ...dtoUser });
 
@@ -151,46 +114,27 @@ class UserService {
 
     async login(email, password) {
 
-        // const validationSchema = Yup.object().shape({
-        //     email: Yup.string()
-        //         .required('Не указан электронный адрес')
-        //         .min(minlengthEmail, `Электронный адрес должен содержать от ${minlengthEmail} до ${maxlengthEmail} символов`)
-        //         .max(maxlengthEmail, `Электронный адрес должен содержать от ${minlengthEmail} до ${maxlengthEmail} символов`)
-        //         .email('Электронный адрес указан не корректно'),
-        //     password: Yup.string()
-        //         .min(minlengthPassword, `Пароль должен содержать от ${minlengthPassword} до ${maxlengthPassword} символов`)
-        //         .max(maxlengthPassword, `Пароль должен содержать от ${minlengthPassword} до ${maxlengthPassword} символов`)
-        //         .matches(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Пароль должен содержать как минимум одну строчную букву, одну заглавную букву и одну цифру')
-        //         .required('Не указан пароль')
-        // });
-
-        // await validationSchema.validate({ email, password }, { abortEarly: false }).catch((e) => {
-
-        //     throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
-
-        // });
-
         await validateYup({ email, password }).catch((e) => {
 
             throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
-    
+
         });
 
         await mongoConnect();
 
-        const User = await mongoUserModel.findOne({ email }).lean();
+        const mongoUser = await mongoUserModel.findOne({ email }).lean();
 
-        if (!User) {
+        if (!mongoUser) {
             throw ApiError.BadRequest(`Пользователь с указанным адресом электронной почты не найден`);
         }
 
-        const isPassEquals = await bcrypt.compare(password, User.password)
+        const isPassEquals = await bcrypt.compare(password, mongoUser.password)
 
         if (!isPassEquals) {
             throw ApiError.BadRequest(`Некорректный пароль`);
         }
 
-        const dtoUser = new DTOUser(User);
+        const dtoUser = new DTOUser(mongoUser);
 
         const tokens = await tokenService.generateTokens({ ...dtoUser });
 
@@ -236,13 +180,13 @@ class UserService {
             throw ApiError.UnauthorizedError();
         }
 
-        const User = await mongoUserModel.findById(userData.id, store=='update'?'-uiAvatarsSrc':'' ).lean();
+        const mongoUser = await mongoUserModel.findById(userData.id, store == 'update' ? '-uiAvatarsSrc' : '').lean();
 
-        if (!User) {
+        if (!mongoUser) {
             throw ApiError.BadRequest(`При обновлении токена сессии была обнаружена ошибка`);
         }
 
-        const dtoUser = new DTOUser(User);
+        const dtoUser = new DTOUser(mongoUser);
 
         return dtoUser;
     }
@@ -255,38 +199,42 @@ class UserService {
 
     }
 
-    async changeUser( inputUserData ) {
-
+    async changeUser(inputUserData) {
+        
         try {
 
             //Validate date
 
-            const userData = await validateYup(inputUserData, {deleteEmptyKey:true}).catch((e) => {
+            const userData = await validateYup(inputUserData, { deleteEmptyKey: true }).catch((e) => {
 
                 throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
-        
+
             });
-            // console.log(inputUserData);
+
             //Google
-            if( inputUserData.uiAvatarsSrc ){
 
-                const googleDriveFile = await googleDrive.uploadUserAvatar(inputUserData.uiAvatarsSrc);
+            if (userData.uiAvatarsSrc) {
 
+                const googleDriveFileID = await googleDrive.uploadUserAvatar(userData.id, userData.uiAvatarsSrc);
+
+
+                if (googleDriveFileID)
+                    userData.uiAvatarsSrc = `http://drive.google.com/uc?export=view&id=${googleDriveFileID}`;
             }
 
             //Mongo
 
             await mongoConnect();
-            
-            const User = await mongoUserModel.findByIdAndUpdate( userData.id, userData, { new: true }).lean();
 
-            if (!User) {
+            const mongoUser = await mongoUserModel.findByIdAndUpdate(userData.id, userData, { new: true }).lean();
+
+            if (!mongoUser) {
                 throw ApiError.BadRequest(`Пользователь с id: ${userData.id} не найден`);
             }
 
             //DTO
 
-            const dtoUser = new DTOUser(User);
+            const dtoUser = new DTOUser(mongoUser);
 
             //Tokens
 
