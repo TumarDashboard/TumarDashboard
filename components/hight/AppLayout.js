@@ -6,10 +6,14 @@ import FSidebar from '../middle/FSidebar';
 export default function AppLayout({ onSidebar, children }) {
     return (
         //
-        <div className="flex flex-col min-h-screen">
+        <div className={`flex flex-col min-h-screen ${onSidebar ? 'bg-color_C' : null}`}>
             <FNavbar />
-            {onSidebar ? <FSidebar/>: null }
-            <main className="pt-20 pb-16 flex grow" >{children}</main>
+            {onSidebar ? <FSidebar /> : null}
+            <main
+                className={`mt-20 mb-16 flex-1 flex ${onSidebar ? 'md:ml-64' : ''}`}
+            >
+                {children}
+            </main>
             <FFooter />
         </div>
     );

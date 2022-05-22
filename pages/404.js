@@ -2,13 +2,13 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { motion } from "framer-motion";
 
-const content = (isFirstMount) => ({
+const content = {
   animate: {
     transition: {
-      staggerChildren: isFirstMount ? 2 : 0.5,
+      staggerChildren: 0.6,
     },
   },
-});
+};
 
 const title = {
   initial: { y: -100, opacity: 0 },
@@ -16,7 +16,7 @@ const title = {
     y: 0,
     opacity: 1,
     transition: {
-      duration: 1,
+      duration: 0.6,
       ease: [0.6, -0.05, 0.01, 0.99],
     },
   },
@@ -28,13 +28,13 @@ const text = {
     y: 0,
     opacity: 1,
     transition: {
-      duration: 0.7,
+      duration: 0.4,
       ease: [0.6, -0.05, 0.01, 0.99],
     },
   },
 };
 
-export default function Custom404({ isFirstMount }) {
+export default function Custom404() {
   
   return (
     <div className="m-auto">
@@ -48,7 +48,7 @@ export default function Custom404({ isFirstMount }) {
         <motion.div
           initial="initial"
           animate="animate"
-          variants={content(isFirstMount)}
+          variants={content}
           className="text-center"
         >
 

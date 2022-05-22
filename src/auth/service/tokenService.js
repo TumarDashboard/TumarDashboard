@@ -4,18 +4,20 @@ import mongoTokenModel from "../../mongo/models/mongoTokenModel";
 
 export async function generateTokens(payload) {
 
+    payload.uiAvatarsSrc='';
+
     const accessToken = await new SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
         .setJti(v4())
         .setIssuedAt()
-        .setExpirationTime(process.env.NEXT_PRIVATE_JWT_ACCESS_EXPIRES_IN)
+        .setExpirationTime(process.env.NEXT_PUBLIC_JWT_ACCESS_EXPIRES_IN)
         .sign(new TextEncoder().encode(process.env.NEXT_PRIVATE_JWT_ACCESS_SECRET));
 
     const refreshToken = await new SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
         .setJti(v4())
         .setIssuedAt()
-        .setExpirationTime(process.env.NEXT_PRIVATE_JWT_REFRESH_EXPIRES_IN)
+        .setExpirationTime(process.env.NEXT_PUBLIC_JWT_REFRESH_EXPIRES_IN)
         .sign(new TextEncoder().encode(process.env.NEXT_PRIVATE_JWT_REFRESH_SECRET));
 
     return {
@@ -69,12 +71,12 @@ export async function saveToken(userId, refreshToken) {
 
 export async function removeToken(refreshToken) {
 
-    return await mongoTokenModel.deleteOne({ refreshToken: refreshToken });
+    return await mongoTokenModel.deleteOne({ refreshToken: refreshToken }).lean();
 
 }
 
 export async function findToken(refreshToken) {
 
-    return await mongoTokenModel.findOne({ refreshToken: refreshToken });
+    return await mongoTokenModel.findOne({ refreshToken: refreshToken }).lean();
 
 }

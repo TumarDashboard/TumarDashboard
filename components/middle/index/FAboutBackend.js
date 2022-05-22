@@ -97,11 +97,11 @@ const icon = {
 
 const icons = [
     { icon: '/TechnologyIcons/next.svg', href: 'https://nextjs.org/', tooltip: 'Next' },
-    { icon: '/TechnologyIcons/mongo.svg', href: 'https://angular.io/', tooltip: 'Angular' },
+    { icon: '/TechnologyIcons/mongo.svg', href: 'https://www.mongodb.com/', tooltip: 'Mongo' },
     { icon: '/TechnologyIcons/cube.svg', href: 'https://cube.dev/', tooltip: 'Cube' },
-    { icon: '/TechnologyIcons/postgresql.svg', href: 'https://ru.wikipedia.org/wiki/JavaScript', tooltip: 'Javascript' },
+    { icon: '/TechnologyIcons/postgresql.svg', href: 'https://www.postgresql.org/', tooltip: 'Postgresql' },
     { icon: '/TechnologyIcons/java.svg', href: 'https://ru.wikipedia.org/wiki/Java', tooltip: 'Java' },
-    { icon: '/TechnologyIcons/apachpoi.svg', href: 'https://www.typescriptlang.org/', tooltip: 'Typescript' },
+    { icon: '/TechnologyIcons/apachpoi.svg', href: 'https://poi.apache.org/', tooltip: 'ApachePoi' },
 ]
 
 const info = [

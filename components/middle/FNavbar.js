@@ -140,7 +140,7 @@ const FNavbar = observer(function FNavbar() {
                     {/* Ссылки на авторизацию */}
                     {user?.isAuth ?
                         <FNavbarProfile
-                            userInitials={user?.user?.login}
+                            uiAvatarsSrc={user?.avatar}
                             logout={logout}
                         />
                         : router.pathname != "/authorization/login" && router.pathname != "/authorization/registration" &&

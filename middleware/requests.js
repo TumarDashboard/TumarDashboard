@@ -16,6 +16,7 @@ const fetchAuth = (url, data = {}, method = 'POST') =>
     }).then(async response => {
 
         const body = await response.json();
+        
         if (!response.ok)
             throw new ApiError(response.status, body.message);
         return body;

@@ -8,7 +8,7 @@ function redirect( to, from ){
     const res = NextResponse.rewrite(`${process.env.NEXT_PUBLIC_CLIENT_URL}${to}`);
 
     res.cookie( "redirectAuth", from , {
-        maxAge: ms(process.env.NEXT_PRIVATE_JWT_REDIRECT_AUTH_EXPIRES_IN),
+        maxAge: ms(process.env.NEXT_PUBLIC_JWT_REDIRECT_AUTH_EXPIRES_IN),
         httpOnly: true,
         path: '/'
     });

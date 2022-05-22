@@ -17,7 +17,7 @@ export default catchErrorsApi(async (req, res) => {
   setCookies("refreshToken", userData.refreshToken, {
     req,
     res,
-    maxAge: ms(process.env.NEXT_PRIVATE_JWT_REFRESH_EXPIRES_IN) / 1000,
+    maxAge: ms(process.env.NEXT_PUBLIC_JWT_REFRESH_EXPIRES_IN) / 1000,
     httpOnly: true,
     path: '/'
   });

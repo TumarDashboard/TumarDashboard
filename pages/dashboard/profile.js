@@ -1,6 +1,5 @@
 import Head from 'next/head'
 import { motion } from "framer-motion";
-import FSidebar from '../../components/middle/FSidebar';
 import FFormProfile from '../../components/middle/FFormProfile';
 
 const content = (isFirstMount) => ({
@@ -12,6 +11,7 @@ const content = (isFirstMount) => ({
 });
 
 export default function Profile({ isFirstMount }) {
+
   return (
     <>
       <Head>
@@ -20,6 +20,7 @@ export default function Profile({ isFirstMount }) {
       </Head>
       <motion.section
         exit={{ opacity: 0 }}
+        className="grow"
       >
         <motion.div
           initial="initial"
@@ -27,8 +28,7 @@ export default function Profile({ isFirstMount }) {
           variants={content(isFirstMount)}
           className="flex overflow-hidden"
         >
-          {/* <FSidebar /> */}
-          <FFormProfile/>
+           <FFormProfile/>
         </motion.div>
       </motion.section>
     </>

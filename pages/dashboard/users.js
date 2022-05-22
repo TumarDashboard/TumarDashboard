@@ -1,11 +1,9 @@
 import Head from 'next/head'
 import { motion } from "framer-motion";
 import catchAuthServer from '../../middleware/authServer';
-import FSidebar from '../../components/middle/FSidebar';
 import FFormUsers from '../../components/middle/FFormUsers';
 import mongoUserModel from "../../src/mongo/models/mongoUserModel";
 import mongoConnect from "../../src/mongo/mongoConnect";
-import DTOUser from "../../src/auth/dtos/dtoUser";
 
 const content = (isFirstMount) => ({
   animate: {
@@ -31,7 +29,6 @@ export default function Users({ isFirstMount, users }) {
           variants={content(isFirstMount)}
           className="flex overflow-hidden"
         >
-          {/* <FSidebar /> */}
           <FFormUsers
             users={users}
           />
@@ -56,9 +53,10 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   const users = responce.map((user) => {
     return {
-      login: user.login,
       email: user.email,
       isActivated: user.isActivated,
+      initials: [user.surname, user.firstName, user.patronymic].join(' '),
+      uiAvatarsSrc: `https://ui-avatars.com/api/?name=${user.surname}+${user.firstName}&size=256&font-size=0.33&length=2`,
       id: JSON.stringify(user._id)
     }
   })

@@ -23,6 +23,10 @@ const background = {
             staggerChildren: 0.5
         },
     },
+    exit: {
+        x: '-16em',
+        opacity: 0
+    },
 };
 
 const itemMotion = {
@@ -43,7 +47,7 @@ const itemMotion = {
 export default function FSidebar() {
 
     const router = useRouter();
-    console.log();
+
     return (
 
         <aside
@@ -54,6 +58,7 @@ export default function FSidebar() {
             <motion.nav
                 initial="initial"
                 animate="animate"
+                exit="exit"
                 key='FSidebar'
                 variants={background}
                 className="flex flex-col w-64 bg-color_A min-h-full"

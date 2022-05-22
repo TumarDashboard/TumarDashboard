@@ -7,7 +7,7 @@ function redirect( to, from, req, res ){
     setCookies( "redirectAuth", from, {
         req, 
         res,
-        maxAge: ms(process.env.NEXT_PRIVATE_JWT_REDIRECT_AUTH_EXPIRES_IN)/1000,
+        maxAge: ms(process.env.NEXT_PUBLIC_JWT_REDIRECT_AUTH_EXPIRES_IN)/1000,
         httpOnly: true,
         path: '/'
     });

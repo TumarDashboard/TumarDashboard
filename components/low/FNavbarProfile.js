@@ -6,7 +6,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function FNavbarProfile({ userInitials, logout }) {
+export default function FNavbarProfile({ uiAvatarsSrc, logout }) {
 
   return (
     <Disclosure as="nav" className="bg-color_A">
@@ -18,7 +18,7 @@ export default function FNavbarProfile({ userInitials, logout }) {
               <span className="sr-only">Open user menu</span>
               <img
                 className="h-8 w-8 rounded-full"
-                src={`https://ui-avatars.com/api/?name=${userInitials}&size=256&font-size=0.33&length=2`}
+                src={uiAvatarsSrc}
                 alt=""
               />
             </Menu.Button>

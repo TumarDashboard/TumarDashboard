@@ -42,7 +42,7 @@ export function catchErrorsApi(handler) {
     return async (req, res) => {
         return handler(req, res)
             .catch((error) => {
-
+                
                 if( error instanceof ApiError ){
 
                     return res.status( error.statusCode ).send( { message: error.message, errors: error.errors });

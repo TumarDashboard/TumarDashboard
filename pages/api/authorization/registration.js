@@ -10,14 +10,14 @@ export default catchErrorsApi( async (req, res) => {
         methods: ['POST']
       });
 
-    const { login, email, password } = req.body;
+    const { surname, firstName, patronymic, email, password } = req.body;
 
-    const userData = await userService.registration( login, email, password );
+    const userData = await userService.registration( surname, firstName, patronymic, email, password );
 
     setCookies( "refreshToken", userData.refreshToken, {
         req, 
         res,
-        maxAge: ms(process.env.NEXT_PRIVATE_JWT_REFRESH_EXPIRES_IN)/1000,
+        maxAge: ms(process.env.NEXT_PUBLIC_JWT_REFRESH_EXPIRES_IN)/1000,
         httpOnly: true,
         path: '/'
     });

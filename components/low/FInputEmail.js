@@ -37,7 +37,7 @@ export function FInputEmail({ onEmailChange, ...props }) {
         <>
             <input
                 id="email"
-                type="text"
+                type="email"
                 name="email"
                 placeholder="Адрес электронной почты"
                 onChange={handleChange}

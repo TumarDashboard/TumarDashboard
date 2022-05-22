@@ -20,7 +20,7 @@ export default function FFormUsers(users) {
   return (
     <motion.div
       variants={inputs}
-      className="mb-16 md:ml-64 w-full"
+      className="w-full"
     >
 
       <table className="min-w-full border-collapse block md:table">
@@ -48,10 +48,10 @@ export default function FFormUsers(users) {
                   <div className="flex flex-row items-center">
                     <img
                       className="h-8 w-8 rounded-full"
-                      src={`https://ui-avatars.com/api/?name=${user.login}&size=256&font-size=0.33&length=2`}
+                      src={user.uiAvatarsSrc}
                       alt=""
                     />
-                    <p className="font-semibold text-black ml-1">{user.login}</p>
+                    <p className="font-semibold text-black ml-1">{user.initials}</p>
                   </div>
                 </td>
 

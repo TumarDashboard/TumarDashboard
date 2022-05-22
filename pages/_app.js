@@ -25,6 +25,7 @@ export default function App({ Component, pageProps, router }) {
 
   return (
     <StoreProvider
+      isFirstMount={isFirstMount}
       {...pageProps}
     >
 

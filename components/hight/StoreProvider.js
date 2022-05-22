@@ -19,24 +19,24 @@ export function useStore() {
   return context
 }
 
-export function StoreProvider({ children, initialState: initialData }) {
+export function StoreProvider({ isFirstMount, children, initialState: initialData }) {
 
-  const context = initializeStore( initialData );
+  const context = refreshStore(initialData, mobxUser?.isAuth == true);
 
   return <StoreContext.Provider value={context}>{children}</StoreContext.Provider>
 
 }
 
-function initializeStore(initialData = null) {
-
-  const _mobxUser = mobxUser ?? new MOBXuser();
-  const _mobxUI = mobxUI ?? new MOBXui();
+function refreshStore(initialData = null, isAuth) {
 
   // load MOBXuser
 
   const router = useRouter();
 
-  const { data, error } = useSWR( '/authorization/refresh', fetchAuth, {shouldRetryOnError: false} );
+  const { data, error } = useSWR(`/authorization/refresh?store=${isAuth ? 'update' : 'initialize'}`, fetchAuth, { shouldRetryOnError: false });
+
+  const _mobxUser = mobxUser ?? new MOBXuser();
+  const _mobxUI = mobxUI ?? new MOBXui();
 
   useEffect(() => {
 
@@ -52,11 +52,73 @@ function initializeStore(initialData = null) {
 
       }
 
-    }else if (data) {
+    } else if (data) {
 
       localStorage.setItem('token', data.accessToken);
+
       _mobxUser.setAuth(true);
-      _mobxUser.setUser(data.user);
+      
+      if (isAuth)
+        _mobxUser.updateUser(data.user);
+      else
+        _mobxUser.setUser(data.user);
+
+      if (initialData?.checkAuth && !data.user?.isActivated) {
+
+        router.push('/authorization/activatelink');
+
+      }
+
+    }
+
+  }, [data, error]);
+
+  // For SSG and SSR always create a new store
+  if (typeof window === 'undefined') return {
+    MOBXuser: _mobxUser,
+    MOBXui: _mobxUI
+  }
+
+  // Create the store once in the client
+  if (!mobxUser) mobxUser = _mobxUser;
+  if (!mobxUI) mobxUI = _mobxUI;
+
+  return {
+    MOBXuser: _mobxUser,
+    MOBXui: _mobxUI
+  }
+
+}
+
+function updateStore(initialData = null) {
+
+  const router = useRouter();
+
+  const { data, error } = useSWR('/authorization/refresh?store=update', fetchAuth, { shouldRetryOnError: false });
+
+  const _mobxUser = mobxUser ?? new MOBXuser();
+  const _mobxUI = mobxUI ?? new MOBXui();
+
+  useEffect(() => {
+
+    if (error) {
+
+      localStorage.removeItem('token');
+      _mobxUser.setAuth(false);
+      _mobxUser.setUser({});
+
+      if (initialData?.checkAuth) {
+
+        router.push('/authorization/login');
+
+      }
+
+    } else if (data) {
+
+      localStorage.setItem('token', data.accessToken);
+
+      _mobxUser.setAuth(true);
+      _mobxUser.updateUser(data.user);
 
       if (initialData?.checkAuth && !data.user?.isActivated) {
 

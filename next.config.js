@@ -9,8 +9,8 @@ module.exports = async (phase, { defaultConfig }) => {
 
         env: {
             // #Min and Max data for login
-            NEXT_PUBLIC_MIN_LENGTH_LOGIN: '4',
-            NEXT_PUBLIC_MAX_LENGTH_LOGIN: '30',
+            NEXT_PUBLIC_MIN_LENGTH_TEXT: '1',
+            NEXT_PUBLIC_MAX_LENGTH_TEXT: '30',
 
             // #Min and Max data for email
             NEXT_PUBLIC_MIN_LENGTH_EMAIL: '3',
@@ -19,6 +19,21 @@ module.exports = async (phase, { defaultConfig }) => {
             // #Min and Max data for password
             NEXT_PUBLIC_MIN_LENGTH_PASSWORD: '4',
             NEXT_PUBLIC_MAX_LENGTH_PASSWORD: '30',
+            
+            // #Mail options for send activate link
+            NEXT_PUBLIC_MAIL_ACTIVATE_LINK_SMTP_HOST: 'smtp-relay.sendinblue.com',
+            NEXT_PUBLIC_MAIL_ACTIVATE_LINK_SMTP_PORT: '587',
+
+            // #JWT config for Generate token
+            NEXT_PUBLIC_JWT_ACCESS_EXPIRES_IN: '30s',
+            NEXT_PUBLIC_JWT_REFRESH_EXPIRES_IN: '15d',
+
+            // #JWT config for redirect auth token
+            NEXT_PUBLIC_JWT_REDIRECT_AUTH_EXPIRES_IN: '5m',
+
+            // #Google Drive info
+            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_DASHBOARD: '1s2KFHjOhXQ9kQ8QcGGofR47PeFNwhD2j',
+            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS: '1oWbuTn70nfV9UMQ90KrIKO4yKbmm4nH0',
         }
 
     }
@@ -30,8 +45,8 @@ module.exports = async (phase, { defaultConfig }) => {
 
     } else {
 
-        nextConfig.env.NEXT_PUBLIC_API_URL = 'https://dashboard-mtmdashboard.vercel.app';
-        nextConfig.env.NEXT_PUBLIC_CLIENT_URL = 'https://dashboard-mtmdashboard.vercel.app';
+        nextConfig.env.NEXT_PUBLIC_API_URL = 'https://tumar-dashboard.vercel.app/';
+        nextConfig.env.NEXT_PUBLIC_CLIENT_URL = 'https://tumar-dashboard.vercel.app/';
 
     }
 

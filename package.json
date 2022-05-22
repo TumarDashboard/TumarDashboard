@@ -13,6 +13,7 @@
     "cors": "^2.8.5",
     "flubber": "^0.4.2",
     "framer-motion": "^6.2.8",
+    "googleapis": "^100.0.0",
     "jose": "^4.6.0",
     "mobx": "^6.4.2",
     "mobx-react-lite": "^3.3.0",
