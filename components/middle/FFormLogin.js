@@ -71,7 +71,7 @@ export default function FFormLogin( { redirectAuth } ) {
         try {
 
             await MOBXuser.login(inputEmail, inputPassword).then(()=>{
-
+                console.log('redirect to /dashboard');
                 router.push( redirectAuth ? redirectAuth : '/dashboard' );
                 
             })
@@ -162,7 +162,7 @@ export default function FFormLogin( { redirectAuth } ) {
                 variants={ inputs }
                 className="flex flex-col w-full text-center"
             >
-                <h1 className="text-color_C italic">
+                <h1 className="text-color_C italic break-words">
                     {onError}
                 </h1>
             </motion.div>

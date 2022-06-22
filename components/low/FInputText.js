@@ -3,7 +3,7 @@ import { useState } from 'react'
 const minlength = process.env.NEXT_PUBLIC_MIN_LENGTH_TEXT;
 const maxlength = process.env.NEXT_PUBLIC_MAX_LENGTH_TEXT;
 
-export function FInputText({ id, onChange, placeholder, ...props }) {
+export function FInputText({ id, className, onChange, placeholder, ...props }) {
 
     const [isInputValidate, setInputValidate] = useState(true);
 
@@ -32,9 +32,9 @@ export function FInputText({ id, onChange, placeholder, ...props }) {
                 onChange={handleChange}
                 minLength={minlength}
                 maxLength={maxlength}
-                className="border border-gray-300 block w-full
+                className={`${className} border border-gray-300 block w-full
                     focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
-                    rounded-md shadow-sm disabled:bg-gray-100"
+                    rounded-md shadow-sm disabled:bg-gray-100`}
                 {...props}
             />
             {isInputValidate ? null :

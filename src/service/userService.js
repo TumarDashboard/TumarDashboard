@@ -1,22 +1,15 @@
 import bcrypt from "bcrypt";
 import { v4 } from "uuid";
-import * as Yup from 'yup';
 import mailService from "./mailService";
 import * as tokenService from "./tokenService";
 import DTOUser, { validateYup } from "../dtos/dtoUser";
-import mongoUserModel from "../../mongo/models/mongoUserModel";
-import mongoConnect from "../../mongo/mongoConnect";
-import { ApiError } from "../../../middleware/exceptions";
-import googleDrive from "../../google/api/googleDrive";
-
-const minlengthFullName = process.env.NEXT_PUBLIC_MIN_LENGTH_TEXT;
-const maxlengthFullName = process.env.NEXT_PUBLIC_MAX_LENGTH_TEXT;
-
-const minlengthEmail = process.env.NEXT_PUBLIC_MIN_LENGTH_EMAIL;
-const maxlengthEmail = process.env.NEXT_PUBLIC_MAX_LENGTH_EMAIL;
-
-const minlengthPassword = process.env.NEXT_PUBLIC_MIN_LENGTH_PASSWORD;
-const maxlengthPassword = process.env.NEXT_PUBLIC_MAX_LENGTH_PASSWORD;
+import mongoUserModel from "../mongo/models/mongoUserModel";
+import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
+import mongoGuardPostsModel from "../mongo/models/mongoGuardPostsModel";
+import mongoGuardPostsArchiveModel from "../mongo/models/mongoGuardPostsArchiveModel";
+import mongoConnect from "../mongo/mongoConnect";
+import { ApiError } from "../../middleware/exceptions";
+import googleDrive from "../google/api/googleDrive";
 
 class UserService {
 
@@ -36,6 +29,12 @@ class UserService {
 
             if (candidate) {
                 throw ApiError.BadRequest(`Пользователь с почтовым адресом ${email} уже существует`);
+            }            
+            
+            const candidateDeleted = await mongoUserArchiveModel.findOne({ email }).lean();
+
+            if (candidateDeleted) {
+                throw ApiError.BadRequest(`Почтовый адрес ${email} использовался для регистрации, после чего был деактивирован`);
             }
 
             const hashPassword = await bcrypt.hash(password, parseInt(process.env.NEXT_PRIVATE_PASSWORD_SALT))
@@ -49,6 +48,7 @@ class UserService {
                 email: email,
                 password: hashPassword,
                 activationLink: activationLink,
+                uiAvatarsSrc: `https://ui-avatars.com/api/?name=${surname}+${firstName}&size=256&font-size=0.33&length=2&background=random`,
                 avatarInitials: {
                     data: "",
                     contentType: 'image/png'
@@ -78,7 +78,7 @@ class UserService {
                 }).lean()
 
             } catch (error) {
-                console.log(error);
+
                 throw error;
 
             }
@@ -176,6 +176,7 @@ class UserService {
 
         const tokenFromDb = await tokenService.findToken(refreshToken);
 
+
         if (!userData || !tokenFromDb) {
             throw ApiError.UnauthorizedError();
         }
@@ -200,58 +201,88 @@ class UserService {
     }
 
     async changeUser(inputUserData) {
-        
-        try {
 
-            //Validate date
+        //Validate date
 
-            const userData = await validateYup(inputUserData, { deleteEmptyKey: true }).catch((e) => {
+        const userData = await validateYup(inputUserData, { deleteEmptyKey: true }).catch((e) => {
 
-                throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
+            throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
 
-            });
+        });
 
-            //Google
+        //Google
 
-            if (userData.uiAvatarsSrc) {
+        if (userData.uiAvatarsSrc) {
 
-                const googleDriveFileID = await googleDrive.uploadUserAvatar(userData.id, userData.uiAvatarsSrc);
+            const googleDriveFileID = await googleDrive.uploadUserAvatar(userData.id, userData.uiAvatarsSrc);
 
-
-                if (googleDriveFileID)
-                    userData.uiAvatarsSrc = `http://drive.google.com/uc?export=view&id=${googleDriveFileID}`;
-            }
-
-            //Mongo
-
-            await mongoConnect();
-
-            const mongoUser = await mongoUserModel.findByIdAndUpdate(userData.id, userData, { new: true }).lean();
-
-            if (!mongoUser) {
-                throw ApiError.BadRequest(`Пользователь с id: ${userData.id} не найден`);
-            }
-
-            //DTO
-
-            const dtoUser = new DTOUser(mongoUser);
-
-            //Tokens
-
-            const tokens = await tokenService.generateTokens({ ...dtoUser });
-
-            await tokenService.saveToken(dtoUser.id, tokens.refreshToken);
-
-            //Result
-
-            // console.log(inputUserData);
-
-            return { ...tokens, user: dtoUser }
-
-        } catch (error) {
-
-            throw error;
+            if (googleDriveFileID)
+                userData.uiAvatarsSrc = `http://drive.google.com/uc?export=view&id=${googleDriveFileID}`;
         }
+
+        //Mongo
+
+        await mongoConnect();
+
+        const mongoUser = await mongoUserModel.findByIdAndUpdate(userData.id, userData, { new: true }).lean();
+
+        if (!mongoUser) {
+            throw ApiError.BadRequest(`Пользователь с id: ${userData.id} не найден`);
+        }
+
+        //DTO
+
+        const dtoUser = new DTOUser(mongoUser);
+
+        //Tokens
+
+        const tokens = await tokenService.generateTokens({ ...dtoUser });
+
+        await tokenService.saveToken(dtoUser.id, tokens.refreshToken);
+
+        //Result
+
+        // console.log(inputUserData);
+
+        return { ...tokens, user: dtoUser }
+
+    }
+
+    async deleteUser(requestData, refreshToken) {
+
+        const { id, reason } = requestData;
+
+        if (!id) {
+            throw ApiError.BadRequest("Не указан ID пользователя для проведения операции удаления");
+        }
+
+        //Google
+
+        await googleDrive.deleteUserAvatar(requestData.id);
+
+        //Mongo
+
+        await mongoConnect();
+
+        const mongoUser = await mongoUserModel.findById(requestData.id);
+
+        const mongoUserArchive = await mongoUserArchiveModel.create(mongoUser.toJSON());
+
+        mongoUserArchive.reason = reason;
+
+        await mongoUserArchive.save();
+
+        await mongoGuardPostsModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
+
+        await mongoGuardPostsArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'UserArchive'}).lean();
+
+        await mongoGuardPostsArchiveModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
+        
+        await mongoUser.delete();
+
+        //Tokens
+
+        return await tokenService.removeTokenByID(requestData.id);
 
     }
 }

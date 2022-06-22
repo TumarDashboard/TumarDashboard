@@ -8,9 +8,13 @@ module.exports = async (phase, { defaultConfig }) => {
     const nextConfig = {
 
         env: {
-            // #Min and Max data for login
+            // #Min and Max data for text input
             NEXT_PUBLIC_MIN_LENGTH_TEXT: '1',
             NEXT_PUBLIC_MAX_LENGTH_TEXT: '30',
+
+            // #Min and Max data for number input
+            NEXT_PUBLIC_MIN_LENGTH_NUMBER_INPUT: '100',
+            NEXT_PUBLIC_MAX_LENGTH_NUMBER_INPUT: '999',
 
             // #Min and Max data for email
             NEXT_PUBLIC_MIN_LENGTH_EMAIL: '3',
@@ -19,6 +23,9 @@ module.exports = async (phase, { defaultConfig }) => {
             // #Min and Max data for password
             NEXT_PUBLIC_MIN_LENGTH_PASSWORD: '4',
             NEXT_PUBLIC_MAX_LENGTH_PASSWORD: '30',
+
+            // #Max count for shifts
+            NEXT_PUBLIC_MAX_COUNT_SHIFTS: '20',
             
             // #Mail options for send activate link
             NEXT_PUBLIC_MAIL_ACTIVATE_LINK_SMTP_HOST: 'smtp-relay.sendinblue.com',
@@ -30,14 +37,15 @@ module.exports = async (phase, { defaultConfig }) => {
 
             // #JWT config for redirect auth token
             NEXT_PUBLIC_JWT_REDIRECT_AUTH_EXPIRES_IN: '5m',
-
+            
             // #Google Drive info
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_DASHBOARD: '1s2KFHjOhXQ9kQ8QcGGofR47PeFNwhD2j',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS: '1oWbuTn70nfV9UMQ90KrIKO4yKbmm4nH0',
+            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS: '16VCgeX_BbwS5UpWdhO0o8loLSPafBPCL',
         },
 
         images: {
-            domains: ['drive.google.com', 'ui-avatars.com'],
+            domains: ['drive.google.com', 'ui-avatars.com', 'googleusercontent.com'],
           }
 
     }

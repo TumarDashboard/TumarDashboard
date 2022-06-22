@@ -8,7 +8,6 @@ export class ApiError extends Error {
 
         this.statusCode = status;
         this.errors = errors;
-
     }
 
     responceClient(){
@@ -34,6 +33,10 @@ export class ApiError extends Error {
 
     static BadRequest(message, errors = []) {
         return new ApiError( 500, message, errors );
+    }    
+    
+    static UnauthorizedGoogleAuth( email, authorizeUrl) {
+        return new ApiError( 520, JSON.stringify({message:"Ошибка доступа к облаку Google", email, authorizeUrl}) );
     }
 
 }
@@ -45,7 +48,7 @@ export function catchErrorsApi(handler) {
                 
                 if( error instanceof ApiError ){
 
-                    return res.status( error.statusCode ).send( { message: error.message, errors: error.errors });
+                    return res.status( error.statusCode ).send( { message: error.message, errors: error.errors, data: error.data });
 
                 }
 

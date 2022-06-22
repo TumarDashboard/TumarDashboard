@@ -11,7 +11,7 @@ class GoogleDrive {
   constructor() {
     this.drive = google.drive({
       version: 'v3',
-      auth: OAUTH2Client
+      auth: OAUTH2Client.auth
     });
   }
 
@@ -34,41 +34,91 @@ class GoogleDrive {
     });
   }
 
-  //function to upload the file
+  //function to upload the user file
   async uploadUserAvatar(mongoUserID, uiAvatarsSrc) {
-    try {
 
-      const existsFile = await this.findFile(`'${process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS}' in parents and name contains '${mongoUserID}'`);
+    await OAUTH2Client.checkAuth();
 
-      if (existsFile) {
-        this.deleteFile(existsFile);
-      }
+    const existsFile = await this.findFile(`'${process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS}' in parents and name contains '${mongoUserID}'`);
 
-      const regex = /^data:.+\/(.+);base64,(.*)$/;
-      const matches = uiAvatarsSrc.match(regex);
-      const type = matches[1];
-      const data = matches[2];
-      const buffer = Buffer.from(data, 'base64');
-      const bufferStream = new stream.PassThrough();
-      bufferStream.end(buffer);
+    if (existsFile) {
+      this.deleteFile(existsFile);
+    }
 
-      const response = await this.drive.files.create({
-        requestBody: {
-          name: `${mongoUserID}.${type}`,
-          parents: [process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS]
-        },
-        media: {
-          body: bufferStream,
-        },
-      });
+    const regex = /^data:.+\/(.+);base64,(.*)$/;
+    const matches = uiAvatarsSrc.match(regex);
+    const type = matches[1];
+    const data = matches[2];
+    const buffer = Buffer.from(data, 'base64');
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(buffer);
 
-      return response.data.id;
+    const response = await this.drive.files.create({
+      requestBody: {
+        name: `${mongoUserID}.${type}`,
+        parents: [process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS]
+      },
+      media: {
+        body: bufferStream,
+      },
+    });
 
-    } catch (error) {
-      //report the error message
-      console.log('error', error.message);
+    return response.data.id;
+  }
 
-      throw error;
+  //function to delete the user avatar
+  async deleteUserAvatar(mongoUserID) {
+
+    await OAUTH2Client.checkAuth();
+
+    const existsFile = await this.findFile(`'${process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS}' in parents and name contains '${mongoUserID}'`);
+
+    if (existsFile) {
+      this.deleteFile(existsFile);
+    }
+  }
+
+  //function to upload the guard post file
+  async uploadGuardPostPhoto(mongoGuardPostID, photo) {
+
+    await OAUTH2Client.checkAuth();
+
+    const existsFile = await this.findFile(`'${process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS}' in parents and name contains '${mongoGuardPostID}'`);
+
+    if (existsFile) {
+      this.deleteFile(existsFile);
+    }
+
+    const regex = /^data:.+\/(.+);base64,(.*)$/;
+    const matches = photo.match(regex);
+    const type = matches[1];
+    const data = matches[2];
+    const buffer = Buffer.from(data, 'base64');
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(buffer);
+
+    const response = await this.drive.files.create({
+      requestBody: {
+        name: `${mongoGuardPostID}.${type}`,
+        parents: [process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS]
+      },
+      media: {
+        body: bufferStream,
+      },
+    });
+
+    return response.data.id;
+  }
+
+  //function to delete the guard post avatar
+  async deleteGuardPostAvatar(mongoGuardPostID) {
+
+    await OAUTH2Client.checkAuth();
+
+    const existsFile = await this.findFile(`'${process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS}' in parents and name contains '${mongoGuardPostID}'`);
+
+    if (existsFile) {
+      this.deleteFile(existsFile);
     }
   }
 

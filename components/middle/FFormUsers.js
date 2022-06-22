@@ -16,12 +16,12 @@ const inputs = {
   },
 };
 
-export default function FFormUsers(users) {
+export default function FFormUsers(props) {
 
   return (
     <motion.div
       variants={inputs}
-      className="w-full"
+      className="w-full m-2"
     >
 
       <table className="min-w-full border-collapse block md:table">
@@ -38,12 +38,12 @@ export default function FFormUsers(users) {
 
         </thead>
 
-        <tbody className="block md:table-row-group">
+        <tbody className="block md:table-row-group bg-color_G">
 
-          {users?.users?.map((user) => {
+          {props?.users?.map((user) => {
             return (
 
-              <tr className="border md:border-none block md:table-row" key={user.id}>
+              <tr className="border md:border-none block md:table-row" key={user._id}>
 
                 <td className="p-2 md:border text-left block md:table-cell flex flex-row items-center">
                   <div className="flex flex-row items-center">
@@ -54,7 +54,7 @@ export default function FFormUsers(users) {
                       src={user.uiAvatarsSrc}
                       alt=""
                     />
-                    <p className="font-semibold text-black ml-1">{user.initials}</p>
+                    <p className="font-semibold text-black ml-1">{[user.surname, user.firstName, user.patronymic].join(' ')}</p>
                   </div>
                 </td>
 

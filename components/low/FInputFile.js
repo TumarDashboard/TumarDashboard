@@ -28,6 +28,7 @@ const fileToDataUri = (file) =>
 export function FInputFile({ setUri, ...props }) {
 
   const onChange = ({ target }) => {
+
     const img = target.files[0];
 
     if (!img) {

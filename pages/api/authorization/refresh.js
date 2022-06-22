@@ -1,5 +1,5 @@
 import ms from 'ms';
-import userService from "../../../src/auth/service/userService";
+import userService from "../../../src/service/userService";
 import { catchErrorsApi } from '../../../middleware/exceptions';
 import { getCookie, setCookies } from '../../../middleware/cookies';
 
@@ -11,7 +11,7 @@ export default catchErrorsApi( async (req, res) => {
     });
 
     const {store}=req.query;
-
+    
     const userData = await userService.refresh( refreshToken, store );
 
     setCookies( "refreshToken", userData.refreshToken, {

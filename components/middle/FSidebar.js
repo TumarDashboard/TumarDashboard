@@ -1,12 +1,7 @@
-import { UsersIcon, UserCircleIcon } from '@heroicons/react/solid';
 import Link from 'next/link';
 import { motion } from "framer-motion";
 import { useRouter } from 'next/router';
-
-const itemList = [
-    { id: 1, text: 'Профиль', url: '/dashboard/profile', icon: <UserCircleIcon className="h-6 w-6" /> },
-    { id: 2, text: 'Пользователи', url: '/dashboard/users', icon: <UsersIcon className="h-6 w-6" /> }
-];
+import FDashboardItemList from '../variable/FDashboardItemList';
 
 const background = {
     initial: {
@@ -63,7 +58,7 @@ export default function FSidebar() {
                 variants={background}
                 className="flex flex-col w-64 bg-color_A min-h-full"
             >
-                {itemList.map((item) => {
+                {FDashboardItemList.map((item) => {
                     return (
                         <motion.div
                             variants={itemMotion}

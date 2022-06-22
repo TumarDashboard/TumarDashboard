@@ -3,8 +3,10 @@ import mongoose from 'mongoose'
 const minLengthEmail = process.env.NEXT_PUBLIC_MIN_LENGTH_EMAIL;
 const maxLengthEmail = process.env.NEXT_PUBLIC_MAX_LENGTH_EMAIL;
 
-// MongooseUserSchema is unique name for export
-export const MongooseUserSchema = new mongoose.Schema({
+const MongooseSchema = new mongoose.Schema({
+  reason: {
+    type: String
+  },
   surname: {
     type: String,
     required: [true, 'Пожалуйста, введите логин']
@@ -42,4 +44,4 @@ export const MongooseUserSchema = new mongoose.Schema({
   }
 })
 
-export default mongoose.models == null ? mongoose.model('User', MongooseUserSchema) : (mongoose.models.User || mongoose.model('User', MongooseUserSchema))
+export default mongoose.models == null ? mongoose.model('UserArchive', MongooseSchema) : (mongoose.models.UserArchive || mongoose.model('UserArchive', MongooseSchema))

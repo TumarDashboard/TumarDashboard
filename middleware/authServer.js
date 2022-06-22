@@ -1,5 +1,5 @@
 import ms from 'ms';
-import userService from "../src/auth/service/userService";
+import userService from "../src/service/userService";
 import { setCookies, removeCookies } from "./cookies";
 
 function redirect( to, from, req, res ){

@@ -255,7 +255,7 @@ export default function FFormRegistration() {
                 variants={inputs}
                 className="flex flex-col w-full text-center w-full"
             >
-                <h1 className="text-color_C italic">
+                <h1 className="text-color_C italic break-words">
                     {onError}
                 </h1>
             </motion.div>

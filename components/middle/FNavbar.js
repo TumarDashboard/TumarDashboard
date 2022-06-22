@@ -1,13 +1,14 @@
 import { useStore } from "../hight/StoreProvider";
 import { observer } from 'mobx-react-lite';
 import { useRouter } from 'next/router';
-import { UsersIcon, HomeIcon, UserCircleIcon } from '@heroicons/react/solid';
+import { HomeIcon, UserCircleIcon } from '@heroicons/react/solid';
 import FNavbarProfile from '../low/FNavbarProfile';
 import FNextLink from '../low/FNextLink';
 import FMenuToggle from "../low/FMenuToggle";
 import { motion, useCycle } from "framer-motion";
 import Link from 'next/link';
 import Image from 'next/image';
+import FDashboardItemList from "../variable/FDashboardItemList";
 
 const blackBox = {
     visible: {
@@ -29,11 +30,6 @@ const blackBox = {
         },
     },
 };
-
-const itemList = [
-    { id: 1, text: 'Профиль', url: '/dashboard/profile', icon: <UserCircleIcon className="h-6 w-6" /> },
-    { id: 2, text: 'Пользователи', url: '/dashboard/users', icon: <UsersIcon className="h-6 w-6" /> }
-];
 
 const itemMotion = {
     visible: {
@@ -176,7 +172,7 @@ const FNavbar = observer(function FNavbar() {
                         <p className="text-color_G text-2xl font-bold font-font_B ml-20 mt-6">Dashboard</p>
                     </motion.div>
 
-                    {itemList.map((item) => {
+                    {FDashboardItemList.map((item) => {
                         return (
                             <motion.div
                                 initial={false}

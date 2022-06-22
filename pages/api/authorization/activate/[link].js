@@ -1,5 +1,5 @@
 import ms from 'ms';
-import userService from "../../../../src/auth/service/userService";
+import userService from "../../../../src/service/userService";
 import { catchErrorsApi } from '../../../../middleware/exceptions';
 import checkCors from "../../../../middleware/cors";
 import { setCookies, getCookie } from '../../../../middleware/cookies';

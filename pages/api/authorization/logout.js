@@ -1,4 +1,4 @@
-import userService from "../../../src/auth/service/userService";
+import userService from "../../../src/service/userService";
 import { catchErrorsApi } from '../../../middleware/exceptions';
 import { getCookie, removeCookies } from '../../../middleware/cookies';
 import checkCors from "../../../middleware/cors";

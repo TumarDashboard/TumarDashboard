@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { AnimatePresence } from "framer-motion";
 import AppLayout from "../components/hight/AppLayout";
 import FLoadingScreen from "../components/hight/LoadingScreen";
+import FGoogleAuthError from "../components/hight/GoogleAuthError";
 import { StoreProvider } from '../components/hight/StoreProvider';
 
 export default function App({ Component, pageProps, router }) {
@@ -31,6 +32,10 @@ export default function App({ Component, pageProps, router }) {
 
       <FLoadingScreen
         key="LoadingScreen"
+      />
+
+      <FGoogleAuthError
+        key="GoogleAuthError"
       />
 
       <AppLayout

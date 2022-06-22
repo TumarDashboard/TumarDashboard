@@ -1,14 +1,21 @@
-import { FInputText } from "../low/FInputText";
 import { motion } from "framer-motion";
-import { useStore } from "../hight/StoreProvider";
+import { useState } from 'react';
+import { useRouter } from "next/router";
 import { observer } from 'mobx-react-lite'
+import Image from 'next/image';
+
+import { useStore } from "../hight/StoreProvider";
+import { changeUser, deleteUser } from "../../src/mobx/mobxUser";
+
+import { ApiError } from "../../middleware/exceptions";
+
+import { FUserDeleteForm } from "../modal/FUserDeleteForm";
+import { FGoogleAuthErrorForm } from "../hight/GoogleAuthError";
+
+import { FInputText } from "../low/FInputText";
+import { FInputFile } from "../low/FInputFile";
 import { FButtonRed } from "../low/FButtonRed";
 import { FSelect } from "../low/FSelect";
-import { FInputFile } from "../low/FInputFile";
-import { useState, useEffect, useLayoutEffect } from 'react';
-import { changeUser } from "../../src/mobx/mobxUser";
-import { ApiError } from "../../middleware/exceptions";
-import Image from 'next/image';
 
 const inputs = {
   initial: {
@@ -26,22 +33,23 @@ const inputs = {
 };
 
 const optionPositions = [
-  "Отсутствует",
-  "Начальник службы охраны",
-  "Сотрудник отдела кадров",
-  "Сотрудник технического отдела"
+  { text: "Отсутствует", code: 'FPEMP' },
+  { text: "Начальник службы охраны", code: 'FPNSO' },
+  { text: "Сотрудник отдела кадров", code: 'FPHRM' },
+  { text: "Сотрудник технического отдела", code: 'FRTHN' },
 ]
 
 const FFormProfile = observer(function FFormProfile() {
-  /*
+  /*----------------------------------------------------------------------------------------------------------------------------
       Использование глобальных данных
-  */
+  ----------------------------------------------------------------------------------------------------------------------------*/
+  const router = useRouter();
 
   const { MOBXuser, MOBXui } = useStore();
 
-  /*
+  /*----------------------------------------------------------------------------------------------------------------------------
       Данные инпутов
-  */
+  ----------------------------------------------------------------------------------------------------------------------------*/
 
   const [onError, setOnError] = useState('');
 
@@ -81,14 +89,13 @@ const FFormProfile = observer(function FFormProfile() {
   }
 
   //Должность
-  const [inputPositions, setInputPositions] = useState('');
+  const [inputPositions, setInputPositions] = useState([]);
 
   const [isInputValidatePositions, setInputValidatePositions] = useState(false);
 
   const positionsChange = (e) => {
 
     var options = e.target.options;
-
     var positions = [];
 
     for (var i = 1, l = options.length; i < l; i++) {
@@ -99,23 +106,23 @@ const FFormProfile = observer(function FFormProfile() {
 
     setInputPositions(positions);
 
-    if (positions.length == 0 ){
-      setInputValidatePositions( MOBXuser.user.positions?.length > 0 );
-    }else{
-      setInputValidatePositions( JSON.stringify(positions.sort()) != JSON.stringify(MOBXuser.user.positions?.sort()) );
+    if (positions.length == 0) {
+      setInputValidatePositions(MOBXuser.user.positions?.length > 0);
+    } else {
+      setInputValidatePositions(JSON.stringify(positions.sort()) != JSON.stringify(MOBXuser.user.positions?.sort()));
     }
 
     setOnError('');
   }
 
-  /*
+  /*----------------------------------------------------------------------------------------------------------------------------
       Функция сохранения
-  */
+  ----------------------------------------------------------------------------------------------------------------------------*/
 
   const saveChanges = async (event) => {
 
     event.preventDefault();
-    
+
     setOnError('');
 
     MOBXui.setLoading();
@@ -123,12 +130,13 @@ const FFormProfile = observer(function FFormProfile() {
     try {
 
       if (MOBXuser.user && MOBXuser.user.id) {
-
         const responce = await changeUser(MOBXuser.user.id, uriAvatar, inputSurname, inputFirstName, inputPatronymic, inputPositions);
 
-        if (uriAvatar) {
-          setUriAvatar(null);
-        }
+        setUriAvatar(null);
+        setInputValidateFirstName(false);
+        setInputValidatePatronymic(false);
+        setInputValidateSurname(false);
+        setInputValidatePositions(false);
 
         MOBXuser.setUser(responce.user);
 
@@ -138,7 +146,19 @@ const FFormProfile = observer(function FFormProfile() {
 
       if (error instanceof ApiError) {
 
-        setOnError(error.message);
+        if (error.statusCode == 520) {
+
+          const message = JSON.parse(error.message)
+
+          setOnError(message.message);
+          
+          MOBXui.openGoogleAuthError(message.email, message.authorizeUrl);
+
+        } else {
+
+          setOnError(error.message);
+
+        }
 
       } else {
         throw error
@@ -151,9 +171,72 @@ const FFormProfile = observer(function FFormProfile() {
     }
   }
 
-  /*
-      ---------------
-  */
+  /*-------------------------------------------------------------------------------------------------------
+      Модальное окно Формы удаления
+  -------------------------------------------------------------------------------------------------------*/
+  const [userDeleteForm, setUserDeleteForm] = useState({
+    isOpen: false
+  });
+
+  /*----------------------------------------------------------------------------------------------------------------------------
+      Функция удаления
+  ----------------------------------------------------------------------------------------------------------------------------*/
+  const userDeleteFormSubmit = async (event, reason) => {
+
+    event.preventDefault();
+
+    setUserDeleteForm({
+      isOpen: false
+    });
+
+    setOnError('');
+
+    MOBXui.setLoading();
+
+    try {
+
+      if (MOBXuser.user && MOBXuser.user.id) {
+
+        await deleteUser(MOBXuser.user.id, reason);
+
+        MOBXuser.setAuth(false);
+        MOBXuser.setUser({});
+
+        router.push('/');
+
+      }
+
+    } catch (error) {
+
+      if (error instanceof ApiError) {
+
+        if (error.statusCode == 520) {
+
+          const message = JSON.parse(error.message)
+
+          setOnError(message.message);
+
+          MOBXui.openGoogleAuthError(message.email, message.authorizeUrl);
+
+        } else {
+
+          setOnError(error.message);
+
+        }
+
+      } else {
+        throw error
+      }
+
+    } finally {
+
+      MOBXui.setLoading();
+
+    }
+  }
+
+  /*----------------------------------------------------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------------------------*/
 
   if (MOBXuser.isAuth)
     return (
@@ -170,7 +253,7 @@ const FFormProfile = observer(function FFormProfile() {
           >
             <Image
               className="object-cover w-44 h-44 rounded-full"
-              width={176} 
+              width={176}
               height={176}
               src={uriAvatar ? uriAvatar : MOBXuser?.avatar}
               alt=""
@@ -184,7 +267,7 @@ const FFormProfile = observer(function FFormProfile() {
           </span>
 
           <div
-            className="flex-1 p-4 hidden md:inline-flex items-end justify-center"
+            className="flex-1 p-4 hidden md:inline-flex items-center justify-center flex-col"
           >
             <FButtonRed
               className="hidden md:inline-flex m-4"
@@ -193,6 +276,17 @@ const FFormProfile = observer(function FFormProfile() {
             >
               Сохранить
             </FButtonRed>
+
+            <FButtonRed
+              className="hidden md:inline-flex m-4"
+              onClick={() => setUserDeleteForm({
+                isOpen: true,
+                email: MOBXuser.user.email
+              })}
+            >
+              Удалить
+            </FButtonRed>
+
           </div>
 
         </div>
@@ -243,13 +337,14 @@ const FFormProfile = observer(function FFormProfile() {
             <FSelect
               options={optionPositions}
               onChange={positionsChange}
-              value={MOBXuser?.user?.positions}
+              value={inputPositions}
+              defaultValue={MOBXuser?.user?.positions}
               multiple
             />
           </div>
 
           <div className="form-item">
-            <span className="text-color_C italic">
+            <span className="text-color_C italic break-words">
               {onError}
             </span>
           </div>
@@ -262,7 +357,24 @@ const FFormProfile = observer(function FFormProfile() {
             Сохранить
           </FButtonRed>
 
+          <FButtonRed
+            className="form-item md:hidden self-end"
+            onClick={() => setUserDeleteForm({
+              isOpen: true,
+              email: MOBXuser.user.email
+            })}
+          >
+            Удалить
+          </FButtonRed>
+
         </div>
+
+        {/* {Форма удаления аккаунта} */}
+        <FUserDeleteForm
+          form={userDeleteForm}
+          setForm={setUserDeleteForm}
+          submit={userDeleteFormSubmit}
+        />
 
       </motion.div>
     )

@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { v4 } from "uuid";
-import mongoTokenModel from "../../mongo/models/mongoTokenModel";
+import mongoTokenModel from "../mongo/models/mongoTokenModel";
 
 export async function generateTokens(payload) {
 
@@ -72,6 +72,12 @@ export async function saveToken(userId, refreshToken) {
 export async function removeToken(refreshToken) {
 
     return await mongoTokenModel.deleteOne({ refreshToken: refreshToken }).lean();
+
+}
+
+export async function removeTokenByID(userId) {
+
+    return await mongoTokenModel.deleteOne({ user: userId }).lean();
 
 }
 

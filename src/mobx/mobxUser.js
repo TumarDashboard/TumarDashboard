@@ -1,5 +1,6 @@
 import { action, observable, runInAction, makeObservable, computed } from 'mobx';
 import { enableStaticRendering } from 'mobx-react-lite';
+import { removeCookies } from '../../middleware/cookies';
 // import useSWR from 'swr';
 import fetchAuth from "../../middleware/requests";
 
@@ -96,33 +97,28 @@ export default class MOBXuser {
             this.setUser({});
 
         }
+    }    
+    
+    async delete( reason ) {
+        try {
+
+            deleteUser( this.user.id, reason )
+            
+            localStorage.removeItem('token');
+
+            removeCookies( "refreshToken", {req, res, path: '/'});
+
+        } catch (error) {
+
+            console.log(error);
+
+        } finally {
+
+            this.setAuth(false);
+            this.setUser({});
+
+        }
     }
-
-    // loadAuth() {
-
-    //     return new Promise(async (resolve) => {
-
-    //         try {
-
-    //             const responce = await fetchAuth('/authorization/refresh');
-    //             localStorage.setItem('token', responce.accessToken);
-    //             this.setAuth(true);
-    //             this.setUser(responce.user);
-
-    //         } catch {
-
-    //             this.setAuth(false);
-    //             this.setUser({});
-
-    //         } finally {
-
-    //             return resolve();
-
-    //         }
-
-    //     })
-
-    // }
 
 }
 
@@ -130,6 +126,18 @@ export const changeUser = async( id, uiAvatarsSrc, surname, firstName, patronymi
     try {
 
         return await fetchAuth('/method/changeUser', { id, uiAvatarsSrc, surname, firstName, patronymic, positions });
+
+    } catch (error) {
+
+        throw error;
+
+    }
+}
+
+export const deleteUser = async( id, reason ) => {
+    try {
+
+        return await fetchAuth('/method/deleteUser', { id, reason });
 
     } catch (error) {
 
