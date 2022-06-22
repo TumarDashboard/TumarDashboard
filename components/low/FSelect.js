@@ -9,7 +9,7 @@ export function FSelect({ options, value, ...props }) {
         >
             {options.map((text, i) => {
                 if (value.includes(text))
-                    return <option key={text + i} className="bg-blue-200">{text}</option>
+                    return <option key={text + i} className="bg-blue-200" selected>{text}</option>
                 else
                     return <option key={text + i}>{text}</option>
             })}
