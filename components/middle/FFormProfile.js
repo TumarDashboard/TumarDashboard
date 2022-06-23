@@ -89,7 +89,7 @@ const FFormProfile = observer(function FFormProfile() {
   }
 
   //Должность
-  const [inputPositions, setInputPositions] = useState([]);
+  const [inputPositions, setInputPositions] = useState(MOBXuser?.user?.positions || []);
 
   const [isInputValidatePositions, setInputValidatePositions] = useState(false);
 

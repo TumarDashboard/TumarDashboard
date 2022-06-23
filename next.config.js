@@ -45,7 +45,7 @@ module.exports = async (phase, { defaultConfig }) => {
         },
 
         images: {
-            domains: ['drive.google.com', 'ui-avatars.com', 'googleusercontent.com'],
+            domains: ['drive.google.com', 'ui-avatars.com', '**googleusercontent.com'],
           }
 
     }
@@ -57,8 +57,8 @@ module.exports = async (phase, { defaultConfig }) => {
 
     } else {
 
-        nextConfig.env.NEXT_PUBLIC_API_URL = 'https://tumar-dashboard.vercel.app/';
-        nextConfig.env.NEXT_PUBLIC_CLIENT_URL = 'https://tumar-dashboard.vercel.app/';
+        nextConfig.env.NEXT_PUBLIC_API_URL = 'https://tumar-dashboard.vercel.app';
+        nextConfig.env.NEXT_PUBLIC_CLIENT_URL = 'https://tumar-dashboard.vercel.app';
 
     }
 
