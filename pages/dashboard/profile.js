@@ -13,7 +13,9 @@ const content = (isFirstMount) => ({
 export default function Profile({ isFirstMount }) {
 
   return (
-    <>
+    <div
+      className="flex-1 bg-color_C"
+    >
       <Head>
         <title>Профиль</title>
         <link rel="icon" href="/favicon.ico" />
@@ -31,7 +33,7 @@ export default function Profile({ isFirstMount }) {
            <FFormProfile/>
         </motion.div>
       </motion.section>
-    </>
+    </div>
   )
 }
 

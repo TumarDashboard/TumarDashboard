@@ -8,9 +8,9 @@ import { ApiError } from "../../middleware/exceptions";
 import { FButtonRed } from "../low/FButtonRed";
 import { FButtonWhite } from "../low/FButtonWhite";
 
-import { createGuardPost, editGuardPost, deleteGuardPost } from '../../src/dtos/dtoGuardPost';
-import { FGuardPostDeleteForm } from '../modal/FGuardPostDeleteForm';
-import { FGuardPostEditForm } from '../modal/FGuardPostEditForm';
+import { createGuard, editGuard, deleteGuard } from '../../src/dtos/dtoGuard';
+import { FGuardDeleteForm } from '../modal/FGuardDeleteForm';
+import { FGuardEditForm } from '../modal/FGuardEditForm';
 
 const inputs = {
   initial: {
@@ -27,82 +27,81 @@ const inputs = {
   },
 };
 
-export default function FFormGuardPosts({ guardPosts, users }) {
+export default function FFormGuards({ guards, guardPosts, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
   -------------------------------------------------------------------------------------------------------*/
   const { MOBXuser, MOBXui } = useStore();
 
-  const [guardPostsTable, setGuardPostsTable] = useState(guardPosts);
-
+  const [guardsTable, setGuardsTable] = useState(guards);
   /*-------------------------------------------------------------------------------------------------------
       Модальное окно Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
-  const [guardPostEditForm, setGuardPostEditForm] = useState({
+  const [guardEditForm, setGuardEditForm] = useState({
     isOpen: false
   });
+
   /*-------------------------------------------------------------------------------------------------------
       Создание физ. поста Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
-  const guardPostAdd = async (event,
-    inputGuardPostNumber,
-    inputGuardPostName,
-    inputGuardPostAddress,
-    inputGuardPostPhoto,
-    inputGuardPostManager,
-    inputGuardPostShifts,
-    inputGuardPostDescription) => {
+  const guardAdd = async (event,
+    inputGuardSurname,
+    inputGuardFirstName,
+    inputGuardPatronymic,
+    inputGuardUIAvatarsSrc,
+    inputGuardTelephone,
+    inputGuardManager,
+    inputGuardGuardPosts) => {
 
     event.preventDefault();
 
     MOBXui.setLoading();
 
     try {
-
-      const responce = await createGuardPost(
-        inputGuardPostNumber,
-        inputGuardPostName,
-        inputGuardPostAddress,
-        inputGuardPostPhoto,
-        inputGuardPostManager,
-        inputGuardPostShifts,
-        inputGuardPostDescription
+      const responce = await createGuard(
+        inputGuardSurname,
+        inputGuardFirstName,
+        inputGuardPatronymic,
+        inputGuardUIAvatarsSrc,
+        inputGuardTelephone,
+        inputGuardManager,
+        inputGuardGuardPosts
       );
 
-      setGuardPostsTable(array => {
-        array.push(responce.guardPost);
+      setGuardsTable(array => {
+        console.log(array);
+        array.push(responce.guard);
         array.sort((a, b) => {
-          return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
-            a.number - b.number ||
-            a.address.localeCompare(b.address)
+          return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
         })
         return array;
       });
 
-      setGuardPostEditForm({ isOpen: false });
+      setGuardEditForm({ isOpen: false });
 
     } catch (error) {
 
-      errorCallback(error, setGuardPostEditForm);
+      errorCallback(error, setGuardEditForm);
 
     } finally {
 
       MOBXui.setLoading();
 
     }
+
   }
 
   /*-------------------------------------------------------------------------------------------------------
       Создание физ. поста Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
-  const guardPostEdit = async (event,
-    inputGuardPostNumber,
-    inputGuardPostName,
-    inputGuardPostAddress,
-    inputGuardPostPhoto,
-    inputGuardPostManager,
-    inputGuardPostShifts,
-    inputGuardPostDescription) => {
+  const guardEdit = async (event,
+    inputGuardSurname,
+    inputGuardFirstName,
+    inputGuardPatronymic,
+    inputGuardUIAvatarsSrc,
+    inputGuardTelephone,
+    inputGuardManager,
+    inputGuardGuardPosts) => {
 
     event.preventDefault();
 
@@ -110,35 +109,33 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
     try {
 
-      const responce = await editGuardPost(
-        guardPostEditForm.guardPost._id,
-        inputGuardPostNumber,
-        inputGuardPostName,
-        inputGuardPostAddress,
-        inputGuardPostPhoto,
-        inputGuardPostManager,
-        inputGuardPostShifts,
-        inputGuardPostDescription
+      const responce = await editGuard(
+        guardEditForm.guard._id,
+        inputGuardSurname,
+        inputGuardFirstName,
+        inputGuardPatronymic,
+        inputGuardUIAvatarsSrc,
+        inputGuardTelephone,
+        inputGuardManager,
+        inputGuardGuardPosts
       );
 
-      setGuardPostsTable(array => {
-        var index = array.indexOf(guardPostEditForm.guardPost);
+      setGuardsTable(array => {
+        var index = array.indexOf(guardEditForm.guard);
         if (index !== -1) {
-          array[index] = responce.guardPost;
+          array[index] = responce.guard;
         }
         array.sort((a, b) => {
-          return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
-            a.number - b.number ||
-            a.address.localeCompare(b.address)
+          return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
         })
         return array;
       });
 
-      setGuardPostEditForm({ isOpen: false });
+      setGuardEditForm({ isOpen: false });
 
     } catch (error) {
 
-      errorCallback(error, setGuardPostEditForm);
+      errorCallback(error, setGuardEditForm);
 
     } finally {
 
@@ -150,14 +147,14 @@ export default function FFormGuardPosts({ guardPosts, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Модальное окно Формы удаления
   -------------------------------------------------------------------------------------------------------*/
-  const [guardPostDeleteForm, setGuardPostDeleteForm] = useState({
+  const [guardDeleteForm, setGuardDeleteForm] = useState({
     isOpen: false
   });
 
   /*-------------------------------------------------------------------------------------------------------
       Функция удаления поста Формы удаления
   -------------------------------------------------------------------------------------------------------*/
-  const guardPostDeleteFormSubmit = async (event, reason) => {
+  const guardDeleteFormSubmit = async (event, reason) => {
 
     event.preventDefault();
 
@@ -167,27 +164,27 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
       if (MOBXuser.user && MOBXuser.user.id) {
 
-        const responce = await deleteGuardPost(
-          guardPostDeleteForm.guardPostId,
+        const responce = await deleteGuard(
+          guardDeleteForm.guardId,
           MOBXuser.user.id,
           reason
         );
 
-        setGuardPostsTable(array => {
+        setGuardsTable(array => {
           const result = array.filter(value => {
-            return responce.guardPost._id != value._id;
+            return responce.guard._id != value._id;
           })
           return result
         });
 
-        setGuardPostDeleteForm({
+        setGuardDeleteForm({
           isOpen: false
         });
       }
 
     } catch (error) {
 
-      errorCallback(error, setGuardPostDeleteForm);
+      errorCallback(error, setGuardDeleteForm);
 
     } finally {
 
@@ -200,8 +197,8 @@ export default function FFormGuardPosts({ guardPosts, users }) {
     Переиспользование функции обработок ошибок
   ----------------------------------------------------------------------------------------------------------------------------*/
   const errorCallback = (error, callback) => {
-    if (error instanceof ApiError) {
 
+    if (error instanceof ApiError) {
       if (error.statusCode == 520) {
 
         callback({ isOpen: false });
@@ -241,7 +238,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
           className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
           hover:bg-color_C active:bg-color_B"
           onClick={() => {
-            setGuardPostEditForm({
+            setGuardEditForm({
               isOpen: true,
               operation: 'Добавить',
               key: Math.random().toString(36)
@@ -263,9 +260,8 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
           <tr className="border md:border-none block md:table-row absolute -top-full md:top-auto -left-full md:left-auto  md:relative">
 
-            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Номер</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Наименование</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Адрес</th>
+            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Инициалы</th>
+            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Телефон</th>
             <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">НСО</th>
             <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell"></th>
 
@@ -275,31 +271,33 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
         <tbody className="block md:table-row-group">
 
-          {guardPostsTable?.map((guardPost) => {
+          {guardsTable?.map((guard) => {
             return (
 
-              <tr className="rounded-md md:border-none block md:table-row bg-color_G mb-2" key={guardPost._id}>
+              <tr className="rounded-md md:border-none block md:table-row bg-color_G mb-2" key={guard._id}>
 
                 <td className="p-2 md:border text-left block md:table-cell">
                   <div className="flex flex-row items-center justify-between md:justify-start">
-                    {guardPost.photo && <Image
+
+                    {guard.uiAvatarsSrc && <Image
                       className="h-8 w-8 rounded-full"
                       width={32}
                       height={32}
-                      src={guardPost.photo}
+                      src={guard.uiAvatarsSrc}
                       alt=""
                     />}
-                    <p className="font-semibold text-black ml-1 text-xl font-bold">{guardPost.number}</p>
-                    <div className='flex md:hidden'>
 
+                    <p className="font-semibold text-black ml-1 text-xl font-bold">{[guard.surname, guard.firstName].join(' ')}</p>
+
+                    <div className='flex md:hidden'>
                       <FButtonRed
                         className="mr-2 flex"
                         onClick={() => {
-                          setGuardPostEditForm({
+                          setGuardEditForm({
                             isOpen: true,
                             operation: 'Изменить',
                             key: Math.random().toString(36),
-                            guardPost: guardPost
+                            guard: guard
                           })
                         }}
                       >
@@ -307,51 +305,49 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                           className="h-4 w-4"
                         />
                       </FButtonRed>
-
                       <FButtonWhite
                         className="flex"
-                        onClick={() => setGuardPostDeleteForm({
+                        onClick={() => setGuardDeleteForm({
                           isOpen: true,
                           key: Math.random().toString(36),
-                          guardPostName: guardPost.name,
-                          guardPostId: guardPost._id,
+                          guardInitials: [guard.surname, guard.firstName].join(' '),
+                          guardId: guard._id,
                         })}
                       >
                         <TrashIcon
                           className="h-4 w-4"
                         />
                       </FButtonWhite>
-
                     </div>
+
                   </div>
                 </td>
 
-                <td className="px-1 md:p-2 md:border text-left block md:table-cell">
-                  <span className="break-all md:break-words">{guardPost.name}</span>
-                </td>
-
                 <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
-                  <span className="break-all md:break-normal"><b className='md:hidden'>Адрес</b> {guardPost.address}</span>
-                </td>
-
-                <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
-                  {guardPost.manager &&
+                  {guard.telephone?.length > 0 &&
                     <span className="break-all md:break-normal">
-                      <b className='md:hidden'>НСО</b> {[guardPost.manager?.surname, guardPost.manager?.firstName].join(' ')}
+                      <b className='md:hidden'>Телефон</b> {guard.telephone}
                     </span>}
                 </td>
 
-                <td className="p-2 md:border text-left hidden md:table-cell w-1">
+                <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
+                  {guard.manager?._id != "EMPTY" &&
+                    <span className="break-all md:break-normal">
+                      <b className='md:hidden'>НСО</b> {[guard.manager?.surname, guard.manager?.firstName].join(' ')}
+                    </span>}
+                </td>
+
+                <td className="p-2 md:border text-left hidden md:block md:table-cell w-1">
                   <div className='flex'>
 
                     <FButtonRed
                       className="mr-2 flex"
                       onClick={() => {
-                        setGuardPostEditForm({
+                        setGuardEditForm({
                           isOpen: true,
                           operation: 'Изменить',
                           key: Math.random().toString(36),
-                          guardPost: guardPost
+                          guard: guard
                         })
                       }}
                     >
@@ -363,11 +359,11 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
                     <FButtonWhite
                       className="flex"
-                      onClick={() => setGuardPostDeleteForm({
+                      onClick={() => setGuardDeleteForm({
                         isOpen: true,
                         key: Math.random().toString(36),
-                        guardPostName: guardPost.name,
-                        guardPostId: guardPost._id,
+                        guardInitials: [guard.surname, guard.firstName].join(' '),
+                        guardId: guard._id,
                       })}
                     >
                       <TrashIcon
@@ -389,19 +385,20 @@ export default function FFormGuardPosts({ guardPosts, users }) {
       </table>
 
       {/* {Форма добавления/редактирования физ. поста} */}
-      <FGuardPostEditForm
-        form={guardPostEditForm}
-        setForm={setGuardPostEditForm}
-        submitAdd={guardPostAdd}
-        submitEdit={guardPostEdit}
+      <FGuardEditForm
+        form={guardEditForm}
+        setForm={setGuardEditForm}
+        submitAdd={guardAdd}
+        submitEdit={guardEdit}
+        guardPosts={guardPosts}
         users={users}
       />
 
       {/* {Форма удаления физ. поста} */}
-      <FGuardPostDeleteForm
-        form={guardPostDeleteForm}
-        setForm={setGuardPostDeleteForm}
-        submit={guardPostDeleteFormSubmit}
+      <FGuardDeleteForm
+        form={guardDeleteForm}
+        setForm={setGuardDeleteForm}
+        submit={guardDeleteFormSubmit}
       />
 
     </motion.div>

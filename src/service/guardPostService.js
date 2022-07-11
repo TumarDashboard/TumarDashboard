@@ -1,16 +1,12 @@
-import bcrypt from "bcrypt";
-import { v4 } from "uuid";
-import * as Yup from 'yup';
-import mailService from "./mailService";
-import * as tokenService from "./tokenService";
 import DTOGuardPost, { validateYup } from "../dtos/dtoGuardPost";
 import mongoUserModel from "../mongo/models/mongoUserModel";
-import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
 import mongoConnect from "../mongo/mongoConnect";
 import { ApiError } from "../../middleware/exceptions";
 import googleDrive from "../google/api/googleDrive";
 import mongoGuardPostsModel from "../mongo/models/mongoGuardPostsModel";
 import mongoGuardPostsArchiveModel from "../mongo/models/mongoGuardPostsArchiveModel";
+import mongoGuardsModel from "../mongo/models/mongoGuardsModel";
+import mongoGuardsArchiveModel from "../mongo/models/mongoGuardsArchiveModel";
 import mongoose from "mongoose";
 
 class GuardPostService {
@@ -186,6 +182,10 @@ class GuardPostService {
 
         const mongoGuardPost = await mongoGuardPostsModel.findById(idGuardPost);
 
+        if(!mongoGuardPost){
+            throw ApiError.BadRequest("Не найден физ. пост для проведения операции удаления");
+        }
+
         const mongoGuardPostArchive = await mongoGuardPostsArchiveModel.create(mongoGuardPost.toJSON());
 
         mongoGuardPostArchive.reason = reason;
@@ -193,6 +193,18 @@ class GuardPostService {
         mongoGuardPostArchive.userPerfomedSheme = 'User';
 
         await mongoGuardPostArchive.save();
+
+        await mongoGuardsModel.updateMany({guardPosts: mongoGuardPost.id}, {
+            $pullAll: {
+                guardPosts: [ mongoGuardPost.id ]
+            }
+        }).lean();
+
+        await mongoGuardsArchiveModel.updateMany({guardPosts: mongoGuardPost.id}, {
+            $pullAll: {
+                guardPosts: [ mongoGuardPost.id ]
+            }
+        }).lean();
         
         await mongoGuardPost.delete();
         

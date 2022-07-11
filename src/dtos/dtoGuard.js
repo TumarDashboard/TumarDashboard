@@ -1,52 +1,48 @@
 import { object, lazy, string } from "yup";
+import fetchAuth from "../../middleware/requests";
 import { mapValue } from "../utils/arrayUtils";
 
 const minlengthFullName = process.env.NEXT_PUBLIC_MIN_LENGTH_TEXT;
 const maxlengthFullName = process.env.NEXT_PUBLIC_MAX_LENGTH_TEXT;
 
-const minlengthEmail = process.env.NEXT_PUBLIC_MIN_LENGTH_EMAIL;
-const maxlengthEmail = process.env.NEXT_PUBLIC_MAX_LENGTH_EMAIL;
+export default class DTOGuard {
 
-const minlengthPassword = process.env.NEXT_PUBLIC_MIN_LENGTH_PASSWORD;
-const maxlengthPassword = process.env.NEXT_PUBLIC_MAX_LENGTH_PASSWORD;
-
-export default class DTOUser {
+    _id;
     surname;
     firstName;
     patronymic;
-    initials;
-    email;
-    id;
-    isActivated;
     uiAvatarsSrc;
-    positions;
+    telephone;
+    manager;
+    managerSheme;
+    guardPosts;
 
     constructor(model) {
+        this._id = model._id;
         this.surname = model.surname;
         this.firstName = model.firstName;
         this.patronymic = model.patronymic;
-        this.initials = [model.surname, model.firstName, model.patronymic].join(' ');
-        this.email = model.email;
-        this.id = model._id;
-        this.isActivated = model.isActivated;
         this.uiAvatarsSrc = model.uiAvatarsSrc;
-        this.positions = model.positions;
+        this.telephone = model.telephone;
+        this.manager = model.manager;
+        this.managerSheme = model.managerSheme;
+        this.guardPosts = model.guardPosts;
     }
 
 }
 
-export const validateYup = (dtoUser, options) => {
+export const validateYup = (dtoGuardPost, options) => {
 
-    let validationSchema = lazy(dtoUser => object(
-        mapValue(dtoUser, (value, key) => {
+    let validationSchema = lazy(dtoGuardPost => object(
+        mapValue(dtoGuardPost, (value, key) => {
+            
+            if (options?.deleteEmptyKey && (!dtoGuardPost[key] || dtoGuardPost[key] === '' || dtoGuardPost[key].length === 0)) {
 
-            if (options?.deleteEmptyKey && (!dtoUser[key] || dtoUser[key] === '')) {
-
-                delete dtoUser[key];
+                delete dtoGuardPost[key];
 
             } else {
 
-                if (key === 'id') {
+                if (key === 'id' || key === '_id') {
                     return string()
                         .required('Не указан id пользователя')
                 }
@@ -78,26 +74,46 @@ export const validateYup = (dtoUser, options) => {
                         .required('Не указано отчество')
                 }
 
-                if (key === 'email') {
-                    return string()
-                        .required('Не указан электронный адрес')
-                        .min(minlengthEmail, `Электронный адрес должен содержать от ${minlengthEmail} до ${maxlengthEmail} символов`)
-                        .max(maxlengthEmail, `Электронный адрес должен содержать от ${minlengthEmail} до ${maxlengthEmail} символов`)
-                        .email('Электронный адрес указан не корректно')
-                }
-
-                if (key === 'password') {
-                    return string()
-                        .min(minlengthPassword, `Пароль должен содержать от ${minlengthPassword} до ${maxlengthPassword} символов`)
-                        .max(maxlengthPassword, `Пароль должен содержать от ${minlengthPassword} до ${maxlengthPassword} символов`)
-                        .matches(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Пароль должен содержать как минимум одну строчную букву, одну заглавную букву и одну цифру')
-                        .required('Не указан пароль')
-                }
-
             }
         })
     ));
 
-    return validationSchema.validate(dtoUser, { strict: true, abortEarly: false });
+    return validationSchema.validate(dtoGuardPost, { strict: true, abortEarly: false });
 
+}
+
+export const createGuard = async( surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts ) => {
+    try {
+
+        return await fetchAuth('/method/createGuard', { surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts });
+
+    } catch (error) {
+        
+        throw error;
+
+    }
+}
+
+export const editGuard = async( id, surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts ) => {
+    try {
+
+        return await fetchAuth('/method/editGuard', { id, surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts });
+
+    } catch (error) {
+        
+        throw error;
+
+    }
+}
+
+export const deleteGuard = async( idGuard, idUser, reason ) => {
+    try {
+
+        return await fetchAuth('/method/deleteGuard', { idGuard, idUser, reason });
+
+    } catch (error) {
+        
+        throw error;
+
+    }
 }

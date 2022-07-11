@@ -292,7 +292,7 @@ const FFormProfile = observer(function FFormProfile() {
         </div>
 
         <div
-          className="flex-initial flex flex-col space-y-4 w-full max-w-xl bg-white p-4 rounded-md"
+          className="flex-initial flex flex-col space-y-4 w-full md:max-w-xl bg-white p-4 rounded-md"
         >
 
           <div className="form-item">

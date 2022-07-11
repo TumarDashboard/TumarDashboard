@@ -16,6 +16,10 @@ module.exports = async (phase, { defaultConfig }) => {
             NEXT_PUBLIC_MIN_LENGTH_NUMBER_INPUT: '100',
             NEXT_PUBLIC_MAX_LENGTH_NUMBER_INPUT: '999',
 
+            // #Min and Max data for number input
+            NEXT_PUBLIC_MIN_LENGTH_TELEPHONE_INPUT: '10',
+            NEXT_PUBLIC_MAX_LENGTH_TELEPHONE_INPUT: '16',
+
             // #Min and Max data for email
             NEXT_PUBLIC_MIN_LENGTH_EMAIL: '3',
             NEXT_PUBLIC_MAX_LENGTH_EMAIL: '320',
@@ -42,6 +46,7 @@ module.exports = async (phase, { defaultConfig }) => {
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_DASHBOARD: '1s2KFHjOhXQ9kQ8QcGGofR47PeFNwhD2j',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS: '1oWbuTn70nfV9UMQ90KrIKO4yKbmm4nH0',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS: '16VCgeX_BbwS5UpWdhO0o8loLSPafBPCL',
+            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDS: '1efI0RWRTXHfz4pMz5Nvjna4HFc4ULlmq',
         },
 
         images: {

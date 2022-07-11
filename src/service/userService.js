@@ -7,6 +7,8 @@ import mongoUserModel from "../mongo/models/mongoUserModel";
 import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
 import mongoGuardPostsModel from "../mongo/models/mongoGuardPostsModel";
 import mongoGuardPostsArchiveModel from "../mongo/models/mongoGuardPostsArchiveModel";
+import mongoGuardsModel from "../mongo/models/mongoGuardsModel";
+import mongoGuardsArchiveModel from "../mongo/models/mongoGuardsArchiveModel";
 import mongoConnect from "../mongo/mongoConnect";
 import { ApiError } from "../../middleware/exceptions";
 import googleDrive from "../google/api/googleDrive";
@@ -277,6 +279,12 @@ class UserService {
         await mongoGuardPostsArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'UserArchive'}).lean();
 
         await mongoGuardPostsArchiveModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
+
+        await mongoGuardsModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
+
+        await mongoGuardsArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'UserArchive'}).lean();
+
+        await mongoGuardsArchiveModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
         
         await mongoUser.delete();
 

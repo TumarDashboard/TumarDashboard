@@ -7,3 +7,13 @@ export function equalArrays(a = [], b = []) {
 
     return true;
 }
+
+export function mapValue(object, iteratee) {
+    object = Object(object);
+    const result = {}
+
+    Object.keys(object).forEach((key) => {
+        result[key] = iteratee(object[key], key, object)
+    })
+    return result
+}

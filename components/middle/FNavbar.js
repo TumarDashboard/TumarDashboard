@@ -87,7 +87,7 @@ const FNavbar = observer(function FNavbar() {
                 <FMenuToggle
                     toggle={toggle}
                     open={isSidebar}
-                    className="absolute z-30 block md:hidden ml-4 mt-5"
+                    className="absolute z-30 block lg:hidden ml-4 mt-5"
                 />
             ) : null}
 
@@ -97,7 +97,7 @@ const FNavbar = observer(function FNavbar() {
                 <div
                     className="flex items-center justify-center
                                 row-start-1 col-start-2
-                                md:pr-3 md:col-start-1 md:justify-self-start"
+                                lg:pr-3 lg:col-start-1 lg:justify-self-start"
                 >
                     {/* Логотип */}
                     <Image
@@ -158,7 +158,7 @@ const FNavbar = observer(function FNavbar() {
 
             {user?.isAuth ? (
                 <motion.div
-                    className='absolute z-35 w-full bg-color_A overflow-hidden block md:hidden'
+                    className='absolute z-35 w-full bg-color_A overflow-hidden block lg:hidden'
                     key='FNavbarSidebar'
                     initial={false}
                     animate={isSidebar}

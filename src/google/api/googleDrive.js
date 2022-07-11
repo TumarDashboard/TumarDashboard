@@ -1,4 +1,3 @@
-
 import { google } from 'googleapis';
 import OAUTH2Client from '../googleConnect';
 import fs from 'fs';
@@ -116,6 +115,50 @@ class GoogleDrive {
     await OAUTH2Client.checkAuth();
 
     const existsFile = await this.findFile(`'${process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS}' in parents and name contains '${mongoGuardPostID}'`);
+
+    if (existsFile) {
+      this.deleteFile(existsFile);
+    }
+  }
+
+  //function to upload the guard file
+  async uploadGuardAvatar(mongoGuardID, uiAvatarsSrc) {
+
+    await OAUTH2Client.checkAuth();
+
+    const existsFile = await this.findFile(`'${process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDS}' in parents and name contains '${mongoGuardID}'`);
+
+    if (existsFile) {
+      this.deleteFile(existsFile);
+    }
+
+    const regex = /^data:.+\/(.+);base64,(.*)$/;
+    const matches = uiAvatarsSrc.match(regex);
+    const type = matches[1];
+    const data = matches[2];
+    const buffer = Buffer.from(data, 'base64');
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(buffer);
+
+    const response = await this.drive.files.create({
+      requestBody: {
+        name: `${mongoGuardID}.${type}`,
+        parents: [process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDS]
+      },
+      media: {
+        body: bufferStream,
+      },
+    });
+
+    return response.data.id;
+  }
+
+  //function to delete the guard post avatar
+  async deleteGuardAvatar(mongoGuardID) {
+
+    await OAUTH2Client.checkAuth();
+
+    const existsFile = await this.findFile(`'${process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDS}' in parents and name contains '${mongoGuardID}'`);
 
     if (existsFile) {
       this.deleteFile(existsFile);

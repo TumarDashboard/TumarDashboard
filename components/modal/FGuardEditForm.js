@@ -1,0 +1,316 @@
+import { FModalForm } from './FModalForm';
+import { useState, useEffect } from 'react';
+import { FInputFile } from "../low/FInputFile";
+import { FButtonRed } from "../low/FButtonRed";
+import { FButtonWhite } from "../low/FButtonWhite";
+import { FSelect } from "../low/FSelect";
+
+import { equalArrays } from '../../src/utils/arrayUtils';
+import { FInputText } from '../low/FInputText';
+import { FInputTelephone } from '../low/FInputTelephone';
+
+export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPosts, users }) {
+
+  /*-------------------------------------------------------------------------------------------------------
+      Операция
+  -------------------------------------------------------------------------------------------------------*/
+  const [operation, setOperation] = useState('');
+  const [error, setError] = useState('');
+
+  /*-------------------------------------------------------------------------------------------------------
+      Фамилия охранника Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const [inputGuardSurname, setInputGuardSurname] = useState('');
+
+  const [isInputValidateGuardSurname, setInputValidateGuardSurname] = useState(false);
+
+  const GuardSurnameChange = (value, validate) => {
+    setInputGuardSurname(value);
+    if (operation == 'Добавить') {
+      if (value)
+        setInputValidateGuardSurname(validate);
+      else
+        setInputValidateGuardSurname(false);
+    } else {
+      setInputValidateGuardSurname(validate && (value != form.guard?.surname));
+    }
+  }
+
+  /*-------------------------------------------------------------------------------------------------------
+      Имя охранника Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const [inputGuardfirstName, setInputGuardfirstName] = useState('');
+
+  const [isInputValidateGuardfirstName, setInputValidateGuardfirstName] = useState(false);
+
+  const GuardfirstNameChange = (value, validate) => {
+    setInputGuardfirstName(value);
+    if (operation == 'Добавить') {
+      if (value)
+        setInputValidateGuardfirstName(validate);
+      else
+        setInputValidateGuardfirstName(false);
+    } else {
+      setInputValidateGuardfirstName(validate && (value != form.guard?.firstName));
+    }
+  }
+
+  /*-------------------------------------------------------------------------------------------------------
+      Отчество охранника Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const [inputGuardPatronymic, setInputGuardPatronymic] = useState('');
+
+  const [isInputValidateGuardPatronymic, setInputValidateGuardPatronymic] = useState(true);
+
+  const GuardPatronymicChange = (value, validate) => {
+    setInputGuardPatronymic(value);    
+    if (operation == 'Добавить') {
+      if (value)
+        setInputValidateGuardPatronymic(validate);
+      else
+        setInputValidateGuardPatronymic(true);
+    } else {
+      setInputValidateGuardPatronymic(validate && (value != form.guard?.patronymic));
+    }
+  }
+
+  /*-------------------------------------------------------------------------------------------------------
+      Фото Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const [inputGuardUIAvatarsSrc, setInputGuardUIAvatarsSrc] = useState('');
+
+  /*-------------------------------------------------------------------------------------------------------
+      Телефон Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const [inputGuardTelephone, setInputGuardTelephone] = useState('');
+
+  const [isInputValidateGuardTelephone, setInputValidateGuardTelephone] = useState(true);
+
+  const GuardTelephoneChange = (value, validate) => {
+    setInputGuardTelephone(value);    
+    if (operation == 'Добавить') {
+      if (value)
+        setInputValidateGuardTelephone(validate);
+      else
+        setInputValidateGuardTelephone(true);
+    } else {
+      setInputValidateGuardTelephone(validate && (value != form.guard?.telephone));
+    }
+  }
+
+  /*-------------------------------------------------------------------------------------------------------
+      Менеджер Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const optionGuardManager = [{
+    text: 'Отсутствует', code: 'EMPTY'
+  }, ...users?.map((user) => {
+    return {
+      text: [user.surname, user.firstName].join(' '),
+      code: user._id,
+    }
+  })]
+
+  const [inputGuardManager, setInputGuardManager] = useState('EMPTY');
+  /*-------------------------------------------------------------------------------------------------------
+      Физ.посты Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const optionGuardPosts = [{
+    text: 'Отсутствует', code: 'EMPTY'
+  }, ...guardPosts?.map((guardPost) => {
+    return {
+      text: [guardPost.name, guardPost.address].filter(Boolean).join(', '),
+      code: guardPost._id,
+    }
+  })]
+
+  const [inputGuardGuardPosts, setInputGuardGuardPosts] = useState([]);
+
+  const guardPostChange = (e) => {
+
+    var options = e.target.options;
+    var positions = [];
+
+    for (var i = 1, l = options.length; i < l; i++) {
+      if (options[i].selected) {
+        positions.push(options[i].value);
+      }
+    }
+
+    setInputGuardGuardPosts(positions);
+  }
+
+  /*-------------------------------------------------------------------------------------------------------
+      Чистка/Обновление инпутов
+  -------------------------------------------------------------------------------------------------------*/
+  useEffect(() => {
+    if (form.error) {
+      setError(form.error);
+    } else if (form.isOpen) {
+      setOperation(form.operation);
+      setInputGuardSurname(form.guard?.surname);
+      setInputValidateGuardSurname(false);
+      setInputGuardfirstName(form.guard?.firstName);
+      setInputValidateGuardfirstName(false);
+      setInputGuardPatronymic(form.guard?.patronymic);
+      setInputValidateGuardPatronymic(form.operation == 'Добавить');
+      setInputGuardUIAvatarsSrc(null);
+      setInputGuardTelephone(form.guard?.telephone);
+      setInputValidateGuardTelephone(form.operation == 'Добавить');
+      setInputGuardManager(form.guard?.manager?._id || 'EMPTY');
+      setInputGuardGuardPosts(form.guard?.guardPosts || []);
+      setError(null);
+    }
+  }, [form])
+  /*-------------------------------------------------------------------------------------------------------
+  -------------------------------------------------------------------------------------------------------*/
+
+  return (
+    <FModalForm
+      title={`${operation} данные охранника`}
+      isModalFormOpen={form.isOpen}
+      setIsModalFormOpen={setForm}
+    >
+
+      {/* Фамилия */}
+      <div className="form-item w-full flex items-center">
+        <label className="text-lg pr-4">Фамилия</label>
+        <FInputText
+          id='family-name'
+          placeholder='Фамилия'
+          value={inputGuardSurname ? inputGuardSurname : ''}
+          onChange={GuardSurnameChange}
+          key={form.key}
+        />
+      </div>
+
+      {/* Имя */}
+      <div className="form-item w-full mt-4 flex items-center">
+        <label className="text-lg pr-4">Имя</label>
+        <FInputText
+          id='FullName'
+          placeholder='Имя'
+          value={inputGuardfirstName ? inputGuardfirstName : ''}
+          onChange={GuardfirstNameChange}
+          key={form.key}
+        />
+      </div>
+
+      {/* Отчество */}
+      <div className="form-item w-full mt-4 flex items-center">
+        <label className="text-lg pr-4">Отчество</label>
+        <FInputText
+          id='additional-name'
+          placeholder='Отчество'
+          value={inputGuardPatronymic ? inputGuardPatronymic : ''}
+          onChange={GuardPatronymicChange}
+          key={form.key}
+        />
+      </div>
+
+      {/* Фото */}
+      <div className="form-item flex items-center w-full mt-4">
+        <label className="text-lg pr-4">Фото</label>
+        <FInputFile
+          setUri={setInputGuardUIAvatarsSrc}
+          key={form.key}
+        />
+      </div>
+
+      {/* Телефон Менеджер*/}
+      <div className='flex flex-col md:flex-row w-full'>
+
+        {/* Телефон */}
+        <div className="form-item w-full mt-4 flex items-center pr-4">
+          <label className="text-lg pr-4">Телефон</label>
+          <FInputTelephone
+            placeholder='Телефон'
+            value={inputGuardTelephone ? inputGuardTelephone : ''}
+            onChange={GuardTelephoneChange}
+            key={form.key}
+          />
+        </div>
+
+        {/* Менеджер */}
+        <div className="form-item w-full mt-4 flex items-center">
+          <label className="text-lg pr-4">НСО</label>
+          <FSelect
+            options={optionGuardManager}
+            onChange={(e) => { setInputGuardManager(e?.target?.value) }}
+            value={inputGuardManager ? inputGuardManager : 'EMPTY'}
+            key={form.key}
+          />
+        </div>
+
+      </div>
+
+      {/* Физ. посты */}
+      <div className="form-item w-full mt-4">
+        <label className="text-lg pr-4">Физ. посты</label>
+        <FSelect
+          options={optionGuardPosts}
+          onChange={guardPostChange}
+          value={inputGuardGuardPosts}
+          key={form.key}
+          multiple
+        />
+      </div>
+
+      {/* Статус ошибки */}
+      <div className="form-item">
+        <span className="text-color_C italic break-words">
+          {error}
+        </span>
+      </div>
+
+      {/* Кнопки */}
+      <div className="ml-auto mt-4">
+
+        <FButtonRed
+          className=""
+          disabled={!(form.isOpen && (operation == 'Добавить' ?
+              (  isInputValidateGuardSurname
+              && isInputValidateGuardfirstName
+              && isInputValidateGuardPatronymic
+              && isInputValidateGuardTelephone ):
+              (  isInputValidateGuardSurname
+              || isInputValidateGuardfirstName
+              || isInputValidateGuardPatronymic
+              || isInputValidateGuardTelephone
+              || (inputGuardManager != form.guard?.manager?._id)
+              || (!equalArrays(inputGuardGuardPosts, form.guard?.guardPosts))
+              || inputGuardUIAvatarsSrc != null 
+              )
+          ))}
+          onClick={(e) => operation == 'Добавить' ? submitAdd(e,
+            inputGuardSurname,
+            inputGuardfirstName,
+            inputGuardPatronymic,
+            inputGuardUIAvatarsSrc,
+            inputGuardTelephone,
+            inputGuardManager,
+            inputGuardGuardPosts
+          ) : submitEdit(e,
+            inputGuardSurname,
+            inputGuardfirstName,
+            inputGuardPatronymic,
+            inputGuardUIAvatarsSrc,
+            inputGuardTelephone,
+            inputGuardManager,
+            inputGuardGuardPosts
+          )}
+        >
+          {operation}
+        </FButtonRed>
+
+        <FButtonWhite
+          className="ml-4"
+          onClick={() => setForm({ isOpen: false })}
+        >
+          Закрыть
+        </FButtonWhite>
+
+      </div>
+
+    </FModalForm >
+  )
+}

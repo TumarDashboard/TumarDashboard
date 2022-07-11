@@ -66,7 +66,7 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
   }, ...users?.map((user) => {
     return {
       text: [user.surname, user.firstName].join(' '),
-      code: user._id,
+      code: user._id
     }
   })]
 
@@ -81,7 +81,9 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
       Чистка/Обновление инпутов
   -------------------------------------------------------------------------------------------------------*/
   useEffect(() => {
-    if (form.isOpen) {
+    if ( form.error ){
+      setError(form.error);
+    }else if (form.isOpen) {
       setOperation(form.operation);
       setInputGuardPostNumber(form.guardPost?.number);
       setInputValidateGuardPostNumber(form.operation == 'Добавить');
@@ -89,11 +91,12 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
       setInputGuardPostAddress(form.guardPost?.address);
       setInputGuardPostDescription(form.guardPost?.description);
       setInputGuardPostPhoto(null);
-      setInputGuardPostManager(form.guardPost?.manager?._id);
-      setInputGuardPostShifts(form.guardPost?.shifts);
-      setError(form.error);
+      setInputGuardPostManager(form.guardPost?.manager?._id || 'EMPTY');
+      setInputGuardPostShifts(form.guardPost?.shifts || []);
+      setError(null);
     }
-  }, [form])
+  }, [ form ])
+  
   /*-------------------------------------------------------------------------------------------------------
   -------------------------------------------------------------------------------------------------------*/
 
@@ -133,7 +136,7 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
       <div className="form-item w-full mt-4">
         <label className="text-lg">Наименование</label>
         <FTextArea
-          id='family-name'
+          id='name'
           placeholder='Наименование'
           value={inputGuardPostName ? inputGuardPostName : ''}
           onChange={setInputGuardPostName}
@@ -145,7 +148,7 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
       <div className="form-item w-full mt-4">
         <label className="text-lg">Адрес</label>
         <FTextArea
-          id='family-name'
+          id='address'
           placeholder='Адрес'
           value={inputGuardPostAddress ? inputGuardPostAddress : ''}
           onChange={setInputGuardPostAddress}
@@ -166,7 +169,7 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
       <div className="form-item w-full mt-4">
         <label className="text-lg">Описание</label>
         <FTextArea
-          id='family-name'
+          id='description'
           placeholder='Описание'
           value={inputGuardPostDescription ? inputGuardPostDescription : ''}
           onChange={setInputGuardPostDescription}

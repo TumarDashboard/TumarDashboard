@@ -47,7 +47,7 @@ export default function FSidebar() {
 
         <aside
             id="sidebar"
-            className="fixed hidden z-20 md:flex h-full pt-20"
+            className="fixed hidden z-20 lg:flex h-full pt-20"
             aria-label="Sidebar"
         >
             <motion.nav

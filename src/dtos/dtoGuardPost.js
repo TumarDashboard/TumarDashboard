@@ -1,18 +1,9 @@
 import { object, lazy, string, number } from "yup";
 import fetchAuth from "../../middleware/requests";
+import { mapValue } from "../utils/arrayUtils";
 
 const minlengthNumber = process.env.NEXT_PUBLIC_MIN_LENGTH_NUMBER_INPUT;
 const maxlengthNumber = process.env.NEXT_PUBLIC_MAX_LENGTH_NUMBER_INPUT;
-
-function mapValue(object, iteratee) {
-    object = Object(object);
-    const result = {}
-
-    Object.keys(object).forEach((key) => {
-        result[key] = iteratee(object[key], key, object)
-    })
-    return result
-}
 
 export default class DTOGuardPost {
 

@@ -7,11 +7,11 @@ const maxLengthEmail = process.env.NEXT_PUBLIC_MAX_LENGTH_EMAIL;
 export const MongooseUserSchema = new mongoose.Schema({
   surname: {
     type: String,
-    required: [true, 'Пожалуйста, введите логин']
+    required: [true, 'Пожалуйста, введите имя']
   },
   firstName: {
     type: String,
-    required: [true, 'Пожалуйста, введите логин']
+    required: [true, 'Пожалуйста, введите фамилию']
   },
   patronymic: {
     type: String

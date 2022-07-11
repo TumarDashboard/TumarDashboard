@@ -9,11 +9,11 @@ const MongooseSchema = new mongoose.Schema({
   },
   surname: {
     type: String,
-    required: [true, 'Пожалуйста, введите логин']
+    required: [true, 'Пожалуйста, введите имя']
   },
   firstName: {
     type: String,
-    required: [true, 'Пожалуйста, введите логин']
+    required: [true, 'Пожалуйста, введите фамилию']
   },
   patronymic: {
     type: String
