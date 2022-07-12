@@ -10,7 +10,7 @@ import LoadingScreenData from '../components/hight/LoadingScreenData';
 export default function App({ Component, pageProps, router }) {
 
   const [isFirstMount, setIsFirstMount] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
 
