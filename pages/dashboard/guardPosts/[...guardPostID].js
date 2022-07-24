@@ -22,18 +22,21 @@ export default function GuardPostID({ isFirstMount, ...props }) {
   const pageIcon = props.guardPost?.photo;
   return (
     <div
-      className="flex-1"
+      className="flex-1 flex w-full"
     >
       <Head>
         <title>{pageName ? pageName : "Физ. пост"}</title>
         <link rel="icon" href={pageIcon ? pageIcon : "/favicon.ico"} />
       </Head>
-      <motion.section exit={{ opacity: 0 }}>
+      <motion.section 
+          className="flex-1 flex w-full"
+      exit={{ opacity: 0 }}
+      >
         <motion.div
           initial="initial"
           animate="animate"
           variants={content(isFirstMount)}
-          className="flex overflow-hidden"
+          className="flex w-full overflow-hidden"
         >
           <FFormGuardPostID
             guardPost={props.guardPost}

@@ -77,7 +77,7 @@ const FNavbar = observer(function FNavbar() {
         // ${isSidebar ? 'h-20' : 'h-screen md:h-20'}
         
         <nav
-            className="fixed z-40 w-full"
+            className="block lg:fixed z-40 w-full"
             id="FNavbar"
             animate={isSidebar}
             variants={blackBox}
@@ -92,7 +92,7 @@ const FNavbar = observer(function FNavbar() {
             ) : null}
 
             {/* md:flex md:items-center md:justify-center */}
-            <div className={`fixed w-full h-20 bg-color_A grid grid-cols-3 px-2 sm:px-6 lg:px-8 ${user?.isAuth ? 'xl:pr-28 2xl:pr-80' : 'xl:px-28 2xl:px-80'}`}>
+            <div className={`w-full h-20 bg-color_A grid grid-cols-3 px-2 sm:px-6 lg:px-8 ${user?.isAuth ? 'xl:pr-28 2xl:pr-80' : 'xl:px-28 2xl:px-80'}`}>
 
                 <div
                     className="flex items-center justify-center

@@ -9,7 +9,7 @@ export default function AppLayout({ onSidebar, children }) {
             <FNavbar />
             {onSidebar ? <FSidebar /> : null}
             <main
-                className={`mt-20 flex-1 flex ${onSidebar ? 'lg:ml-64' : 'mb-16'}`}
+                className={`lg:mt-20 flex-1 flex ${onSidebar ? 'lg:ml-64' : 'mb-16'}`}
             >
                 {children}
             </main>

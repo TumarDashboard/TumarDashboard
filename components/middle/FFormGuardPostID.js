@@ -72,7 +72,7 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Список охранников
   -------------------------------------------------------------------------------------------------------*/
-  const [optionGuards, setOptionGuards ] = useState([]);
+  const [optionGuards, setOptionGuards] = useState([]);
 
   /*----------------------------------------------------------------------------------------------------------------------------
   ----Модальное окно Формы редактирования Строки охранника----------------------------------------------------------------------
@@ -84,7 +84,7 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Функция изменения Формы редактирования Строки охранника
   -------------------------------------------------------------------------------------------------------*/
-  const guardRowAdd = async(event,
+  const guardRowAdd = async (event,
     inputGuard) => {
 
     event.preventDefault();
@@ -93,12 +93,12 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
 
     try {
 
-      setOptionGuards( array=>{
-        return array.filter(value=> value.code != inputGuard );
+      setOptionGuards(array => {
+        return array.filter(value => value.code != inputGuard);
       })
-      
+
       setTimesheetTableBody(array => {
-        return array.concat( guards?.filter(element=>inputGuard.includes(element._id)) );
+        return array.concat(guards?.filter(element => inputGuard.includes(element._id)));
       });
 
       setGuardRowEditForm({ isOpen: false });
@@ -126,9 +126,9 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
 
     try {
 
-      setOptionGuards( array=>{
-        return array.map( value=> {
-          if(value.code == inputGuard){
+      setOptionGuards(array => {
+        return array.map(value => {
+          if (value.code == inputGuard) {
             return {
               text: [guardRowEditForm.guard.surname, guardRowEditForm.guard.firstName].join(' '),
               code: guardRowEditForm.guard._id,
@@ -141,7 +141,7 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
       setTimesheetTableBody(array => {
         var index = array.indexOf(guardRowEditForm.guard);
         if (index !== -1) {
-          array[index] = guards?.find(element=>inputGuard === element._id);
+          array[index] = guards?.find(element => inputGuard === element._id);
         }
         return array;
       });
@@ -169,9 +169,9 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
 
     MOBXui.setLoading();
 
-    try {      
-      
-      setOptionGuards( array=>{
+    try {
+
+      setOptionGuards(array => {
         array.push({
           text: [deletedGuard.surname, deletedGuard.firstName].join(' '),
           code: deletedGuard._id,
@@ -330,7 +330,7 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
       const dateInitial = `${date.getFullYear()}-${date.getMonth().toString().padStart(2, '0')}`;
       selectDate(dateInitial);
     }
-    if(optionGuards.length == 0){
+    if (optionGuards.length == 0) {
       setOptionGuards([{
         text: 'Отсутствует', code: 'EMPTY'
       }, ...guards?.map((guard) => {
@@ -348,7 +348,7 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
   return (
     <motion.div
       variants={inputs}
-      className="w-full h-full m-2"
+      className="w-full h-full m-2 flex flex-col h-full"
     >
 
       {/* {Панель управления} */}
@@ -475,20 +475,35 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
 
       {/* {Таблица физ. постов} */}
       <div
-        className='flex overflow-auto md:border'
+        className='flex-initial flex h-screen overflow-auto z-50'
       >
         <div
           className='flex-1 w-0'
         >
 
-          <table className="w-full block md:table table-auto border-separate [border-spacing:0]">
-
-            <thead className="block md:table-header-group">
-
-              <tr className="block md:table-row absolute -top-full md:top-auto -left-full 
-              md:left-auto md:relative z-10">
-                <th className="bg-color_B p-2 text-white font-bold text-center block md:table-cell left-0 sticky z-10 border-r-[1px] border-b-[1px]" rowSpan="2">Охранник</th>
-                <th className="bg-color_B p-2 text-white font-bold text-left block md:table-cell top-0 sticky z-5 border-b-[1px]" colSpan={timesheetTableHeader.length}>
+          <table className=" w-full block md:table table-auto border-separate [border-spacing:0]">
+            {/* Заголовок таблицы */}
+            <thead className="block md:table-header-group z-50 top-0 sticky">
+              <tr
+                className="block md:table-row 
+                absolute -top-full -left-full 
+                md:relative md:top-auto md:left-auto
+                "
+              >
+                <th
+                  className="bg-color_B p-2 block md:table-cell
+                  text-white font-bold text-center 
+                  border-r-[1px] border-b-[1px] 
+                  left-0 sticky z-50"
+                  rowSpan="2">
+                  Охранник
+                </th>
+                <th
+                  className="bg-color_B block md:table-cell
+                  text-white font-bold text-left
+                  border-b-[1px] pt-4 pb-1.5"
+                  colSpan={timesheetTableHeader.length}
+                >
                   <div className='flex justify-center'>
                     <input
                       type="month"
@@ -507,7 +522,10 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
                 </th>
               </tr>
 
-              <tr className="block md:table-row absolute -top-full md:top-auto -left-full md:left-auto md:relative z-5">
+              <tr className="block md:table-row 
+              absolute -top-full -left-full 
+              md:relative md:left-auto md:top-auto
+              ">
 
                 {timesheetTableHeader.map((value, i) => {
                   return <th
@@ -522,69 +540,248 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
 
             </thead>
 
-            {timesheetTableBody.length>0 &&
-            <tbody className="block md:table-row-group">
-              {timesheetTableBody.map((guard, i) => {
-                return <tr 
-                  key={guard._id}
-                  className="rounded-md md:border-none block md:table-row bg-color_G mb-2"
-                >
-                  <td className="text-center block md:table-cell border-b-[1px] bg-color_G border-r-[1px] left-0 sticky z-10">
-                    <div className="flex flex-row items-center justify-between w-full">
+            {/* Тело таблицы */}
+            {timesheetTableBody.length > 0 &&
+              <tbody className="block md:table-row-group z-10">
+                {timesheetTableBody.map((guard, i) => {
+                  return <tr
+                    key={guard._id}
+                    className="block md:table-row bg-color_G mb-2"
+                  >
+                    <td className="text-center block md:table-cell border-b-[1px] bg-color_G border-r-[1px] left-0 sticky">
+                      <div className="flex flex-row items-center justify-between w-full">
 
-                      {guard.uiAvatarsSrc && <Image
-                        className="h-8 w-8 rounded-full"
-                        width={32}
-                        height={32}
-                        src={guard.uiAvatarsSrc}
-                        alt=""
-                      />}
+                        {guard.uiAvatarsSrc && <Image
+                          className="h-8 w-8 rounded-full"
+                          width={32}
+                          height={32}
+                          src={guard.uiAvatarsSrc}
+                          alt=""
+                        />}
 
-                      <p className="font-semibold text-black ml-1 text-xl font-bold select-none">{[guard.surname, guard.firstName].join(' ')}</p>
+                        <p className="font-semibold text-black ml-1 text-xl font-bold select-none">{[guard.surname, guard.firstName].join(' ')}</p>
 
-                      <div className='flex mr-2'>
-                        <button
-                          className="flex disabled:opacity-25"
-                          disabled={ optionGuards.length <= 1 }
-                          onClick={() => {
-                            setGuardRowEditForm({
-                              isOpen: true,
-                              operation: 'Изменить',
-                              key: Math.random().toString(36),
-                              guard: guard
-                            })
-                          }}
-                        >
-                          <PencilAltIcon
-                            className="h-4 w-4"
-                          />
-                        </button>
-                        <button
-                          className="flex"
-                          onClick={(event) => guardRowDelete(event, guard)}
-                        >
-                          <TrashIcon
-                            className="h-4 w-4"
-                          />
-                        </button>
+                        <div className='flex mr-2'>
+                          <button
+                            className="flex disabled:opacity-25"
+                            disabled={optionGuards.length <= 1}
+                            onClick={() => {
+                              setGuardRowEditForm({
+                                isOpen: true,
+                                operation: 'Изменить',
+                                key: Math.random().toString(36),
+                                guard: guard
+                              })
+                            }}
+                          >
+                            <PencilAltIcon
+                              className="h-4 w-4"
+                            />
+                          </button>
+                          <button
+                            className="flex"
+                            onClick={(event) => guardRowDelete(event, guard)}
+                          >
+                            <TrashIcon
+                              className="h-4 w-4"
+                            />
+                          </button>
+                        </div>
+
                       </div>
+                    </td>
+                    {timesheetTableHeader.map((value, i) => {
+                      return <td key={i} className="text-center block md:table-cell border-b-[1px] border-r-[1px] last:border-r-[0px]">
 
-                    </div>
-                  </td>
-                  {timesheetTableHeader.map((value, i) => {
-                    return <td key={i} className="text-center block md:table-cell z-5 border-b-[1px] border-r-[1px] last:border-r-[0px]">
+                      </td>;
+                    })}
+                  </tr>
+                })}
+              </tbody>}
 
-                    </td>;
-                  })}
-                </tr>
-              })}
-            </tbody>}
+            {/* Тело таблицы */}
+            {timesheetTableBody.length > 0 &&
+              <tbody className="block md:table-row-group z-10">
+                {timesheetTableBody.map((guard, i) => {
+                  return <tr
+                    key={guard._id}
+                    className="block md:table-row bg-color_G mb-2"
+                  >
+                    <td className="text-center block md:table-cell border-b-[1px] bg-color_G border-r-[1px] left-0 sticky">
+                      <div className="flex flex-row items-center justify-between w-full">
 
+                        {guard.uiAvatarsSrc && <Image
+                          className="h-8 w-8 rounded-full"
+                          width={32}
+                          height={32}
+                          src={guard.uiAvatarsSrc}
+                          alt=""
+                        />}
+
+                        <p className="font-semibold text-black ml-1 text-xl font-bold select-none">{[guard.surname, guard.firstName].join(' ')}</p>
+
+                        <div className='flex mr-2'>
+                          <button
+                            className="flex disabled:opacity-25"
+                            disabled={optionGuards.length <= 1}
+                            onClick={() => {
+                              setGuardRowEditForm({
+                                isOpen: true,
+                                operation: 'Изменить',
+                                key: Math.random().toString(36),
+                                guard: guard
+                              })
+                            }}
+                          >
+                            <PencilAltIcon
+                              className="h-4 w-4"
+                            />
+                          </button>
+                          <button
+                            className="flex"
+                            onClick={(event) => guardRowDelete(event, guard)}
+                          >
+                            <TrashIcon
+                              className="h-4 w-4"
+                            />
+                          </button>
+                        </div>
+
+                      </div>
+                    </td>
+                    {timesheetTableHeader.map((value, i) => {
+                      return <td key={i} className="text-center block md:table-cell border-b-[1px] border-r-[1px] last:border-r-[0px]">
+
+                      </td>;
+                    })}
+                  </tr>
+                })}
+              </tbody>}
+
+            {/* Тело таблицы */}
+            {timesheetTableBody.length > 0 &&
+              <tbody className="block md:table-row-group z-10">
+                {timesheetTableBody.map((guard, i) => {
+                  return <tr
+                    key={guard._id}
+                    className="block md:table-row bg-color_G mb-2"
+                  >
+                    <td className="text-center block md:table-cell border-b-[1px] bg-color_G border-r-[1px] left-0 sticky">
+                      <div className="flex flex-row items-center justify-between w-full">
+
+                        {guard.uiAvatarsSrc && <Image
+                          className="h-8 w-8 rounded-full"
+                          width={32}
+                          height={32}
+                          src={guard.uiAvatarsSrc}
+                          alt=""
+                        />}
+
+                        <p className="font-semibold text-black ml-1 text-xl font-bold select-none">{[guard.surname, guard.firstName].join(' ')}</p>
+
+                        <div className='flex mr-2'>
+                          <button
+                            className="flex disabled:opacity-25"
+                            disabled={optionGuards.length <= 1}
+                            onClick={() => {
+                              setGuardRowEditForm({
+                                isOpen: true,
+                                operation: 'Изменить',
+                                key: Math.random().toString(36),
+                                guard: guard
+                              })
+                            }}
+                          >
+                            <PencilAltIcon
+                              className="h-4 w-4"
+                            />
+                          </button>
+                          <button
+                            className="flex"
+                            onClick={(event) => guardRowDelete(event, guard)}
+                          >
+                            <TrashIcon
+                              className="h-4 w-4"
+                            />
+                          </button>
+                        </div>
+
+                      </div>
+                    </td>
+                    {timesheetTableHeader.map((value, i) => {
+                      return <td key={i} className="text-center block md:table-cell border-b-[1px] border-r-[1px] last:border-r-[0px]">
+
+                      </td>;
+                    })}
+                  </tr>
+                })}
+              </tbody>}
+
+            {/* Тело таблицы */}
+            {timesheetTableBody.length > 0 &&
+              <tbody className="block md:table-row-group z-10">
+                {timesheetTableBody.map((guard, i) => {
+                  return <tr
+                    key={guard._id}
+                    className="block md:table-row bg-color_G mb-2"
+                  >
+                    <td className="text-center block md:table-cell border-b-[1px] bg-color_G border-r-[1px] left-0 sticky">
+                      <div className="flex flex-row items-center justify-between w-full">
+
+                        {guard.uiAvatarsSrc && <Image
+                          className="h-8 w-8 rounded-full"
+                          width={32}
+                          height={32}
+                          src={guard.uiAvatarsSrc}
+                          alt=""
+                        />}
+
+                        <p className="font-semibold text-black ml-1 text-xl font-bold select-none">{[guard.surname, guard.firstName].join(' ')}</p>
+
+                        <div className='flex mr-2'>
+                          <button
+                            className="flex disabled:opacity-25"
+                            disabled={optionGuards.length <= 1}
+                            onClick={() => {
+                              setGuardRowEditForm({
+                                isOpen: true,
+                                operation: 'Изменить',
+                                key: Math.random().toString(36),
+                                guard: guard
+                              })
+                            }}
+                          >
+                            <PencilAltIcon
+                              className="h-4 w-4"
+                            />
+                          </button>
+                          <button
+                            className="flex"
+                            onClick={(event) => guardRowDelete(event, guard)}
+                          >
+                            <TrashIcon
+                              className="h-4 w-4"
+                            />
+                          </button>
+                        </div>
+
+                      </div>
+                    </td>
+                    {timesheetTableHeader.map((value, i) => {
+                      return <td key={i} className="text-center block md:table-cell border-b-[1px] border-r-[1px] last:border-r-[0px]">
+
+                      </td>;
+                    })}
+                  </tr>
+                })}
+              </tbody>}
+
+            {/* Итоги таблицы */}
             {timesheetTableHeader.length > 0 &&
               <tfoot className='block md:table-footer-group'>
                 <tr className="block md:table-row absolute -top-full md:top-auto -left-full 
                 md:left-auto md:relative z-10">
-                  <td className="bg-color_B p-2 block md:table-cell left-0 sticky z-10 border-r-[1px]">
+                  <td className="bg-color_B p-2 block md:table-cell left-0 sticky border-r-[1px]">
                     <button
                       className='flex items-center justify-center align-middle text-white text-center w-full disabled:opacity-25'
                       onClick={(event) => {
@@ -595,7 +792,7 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
                           key: Math.random().toString(36)
                         })
                       }}
-                      disabled={ optionGuards.length <= 1 }
+                      disabled={optionGuards.length <= 1}
                     >
                       <PlusIcon className='w-4 h-4' />
                       <span>Добавить</span>
