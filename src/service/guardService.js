@@ -177,7 +177,7 @@ class GuardService {
 
         }
 
-        const mongoGuard = await mongoGuardsModel.
+        mongoGuard = await mongoGuardsModel.
                                         findByIdAndUpdate(guardData.id, guardData, { new: true }).
                                         populate('manager', 'surname firstName').
                                         populate('guardPosts', 'id').lean();
