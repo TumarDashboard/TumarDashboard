@@ -4,7 +4,6 @@ import { catchErrorsApi } from '../../../middleware/exceptions';
 import { getCookie, setCookies } from '../../../middleware/cookies';
 
 export default catchErrorsApi( async (req, res) => {
-    
     const refreshToken = getCookie("refreshToken", {
         req, 
         res
@@ -21,6 +20,8 @@ export default catchErrorsApi( async (req, res) => {
         httpOnly: true,
         path: '/'
     });
+
+    console.log('update tokens');
 
     return res.json(userData);
 

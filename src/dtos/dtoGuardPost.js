@@ -1,5 +1,5 @@
 import { object, lazy, string, number } from "yup";
-import fetchAuth from "../../middleware/requests";
+import { fetchAuthMethod } from "../../middleware/requests";
 import { mapValue } from "../utils/arrayUtils";
 
 const minlengthNumber = process.env.NEXT_PUBLIC_MIN_LENGTH_NUMBER_INPUT;
@@ -33,7 +33,7 @@ export const validateYup = (dtoGuardPost, options) => {
 
     let validationSchema = lazy(dtoGuardPost => object(
         mapValue(dtoGuardPost, (value, key) => {
-            
+
             if (options?.deleteEmptyKey && (!dtoGuardPost[key] || dtoGuardPost[key] === '' || dtoGuardPost[key].length === 0)) {
 
                 delete dtoGuardPost[key];
@@ -71,38 +71,14 @@ export const validateYup = (dtoGuardPost, options) => {
 
 }
 
-export const createGuardPost = async( number, name, address, photo, manager, shifts, description ) => {
-    try {
-
-        return await fetchAuth('/method/createGuardPost', { number, name, address, photo, manager, shifts, description });
-
-    } catch (error) {
-        
-        throw error;
-
-    }
+export const createGuardPost = async (number, name, address, photo, manager, shifts, description) => {
+    return await fetchAuthMethod('/method/createGuardPost', { number, name, address, photo, manager, shifts, description });
 }
 
-export const editGuardPost = async( id, number, name, address, photo, manager, shifts, description ) => {
-    try {
-
-        return await fetchAuth('/method/editGuardPost', { id, number, name, address, photo, manager, shifts, description });
-
-    } catch (error) {
-        
-        throw error;
-
-    }
+export const editGuardPost = async (id, number, name, address, photo, manager, shifts, description) => {
+    return await fetchAuthMethod('/method/editGuardPost', { id, number, name, address, photo, manager, shifts, description });
 }
 
-export const deleteGuardPost = async( idGuardPost, idUser, reason ) => {
-    try {
-
-        return await fetchAuth('/method/deleteGuardPost', { idGuardPost, idUser, reason });
-
-    } catch (error) {
-        
-        throw error;
-
-    }
+export const deleteGuardPost = async (idGuardPost, idUser, reason) => {
+    return await fetchAuthMethod('/method/deleteGuardPost', { idGuardPost, idUser, reason });
 }

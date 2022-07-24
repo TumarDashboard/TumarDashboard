@@ -63,14 +63,17 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
   const [isInputValidateGuardPatronymic, setInputValidateGuardPatronymic] = useState(true);
 
   const GuardPatronymicChange = (value, validate) => {
-    setInputGuardPatronymic(value);    
+    setInputGuardPatronymic(value);
     if (operation == 'Добавить') {
       if (value)
         setInputValidateGuardPatronymic(validate);
       else
         setInputValidateGuardPatronymic(true);
     } else {
-      setInputValidateGuardPatronymic(validate && (value != form.guard?.patronymic));
+      if (value)
+        setInputValidateGuardPatronymic(validate && (value != form.guard?.patronymic));
+      else
+        setInputValidateGuardPatronymic(value != form.guard?.patronymic);
     }
   }
 
@@ -87,7 +90,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
   const [isInputValidateGuardTelephone, setInputValidateGuardTelephone] = useState(true);
 
   const GuardTelephoneChange = (value, validate) => {
-    setInputGuardTelephone(value);    
+    setInputGuardTelephone(value);
     if (operation == 'Добавить') {
       if (value)
         setInputValidateGuardTelephone(validate);
@@ -268,18 +271,18 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
         <FButtonRed
           className=""
           disabled={!(form.isOpen && (operation == 'Добавить' ?
-              (  isInputValidateGuardSurname
+            (isInputValidateGuardSurname
               && isInputValidateGuardfirstName
               && isInputValidateGuardPatronymic
-              && isInputValidateGuardTelephone ):
-              (  isInputValidateGuardSurname
+              && isInputValidateGuardTelephone) :
+            (isInputValidateGuardSurname
               || isInputValidateGuardfirstName
               || isInputValidateGuardPatronymic
               || isInputValidateGuardTelephone
               || (inputGuardManager != form.guard?.manager?._id)
               || (!equalArrays(inputGuardGuardPosts, form.guard?.guardPosts))
-              || inputGuardUIAvatarsSrc != null 
-              )
+              || inputGuardUIAvatarsSrc != null
+            )
           ))}
           onClick={(e) => operation == 'Добавить' ? submitAdd(e,
             inputGuardSurname,

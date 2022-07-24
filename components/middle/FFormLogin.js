@@ -71,9 +71,7 @@ export default function FFormLogin( { redirectAuth } ) {
         try {
 
             await MOBXuser.login(inputEmail, inputPassword).then(()=>{
-                console.log('redirect to ', redirectAuth);
-                router.push( redirectAuth ? redirectAuth : '/dashboard' );
-                
+                router.push( redirectAuth && typeof redirectAuth !== "undefined" ? redirectAuth : '/dashboard' );
             })
 
         } catch (error) {

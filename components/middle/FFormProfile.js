@@ -5,12 +5,11 @@ import { observer } from 'mobx-react-lite'
 import Image from 'next/image';
 
 import { useStore } from "../hight/StoreProvider";
-import { changeUser, deleteUser } from "../../src/mobx/mobxUser";
+import { changeUser, deleteUser } from "../../src/dtos/dtoUser";
 
 import { ApiError } from "../../middleware/exceptions";
 
 import { FUserDeleteForm } from "../modal/FUserDeleteForm";
-import { FGoogleAuthErrorForm } from "../hight/GoogleAuthError";
 
 import { FInputText } from "../low/FInputText";
 import { FInputFile } from "../low/FInputFile";

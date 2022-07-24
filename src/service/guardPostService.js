@@ -27,21 +27,20 @@ class GuardPostService {
 
             //break image
             let photo;
-            if(guardPostData.photo){
+            if (guardPostData.photo) {
                 photo = guardPostData.photo;
                 delete guardPostData['photo'];
-            }else{
+            } else {
 
-                guardPostData.photo = `https://ui-avatars.com/api/?name=${ 
-                    guardPostData.number ? guardPostData.number : guardPostData.name.replace(/ /ig, ',')
-                }&size=256&font-size=0.33&length=3&background=random`;
+                guardPostData.photo = `https://ui-avatars.com/api/?name=${guardPostData.number ? guardPostData.number : guardPostData.name.replace(/ /ig, ',')
+                    }&size=256&font-size=0.33&length=3&background=random`;
 
             }
 
             //Check number condition
             await mongoConnect();
-            
-            if( guardPostData.number ){
+
+            if (guardPostData.number) {
 
                 const candidate = await mongoGuardPostsModel.findOne({ number: guardPostData.number }).lean();
 
@@ -53,34 +52,34 @@ class GuardPostService {
 
             //cast manager id from string to id
             let manager;
-            if( guardPostData.manager == 'EMPTY' ){
+            if (guardPostData.manager == 'EMPTY') {
                 guardPostData.manager = null;
-            }else if(guardPostData.manager){
+            } else if (guardPostData.manager) {
                 guardPostData.manager = new mongoose.mongo.ObjectId(guardPostData.manager);
                 guardPostData.managerSheme = 'User';
                 manager = await mongoUserModel.findById(guardPostData.manager, 'surname firstName').lean();
             }
 
             //Create model
-            let mongoGuardPost = await mongoGuardPostsModel.create( guardPostData );
+            let mongoGuardPost = await mongoGuardPostsModel.create(guardPostData);
             deleteGuardPost = mongoGuardPost;
 
             //Google
-            if ( photo ) {
-    
-                const googleDriveFileID = await googleDrive.uploadGuardPostPhoto( mongoGuardPost._id.toString(), photo );
-    
+            if (photo) {
+
+                const googleDriveFileID = await googleDrive.uploadGuardPostPhoto(mongoGuardPost._id.toString(), photo);
+
                 if (googleDriveFileID)
                     mongoGuardPost.photo = `http://drive.google.com/uc?export=view&id=${googleDriveFileID}`;
 
                 await mongoGuardPost.save();
-                    
+
             }
 
-            if( manager ){
+            if (manager) {
                 mongoGuardPost._doc.manager = manager;
             }
-            
+
             const dtoGuardPost = new DTOGuardPost(mongoGuardPost);
 
             return { guardPost: dtoGuardPost }
@@ -88,16 +87,16 @@ class GuardPostService {
         } catch (error) {
             console.log(error);
 
-            if( deleteGuardPost ){
+            if (deleteGuardPost) {
 
                 try {
-    
+
                     await mongoGuardPostsModel.deleteOne({ _id: deleteGuardPost._id })
-    
+
                 } catch (error) {
-                    
+
                     throw error;
-    
+
                 }
 
             }
@@ -110,7 +109,7 @@ class GuardPostService {
     async editGuardPost(inputData) {
 
         //Validate date
-        if( inputData.number ){
+        if (inputData.number) {
             inputData.number = parseInt(inputData.number);
         }
 
@@ -121,21 +120,21 @@ class GuardPostService {
         });
 
         //Google
-        if ( guardPostData.photo ) {
+        if (guardPostData.photo) {
 
-            const googleDriveFileID = await googleDrive.uploadGuardPostPhoto( guardPostData.id, guardPostData.photo );
+            const googleDriveFileID = await googleDrive.uploadGuardPostPhoto(guardPostData.id, guardPostData.photo);
 
             if (googleDriveFileID)
-            guardPostData.photo = `http://drive.google.com/uc?export=view&id=${googleDriveFileID}`;
-                
-        }else{
+                guardPostData.photo = `http://drive.google.com/uc?export=view&id=${googleDriveFileID}`;
+
+        } else {
             delete guardPostData['photo'];
         }
 
         //cast manager id from string to id
-        if( guardPostData.manager == 'EMPTY' ){
+        if (guardPostData.manager == 'EMPTY') {
             guardPostData.manager = null;
-        }else if(guardPostData.manager){
+        } else if (guardPostData.manager) {
             guardPostData.manager = new mongoose.mongo.ObjectId(guardPostData.manager);
             guardPostData.managerSheme = 'User';
         }
@@ -143,13 +142,25 @@ class GuardPostService {
         //Mongo
         await mongoConnect();
 
-        const mongoGuardPost = await mongoGuardPostsModel.
-                                        findByIdAndUpdate(guardPostData.id, guardPostData, { new: true }).
-                                        populate('manager', 'surname firstName').lean();
+        var mongoGuardPost = await mongoGuardPostsModel.findById(guardPostData.id);
 
         if (!mongoGuardPost) {
             throw ApiError.BadRequest(`Физ. пост с id: ${guardPostData.id} не найден`);
         }
+
+        if (mongoGuardPost.photo.startsWith('https://ui-avatars.com/api/?name=') &&
+            !guardPostData.photo &&
+            ((guardPostData.number && (mongoGuardPost.number != guardPostData.number))
+                || (mongoGuardPost.name.localeCompare(guardPostData.name) != 0 ))) {
+
+            guardPostData.photo = `https://ui-avatars.com/api/?name=${guardPostData.number ? guardPostData.number : guardPostData.name.replace(/ /ig, ',')
+                }&size=256&font-size=0.33&length=3&background=random`;
+
+        }
+
+        mongoGuardPost = await mongoGuardPostsModel.
+                                        findByIdAndUpdate(guardPostData.id, guardPostData, { new: true }).
+                                        populate('manager', 'surname firstName').lean();
 
         //DTO
 
@@ -164,11 +175,11 @@ class GuardPostService {
     async deleteGuardPost(inputData) {
         const { idGuardPost, idUser, reason } = inputData;
 
-        if( !idGuardPost ){
+        if (!idGuardPost) {
             throw ApiError.BadRequest("Не указан ID физ. поста для проведения операции удаления");
         }
 
-        if( !idUser ){
+        if (!idUser) {
             throw ApiError.BadRequest("Не указан ID Пользователя для проведения операции удаления");
         }
 
@@ -177,12 +188,12 @@ class GuardPostService {
         await googleDrive.deleteGuardPostAvatar(idGuardPost);
 
         //Mongo
-            
+
         await mongoConnect();
 
         const mongoGuardPost = await mongoGuardPostsModel.findById(idGuardPost);
 
-        if(!mongoGuardPost){
+        if (!mongoGuardPost) {
             throw ApiError.BadRequest("Не найден физ. пост для проведения операции удаления");
         }
 
@@ -194,20 +205,20 @@ class GuardPostService {
 
         await mongoGuardPostArchive.save();
 
-        await mongoGuardsModel.updateMany({guardPosts: mongoGuardPost.id}, {
+        await mongoGuardsModel.updateMany({ guardPosts: mongoGuardPost.id }, {
             $pullAll: {
-                guardPosts: [ mongoGuardPost.id ]
+                guardPosts: [mongoGuardPost.id]
             }
         }).lean();
 
-        await mongoGuardsArchiveModel.updateMany({guardPosts: mongoGuardPost.id}, {
+        await mongoGuardsArchiveModel.updateMany({ guardPosts: mongoGuardPost.id }, {
             $pullAll: {
-                guardPosts: [ mongoGuardPost.id ]
+                guardPosts: [mongoGuardPost.id]
             }
         }).lean();
-        
+
         await mongoGuardPost.delete();
-        
+
         const dtoGuardPost = new DTOGuardPost(mongoGuardPostArchive);
 
         return { guardPost: dtoGuardPost }

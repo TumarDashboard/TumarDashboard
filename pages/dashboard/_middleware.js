@@ -44,7 +44,9 @@ export default catchErrorsMiddleware(async (req, ev) => {
         }
 
     }
+
     console.log('redirect to /authorization/login');
+    
     return redirect('/authorization/login', req.nextUrl.pathname);
 
 })

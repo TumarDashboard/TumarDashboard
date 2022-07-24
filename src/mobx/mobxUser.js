@@ -1,8 +1,7 @@
 import { action, observable, runInAction, makeObservable, computed } from 'mobx';
 import { enableStaticRendering } from 'mobx-react-lite';
 import { removeCookies } from '../../middleware/cookies';
-// import useSWR from 'swr';
-import fetchAuth from "../../middleware/requests";
+import {fetchAuth} from "../../middleware/requests";
 
 enableStaticRendering(typeof window === 'undefined')
 
@@ -120,28 +119,4 @@ export default class MOBXuser {
         }
     }
 
-}
-
-export const changeUser = async( id, uiAvatarsSrc, surname, firstName, patronymic, positions ) => {
-    try {
-
-        return await fetchAuth('/method/changeUser', { id, uiAvatarsSrc, surname, firstName, patronymic, positions });
-
-    } catch (error) {
-
-        throw error;
-
-    }
-}
-
-export const deleteUser = async( id, reason ) => {
-    try {
-
-        return await fetchAuth('/method/deleteUser', { id, reason });
-
-    } catch (error) {
-
-        throw error;
-
-    }
 }

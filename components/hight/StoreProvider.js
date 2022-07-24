@@ -3,7 +3,7 @@ import MOBXui from '../../src/mobx/mobxUI';
 import MOBXuser from '../../src/mobx/mobxUser';
 import { useEffect } from 'react';
 import useSWR from 'swr'
-import fetchAuth from '../../middleware/requests';
+import {fetchAuth} from '../../middleware/requests';
 import { useRouter } from 'next/router';
 
 let mobxUser;
@@ -48,7 +48,10 @@ function refreshStore(initialData = null, isAuth) {
 
       if (initialData?.checkAuth) {
 
-        router.push('/authorization/login');
+        router.push({
+          pathname: '/authorization/login',
+          query: { from: router.asPath },
+        }, undefined, { shallow: true });
 
       }
 

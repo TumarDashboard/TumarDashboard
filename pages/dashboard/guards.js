@@ -84,7 +84,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   })
 
   return {
-    props: { guards, guardPosts, users }
+    props: { guards, guardPosts, users, initialState: { checkAuth: true } }
   }
 
 })

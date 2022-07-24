@@ -1,5 +1,5 @@
 import { object, lazy, string } from "yup";
-import fetchAuth from "../../middleware/requests";
+import { fetchAuthMethod } from "../../middleware/requests";
 import { mapValue } from "../utils/arrayUtils";
 
 const minlengthFullName = process.env.NEXT_PUBLIC_MIN_LENGTH_TEXT;
@@ -35,7 +35,7 @@ export const validateYup = (dtoGuardPost, options) => {
 
     let validationSchema = lazy(dtoGuardPost => object(
         mapValue(dtoGuardPost, (value, key) => {
-            
+
             if (options?.deleteEmptyKey && (!dtoGuardPost[key] || dtoGuardPost[key] === '' || dtoGuardPost[key].length === 0)) {
 
                 delete dtoGuardPost[key];
@@ -65,7 +65,7 @@ export const validateYup = (dtoGuardPost, options) => {
                         .required('Не указано имя')
                 }
 
-                if (key === 'patronymic') {
+                if (key === 'patronymic' && dtoGuardPost[key]) {
                     return string()
                         .min(minlengthFullName, `Отчество должно содержать от ${minlengthFullName} до ${maxlengthFullName} символов`)
                         .max(maxlengthFullName, `Отчество должно содержать от ${minlengthFullName} до ${maxlengthFullName} символов`)
@@ -82,38 +82,14 @@ export const validateYup = (dtoGuardPost, options) => {
 
 }
 
-export const createGuard = async( surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts ) => {
-    try {
-
-        return await fetchAuth('/method/createGuard', { surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts });
-
-    } catch (error) {
-        
-        throw error;
-
-    }
+export const createGuard = async (surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts) => {
+    return await fetchAuthMethod('/method/createGuard', { surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts });
 }
 
-export const editGuard = async( id, surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts ) => {
-    try {
-
-        return await fetchAuth('/method/editGuard', { id, surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts });
-
-    } catch (error) {
-        
-        throw error;
-
-    }
+export const editGuard = async (id, surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts) => {
+    return await fetchAuthMethod('/method/editGuard', { id, surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts });
 }
 
-export const deleteGuard = async( idGuard, idUser, reason ) => {
-    try {
-
-        return await fetchAuth('/method/deleteGuard', { idGuard, idUser, reason });
-
-    } catch (error) {
-        
-        throw error;
-
-    }
+export const deleteGuard = async (idGuard, idUser, reason) => {
+    return await fetchAuthMethod('/method/deleteGuard', { idGuard, idUser, reason });
 }

@@ -43,7 +43,6 @@ export default function GuardPosts({ isFirstMount, ...props }) {
 GuardPosts.onSidebar = true;
 
 export const getServerSideProps = catchAuthServer(async (context) => {
-
   await mongoConnect();
 
   const guardPosts = await mongoGuardPostsModel.find().populate('manager', 'surname firstName').lean();
@@ -66,7 +65,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   })
 
   return {
-    props: { guardPosts, users }
+    props: { guardPosts, users, initialState: { checkAuth: true } }
   }
 
 })

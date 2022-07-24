@@ -1,4 +1,5 @@
 import { object, lazy, string } from "yup";
+import { fetchAuthMethod } from "../../middleware/requests";
 import { mapValue } from "../utils/arrayUtils";
 
 const minlengthFullName = process.env.NEXT_PUBLIC_MIN_LENGTH_TEXT;
@@ -100,4 +101,12 @@ export const validateYup = (dtoUser, options) => {
 
     return validationSchema.validate(dtoUser, { strict: true, abortEarly: false });
 
+}
+
+export const changeUser = async (id, uiAvatarsSrc, surname, firstName, patronymic, positions) => {
+    return await fetchAuthMethod('/method/changeUser', { id, uiAvatarsSrc, surname, firstName, patronymic, positions });
+}
+
+export const deleteUser = async (id, reason) => {
+    return await fetchAuthMethod('/method/deleteUser', { id, reason });
 }

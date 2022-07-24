@@ -9,14 +9,12 @@ export default catchErrorsMiddleware( async (req, ev) => {
     if( authorizationToken ){
 
         const accesToken = authorizationToken.split(' ')[1];
-
-        const verified = await jwtVerify(
+        
+        var verified = await jwtVerify(
             accesToken,
             new TextEncoder().encode( process.env.NEXT_PRIVATE_JWT_ACCESS_SECRET )
             ).catch(error=>{
-                
                 throw ApiError.UnauthorizedError();
-                
             })
 
         const userData = verified.payload;

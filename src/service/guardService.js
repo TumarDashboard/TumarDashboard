@@ -162,17 +162,29 @@ class GuardService {
         //Mongo
         await mongoConnect();
 
-        const mongoGuard = await mongoGuardsModel.
-                                        findByIdAndUpdate(guardData.id, guardData, { new: true }).
-                                        populate('manager', 'surname firstName').
-                                        populate('guardPosts', 'id').lean();
+        var mongoGuard = await mongoGuardsModel.findById(guardData.id);
 
         if (!mongoGuard) {
             throw ApiError.BadRequest(`Охранник с id: ${guardData.id} не найден`);
         }
 
+        if (mongoGuard.uiAvatarsSrc.startsWith('https://ui-avatars.com/api/?name=') &&
+            !guardPostData.uiAvatarsSrc &&
+            ((mongoGuardPost.surname.localeCompare(guardPostData.surname) != 0 )
+                || (mongoGuardPost.firstName.localeCompare(guardPostData.firstName) != 0 ))) {
+
+            guardData.uiAvatarsSrc = `https://ui-avatars.com/api/?name=${guardData.surname}+${guardData.firstName}&size=256&font-size=0.33&length=2&background=random`;
+
+        }
+
+        const mongoGuard = await mongoGuardsModel.
+                                        findByIdAndUpdate(guardData.id, guardData, { new: true }).
+                                        populate('manager', 'surname firstName').
+                                        populate('guardPosts', 'id').lean();
+
         //break populate data
         mongoGuard._id = mongoGuard._id.toString();
+
         if (mongoGuard.manager) {
             mongoGuard.manager._id = mongoGuard.manager._id.toString();
         }else{

@@ -35,12 +35,11 @@ function Login({ isFirstMount, redirectAuth }) {
   )
 }
 
-Login.getInitialProps = async ({ req, res }) => {
-
+Login.getInitialProps = async ({ query, req, res }) => {
   const redirectAuth = getCookie("redirectAuth", {
     req,
     res
-  });
+  }) || query?.from;
 
   return { redirectAuth }
 }

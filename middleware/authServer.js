@@ -31,7 +31,7 @@ export default function catchAuthServer(handler) {
             removeCookies( "redirectAuth", {req, res, path: '/'});
     
             const refreshToken = req.cookies['refreshToken'];
-
+            
             const userData = await userService.checkAuth( refreshToken );
             
             if (!userData?.isActivated) {
@@ -41,6 +41,7 @@ export default function catchAuthServer(handler) {
             return handler(context);
 
         } catch (error) {
+            console.log(error);
             return redirect('/authorization/login', resolvedUrl, req, res)
         }
 

@@ -2,6 +2,7 @@ import { PlusIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
 import { motion } from "framer-motion";
 import Image from 'next/image';
 import { useState } from 'react';
+import { useRouter } from "next/router";
 
 import { useStore } from "../hight/StoreProvider";
 import { ApiError } from "../../middleware/exceptions";
@@ -31,6 +32,8 @@ export default function FFormGuardPosts({ guardPosts, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
   -------------------------------------------------------------------------------------------------------*/
+  const router = useRouter();
+
   const { MOBXuser, MOBXui } = useStore();
 
   const [guardPostsTable, setGuardPostsTable] = useState(guardPosts);
@@ -93,7 +96,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
   }
 
   /*-------------------------------------------------------------------------------------------------------
-      Создание физ. поста Формы редактирования
+      Изменение физ. поста Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
   const guardPostEdit = async (event,
     inputGuardPostNumber,
@@ -212,7 +215,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
       } else {
         callback(form => {
-          let formNew = {...form};
+          let formNew = { ...form };
           formNew.error = error.message;
           return formNew;
         });
@@ -278,7 +281,17 @@ export default function FFormGuardPosts({ guardPosts, users }) {
           {guardPostsTable?.map((guardPost) => {
             return (
 
-              <tr className="rounded-md md:border-none block md:table-row bg-color_G mb-2" key={guardPost._id}>
+              <tr 
+              className="rounded-md md:border-none block md:table-row bg-color_G mb-2 cursor-pointer" 
+              key={guardPost._id}
+              onClick={(event) => {
+                event.stopPropagation();
+                router.push({
+                  pathname: '/dashboard/guardPosts/[guardPostID]',
+                  query: { guardPostID: guardPost._id },
+                })
+              }}
+              >
 
                 <td className="p-2 md:border text-left block md:table-cell">
                   <div className="flex flex-row items-center justify-between md:justify-start">
@@ -294,7 +307,8 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
                       <FButtonRed
                         className="mr-2 flex"
-                        onClick={() => {
+                        onClick={(event) => {
+                          event.stopPropagation();
                           setGuardPostEditForm({
                             isOpen: true,
                             operation: 'Изменить',
@@ -310,12 +324,15 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
                       <FButtonWhite
                         className="flex"
-                        onClick={() => setGuardPostDeleteForm({
-                          isOpen: true,
-                          key: Math.random().toString(36),
-                          guardPostName: guardPost.name,
-                          guardPostId: guardPost._id,
-                        })}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setGuardPostDeleteForm({
+                            isOpen: true,
+                            key: Math.random().toString(36),
+                            guardPostName: guardPost.name,
+                            guardPostId: guardPost._id,
+                          })
+                        }}
                       >
                         <TrashIcon
                           className="h-4 w-4"
@@ -346,7 +363,8 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
                     <FButtonRed
                       className="mr-2 flex"
-                      onClick={() => {
+                      onClick={(event) => {
+                        event.stopPropagation();
                         setGuardPostEditForm({
                           isOpen: true,
                           operation: 'Изменить',
@@ -363,12 +381,15 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
                     <FButtonWhite
                       className="flex"
-                      onClick={() => setGuardPostDeleteForm({
-                        isOpen: true,
-                        key: Math.random().toString(36),
-                        guardPostName: guardPost.name,
-                        guardPostId: guardPost._id,
-                      })}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setGuardPostDeleteForm({
+                          isOpen: true,
+                          key: Math.random().toString(36),
+                          guardPostName: guardPost.name,
+                          guardPostId: guardPost._id,
+                        })
+                      }}
                     >
                       <TrashIcon
                         className="h-4 w-4"

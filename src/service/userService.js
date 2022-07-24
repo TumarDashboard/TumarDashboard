@@ -169,6 +169,7 @@ class UserService {
     async checkAuth(refreshToken, store) {
 
         if (!refreshToken) {
+            console.log('отстутствует refreshToken', refreshToken );
             throw ApiError.UnauthorizedError();
         }
 
@@ -178,7 +179,6 @@ class UserService {
 
         const tokenFromDb = await tokenService.findToken(refreshToken);
 
-
         if (!userData || !tokenFromDb) {
             throw ApiError.UnauthorizedError();
         }
@@ -186,6 +186,7 @@ class UserService {
         const mongoUser = await mongoUserModel.findById(userData.id, store == 'update' ? '-uiAvatarsSrc' : '').lean();
 
         if (!mongoUser) {
+            console.log('отстутствует mongoUser',userData, tokenFromDb, mongoUser );
             throw ApiError.BadRequest(`При обновлении токена сессии была обнаружена ошибка`);
         }
 
