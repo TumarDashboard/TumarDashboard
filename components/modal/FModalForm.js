@@ -23,7 +23,7 @@ const modal = {
 export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, children }) {
   return (
     <motion.div
-      className="fixed w-full h-full top-0 left-0 bg-color_F/75 z-40"
+      className="fixed w-full h-full top-0 left-0 bg-color_F/75 z-50"
       initial="closed"
       animate={isModalFormOpen ? "open" : "closed"}
       variants={modal}
