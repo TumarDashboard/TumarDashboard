@@ -7,6 +7,7 @@ import mongoGuardPostsModel from "../mongo/models/mongoGuardPostsModel";
 import mongoGuardPostsArchiveModel from "../mongo/models/mongoGuardPostsArchiveModel";
 import mongoGuardsModel from "../mongo/models/mongoGuardsModel";
 import mongoGuardsArchiveModel from "../mongo/models/mongoGuardsArchiveModel";
+import mongoTimesheetsModel from "../mongo/models/mongoTimesheetsModel";
 import mongoose from "mongoose";
 
 class GuardService {
@@ -236,7 +237,9 @@ class GuardService {
         mongoGuardArchive.userPerfomedSheme = 'User';
 
         await mongoGuardArchive.save();
-        
+
+        await mongoTimesheetsModel.updateMany({guard: mongoGuard.id}, {guardSheme:'GuardsArchive'}).lean();
+
         await mongoGuard.delete();
         
         const dtoGuard = new DTOGuard(mongoGuardArchive);

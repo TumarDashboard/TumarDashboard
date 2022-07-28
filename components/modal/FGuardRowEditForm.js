@@ -22,6 +22,20 @@ export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, option
 
   const [inputGuard, setInputGuard] = useState('EMPTY');
 
+  const guardChange = (e) => {
+
+    var options = e.target.options;
+    var positions = [];
+
+    for (var i = 1, l = options.length; i < l; i++) {
+      if (options[i].selected) {
+        positions.push(options[i].value);
+      }
+    }
+
+    setInputGuard(positions);
+  }
+
   /*-------------------------------------------------------------------------------------------------------
       Чистка/Обновление инпутов
   -------------------------------------------------------------------------------------------------------*/
@@ -30,7 +44,7 @@ export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, option
       setError(form.error);
     } else if (form.isOpen) {
       setOperation(form.operation);
-      setInputGuard(form.guard?._id || 'EMPTY');
+      setInputGuard(form.guard?._id || ['EMPTY']);
       setError(null);
     }
   }, [form])
@@ -49,9 +63,10 @@ export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, option
         <label className="text-lg pr-4">Охранник</label>
         <FSelect
           options={optionGuards}
-          onChange={(e) => { setInputGuard(e?.target?.value) }}
+          onChange={(e) => { operation == 'Добавить'?guardChange(e): setInputGuard(e?.target?.value) }}
           value={inputGuard ? inputGuard : 'EMPTY'}
           key={form.key}
+          multiple={operation == 'Добавить'}
         />
       </div>
 

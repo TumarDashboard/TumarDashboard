@@ -1,4 +1,4 @@
-import { PlusIcon, ReplyIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
+import { ArchiveIcon, PlusIcon, ReplyIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
 import { motion } from "framer-motion";
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
@@ -9,7 +9,8 @@ import { ApiError } from "../../middleware/exceptions";
 import { FButtonRed } from "../low/FButtonRed";
 import { FButtonWhite } from "../low/FButtonWhite";
 
-import { createGuardPost, editGuardPost, deleteGuardPost } from '../../src/dtos/dtoGuardPost';
+import { editGuardPost, deleteGuardPost } from '../../src/dtos/dtoGuardPost';
+import { changeTimesheet, getTimesheet } from '../../src/dtos/dtoTimesheet';
 import { FGuardPostDeleteForm } from '../modal/FGuardPostDeleteForm';
 import { FGuardPostEditForm } from '../modal/FGuardPostEditForm';
 import { FGuardRowEditForm } from '../modal/FGuardRowEditForm';
@@ -58,14 +59,75 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
 
   const [timesheetTableHeader, setTimesheetTableHeader] = useState([]);
 
-  const selectDate = (value) => {
+  const updateDate = async(value)=>{
+    setError('');
+
+    if(!timesheetChanged && (confirm('Внесённые изменения не сохраняться!')==false)){
+      console.log('returned');
+      return;
+    }
+    console.log('accepted');
+
+    setTimesheetChanged(true);
+
+    MOBXui.setLoading();
+
     setTimesheetMonth(value);
-    if (value) {
-      const date = new Date(value);
-      const daysCount = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-      setTimesheetTableHeader([...Array(daysCount).keys()]);
-    } else {
-      setTimesheetTableHeader([]);
+
+    try {
+
+      if (value) {
+
+        const date = new Date(value);
+        const daysCount = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+
+        setTimesheetTableHeader([...Array(daysCount).keys()]);
+
+        const {guardsRow, optionGuards} = await getTimesheet(guardPost._id, value);
+
+        if( guardsRow && guardsRow.length >0 && optionGuards && optionGuards.length >0){
+
+          setOptionGuards([{
+                text: 'Отсутствует', code: 'EMPTY'
+              }, ...guards?.reduce((result, guard) => {
+
+                if( !optionGuards.includes(guard._id) ){
+                  result.push({
+                    text: [guard.surname, guard.firstName].join(' '),
+                    code: guard._id,
+                  })
+                }
+
+                return result;
+              }, [])]);
+          
+          setTimesheetTableBody(guardsRow);
+
+          return;
+
+        }
+
+      } else {
+        setTimesheetTableHeader([]);
+      }  
+
+      setOptionGuards(array => {
+        return array.concat(timesheetTableBody.map(value=>{
+          return {
+          text: [value.surname, value.firstName].join(' '),
+          code: value._id,
+      }}))});
+
+      setTimesheetTableBody([]);
+
+    } catch (error) {
+
+      errorCallback(error, setGuardPostEditForm);
+
+    } finally {
+
+      MOBXui.setLoading();
+
     }
   }
 
@@ -84,17 +146,21 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Функция изменения Формы редактирования Строки охранника
   -------------------------------------------------------------------------------------------------------*/
-  const guardRowAdd = async (event,
+  const guardRowAdd = (event,
     inputGuard) => {
 
     event.preventDefault();
+
+    setError('');
+
+    setTimesheetChanged(false);
 
     MOBXui.setLoading();
 
     try {
 
       setOptionGuards(array => {
-        return array.filter(value => value.code != inputGuard);
+        return array.filter(value => !inputGuard.includes(value.code));
       })
 
       setTimesheetTableBody(array => {
@@ -117,10 +183,14 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Функция изменения Формы редактирования Строки охранника
   -------------------------------------------------------------------------------------------------------*/
-  const guardRowEdit = async (event,
+  const guardRowEdit = (event,
     inputGuard) => {
 
     event.preventDefault();
+
+    setError('');
+
+    setTimesheetChanged(false);
 
     MOBXui.setLoading();
 
@@ -162,10 +232,14 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Функция удаления Строки охранника
   -------------------------------------------------------------------------------------------------------*/
-  const guardRowDelete = async (event,
+  const guardRowDelete = (event,
     deletedGuard) => {
 
     event.preventDefault();
+
+    setError('');
+
+    setTimesheetChanged(false);
 
     MOBXui.setLoading();
 
@@ -200,11 +274,98 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
   }
 
   /*----------------------------------------------------------------------------------------------------------------------------
+  ----Функция клика по Строке охранника-----------------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------------------------*/
+  const guardCellHandle = (event, guard, day) => {
+
+    event.preventDefault();
+
+    setError('');
+
+    setTimesheetChanged(false);
+
+    if (!guard.timesheetDays) {
+      guard.timesheetDays = [];
+      guard.timesheetShifts = [];
+    }
+
+    const index = guard.timesheetDays.indexOf(day);
+    if (index == -1) {
+
+      const shift = guardPostData.shifts?.length > 0 ? guardPostData.shifts[0] : "8";
+
+      guard.timesheetShifts.push(shift);
+
+      guard.timesheetDays.push(day);
+
+    } else {
+
+      const shift = guard.timesheetShifts[index];
+
+      const indexShift = guardPostData.shifts?.length > 0 ? guardPostData.shifts.lastIndexOf(shift) : -1;
+
+      if (indexShift >= 0 && indexShift + 1 < guardPostData.shifts?.length) {
+        guard.timesheetShifts[index] = guardPostData.shifts[indexShift + 1];
+      } else {
+        guard.timesheetShifts.splice(index, 1);
+        guard.timesheetDays.splice(index, 1);
+      }
+    }
+
+    setTimesheetTableHeader(array => [...array]);
+
+  }
+
+  /*----------------------------------------------------------------------------------------------------------------------------
+  ----Функция клика по Строке охранника-----------------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------------------------*/
+  const [timesheetChanged, setTimesheetChanged] = useState(true);
+
+  const timesheetChangeHandle = async (event) => {  
+
+    event.preventDefault();
+
+    setError('');
+
+    MOBXui.setLoading();
+
+    try {
+
+      await changeTimesheet(
+        guardPost._id,
+        timesheetMonth,
+        timesheetTableBody.reduce((result, guardRow)=>{
+          if( guardRow.timesheetShifts && guardRow.timesheetShifts.length>0 ){
+            result.push({
+              _id: guardRow._id,
+              timesheetShifts: guardRow.timesheetShifts,
+              timesheetDays: guardRow.timesheetDays
+            })
+          }
+          return result;
+        }, [])
+      );
+
+      setTimesheetChanged(true);
+
+    } catch (error) {
+
+      errorCallback(error, setGuardPostEditForm);
+
+    } finally {
+
+      MOBXui.setLoading();
+
+    }
+  }
+
+  /*----------------------------------------------------------------------------------------------------------------------------
   ----Модальное окно Формы редактирования Физ. поста----------------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------*/
   const [guardPostEditForm, setGuardPostEditForm] = useState({
     isOpen: false
   });
+
   /*-------------------------------------------------------------------------------------------------------
       Функция изменения Формы редактирования Физ. поста
   -------------------------------------------------------------------------------------------------------*/
@@ -218,6 +379,8 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
     inputGuardPostDescription) => {
 
     event.preventDefault();
+
+    setError('');
 
     MOBXui.setLoading();
 
@@ -237,6 +400,8 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
       setGuardPostData(responce.guardPost);
 
       setGuardPostEditForm({ isOpen: false });
+
+      setTimesheetChanged(false);
 
     } catch (error) {
 
@@ -262,6 +427,8 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
   const guardPostDeleteFormSubmit = async (event, reason) => {
 
     event.preventDefault();
+
+    setError('');
 
     MOBXui.setLoading();
 
@@ -325,20 +492,12 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
   ----Инициализация-------------------------------------------------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------*/
   useEffect(() => {
+    setError('');
+    setTimesheetChanged(true);
     if (!timesheetMonth) {
       const date = new Date();
-      const dateInitial = `${date.getFullYear()}-${date.getMonth().toString().padStart(2, '0')}`;
-      selectDate(dateInitial);
-    }
-    if (optionGuards.length == 0) {
-      setOptionGuards([{
-        text: 'Отсутствует', code: 'EMPTY'
-      }, ...guards?.map((guard) => {
-        return {
-          text: [guard.surname, guard.firstName].join(' '),
-          code: guard._id,
-        }
-      })]);
+      const dateInitial = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}`;
+      updateDate(dateInitial);
     }
   }, []);
 
@@ -501,7 +660,7 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
                 <th
                   className="bg-color_B block md:table-cell
                   text-white font-bold text-left
-                  border-b-[1px] pt-4 pb-1.5"
+                  border-r-[1px] border-b-[1px] pt-4 pb-1.5"
                   colSpan={timesheetTableHeader.length}
                 >
                   <div className='flex justify-center'>
@@ -511,7 +670,7 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
                       name="start"
                       min="2022-01"
                       max="2022-12"
-                      onChange={(e) => selectDate(e.target.value)}
+                      onChange={(e) => updateDate(e.target.value)}
                       value={timesheetMonth}
                       className="border border-gray-300 p-0
                               focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
@@ -519,6 +678,29 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
                               text-black font-bold text-center"
                     />
                   </div>
+                </th>
+                <th
+                  className="bg-color_B p-0 px-2 min-w-[35px] block md:table-cell
+                  text-white font-bold text-center text-sm
+                  border-r-[1px] border-b-[1px] 
+                  left-0 sticky z-50"
+                  rowSpan="2">
+                  <p>с</p>
+                  <p>м</p>
+                  <p>е</p>
+                  <p>н</p>
+                  <p>ы</p>
+                </th>
+                <th
+                  className="bg-color_B p-0 px-2 min-w-[35px] block md:table-cell
+                  text-white font-bold text-center text-sm
+                  border-b-[1px] 
+                  left-0 sticky z-50"
+                  rowSpan="2">
+                  <p>ч</p>
+                  <p>а</p>
+                  <p>с</p>
+                  <p>ы</p>
                 </th>
               </tr>
 
@@ -531,7 +713,7 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
                   return <th
                     key={i}
                     className="bg-color_B p-2 text-white font-bold text-center block md:table-cell min-w-[35px]
-                    border-b-[1px] border-r-[1px] last:border-r-[0px]">
+                    border-b-[1px] border-r-[1px]">
                     {i + 1}
                   </th>;
                 })}
@@ -544,11 +726,13 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
             {timesheetTableBody.length > 0 &&
               <tbody className="block md:table-row-group z-10">
                 {timesheetTableBody.map((guard, i) => {
+                  var shiftsCount = 0;
+                  var hoursCount = 0;
                   return <tr
                     key={guard._id}
-                    className="block md:table-row bg-color_G mb-2"
+                    className={`block md:table-row mb-2 ${( i & 1 ) ? "bg-stone-50" : "bg-stone-100"}`}
                   >
-                    <td className="text-center block md:table-cell border-b-[1px] bg-color_G border-r-[1px] left-0 sticky">
+                    <td className={`text-center block md:table-cell border-b-[1px] border-r-[1px] left-0 sticky ${( i & 1 ) ? "bg-stone-50" : "bg-stone-100"}`}>
                       <div className="flex flex-row items-center justify-between w-full">
 
                         {guard.uiAvatarsSrc && <Image
@@ -591,10 +775,26 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
                       </div>
                     </td>
                     {timesheetTableHeader.map((value, i) => {
-                      return <td key={i} className="text-center block md:table-cell border-b-[1px] border-r-[1px] last:border-r-[0px]">
-
+                      const index = guard.timesheetDays?.indexOf(value);
+                      const shift = index >= 0 ? guard.timesheetShifts[index] : '';
+                      shiftsCount += index >= 0 ? 1 : 0;
+                      hoursCount += index >= 0 ? parseInt(shift) : 0;
+                      return <td
+                        key={i}
+                        className="text-center block md:table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none"
+                        onClick={(event) => {
+                          guardCellHandle(event, guard, value)
+                        }}
+                      >
+                        {shift}
                       </td>;
                     })}
+                    <td className="text-center font-bold block md:table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none">
+                      {shiftsCount > 0 ? shiftsCount : null}
+                    </td>
+                    <td className="text-center font-bold block md:table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none">
+                      {hoursCount > 0 ? hoursCount : null}
+                    </td>
                   </tr>
                 })}
               </tbody>}
@@ -621,7 +821,29 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
                       <span>Добавить</span>
                     </button>
                   </td>
-                  <td className="bg-color_B p-2 text-white font-bold text-left block md:table-cell" colSpan={timesheetTableHeader.length}></td>
+                  <td className="bg-color_B p-2 text-white font-bold text-left block md:table-cell" colSpan={timesheetTableHeader.length-3}>            
+                    <span className="text-color_C italic break-words">
+                      {error}
+                    </span>
+                  </td>
+                  <td 
+                    className="bg-color_B p-2 block md:table-cell right-0 sticky" 
+                    colSpan={5}
+                  >
+                    <div className='flex justify-center'>
+                    <FButtonRed
+                      className="flex"
+                      onClick={timesheetChangeHandle}
+                      disabled={timesheetChanged}
+                    >
+                      <ArchiveIcon
+                        className="h-4 w-4"
+                      />
+                      Сохранить
+                    </FButtonRed>
+
+                    </div>
+                  </td>
                 </tr>
               </tfoot>}
 
