@@ -17,6 +17,7 @@ import { FGuardRowEditForm } from '../modal/FGuardRowEditForm';
 import { FInputMonth } from '../low/FInputMonth';
 import { FSelect } from '../low/FSelect';
 import { array } from 'yup';
+import { getCurrentMonth } from '../../src/utils/dateUtils';
 
 const inputs = {
   initial: {
@@ -102,7 +103,7 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
               }, [])]);
           
           setTimesheetTableBody(guardsRow);
-
+          
           return;
 
         }
@@ -111,12 +112,21 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
         setTimesheetTableHeader([]);
       }  
 
-      setOptionGuards(array => {
-        return array.concat(timesheetTableBody.map(value=>{
-          return {
-          text: [value.surname, value.firstName].join(' '),
-          code: value._id,
-      }}))});
+      if (timesheetTableBody.length>0) {
+        setOptionGuards(array => {
+          return array.concat(timesheetTableBody.map(value=>{
+            return {
+            text: [value.surname, value.firstName].join(' '),
+            code: value._id,
+        }}))});
+      }else{
+        setOptionGuards([{
+          text: 'Отсутствует', code: 'EMPTY'
+        }, ...guards?.map(guard => ({
+              text: [guard.surname, guard.firstName].join(' '),
+              code: guard._id,
+        }))]);
+      }
 
       setTimesheetTableBody([]);
 
@@ -495,9 +505,7 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
     setError('');
     setTimesheetChanged(true);
     if (!timesheetMonth) {
-      const date = new Date();
-      const dateInitial = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}`;
-      updateDate(dateInitial);
+      updateDate(getCurrentMonth());
     }
   }, []);
 
@@ -664,18 +672,9 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
                   colSpan={timesheetTableHeader.length}
                 >
                   <div className='flex justify-center'>
-                    <input
-                      type="month"
-                      id="start"
-                      name="start"
-                      min="2022-01"
-                      max="2022-12"
-                      onChange={(e) => updateDate(e.target.value)}
+                    <FInputMonth
+                      onChange={updateDate}
                       value={timesheetMonth}
-                      className="border border-gray-300 p-0
-                              focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
-                              rounded-md shadow-sm disabled:bg-gray-100 open:bg-black
-                              text-black font-bold text-center"
                     />
                   </div>
                 </th>

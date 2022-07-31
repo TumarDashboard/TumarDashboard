@@ -33,7 +33,7 @@ const LoadingScreen = observer(function FLoadingScreen() {
             initial='hidden'
             animate={mobxUI.isLoading ? 'block' : 'hidden'}
             variants={inputs}
-            className='fixed z-50 w-full h-full bg-color_A/[0.9]'
+            className='fixed z-[100] w-full h-full bg-color_A/[0.9]'
         >
             <div className="flex justify-center w-full h-full items-center text-3xl text-color_F font-font_B">
 

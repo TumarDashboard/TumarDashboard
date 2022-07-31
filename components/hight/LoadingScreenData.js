@@ -32,7 +32,7 @@ export default function LoadingScreenData({ isLoading }) {
             animate={'block'}
             exit={'hidden'}
             variants={inputs}
-            className='fixed left-0 top-0 z-50 w-full h-full bg-color_A/[0.9]'
+            className='fixed left-0 top-0 z-[100] w-full h-full bg-color_A/[0.9]'
         >
             <div className="flex justify-center w-full h-full items-center text-3xl text-color_F font-font_B">
 

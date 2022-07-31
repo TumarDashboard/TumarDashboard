@@ -50,6 +50,10 @@ export const changeTimesheet = async (guardPost, month, guardsRow) => {
     return await fetchAuthMethod('/method/changeTimesheet', { guardPost, month, guardsRow });
 }
 
-export const getTimesheet = async (guardPost, month, guardsRow) => {
-    return await fetchAuthMethod('/method/getTimesheet', { guardPost, month, guardsRow });
+export const getTimesheet = async (guardPost, month) => {
+    return await fetchAuthMethod('/method/getTimesheet', { guardPost, month });
+}
+
+export const getTimesheetPrint = async (guardPost, month) => {
+    return await fetchAuthMethod('/method/getTimesheetPrint', { guardPost, month });
 }

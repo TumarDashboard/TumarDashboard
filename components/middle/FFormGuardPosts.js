@@ -1,4 +1,4 @@
-import { PlusIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
+import { CalendarIcon, PlusIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
 import { motion } from "framer-motion";
 import Image from 'next/image';
 import { useState } from 'react';
@@ -12,6 +12,7 @@ import { FButtonWhite } from "../low/FButtonWhite";
 import { createGuardPost, editGuardPost, deleteGuardPost } from '../../src/dtos/dtoGuardPost';
 import { FGuardPostDeleteForm } from '../modal/FGuardPostDeleteForm';
 import { FGuardPostEditForm } from '../modal/FGuardPostEditForm';
+import { FTimesheetPrintForm } from '../modal/FTimesheetPrintForm';
 
 const inputs = {
   initial: {
@@ -226,6 +227,13 @@ export default function FFormGuardPosts({ guardPosts, users }) {
     }
   }
 
+  /*-------------------------------------------------------------------------------------------------------
+      Модальное окно Формы выгрузки графика рабочих часов
+  -------------------------------------------------------------------------------------------------------*/
+  const [timesheetPrintForm, setTimesheetPrintForm] = useState({
+    isOpen: false
+  });
+
   /*----------------------------------------------------------------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------*/
 
@@ -239,6 +247,21 @@ export default function FFormGuardPosts({ guardPosts, users }) {
       <div
         className="w-full flex pt-2 pb-4 pr-4 justify-end"
       >
+        {guardPostsTable?.length > 0 && (<button
+          className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
+          hover:bg-color_C active:bg-color_B mr-4"
+          onClick={() => {
+            setTimesheetPrintForm({
+              isOpen: true,
+              key: Math.random().toString(36)
+            })
+          }}
+        >
+          <CalendarIcon
+            className="h-8 w-8 fill-color_C
+            hover:fill-color_F"
+          />
+        </button>)}
 
         <button
           className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
@@ -423,6 +446,15 @@ export default function FFormGuardPosts({ guardPosts, users }) {
         form={guardPostDeleteForm}
         setForm={setGuardPostDeleteForm}
         submit={guardPostDeleteFormSubmit}
+      />
+
+      {/* {Форма выгрузки графика рабочих часов} */}
+      <FTimesheetPrintForm
+        form={timesheetPrintForm}
+        setForm={setTimesheetPrintForm}
+        MOBXui={MOBXui}
+        errorCallback={errorCallback}
+        guardPosts={guardPostsTable}
       />
 
     </motion.div>
