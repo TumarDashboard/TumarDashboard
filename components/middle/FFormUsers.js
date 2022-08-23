@@ -31,6 +31,7 @@ export default function FFormUsers(props) {
           <tr className="border md:border-none block md:table-row absolute -top-full md:top-auto -left-full md:left-auto  md:relative">
 
             <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Логин</th>
+            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Должность</th>
             <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Почта</th>
             <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Статус</th>
 
@@ -56,6 +57,12 @@ export default function FFormUsers(props) {
                     />
                     <p className="font-semibold text-black ml-1">{[user.surname, user.firstName, user.patronymic].join(' ')}</p>
                   </div>
+                </td>
+
+                <td className="p-2 md:border text-left block md:table-cell">
+                  {user.positionsText && 
+                    <><span className="inline-block w-1/3 md:hidden font-bold">Должность</span>{user.positionsText.map(positionText=><p>{positionText}</p>)}</>
+                  }
                 </td>
 
                 <td className="p-2 md:border text-left block md:table-cell">

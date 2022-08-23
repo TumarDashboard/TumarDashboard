@@ -41,6 +41,8 @@ function refreshStore(initialData = null, isAuth) {
   useEffect(() => {
 
     if (error) {
+      
+      console.log(error);
 
       localStorage.removeItem('token');
       _mobxUser.setAuth(false);

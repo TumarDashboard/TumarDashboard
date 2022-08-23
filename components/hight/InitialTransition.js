@@ -75,7 +75,6 @@ export default function InitialTransition() {
       onAnimationStart={() => document.body.classList.add("overflow-hidden")}
       onAnimationComplete={() => {
         document.body.classList.remove("overflow-hidden")
-        // document.querySelector("#InitialTransition").classList.add("absolute");
         document.querySelector("#InitialTransition").classList.add("hidden");
       }}
     >

@@ -174,7 +174,7 @@ class UserService {
         }
 
         const userData = await tokenService.validateRefreshToken(refreshToken);
-
+        
         await mongoConnect();
 
         const tokenFromDb = await tokenService.findToken(refreshToken);

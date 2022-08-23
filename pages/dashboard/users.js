@@ -4,6 +4,7 @@ import catchAuthServer from '../../middleware/authServer';
 import FFormUsers from '../../components/middle/FFormUsers';
 import mongoUserModel from "../../src/mongo/models/mongoUserModel";
 import mongoConnect from "../../src/mongo/mongoConnect";
+import { getPositionWithCodeList } from '../../components/variable/FPositionItemList';
 
 const content = (isFirstMount) => ({
   animate: {
@@ -48,6 +49,9 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   users.forEach(value=>{
     value._id = value._id.toString();
+    if(value.positions){
+      value.positionsText = getPositionWithCodeList(value.positions);
+    }
   })
 
   return {

@@ -67,7 +67,7 @@ export default function FAboutHello() {
             />
 
             <div
-                className="flex flex-wrap justify-center p-10 mm:space-x-8"
+                className="flex flex-wrap justify-center p-5 lg:p-10 mm:space-x-8"
             >
                 {info.map((value) => {
                     return <div key={value.text}>

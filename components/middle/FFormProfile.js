@@ -15,6 +15,7 @@ import { FInputText } from "../low/FInputText";
 import { FInputFile } from "../low/FInputFile";
 import { FButtonRed } from "../low/FButtonRed";
 import { FSelect } from "../low/FSelect";
+import FPositionItemList from "../variable/FPositionItemList";
 
 const inputs = {
   initial: {
@@ -30,13 +31,6 @@ const inputs = {
     },
   },
 };
-
-const optionPositions = [
-  { text: "Отсутствует", code: 'FPEMP' },
-  { text: "Начальник службы охраны", code: 'FPNSO' },
-  { text: "Сотрудник отдела кадров", code: 'FPHRM' },
-  { text: "Сотрудник технического отдела", code: 'FRTHN' },
-]
 
 const FFormProfile = observer(function FFormProfile() {
   /*----------------------------------------------------------------------------------------------------------------------------
@@ -334,7 +328,7 @@ const FFormProfile = observer(function FFormProfile() {
           <div className="form-item">
             <label className="text-xl">Должность</label>
             <FSelect
-              options={optionPositions}
+              options={FPositionItemList}
               onChange={positionsChange}
               value={inputPositions}
               defaultValue={MOBXuser?.user?.positions}

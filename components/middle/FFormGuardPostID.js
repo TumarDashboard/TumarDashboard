@@ -515,140 +515,141 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
   return (
     <motion.div
       variants={inputs}
-      className="w-full h-full m-2 flex flex-col h-full"
+      className="w-full h-full flex flex-col"
     >
+      <div className="p-2">
+        
+        {/* {Панель управления} */}
+        <div className="w-full flex pt-2 justify-between items-center">
 
-      {/* {Панель управления} */}
-      <div
-        className="w-full flex pt-2 justify-between items-center"
-      >
-
-        <button
-          className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
-        hover:bg-color_C active:bg-color_B"
-          onClick={(event) => {
-            event.stopPropagation();
-            router.push('/dashboard/guardPosts');
-          }}
-        >
-          <ReplyIcon
-            className="h-8 w-8 fill-color_C
-          hover:fill-color_F"
-          />
-        </button>
-
-        <div className="flex flex-row items-center justify-between md:justify-start bg-white p-4 rounded-t-md border-t-8 border-red-700">
-          {guardPostData.photo && <Image
-            className="h-8 w-8 rounded-full"
-            width={32}
-            height={32}
-            src={guardPostData.photo}
-            alt=""
-          />}
-          <p className="text-black ml-1 text-xl font-bold">{guardPostData.number}</p>
-        </div>
-
-        <div className='flex'>
-
-          <FButtonRed
-            className="mr-2 flex"
+          <button
+            className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
+          hover:bg-color_C active:bg-color_B"
             onClick={(event) => {
               event.stopPropagation();
-              setGuardPostEditForm({
-                isOpen: true,
-                operation: 'Изменить',
-                key: Math.random().toString(36),
-                guardPost: guardPostData
-              })
+              router.push('/dashboard/guardPosts');
             }}
           >
-            <PencilAltIcon
-              className="h-4 w-4"
+            <ReplyIcon
+              className="h-8 w-8 fill-color_C
+            hover:fill-color_F"
             />
-          </FButtonRed>
+          </button>
 
-          <FButtonWhite
-            className="flex"
-            onClick={(event) => {
-              event.stopPropagation();
-              setGuardPostDeleteForm({
-                isOpen: true,
-                key: Math.random().toString(36),
-                guardPostName: guardPostData.name,
-                guardPostId: guardPostData._id,
-              })
-            }}
-          >
-            <TrashIcon
-              className="h-4 w-4"
-            />
-          </FButtonWhite>
+          <div className="flex flex-row items-center justify-between md:justify-start bg-white p-4 rounded-t-md border-t-8 border-red-700">
+            {guardPostData.photo && <Image
+              className="h-8 w-8 rounded-full"
+              width={32}
+              height={32}
+              src={guardPostData.photo}
+              alt=""
+            />}
+            <p className="text-black ml-1 text-xl font-bold">{guardPostData.number}</p>
+          </div>
+
+          <div className='flex'>
+
+            <FButtonRed
+              className="mr-2 flex"
+              onClick={(event) => {
+                event.stopPropagation();
+                setGuardPostEditForm({
+                  isOpen: true,
+                  operation: 'Изменить',
+                  key: Math.random().toString(36),
+                  guardPost: guardPostData
+                })
+              }}
+            >
+              <PencilAltIcon
+                className="h-4 w-4"
+              />
+            </FButtonRed>
+
+            <FButtonWhite
+              className="flex"
+              onClick={(event) => {
+                event.stopPropagation();
+                setGuardPostDeleteForm({
+                  isOpen: true,
+                  key: Math.random().toString(36),
+                  guardPostName: guardPostData.name,
+                  guardPostId: guardPostData._id,
+                })
+              }}
+            >
+              <TrashIcon
+                className="h-4 w-4"
+              />
+            </FButtonWhite>
+
+          </div>
 
         </div>
 
-      </div>
+        {/* {Панель информации} */}
+        <div className='w-full flex flex-col bg-white p-2 rounded-md'>
 
-      {/* {Панель информации} */}
-      <div className='w-full flex flex-col bg-white p-2 mb-4 rounded-md'>
+          <div className='flex flex-col md:flex-row w-full flex-wrap'>
+            {/* Менеджер */}
+            {guardPostData.manager &&
+              <div className='form-item items-center'>
+                <span className='break-all md:break-normal'><b className=''>НСО</b> {[guardPostData.manager?.surname, guardPostData.manager?.firstName].join(' ')}</span>
+              </div>}
 
-        <div className='flex flex-col md:flex-row w-full flex-wrap'>
-          {/* Менеджер */}
-          {guardPostData.manager &&
-            <div className='form-item items-center'>
-              <span className='break-all md:break-normal'><b className=''>НСО</b> {[guardPostData.manager?.surname, guardPostData.manager?.firstName].join(' ')}</span>
+            {/* Смены */}
+            {guardPostData.shifts && (guardPostData.shifts.length > 0) &&
+              <div className="form-item flex items-center ml-auto">
+                <b className='pr-1'>Смены</b>
+                {guardPostData.shifts?.map((value, i) => {
+                  return <span
+                    key={i}
+                    className='flex items-center justify-center px-2 bg-red-600 select-none
+                    font-semibold capitalize text-white text-lg
+                    border border-transparent rounded-md'
+                  >{value}</span>
+                })}
+              </div>}
+          </div>
+
+          {/* Наименование */}
+          {guardPostData.name &&
+            <div className='form-item w-full items-center'>
+              <span className="break-all md:break-normal"><b className='hidden md:inline-block'>Наименование</b> {guardPostData.name}</span>
             </div>}
 
-          {/* Смены */}
-          {guardPostData.shifts && (guardPostData.shifts.length > 0) &&
-            <div className="form-item flex items-center ml-auto">
-              <b className='pr-1'>Смены</b>
-              {guardPostData.shifts?.map((value, i) => {
-                return <span
-                  key={i}
-                  className='flex items-center justify-center px-2 bg-red-600 select-none
-                  font-semibold capitalize text-white text-lg
-                  border border-transparent rounded-md'
-                >{value}</span>
-              })}
+          {/* Адрес */}
+          {guardPostData.address &&
+            <div className='form-item w-full items-center'>
+              <span className="break-all md:break-normal"><b className='hidden md:inline-block'>Адрес</b> {guardPostData.address}</span>
             </div>}
+
+          {/* Описание */}
+          {guardPostData.description &&
+            <div className='form-item w-full items-center p-2 bg-slate-200 rounded-md border-[1px] border-slate-600 text-neutral-800'>
+              <span className="break-all md:break-normal">{guardPostData.description}</span>
+            </div>}
+
+          {/* Статус ошибки */}
+          {error && <div className="">
+            <span className="text-color_C italic break-words">
+              {error}
+            </span>
+          </div>}
+
         </div>
-
-        {/* Наименование */}
-        {guardPostData.name &&
-          <div className='form-item w-full items-center'>
-            <span className="break-all md:break-normal"><b className='hidden md:inline-block'>Наименование</b> {guardPostData.name}</span>
-          </div>}
-
-        {/* Адрес */}
-        {guardPostData.address &&
-          <div className='form-item w-full items-center'>
-            <span className="break-all md:break-normal"><b className='hidden md:inline-block'>Адрес</b> {guardPostData.address}</span>
-          </div>}
-
-        {/* Описание */}
-        {guardPostData.description &&
-          <div className='form-item w-full items-center p-2 bg-slate-200 rounded-md border-[1px] border-slate-600 text-neutral-800'>
-            <span className="break-all md:break-normal">{guardPostData.description}</span>
-          </div>}
-
-        {/* Статус ошибки */}
-        {error && <div className="">
-          <span className="text-color_C italic break-words">
-            {error}
-          </span>
-        </div>}
 
       </div>
 
       {/* {Таблица физ. постов} */}
       <div
-        className='flex-initial flex overflow-auto z-40 min-h-max max-h-screen'
+        className='flex-initial flex overflow-auto z-30 min-h-max max-h-screen'
       >
         <div
           className='flex-1 w-0'
         >
 
-          <table className=" w-full block md:table table-auto border-separate [border-spacing:0]">
+          <table className="w-full block md:table table-auto border-separate [border-spacing:0]">
             {/* Заголовок таблицы */}
             <thead className="block md:table-header-group z-50 top-0 sticky">
               <tr

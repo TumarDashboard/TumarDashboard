@@ -19,13 +19,13 @@ function redirect( to, from ){
 
 export default catchErrorsMiddleware(async (req, ev) => {
     const refreshToken = req.cookies['refreshToken'];
-    
+    console.log(refreshToken);
     if (refreshToken) {
 
         const verified = await jwtVerify(
             refreshToken,
             new TextEncoder().encode(process.env.NEXT_PRIVATE_JWT_REFRESH_SECRET)
-        ).catch(error => { })
+        ).catch(error => { console.log(error);})
 
         const userData = verified?.payload;
 
