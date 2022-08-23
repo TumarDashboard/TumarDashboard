@@ -10,6 +10,7 @@ import { FSelect } from "../low/FSelect";
 import { FSelectShifts } from "../low/FSelectShifts";
 
 import { equalArrays } from '../../src/utils/arrayUtils';
+import { FInputText } from '../low/FInputText';
 
 export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users }) {
 
@@ -37,6 +38,11 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
       setInputValidateGuardPostNumber(validate && (value != form.guardPost?.number));
     }
   }
+
+  /*-------------------------------------------------------------------------------------------------------
+      Краткое Наименование Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const [inputGuardPostCallsign, setInputGuardPostCallsign] = useState('');
 
   /*-------------------------------------------------------------------------------------------------------
       Наименование Формы редактирования
@@ -86,6 +92,7 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
     }else if (form.isOpen) {
       setOperation(form.operation);
       setInputGuardPostNumber(form.guardPost?.number);
+      setInputGuardPostCallsign(form.guardPost?.callsign);
       setInputValidateGuardPostNumber(form.operation == 'Добавить');
       setInputGuardPostName(form.guardPost?.name);
       setInputGuardPostAddress(form.guardPost?.address);
@@ -109,18 +116,29 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
       {/* Номер и менеджер */}
       <div className='flex flex-col md:flex-row w-full'>
 
-        <div className="form-item flex items-center md:mr-4">
+        <div className="form-item flex items-center min-w-min md:mr-4">
           <label className="text-lg pr-4">Номер</label>
           <FInputNumber
             id='guard-post-number'
-            placeholder='Номер'
+            placeholder='###'
             value={inputGuardPostNumber ? inputGuardPostNumber : ''}
             onChange={GuardPostNumberChange}
             key={form.key}
           />
         </div>
 
-        <div className="form-item flex items-center w-full mt-4 md:mt-0">
+        <div className="form-item flex items-center w-full md:mr-4">
+          <label className="text-lg pr-4">Номер</label>
+          <FInputText
+            id='guard-post-callsign'
+            placeholder='Кратко'
+            value={inputGuardPostCallsign ? inputGuardPostCallsign : ''}
+            onChange={setInputGuardPostCallsign}
+            key={form.key}
+          />
+        </div>
+
+        <div className="form-item flex items-center min-w-fit mt-4 md:mt-0">
           <label className="text-lg pr-4">НСО</label>
           <FSelect
             options={optionGuardPostManager}
@@ -201,11 +219,11 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
           className=""
           disabled={!(form.isOpen && (operation == 'Добавить' ?
             (isInputValidateGuardPostNumber
-              && inputGuardPostName
-              && inputGuardPostAddress) :
+              && inputGuardPostCallsign) :
             (isInputValidateGuardPostNumber
-              || (inputGuardPostName != '' && inputGuardPostName != form.guardPost?.name)
-              || (inputGuardPostAddress != '' && inputGuardPostAddress != form.guardPost?.address)
+              || (inputGuardPostCallsign != '' && inputGuardPostCallsign != form.guardPost?.callsign)
+              || (inputGuardPostName != form.guardPost?.name)
+              || (inputGuardPostAddress != form.guardPost?.address)
               || (inputGuardPostManager != form.guardPost?.manager?._id)
               || (inputGuardPostDescription != form.guardPost?.description)
               || (!equalArrays(inputGuardPostShifts, form.guardPost?.shifts))
@@ -213,6 +231,7 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
           ))}
           onClick={(e) => operation == 'Добавить' ? submitAdd(e,
               inputGuardPostNumber,
+              inputGuardPostCallsign,
               inputGuardPostName,
               inputGuardPostAddress,
               inputGuardPostPhoto,
@@ -221,6 +240,7 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
               inputGuardPostDescription
             ) : submitEdit(e,
               inputGuardPostNumber,
+              inputGuardPostCallsign,
               inputGuardPostName,
               inputGuardPostAddress,
               inputGuardPostPhoto,

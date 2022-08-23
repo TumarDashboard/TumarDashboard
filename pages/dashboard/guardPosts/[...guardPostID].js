@@ -18,7 +18,7 @@ const content = (isFirstMount) => ({
 });
 
 export default function GuardPostID({ isFirstMount, ...props }) {
-  const pageName = [props.guardPost?.number, props.guardPost?.name].join('-');
+  const pageName = [props.guardPost?.number, props.guardPost?.callsign].filter(Boolean).join('-');
   const pageIcon = props.guardPost?.photo;
   return (
     <div

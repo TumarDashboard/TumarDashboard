@@ -50,7 +50,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   guardPosts.sort((a,b)=>{
     return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
     a.number - b.number ||
-    a.address.localeCompare(b.address)
+    a.callsign.localeCompare(b.callsign)
   }).forEach(value=>{
     value._id = value._id.toString();
     if( value.manager ){

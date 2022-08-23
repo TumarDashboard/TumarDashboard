@@ -6,7 +6,7 @@ import { FButtonWhite } from "../low/FButtonWhite";
 import { FSelect } from "../low/FSelect";
 
 import { equalArrays } from '../../src/utils/arrayUtils';
-import { FInputText } from '../low/FInputText';
+import { FInputInitials } from '../low/FInputInitials';
 import { FInputTelephone } from '../low/FInputTelephone';
 
 export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, optionGuards }) {

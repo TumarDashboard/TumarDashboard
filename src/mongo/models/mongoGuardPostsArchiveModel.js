@@ -19,14 +19,19 @@ export const MongooseSchema = new mongoose.Schema({
     type: String,
   },
 
+  callsign: {
+    type: String,
+    required: [true, 'Пожалуйста, введите краткое наименование']
+  },
+
   name: {
     type: String,
-    required: [true, 'Пожалуйста, введите наименование']
+    // required: [true, 'Пожалуйста, введите наименование']
   },
 
   address: {
     type: String,
-    required: [true, 'Пожалуйста, введите адресс']
+    // required: [true, 'Пожалуйста, введите адресс']
   },
 
   photo:{

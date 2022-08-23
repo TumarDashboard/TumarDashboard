@@ -50,6 +50,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
   -------------------------------------------------------------------------------------------------------*/
   const guardPostAdd = async (event,
     inputGuardPostNumber,
+    inputGuardPostCallsign,
     inputGuardPostName,
     inputGuardPostAddress,
     inputGuardPostPhoto,
@@ -65,6 +66,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
       const responce = await createGuardPost(
         inputGuardPostNumber,
+        inputGuardPostCallsign,
         inputGuardPostName,
         inputGuardPostAddress,
         inputGuardPostPhoto,
@@ -78,7 +80,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
         array.sort((a, b) => {
           return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
             a.number - b.number ||
-            a.address.localeCompare(b.address)
+            a.callsign.localeCompare(b.callsign)
         })
         return array;
       });
@@ -101,6 +103,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
   -------------------------------------------------------------------------------------------------------*/
   const guardPostEdit = async (event,
     inputGuardPostNumber,
+    inputGuardPostCallsign,
     inputGuardPostName,
     inputGuardPostAddress,
     inputGuardPostPhoto,
@@ -117,6 +120,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
       const responce = await editGuardPost(
         guardPostEditForm.guardPost._id,
         inputGuardPostNumber,
+        inputGuardPostCallsign,
         inputGuardPostName,
         inputGuardPostAddress,
         inputGuardPostPhoto,
@@ -133,7 +137,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
         array.sort((a, b) => {
           return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
             a.number - b.number ||
-            a.address.localeCompare(b.address)
+            a.callsign.localeCompare(b.callsign)
         })
         return array;
       });
@@ -325,7 +329,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                       src={guardPost.photo}
                       alt=""
                     />}
-                    <p className="font-semibold text-black ml-1 text-xl font-bold">{guardPost.number}</p>
+                    <p className="font-semibold text-black ml-1 text-xl font-bold">{[guardPost.number, guardPost.callsign].filter(Boolean).join(' ')}</p>
                     <div className='flex md:hidden'>
 
                       <FButtonRed

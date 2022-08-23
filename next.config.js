@@ -9,8 +9,8 @@ module.exports = async (phase, { defaultConfig }) => {
 
         env: {
             // #Min and Max data for text input
-            NEXT_PUBLIC_MIN_LENGTH_TEXT: '1',
-            NEXT_PUBLIC_MAX_LENGTH_TEXT: '30',
+            NEXT_PUBLIC_MIN_LENGTH_INITIALS: '1',
+            NEXT_PUBLIC_MAX_LENGTH_INITIALS: '30',
 
             // #Min and Max data for number input
             NEXT_PUBLIC_MIN_LENGTH_NUMBER_INPUT: '100',

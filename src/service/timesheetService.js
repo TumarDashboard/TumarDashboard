@@ -178,9 +178,10 @@ class TimesheetService {
                     name: "$guardPost.name",
                     address: "$guardPost.address",
                     number: "$guardPost.number",
+                    callsign: "$guardPost.callsign",
                     guardRow: "$guardRow"
                 } } },
-                { $sort : { number : 1, address: 1 } }
+                { $sort : { number : 1, callsign: 1 } }
             ]);
 
             return { ...responce }

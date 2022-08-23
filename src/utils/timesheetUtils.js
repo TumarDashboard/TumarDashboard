@@ -108,7 +108,7 @@ export function timesheetPrint( responce, date ) {
       rowsCount+=tableRowsCount;
 
       // Наименование таблицы
-      var tableCaptionRow = worksheet.addRow([[guardPost.number?'№'+guardPost.number:null, guardPost.name, guardPost.address].join(', ')]);
+      var tableCaptionRow = worksheet.addRow([[guardPost.number?'№'+guardPost.number:null, guardPost.callsign, guardPost.name, guardPost.address].join(', ')]);
       var tableCustomCell = tableCaptionRow.getCell(1);
       tableCustomCell.font = Style.FontSmallBold;
       tableCustomCell.alignment = Style.AlignmentMiddleCenter;

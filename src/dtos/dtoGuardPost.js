@@ -9,6 +9,7 @@ export default class DTOGuardPost {
 
     _id;
     number;
+    callsign;
     name;
     address;
     photo;
@@ -19,6 +20,7 @@ export default class DTOGuardPost {
     constructor(model) {
         this._id = model._id;
         this.number = model.number;
+        this.callsign = model.callsign;
         this.name = model.name;
         this.address = model.address;
         this.photo = model.photo;
@@ -53,6 +55,11 @@ export const validateYup = (dtoGuardPost, options) => {
                         .max(maxlengthNumber, `Кол-во цифр должно быть в диапозоне от ${minlengthNumber} до ${maxlengthNumber}`)
                 }
 
+                if (key === 'callsign') {
+                    return string()
+                        .required('Не указано краткое наименование')
+                }
+
                 if (key === 'name') {
                     return string()
                         .required('Не указано наименование')
@@ -71,12 +78,12 @@ export const validateYup = (dtoGuardPost, options) => {
 
 }
 
-export const createGuardPost = async (number, name, address, photo, manager, shifts, description) => {
-    return await fetchAuthMethod('/method/createGuardPost', { number, name, address, photo, manager, shifts, description });
+export const createGuardPost = async (number, callsign, name, address, photo, manager, shifts, description) => {
+    return await fetchAuthMethod('/method/createGuardPost', { number, callsign, name, address, photo, manager, shifts, description });
 }
 
-export const editGuardPost = async (id, number, name, address, photo, manager, shifts, description) => {
-    return await fetchAuthMethod('/method/editGuardPost', { id, number, name, address, photo, manager, shifts, description });
+export const editGuardPost = async (id, number, callsign, name, address, photo, manager, shifts, description) => {
+    return await fetchAuthMethod('/method/editGuardPost', { id, number, callsign, name, address, photo, manager, shifts, description });
 }
 
 export const deleteGuardPost = async (idGuardPost, idUser, reason) => {

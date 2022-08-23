@@ -544,7 +544,7 @@ export default function FFormGuardPostID({ guardPost, guards, users }) {
               src={guardPostData.photo}
               alt=""
             />}
-            <p className="text-black ml-1 text-xl font-bold">{guardPostData.number}</p>
+            <p className="text-black ml-1 text-xl font-bold">{[guardPostData.number, guardPostData.callsign].filter(Boolean).join(' ')}</p>
           </div>
 
           <div className='flex'>

@@ -6,7 +6,7 @@ import { FButtonWhite } from "../low/FButtonWhite";
 import { FSelect } from "../low/FSelect";
 
 import { equalArrays } from '../../src/utils/arrayUtils';
-import { FInputText } from '../low/FInputText';
+import { FInputInitials } from '../low/FInputInitials';
 import { FInputTelephone } from '../low/FInputTelephone';
 
 export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPosts, users }) {
@@ -121,7 +121,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
     text: 'Отсутствует', code: 'EMPTY'
   }, ...guardPosts?.map((guardPost) => {
     return {
-      text: [guardPost.name, guardPost.address].filter(Boolean).join(', '),
+      text: [guardPost.number, guardPost.callsign].filter(Boolean).join(', '),
       code: guardPost._id,
     }
   })]
@@ -177,7 +177,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
       {/* Фамилия */}
       <div className="form-item w-full flex items-center">
         <label className="text-lg pr-4">Фамилия</label>
-        <FInputText
+        <FInputInitials
           id='family-name'
           placeholder='Фамилия'
           value={inputGuardSurname ? inputGuardSurname : ''}
@@ -189,7 +189,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
       {/* Имя */}
       <div className="form-item w-full mt-4 flex items-center">
         <label className="text-lg pr-4">Имя</label>
-        <FInputText
+        <FInputInitials
           id='FullName'
           placeholder='Имя'
           value={inputGuardfirstName ? inputGuardfirstName : ''}
@@ -201,7 +201,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
       {/* Отчество */}
       <div className="form-item w-full mt-4 flex items-center">
         <label className="text-lg pr-4">Отчество</label>
-        <FInputText
+        <FInputInitials
           id='additional-name'
           placeholder='Отчество'
           value={inputGuardPatronymic ? inputGuardPatronymic : ''}

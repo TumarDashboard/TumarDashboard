@@ -11,7 +11,7 @@ import { ApiError } from "../../middleware/exceptions";
 
 import { FUserDeleteForm } from "../modal/FUserDeleteForm";
 
-import { FInputText } from "../low/FInputText";
+import { FInputInitials } from "../low/FInputInitials";
 import { FInputFile } from "../low/FInputFile";
 import { FButtonRed } from "../low/FButtonRed";
 import { FSelect } from "../low/FSelect";
@@ -297,7 +297,7 @@ const FFormProfile = observer(function FFormProfile() {
 
           <div className="form-item">
             <label className="text-xl ">Фамилия</label>
-            <FInputText
+            <FInputInitials
               id='family-name'
               placeholder='Фамилия'
               value={inputSurname ? inputSurname : MOBXuser?.user?.surname}
@@ -307,7 +307,7 @@ const FFormProfile = observer(function FFormProfile() {
 
           <div className="form-item">
             <label className="text-xl ">Имя</label>
-            <FInputText
+            <FInputInitials
               id='FullName'
               placeholder='Имя'
               value={inputFirstName ? inputFirstName : MOBXuser?.user?.firstName}
@@ -317,7 +317,7 @@ const FFormProfile = observer(function FFormProfile() {
 
           <div className="form-item">
             <label className="text-xl ">Отчество</label>
-            <FInputText
+            <FInputInitials
               id='additional-name'
               placeholder='Отчество'
               value={inputPatronymic ? inputPatronymic : MOBXuser?.user?.patronymic}

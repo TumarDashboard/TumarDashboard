@@ -1,4 +1,4 @@
-import { FInputText } from "../low/FInputText";
+import { FInputInitials } from "../low/FInputInitials";
 import { FInputEmail } from "../low/FInputEmail";
 import { FInputPassword } from "../low/FInputPassword";
 import { useStore } from "../hight/StoreProvider";
@@ -166,7 +166,7 @@ export default function FFormRegistration() {
                 className="mb-4 w-full"
                 variants={inputs}
             >
-                <FInputText
+                <FInputInitials
                     id='family-name'
                     onChange={surnameChange}
                     placeholder='Фамилия'
@@ -177,7 +177,7 @@ export default function FFormRegistration() {
                 className="mb-4 w-full"
                 variants={inputs}
             >
-                <FInputText
+                <FInputInitials
                     id='FullName'
                     onChange={firstNameChange}
                     placeholder='Имя'
@@ -188,7 +188,7 @@ export default function FFormRegistration() {
                 className="mb-4 w-full"
                 variants={inputs}
             >
-                <FInputText
+                <FInputInitials
                     id='additional-name'
                     onChange={patronymicChange}
                     placeholder='Отчество'

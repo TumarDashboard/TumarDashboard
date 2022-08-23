@@ -2,8 +2,8 @@ import { object, lazy, string } from "yup";
 import { fetchAuthMethod } from "../../middleware/requests";
 import { mapValue } from "../utils/arrayUtils";
 
-const minlengthFullName = process.env.NEXT_PUBLIC_MIN_LENGTH_TEXT;
-const maxlengthFullName = process.env.NEXT_PUBLIC_MAX_LENGTH_TEXT;
+const minlengthFullName = process.env.NEXT_PUBLIC_MIN_LENGTH_INITIALS;
+const maxlengthFullName = process.env.NEXT_PUBLIC_MAX_LENGTH_INITIALS;
 
 export default class DTOGuard {
 
