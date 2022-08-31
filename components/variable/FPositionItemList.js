@@ -1,28 +1,30 @@
+export const FPositionNSO = 'FPNSO';
+
 const FPositionItemList = [
-    { text: "Отсутствует", code: 'FPEMP' },
-    { text: "Директор", code: 'FPDIR' },
-    { text: "Зам. директора", code: 'FPZDIR' },
-    { text: "Начальник службы охраны", code: 'FPNSO' },
-    { text: "Сотрудник отдела кадров", code: 'FPHRM' },
-    { text: "Дежурный оператор", code: 'FPOPR' },
-    { text: "Бухгалтер", code: 'FPBUH' },
-    { text: "Сотрудник технического отдела", code: 'FPTHN' },
+    { label: "Отсутствует", value: 'FPEMP' },
+    { label: "Директор", value: 'FPDIR' },
+    { label: "Зам. директора", value: 'FPZDIR' },
+    { label: "Начальник службы охраны", value: FPositionNSO },
+    { label: "Сотрудник отдела кадров", value: 'FPHRM' },
+    { label: "Дежурный оператор", value: 'FPOPR' },
+    { label: "Бухгалтер", value: 'FPBUH' },
+    { label: "Сотрудник технического отдела", value: 'FPTHN' },
 ];
 
-export function getPositionWithCode( code ){
+export function getPositionWithCode( value ){
     for ( let i = 0; i < FPositionItemList.length; i++ ) {
-        if( FPositionItemList[i].code == code ){
+        if( FPositionItemList[i].value == value ){
             return FPositionItemList[i];
         }
     }
 }
 
-export function getPositionWithCodeList( codeList ){
+export function getPositionWithCodeList( valueList ){
     var result = [];
-    codeList.forEach(code => {
-        let text = getPositionWithCode(code).text;
-        if( text )
-            result.push(text)
+    valueList.forEach(value => {
+        let label = getPositionWithCode(value).label;
+        if( label )
+            result.push(label)
     });
     return result;
 }

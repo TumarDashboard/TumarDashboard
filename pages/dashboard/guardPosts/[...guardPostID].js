@@ -5,9 +5,11 @@ import FFormGuardPostID from '../../../components/middle/FFormGuardPostID';
 import mongoGuardPostsModel from "../../../src/mongo/models/mongoGuardPostsModel";
 import mongoGuardsModel from "../../../src/mongo/models/mongoGuardsModel";
 import mongoUserModel from "../../../src/mongo/models/mongoUserModel";
+import mongoUserArchiveModel from "../../../src/mongo/models/mongoUserArchiveModel";
 import mongoConnect from "../../../src/mongo/mongoConnect";
 import { ApiError } from '../../../middleware/exceptions';
 import mongoose from 'mongoose'
+import { FPositionNSO } from '../../../components/variable/FPositionItemList';
 
 const content = (isFirstMount) => ({
   animate: {
@@ -42,6 +44,7 @@ export default function GuardPostID({ isFirstMount, ...props }) {
             guardPost={props.guardPost}
             guards={props.guards}
             users={props.users}
+            usersAll={props.usersAll}
           />
         </motion.div>
       </motion.section>
@@ -80,6 +83,22 @@ export const getServerSideProps = catchAuthServer(async (context) => {
     }
   })
 
+  // НСО
+  const users = await mongoUserModel.find({positions: FPositionNSO}, 'surname firstName').lean();
+
+  users.forEach(value => {
+    value._id = value._id.toString();
+  })  
+  
+  // удаленные НСО
+  const usersArchive = await mongoUserArchiveModel.find({positions: FPositionNSO}, 'surname firstName').lean();
+
+  usersArchive.forEach(value => {
+    value._id = value._id.toString();
+  })
+
+  const usersAll = users.concat( usersArchive );
+
   // Физ пост
   const guardPost = await mongoGuardPostsModel.findById(queryPath[0]).populate('manager', 'surname firstName').lean();
 
@@ -91,18 +110,15 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   if (guardPost.manager) {
     guardPost.manager._id = guardPost.manager._id.toString();
+    let index = usersAll.findIndex(x => x._id==guardPost.manager._id); 
+    if( index === -1 ){
+      usersAll.unshift(guardPost.manager)
+    }
   }
-
-  // НСО
-  const users = await mongoUserModel.find({}, 'surname firstName').lean();
-
-  users.forEach(value => {
-    value._id = value._id.toString();
-  })
 
   // Передача данных
   return {
-    props: { guardPost, guards, users, initialState: { checkAuth: true } }
+    props: { guardPost, guards, users, usersAll, initialState: { checkAuth: true } }
   }
 
 })

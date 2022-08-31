@@ -3,6 +3,8 @@ import userService from "../../../src/service/userService";
 import { catchErrorsApi } from '../../../middleware/exceptions';
 import { getCookie, setCookies } from '../../../middleware/cookies';
 
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
 export default catchErrorsApi( async (req, res) => {
     try {
         
@@ -15,7 +17,6 @@ export default catchErrorsApi( async (req, res) => {
         
         const userData = await userService.refresh( refreshToken, store );
 
-
         setCookies( "refreshToken", userData.refreshToken, {
             req, 
             res,
@@ -23,8 +24,8 @@ export default catchErrorsApi( async (req, res) => {
             httpOnly: true,
             path: '/'
         });
-    
-        console.log('update tokens');
+
+        await delay(5000);
     
         return res.json(userData);
 

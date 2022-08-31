@@ -2,6 +2,21 @@ import { SignJWT, jwtVerify } from 'jose';
 import { v4 } from "uuid";
 import mongoTokenModel from "../mongo/models/mongoTokenModel";
 
+export async function generateAccessToken(payload) {
+
+    payload.uiAvatarsSrc='';
+
+    const accessToken = await new SignJWT(payload)
+        .setProtectedHeader({ alg: 'HS256' })
+        .setJti(v4())
+        .setIssuedAt()
+        .setExpirationTime(process.env.NEXT_PUBLIC_JWT_ACCESS_EXPIRES_IN)
+        .sign(new TextEncoder().encode(process.env.NEXT_PRIVATE_JWT_ACCESS_SECRET));
+
+    return accessToken
+
+}
+
 export async function generateTokens(payload) {
 
     payload.uiAvatarsSrc='';

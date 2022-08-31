@@ -6,6 +6,7 @@ import mongoGuardsModel from "../../src/mongo/models/mongoGuardsModel";
 import mongoGuardPostsModel from "../../src/mongo/models/mongoGuardPostsModel";
 import mongoUserModel from "../../src/mongo/models/mongoUserModel";
 import mongoConnect from "../../src/mongo/mongoConnect";
+import { FPositionNSO } from '../../components/variable/FPositionItemList';
 
 const content = (isFirstMount) => ({
   animate: {
@@ -48,11 +49,13 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   await mongoConnect();
 
-  const guards = await mongoGuardsModel.find().populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
+  const guards = await mongoGuardsModel.find({}, null, {sort: {'manager': 1, 'surname': 1, 'firstName': 1,}}).populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
 
-  guards.sort((a, b) => {
-    return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
-  }).forEach(value => {
+  // guards.sort((a, b) => {
+  //   // a.manager?._id.localeCompare(b.manager?._id) || 
+  //   return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
+  // })
+  guards.forEach(value => {
     value._id = value._id.toString();
     if (value.manager) {
       value.manager._id = value.manager._id.toString();
@@ -77,7 +80,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
     }
   })
 
-  const users = await mongoUserModel.find({}, 'surname firstName').lean();
+  const users = await mongoUserModel.find({positions: FPositionNSO}, 'surname firstName').lean();
 
   users.forEach(value => {
     value._id = value._id.toString();

@@ -58,6 +58,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
     MOBXui.setLoading();
 
     try {
+
       const responce = await createGuard(
         inputGuardSurname,
         inputGuardFirstName,
@@ -69,11 +70,10 @@ export default function FFormGuards({ guards, guardPosts, users }) {
       );
 
       setGuardsTable(array => {
-        console.log(array);
-        array.push(responce.guard);
-        array.sort((a, b) => {
-          return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
-        })
+        array.unshift(responce.guard);
+        // array.sort((a, b) => {
+        //   return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
+        // })
         return array;
       });
 
@@ -121,13 +121,14 @@ export default function FFormGuards({ guards, guardPosts, users }) {
       );
 
       setGuardsTable(array => {
-        var index = array.indexOf(guardEditForm.guard);
-        if (index !== -1) {
-          array[index] = responce.guard;
-        }
-        array.sort((a, b) => {
-          return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
-        })
+        array[guardEditForm.index] = responce.guardPost;
+        // var index = array.indexOf(guardEditForm.guard);
+        // if (index !== -1) {
+        //   array[index] = responce.guard;
+        // }
+        // array.sort((a, b) => {
+        //   return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
+        // })
         return array;
       });
 
@@ -271,7 +272,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
 
         <tbody className="block md:table-row-group">
 
-          {guardsTable?.map((guard) => {
+          {guardsTable?.map((guard, index) => {
             return (
 
               <tr className="rounded-md md:border-none block md:table-row bg-color_G mb-2" key={guard._id}>
@@ -345,6 +346,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
                       onClick={() => {
                         setGuardEditForm({
                           isOpen: true,
+                          index: index,
                           operation: 'Изменить',
                           key: Math.random().toString(36),
                           guard: guard

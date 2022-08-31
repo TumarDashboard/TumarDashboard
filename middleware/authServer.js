@@ -41,7 +41,7 @@ export default function catchAuthServer(handler) {
             return handler(context);
 
         } catch (error) {
-            console.log(error);
+            console.log('catchAuthServer redirect to /authorization/login');
             return redirect('/authorization/login', resolvedUrl, req, res)
         }
 

@@ -105,11 +105,11 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
       Менеджер Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
   const optionGuardManager = [{
-    text: 'Отсутствует', code: 'EMPTY'
+    label: 'Отсутствует', value: 'EMPTY'
   }, ...users?.map((user) => {
     return {
-      text: [user.surname, user.firstName].join(' '),
-      code: user._id,
+      label: [user.surname, user.firstName].join(' '),
+      value: user._id,
     }
   })]
 
@@ -118,11 +118,11 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
       Физ.посты Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
   const optionGuardPosts = [{
-    text: 'Отсутствует', code: 'EMPTY'
+    label: 'Отсутствует', value: 'EMPTY'
   }, ...guardPosts?.map((guardPost) => {
     return {
-      text: [guardPost.number, guardPost.callsign].filter(Boolean).join(', '),
-      code: guardPost._id,
+      label: [guardPost.number, guardPost.callsign].filter(Boolean).join(', '),
+      value: guardPost._id,
     }
   })]
 
@@ -172,6 +172,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
       title={`${operation} данные охранника`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
+      className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
     >
 
       {/* Фамилия */}

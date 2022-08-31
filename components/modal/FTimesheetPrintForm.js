@@ -121,6 +121,7 @@ export function FTimesheetPrintForm({ form, setForm, MOBXui, errorCallback, guar
       title={`Выгрузка графика рабочих часов`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
+      className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
     >
       {/* Месяц и Кнопка выгрузки */}
       <div className='flex flex-col md:flex-row w-full '>

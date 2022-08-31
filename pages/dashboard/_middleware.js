@@ -19,7 +19,6 @@ function redirect( to, from ){
 
 export default catchErrorsMiddleware(async (req, ev) => {
     const refreshToken = req.cookies['refreshToken'];
-    console.log(refreshToken);
     if (refreshToken) {
 
         const verified = await jwtVerify(
@@ -45,7 +44,7 @@ export default catchErrorsMiddleware(async (req, ev) => {
 
     }
 
-    console.log('redirect to /authorization/login');
+    console.log('catchErrorsMiddleware redirect to /authorization/login');
     
     return redirect('/authorization/login', req.nextUrl.pathname);
 

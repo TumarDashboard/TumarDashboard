@@ -49,7 +49,7 @@ function refreshStore(initialData = null, isAuth) {
       _mobxUser.setUser({});
 
       if (initialData?.checkAuth) {
-
+        
         router.push({
           pathname: '/authorization/login',
           query: { from: router.asPath },

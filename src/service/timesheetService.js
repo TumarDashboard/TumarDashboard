@@ -2,7 +2,7 @@ import DTOTimesheet, { validateYup } from "../dtos/dtoTimesheet";
 import mongoConnect from "../mongo/mongoConnect";
 import { ApiError } from "../../middleware/exceptions";
 import googleDrive from "../google/api/googleDrive";
-import mongoTimesheetsModel from "../mongo/models/mongoTimesheetsModel";
+import mongoTimesheetsGuardsModel from "../mongo/models/mongoTimesheetsGuardsModel";
 import mongoUserModel from "../mongo/models/mongoUserModel";
 import mongoGuardPostsModel from "../mongo/models/mongoGuardPostsModel";
 import mongoGuardPostsArchiveModel from "../mongo/models/mongoGuardPostsArchiveModel";
@@ -10,6 +10,8 @@ import mongoGuardsModel from "../mongo/models/mongoGuardsModel";
 import mongoGuardsArchiveModel from "../mongo/models/mongoGuardsArchiveModel";
 import mongoose from "mongoose";
 import DTOGuard from "../dtos/dtoGuard";
+import mongoTimesheetsGuardPostManagersModel from "../mongo/models/mongoTimesheetsGuardPostManagersModel";
+import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
 
 class TimesheetService {
 
@@ -24,14 +26,15 @@ class TimesheetService {
                 throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
 
             });
-            const {guardPost, month, guardsRow} = timesheetsData;
 
+            const {guardPost, month, guardsRow, manager} = timesheetsData;
             //Check initials condition
             await mongoConnect();
             
+            // change mongoTimesheetsGuardsModel
             const existArray = [];
 
-            const responce = await mongoTimesheetsModel.bulkWrite([
+            await mongoTimesheetsGuardsModel.bulkWrite([
                 ...guardsRow.map(guardRow=>{
                     existArray.push(guardRow._id);
                     return {
@@ -39,7 +42,7 @@ class TimesheetService {
                             filter: {guardPost: guardPost, month: month, guard: guardRow._id},
                             update: {
                                 timesheetShifts: guardRow.timesheetShifts,
-                                timesheetDays: guardRow.timesheetDays,
+                                timesheetDays: guardRow.timesheetDays
                             },
                             upsert: true
                         }
@@ -52,7 +55,51 @@ class TimesheetService {
                 }
             ]);
 
-            return { responce }
+            // change mongoTimesheetsGuardsModel
+            if( manager && manager != 'EMPTY' ){
+
+                const user = await mongoUserModel.findById(manager);
+                
+                if( user ){
+
+                    await mongoTimesheetsGuardPostManagersModel.updateOne({
+                        guardPost: guardPost, 
+                        month: month
+                    }, {
+                        manager: user.id, 
+                        managerSheme: user.constructor.modelName
+                    }, {
+                        upsert: true
+                    });
+
+                }else{
+
+                    const userArchive = await mongoUserArchiveModel.findById(manager);
+
+                    if( userArchive ){
+
+                        await mongoTimesheetsGuardPostManagersModel.updateOne({
+                            guardPost: guardPost, 
+                            month: month
+                        }, {
+                            manager: userArchive.id, 
+                            managerSheme: userArchive.constructor.modelName
+                        }, {
+                            upsert: true
+                        });
+
+                    }else{
+
+                        throw ApiError.BadRequest(`Неккоректно указан ID менеджера: ${manager}`);
+
+                    }
+                }
+
+            }else{
+                await mongoTimesheetsGuardPostManagersModel.deleteOne({guardPost: guardPost, month: month});
+            }
+
+            return;
 
         } catch (error) {
             console.log(error);
@@ -79,7 +126,8 @@ class TimesheetService {
             //Check initials condition
             await mongoConnect();
 
-            const responce = await mongoTimesheetsModel.find({guardPost: guardPost, month: month}).populate('guard').lean();
+            //get timesheet data
+            const responce = await mongoTimesheetsGuardsModel.find({guardPost: guardPost, month: month}, null, {sort: {timesheetDays: 1}}).populate('guard').lean();
 
             const optionGuards = [];
             const guardsRow = responce.map(timesheet=>{
@@ -97,7 +145,10 @@ class TimesheetService {
                 return dtoGuard;
             });
 
-            return { guardsRow, optionGuards }
+            //get manager data
+            const timesheetsGuardPostManagers = await mongoTimesheetsGuardPostManagersModel.find({guardPost: guardPost, month: month}).lean();
+
+            return { guardsRow, optionGuards, manager: timesheetsGuardPostManagers.manager ? timesheetsGuardPostManagers.manager.toString() : "EMPTY" }
 
         } catch (error) {
             console.log(error);
@@ -126,7 +177,7 @@ class TimesheetService {
 
             const guardPosts = guardPost.map(function(el) { return mongoose.Types.ObjectId(el) })
 
-            const responce = await mongoTimesheetsModel.aggregate([
+            const responce = await mongoTimesheetsGuardsModel.aggregate([
                 { $match: {guardPost: {$in: guardPosts}, month: new Date(month)} },
                 { $lookup: {
                     from: mongoGuardsModel.collection.name,

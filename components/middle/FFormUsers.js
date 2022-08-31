@@ -61,7 +61,8 @@ export default function FFormUsers(props) {
 
                 <td className="p-2 md:border text-left block md:table-cell">
                   {user.positionsText && 
-                    <><span className="inline-block w-1/3 md:hidden font-bold">Должность</span>{user.positionsText.map(positionText=><p>{positionText}</p>)}</>
+                    <><span className="inline-block w-1/3 md:hidden font-bold">Должность</span>
+                    {user.positionsText.map(positionText=><p key={`${user._id}${positionText}`}>{positionText}</p>)}</>
                   }
                 </td>
 

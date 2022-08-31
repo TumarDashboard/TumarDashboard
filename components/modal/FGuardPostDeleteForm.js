@@ -32,6 +32,7 @@ export function FGuardPostDeleteForm({ form, setForm, submit }) {
       title={"Удаление физ. поста"}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
+      className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
     >
 
       <FTextArea
@@ -43,7 +44,7 @@ export function FGuardPostDeleteForm({ form, setForm, submit }) {
       />
 
       <span>
-        Для подтверждения действия введите <b>{form.guardPostName}</b> в поле ниже:
+        Для подтверждения действия введите <b>{form.guardPostCallsign}</b> в поле ниже:
       </span>
 
       <input
@@ -69,7 +70,7 @@ export function FGuardPostDeleteForm({ form, setForm, submit }) {
 
         <FButtonRed
           className=""
-          disabled={inputValidate != form.guardPostName}
+          disabled={inputValidate != form.guardPostCallsign}
           onClick={(e)=>submit( e, inputReason )}
         >
           Удалить

@@ -76,12 +76,15 @@ export default function FFormGuardPosts({ guardPosts, users }) {
       );
 
       setGuardPostsTable(array => {
-        array.push(responce.guardPost);
-        array.sort((a, b) => {
-          return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
-            a.number - b.number ||
-            a.callsign.localeCompare(b.callsign)
-        })
+        array.unshift(responce.guardPost);
+        // array.sort((a, b) => {    
+        //   return (a.manager === undefined || a.manager === null) - (b.manager === undefined || b.manager === null)||
+        //   a.manager.surname.localeCompare(b.manager.surname) ||
+        //   a.number - b.number 
+        //   // return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
+        //   //   a.number - b.number ||
+        //   //   a.callsign.localeCompare(b.callsign)
+        // })
         return array;
       });
 
@@ -130,15 +133,19 @@ export default function FFormGuardPosts({ guardPosts, users }) {
       );
 
       setGuardPostsTable(array => {
-        var index = array.indexOf(guardPostEditForm.guardPost);
-        if (index !== -1) {
-          array[index] = responce.guardPost;
-        }
-        array.sort((a, b) => {
-          return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
-            a.number - b.number ||
-            a.callsign.localeCompare(b.callsign)
-        })
+        array[guardPostEditForm.index] = responce.guardPost;
+        // var index = array.indexOf(guardPostEditForm.guardPost);
+        // if (index !== -1) {
+        //   array[index] = responce.guardPost;
+        // }
+        // array.sort((a, b) => {   
+        //   return (a.manager === undefined || a.manager === null) - (b.manager === undefined || b.manager === null)||
+        //   a.manager.surname.localeCompare(b.manager.surname) ||
+        //   a.number - b.number 
+        //   // return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
+        //   //   a.number - b.number ||
+        //   //   a.callsign.localeCompare(b.callsign)
+        // })
         return array;
       });
 
@@ -293,11 +300,12 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
           <tr className="border md:border-none block md:table-row absolute -top-full md:top-auto -left-full md:left-auto  md:relative">
 
-            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Номер</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Наименование</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Адрес</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">НСО</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell"></th>
+            <th className="bg-color_B p-2 text-white font-bold md:border text-center block md:table-cell">№</th>
+            <th className="bg-color_B p-2 text-white font-bold md:border text-center block md:table-cell">Позывной</th>
+            <th className="bg-color_B p-2 text-white font-bold md:border text-center block md:table-cell">Наименование</th>
+            <th className="bg-color_B p-2 text-white font-bold md:border text-center block md:table-cell">Адрес</th>
+            <th className="bg-color_B p-2 text-white font-bold md:border text-center block md:table-cell">НСО</th>
+            <th className="bg-color_B p-2 text-white font-bold md:border text-center block md:table-cell"></th>
 
           </tr>
 
@@ -305,7 +313,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
         <tbody className="block md:table-row-group">
 
-          {guardPostsTable?.map((guardPost) => {
+          {guardPostsTable?.map((guardPost,index) => {
             return (
 
               <tr 
@@ -320,7 +328,11 @@ export default function FFormGuardPosts({ guardPosts, users }) {
               }}
               >
 
-                <td className="p-2 md:border text-left block md:table-cell">
+                <td className="px-2 md:border text-center block md:table-cell">
+                    <p className="text-black ml-1 text-lg font-bold">{guardPost.number}</p>
+                </td>
+
+                <td className="px-2 md:border text-left block md:table-cell">
                   <div className="flex flex-row items-center justify-between md:justify-start">
                     {guardPost.photo && <Image
                       className="h-8 w-8 rounded-full"
@@ -329,7 +341,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                       src={guardPost.photo}
                       alt=""
                     />}
-                    <p className="font-semibold text-black ml-1 text-xl font-bold">{[guardPost.number, guardPost.callsign].filter(Boolean).join(' ')}</p>
+                    <p className="text-black ml-1 text-xl font-bold">{guardPost.callsign}</p>
                     <div className='flex md:hidden'>
 
                       <FButtonRed
@@ -375,7 +387,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                 </td>
 
                 <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
-                  <span className="break-all md:break-normal"><b className='md:hidden'>Адрес</b> {guardPost.address}</span>
+                  {guardPost.address && <span className="break-all md:break-normal"><b className='md:hidden'>Адрес</b> {guardPost.address}</span>}
                 </td>
 
                 <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
@@ -394,6 +406,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                         event.stopPropagation();
                         setGuardPostEditForm({
                           isOpen: true,
+                          index: index,
                           operation: 'Изменить',
                           key: Math.random().toString(36),
                           guardPost: guardPost
@@ -413,7 +426,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                         setGuardPostDeleteForm({
                           isOpen: true,
                           key: Math.random().toString(36),
-                          guardPostName: guardPost.name,
+                          guardPostCallsign: guardPost.callsign,
                           guardPostId: guardPost._id,
                         })
                       }}

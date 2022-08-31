@@ -8,6 +8,8 @@ import { FSelect } from "../low/FSelect";
 import { equalArrays } from '../../src/utils/arrayUtils';
 import { FInputInitials } from '../low/FInputInitials';
 import { FInputTelephone } from '../low/FInputTelephone';
+import Select from 'react-select';
+import { useId } from 'react';
 
 export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, optionGuards }) {
 
@@ -20,21 +22,7 @@ export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, option
       Менеджер Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
 
-  const [inputGuard, setInputGuard] = useState('EMPTY');
-
-  const guardChange = (e) => {
-
-    var options = e.target.options;
-    var positions = [];
-
-    for (var i = 1, l = options.length; i < l; i++) {
-      if (options[i].selected) {
-        positions.push(options[i].value);
-      }
-    }
-
-    setInputGuard(positions);
-  }
+  const [inputGuard, setInputGuard] = useState([]);
 
   /*-------------------------------------------------------------------------------------------------------
       Чистка/Обновление инпутов
@@ -44,7 +32,7 @@ export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, option
       setError(form.error);
     } else if (form.isOpen) {
       setOperation(form.operation);
-      setInputGuard(form.guard?._id || ['EMPTY']);
+      setInputGuard(form.guard?._id || null);
       setError(null);
     }
   }, [form])
@@ -56,17 +44,21 @@ export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, option
       title={`${operation} охранника`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
+      className="flex flex-col items-start p-4 w-full"
     >
 
       {/* Охранник */}
       <div className="form-item w-full mt-4 flex items-center">
-        <label className="text-lg pr-4">Охранник</label>
-        <FSelect
+        <Select
+          className="w-full"
           options={optionGuards}
-          onChange={(e) => { operation == 'Добавить'?guardChange(e): setInputGuard(e?.target?.value) }}
-          value={inputGuard ? inputGuard : 'EMPTY'}
+          onChange={setInputGuard}
+          value={inputGuard}
+          placeholder=''
           key={form.key}
-          multiple={operation == 'Добавить'}
+          id={form.key || "long-value-select"}
+          instanceId={form.key || "long-value-select"}
+          isMulti={operation == 'Добавить'}
         />
       </div>
 
@@ -88,8 +80,8 @@ export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, option
             || (inputGuard != form.guard?._id)
         )))}
           onClick={(e) => operation == 'Добавить' 
-          ? submitAdd(e,inputGuard)
-          : submitEdit(e,inputGuard)}
+          ? submitAdd(e,inputGuard.map(element=>element.value))
+          : submitEdit(e,inputGuard.value)}
         >
           {operation}
         </FButtonRed>

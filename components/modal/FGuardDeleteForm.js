@@ -32,6 +32,7 @@ export function FGuardDeleteForm({ form, setForm, submit }) {
       title={"Удаление данных охранника"}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
+      className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
     >
 
       <FTextArea

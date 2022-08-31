@@ -20,7 +20,7 @@ const modal = {
   },
 };
 
-export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, children }) {
+export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, children, className }) {
   return (
     <motion.div
       className="fixed w-full h-full top-0 left-0 bg-color_F/75 z-50"
@@ -48,7 +48,7 @@ export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, childre
 
           </div>
 
-          <div className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]">
+          <div className={className}>
 
             {children}
 

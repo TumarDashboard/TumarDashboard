@@ -12,6 +12,7 @@ import mongoGuardsArchiveModel from "../mongo/models/mongoGuardsArchiveModel";
 import mongoConnect from "../mongo/mongoConnect";
 import { ApiError } from "../../middleware/exceptions";
 import googleDrive from "../google/api/googleDrive";
+import mongoTimesheetsGuardPostManagersModel from "../mongo/models/mongoTimesheetsGuardPostManagersModel";
 
 class UserService {
 
@@ -158,41 +159,57 @@ class UserService {
 
         const dtoUser = await this.checkAuth(refreshToken, store);
 
-        const tokens = await tokenService.generateTokens({ ...dtoUser });
+        if( dtoUser.exp - dtoUser.iat > 5000 ){
 
-        await tokenService.saveToken(dtoUser.id, tokens.refreshToken);
+            const accessToken = await tokenService.generateAccessToken({ ...dtoUser });
+    
+            return { accessToken: accessToken, refreshToken: refreshToken, user: dtoUser }
 
-        return { ...tokens, user: dtoUser }
+        }else{
+
+            const tokens = await tokenService.generateTokens({ ...dtoUser });
+    
+            await tokenService.saveToken(dtoUser.id, tokens.refreshToken);
+    
+            return { ...tokens, user: dtoUser }
+
+        }
 
     }
 
     async checkAuth(refreshToken, store) {
+        try {
 
-        if (!refreshToken) {
-            console.log('отстутствует refreshToken', refreshToken );
-            throw ApiError.UnauthorizedError();
+            if (!refreshToken) {
+                console.log('отстутствует refreshToken', refreshToken );
+                throw ApiError.UnauthorizedError();
+            }
+    
+            const userData = await tokenService.validateRefreshToken(refreshToken);
+
+            await mongoConnect();
+    
+            const tokenFromDb = await tokenService.findToken(refreshToken);
+
+            if (!userData || !tokenFromDb) {
+                throw ApiError.UnauthorizedError();
+            }
+    
+            const mongoUser = await mongoUserModel.findById(userData.id, store == 'update' ? '-uiAvatarsSrc' : '').lean();
+    
+            if (!mongoUser) {
+                console.log('отстутствует mongoUser',userData, tokenFromDb, mongoUser );
+                throw ApiError.BadRequest(`При обновлении токена сессии была обнаружена ошибка`);
+            }
+    
+            // const dtoUser = new DTOUser(mongoUser);
+    
+            return userData;
+            
+        } catch (error) {
+            console.log(error, refreshToken);
+            throw error
         }
-
-        const userData = await tokenService.validateRefreshToken(refreshToken);
-        
-        await mongoConnect();
-
-        const tokenFromDb = await tokenService.findToken(refreshToken);
-
-        if (!userData || !tokenFromDb) {
-            throw ApiError.UnauthorizedError();
-        }
-
-        const mongoUser = await mongoUserModel.findById(userData.id, store == 'update' ? '-uiAvatarsSrc' : '').lean();
-
-        if (!mongoUser) {
-            console.log('отстутствует mongoUser',userData, tokenFromDb, mongoUser );
-            throw ApiError.BadRequest(`При обновлении токена сессии была обнаружена ошибка`);
-        }
-
-        const dtoUser = new DTOUser(mongoUser);
-
-        return dtoUser;
     }
 
     async getAllUsers() {
@@ -286,6 +303,8 @@ class UserService {
         await mongoGuardsArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'UserArchive'}).lean();
 
         await mongoGuardsArchiveModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
+
+        await mongoTimesheetsGuardPostManagersModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
         
         await mongoUser.delete();
 

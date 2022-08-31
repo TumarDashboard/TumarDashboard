@@ -10,8 +10,8 @@ export default catchErrorsApi( async (req, res) => {
         methods: ['POST']
       });
       
-    const data = await service.changeTimesheet( req.body );
-    console.log(data);
-    return res.json(data);
+    await service.changeTimesheet( req.body );
+    
+    return res.json('changeTimesheet is ok');
 
 })

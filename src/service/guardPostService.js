@@ -32,7 +32,7 @@ class GuardPostService {
                 delete guardPostData['photo'];
             } else {
 
-                guardPostData.photo = `https://ui-avatars.com/api/?name=${guardPostData.number ? guardPostData.number : guardPostData.name.replace(/ /ig, ',')
+                guardPostData.photo = `https://ui-avatars.com/api/?name=${guardPostData.number ? guardPostData.number : guardPostData.callsign?.replace(/ /ig, ',')
                     }&size=256&font-size=0.33&length=3&background=random`;
 
             }
@@ -107,69 +107,73 @@ class GuardPostService {
     }
 
     async editGuardPost(inputData) {
+        try {
 
-        //Validate date
-        if (inputData.number) {
-            inputData.number = parseInt(inputData.number);
+            //Validate date
+            if (inputData.number) {
+                inputData.number = parseInt(inputData.number);
+            }
+
+            const guardPostData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
+
+                throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
+
+            });
+            
+            //Google
+            if (guardPostData.photo) {
+
+                const googleDriveFileID = await googleDrive.uploadGuardPostPhoto(guardPostData.id, guardPostData.photo);
+
+                if (googleDriveFileID)
+                    guardPostData.photo = `http://drive.google.com/uc?export=view&id=${googleDriveFileID}`;
+
+            } else {
+                delete guardPostData['photo'];
+            }
+
+            //cast manager id from string to id
+            if (guardPostData.manager == 'EMPTY') {
+                guardPostData.manager = null;
+            } else if (guardPostData.manager) {
+                guardPostData.manager = new mongoose.mongo.ObjectId(guardPostData.manager);
+                guardPostData.managerSheme = 'User';
+            }
+
+            //Mongo
+            await mongoConnect();
+
+            var mongoGuardPost = await mongoGuardPostsModel.findById(guardPostData.id);
+
+            if (!mongoGuardPost) {
+                throw ApiError.BadRequest(`Физ. пост с id: ${guardPostData.id} не найден`);
+            }
+
+            if (mongoGuardPost.photo.startsWith('https://ui-avatars.com/api/?name=') &&
+                !guardPostData.photo &&
+                ((guardPostData.number && (mongoGuardPost.number != guardPostData.number))
+                    || (mongoGuardPost.callsign.localeCompare(guardPostData.callsign) != 0))) {
+
+                guardPostData.photo = `https://ui-avatars.com/api/?name=${guardPostData.number ? guardPostData.number : guardPostData.callsign.replace(/ /ig, ',')
+                    }&size=256&font-size=0.33&length=3&background=random`;
+
+            }
+
+            mongoGuardPost = await mongoGuardPostsModel.
+                findByIdAndUpdate(guardPostData.id, guardPostData, { new: true }).
+                populate('manager', 'surname firstName').lean();
+
+            //DTO
+
+            const dtoGuardPost = new DTOGuardPost(mongoGuardPost);
+
+            //Result
+
+            return { guardPost: dtoGuardPost }
+        } catch (error) {
+            console.log(error);
+            throw error;
         }
-
-        const guardPostData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
-
-            throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
-
-        });
-
-        //Google
-        if (guardPostData.photo) {
-
-            const googleDriveFileID = await googleDrive.uploadGuardPostPhoto(guardPostData.id, guardPostData.photo);
-
-            if (googleDriveFileID)
-                guardPostData.photo = `http://drive.google.com/uc?export=view&id=${googleDriveFileID}`;
-
-        } else {
-            delete guardPostData['photo'];
-        }
-
-        //cast manager id from string to id
-        if (guardPostData.manager == 'EMPTY') {
-            guardPostData.manager = null;
-        } else if (guardPostData.manager) {
-            guardPostData.manager = new mongoose.mongo.ObjectId(guardPostData.manager);
-            guardPostData.managerSheme = 'User';
-        }
-
-        //Mongo
-        await mongoConnect();
-
-        var mongoGuardPost = await mongoGuardPostsModel.findById(guardPostData.id);
-
-        if (!mongoGuardPost) {
-            throw ApiError.BadRequest(`Физ. пост с id: ${guardPostData.id} не найден`);
-        }
-
-        if (mongoGuardPost.photo.startsWith('https://ui-avatars.com/api/?name=') &&
-            !guardPostData.photo &&
-            ((guardPostData.number && (mongoGuardPost.number != guardPostData.number))
-                || (mongoGuardPost.name.localeCompare(guardPostData.name) != 0 ))) {
-
-            guardPostData.photo = `https://ui-avatars.com/api/?name=${guardPostData.number ? guardPostData.number : guardPostData.name.replace(/ /ig, ',')
-                }&size=256&font-size=0.33&length=3&background=random`;
-
-        }
-
-        mongoGuardPost = await mongoGuardPostsModel.
-                                        findByIdAndUpdate(guardPostData.id, guardPostData, { new: true }).
-                                        populate('manager', 'surname firstName').lean();
-
-        //DTO
-
-        const dtoGuardPost = new DTOGuardPost(mongoGuardPost);
-
-        //Result
-
-        return { guardPost: dtoGuardPost }
-
     }
 
     async deleteGuardPost(inputData) {

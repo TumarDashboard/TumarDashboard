@@ -16,7 +16,7 @@ export function FInputNumber({ id, className, onChange, placeholder, ...props })
 
     return (
         <div
-            className='flex flex-col'
+            className='flex relative space-x-2'
         >
             <input
                 id={id}
@@ -26,11 +26,14 @@ export function FInputNumber({ id, className, onChange, placeholder, ...props })
                 onChange={handleChange}
                 className={`${className} border border-gray-300 block w-full
                     focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
-                    rounded-md shadow-sm disabled:bg-gray-100`}
+                    rounded-md shadow-sm disabled:bg-gray-100 
+                    `}
                 {...props}
             />
             {isInputValidate ? null :
-                <p className="text-color_C text-xs italic">
+                <p className="
+                xl:absolute xl:-bottom-4 xl:-left-20 xl:w-max 
+                text-color_C text-xs italic ">
                     Кол-во цифр должно быть в диапозоне от {minlength} до {maxlength}
                 </p>
             }

@@ -9,10 +9,10 @@ export function FSelect({ options, value, className, defaultValue, ...props }) {
         >
             {options?.map((option, i) => {
                 return <option
-                    key={option.text + option.code + i}
-                    className={`${defaultValue?.includes(option.code) ? "bg-blue-200 right-0" : null}`}
-                    value={option.code}>
-                    {option.text}
+                    key={option.label + option.value + i}
+                    className={`${defaultValue?.includes(option.value) ? "bg-blue-200 right-0" : null}`}
+                    value={option.value}>
+                    {option.label}
                 </option>
             })}
         </select>

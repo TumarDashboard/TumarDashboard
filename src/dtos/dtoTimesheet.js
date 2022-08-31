@@ -10,6 +10,7 @@ export default class DTOTimesheet {
     guard;
     timesheetShifts;
     timesheetDays;
+    manager;
 
     constructor(model) {
         this._id = model._id;
@@ -18,6 +19,7 @@ export default class DTOTimesheet {
         this.guard = model.guard;
         this.timesheetShifts = model.timesheetShifts;
         this.timesheetDays = model.timesheetDays;
+        this.manager = model.manager;
     }
 
 }
@@ -46,8 +48,8 @@ export const validateYup = (dtoGuardPost, options) => {
 
 }
 
-export const changeTimesheet = async (guardPost, month, guardsRow) => {
-    return await fetchAuthMethod('/method/changeTimesheet', { guardPost, month, guardsRow });
+export const changeTimesheet = async (guardPost, month, guardsRow, manager) => {
+    return await fetchAuthMethod('/method/changeTimesheet', { guardPost, month, guardsRow, manager});
 }
 
 export const getTimesheet = async (guardPost, month) => {

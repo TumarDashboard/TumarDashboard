@@ -68,11 +68,11 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
       Менеджер Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
   const optionGuardPostManager = [{
-    text: 'Отсутствует', code: 'EMPTY'
+    label: 'Отсутствует', value: 'EMPTY'
   }, ...users?.map((user) => {
     return {
-      text: [user.surname, user.firstName].join(' '),
-      code: user._id
+      label: [user.surname, user.firstName].join(' '),
+      value: user._id
     }
   })]
 
@@ -112,33 +112,35 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
       title={`${operation} физ. пост`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
+      className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
     >
       {/* Номер и менеджер */}
-      <div className='flex flex-col md:flex-row w-full'>
+      <div className='flex flex-col xl:flex-row w-full'>
 
-        <div className="form-item flex items-center min-w-min md:mr-4">
+        <div className="form-item flex items-center xl:mr-4">
           <label className="text-lg pr-4">Номер</label>
           <FInputNumber
             id='guard-post-number'
             placeholder='###'
             value={inputGuardPostNumber ? inputGuardPostNumber : ''}
-            onChange={GuardPostNumberChange}
+            onChange={GuardPostNumberChange} 
             key={form.key}
           />
         </div>
 
-        <div className="form-item flex items-center w-full md:mr-4">
-          <label className="text-lg pr-4">Номер</label>
+        <div className="form-item flex w-full items-center mt-4 xl:mt-0 xl:mr-4">
+          {/* <label className="text-lg pr-4">Позывной</label> */}
           <FInputText
             id='guard-post-callsign'
             placeholder='Кратко'
             value={inputGuardPostCallsign ? inputGuardPostCallsign : ''}
             onChange={setInputGuardPostCallsign}
+            className="font-bold"
             key={form.key}
           />
         </div>
 
-        <div className="form-item flex items-center min-w-fit mt-4 md:mt-0">
+        <div className="form-item flex min-w-fit items-center mt-4 xl:mt-0">
           <label className="text-lg pr-4">НСО</label>
           <FSelect
             options={optionGuardPostManager}

@@ -60,15 +60,15 @@ export const validateYup = (dtoGuardPost, options) => {
                         .required('Не указано краткое наименование')
                 }
 
-                if (key === 'name') {
-                    return string()
-                        .required('Не указано наименование')
-                }
+                // if (key === 'name') {
+                //     return string()
+                //         .required('Не указано наименование')
+                // }
 
-                if (key === 'address') {
-                    return string()
-                        .required('Не указан адрес')
-                }
+                // if (key === 'address') {
+                //     return string()
+                //         .required('Не указан адрес')
+                // }
 
             }
         })
