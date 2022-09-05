@@ -46,9 +46,9 @@ const text = {
 }
 
 const info = [
-    {text:'Б Е З О П А С Н О С Т Ь ', style:'font-bold'},
-    {text:'Н Е  И М Е Е Т ', style:''},
-    {text:'Ц Е Н Ы', style:'font-bold'}
+    {text:'О Х Р А Н Н А Я', style:'font-bold'},
+    // {text:'К О М П А Н И Я', style:''},
+    {text:'К О М П А Н И Я', style:'font-bold'}
 ]
 
 export default function FAboutHello() {
