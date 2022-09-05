@@ -46,9 +46,9 @@ const text = {
 }
 
 const info = [
-    {text:'П Р И В Е Т, ', style:'font-bold'},
-    {text:'Я  Т А Л Г А Т, ', style:'font-bold'},
-    {text:'И  Я  П Р О Г Р А М М И С Т', style:''}
+    {text:'Б Е З О П А С Н О С Т Ь ', style:'font-bold'},
+    {text:'Н Е  И М Е Е Т ', style:''},
+    {text:'Ц Е Н Ы', style:'font-bold'}
 ]
 
 export default function FAboutHello() {
@@ -57,7 +57,7 @@ export default function FAboutHello() {
 
             <motion.img
                 key='FHeadSelf'
-                className="mx-auto"
+                className="mx-auto w-64"
                 src='/imageSelf.png'
                 alt="Self image"
                 initial='initial'
