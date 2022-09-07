@@ -53,7 +53,7 @@ export default function Index({ isFirstMount }) {
 
           </div>
 
-          <nav>
+          {/* <nav>
             <ul className='flex flex-row border-b-[1px] border-color_E space-x-1'>
               {tabs.map((item) => (
                 <li
@@ -71,7 +71,7 @@ export default function Index({ isFirstMount }) {
                 </li>
               ))}
             </ul>
-          </nav>
+          </nav> */}
 
         </div>
 

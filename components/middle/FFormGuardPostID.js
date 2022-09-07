@@ -18,6 +18,7 @@ import { FInputMonth } from '../low/FInputMonth';
 import { FSelect } from '../low/FSelect';
 import { array } from 'yup';
 import { getCurrentMonth } from '../../src/utils/dateUtils';
+import { FGuardRowEditFormSecond } from '../modal/FGuardRowEditFormSecond';
 
 const inputs = {
   initial: {
@@ -306,7 +307,6 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
   /*----------------------------------------------------------------------------------------------------------------------------
   ----Функция клика по Строке охранника-----------------------------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------*/
-
   const guardCellHandle = (event, guard, day) => {
 
     event.preventDefault();
@@ -907,7 +907,7 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
       </div>
 
       {/* {Форма добавления/редактирования строки охранника} */}
-      <FGuardRowEditForm
+      <FGuardRowEditFormSecond
         form={guardRowEditForm}
         setForm={setGuardRowEditForm}
         submitAdd={guardRowAdd}
