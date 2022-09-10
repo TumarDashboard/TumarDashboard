@@ -144,7 +144,7 @@ export function FGuardRowEditFormSecond({ form, setForm, submitAdd, submitEdit, 
       </div>
 
       {/* Охранник */}
-      <div className="form-item w-full mt-2 flex flex-col items-center overflow-y-auto border rounded-md">
+      <div className="form-item w-full mt-2 flex flex-col items-center min-h-[48px] overflow-y-auto border rounded-md">
         {inputFilter && inputFilter.length > 0 && inputFilter.map((value, i)=>{
           return <button
               key={"key"+i+value.value} 

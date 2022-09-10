@@ -41,6 +41,8 @@ export default function Index({ isFirstMount }) {
 
         {isFirstMount && <InitialTransition />}
 
+        {/* {selectedTab.component} */}
+         
         <div className='w-full hidden md:grid grid-cols-1 grid-rows-4 place-items-center'>
 
           <div className='row-span-3'>

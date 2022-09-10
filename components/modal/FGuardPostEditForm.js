@@ -117,7 +117,7 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
       {/* Номер и менеджер */}
       <div className='flex flex-col xl:flex-row w-full'>
 
-        <div className="form-item flex items-center xl:mr-4">
+        <div className="form-item flex items-center xl:mr-4 min-w-[150px]">
           <label className="text-lg pr-4">Номер</label>
           <FInputNumber
             id='guard-post-number'
