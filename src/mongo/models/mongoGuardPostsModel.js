@@ -36,7 +36,7 @@ export const MongooseSchema = new mongoose.Schema({
   },
 
   shifts: {
-    type: [Number]
+    type: [String]
   },
   
   description: {

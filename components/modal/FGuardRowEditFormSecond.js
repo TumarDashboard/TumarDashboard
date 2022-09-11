@@ -49,18 +49,30 @@ export function FGuardRowEditFormSecond({ form, setForm, submitAdd, submitEdit, 
 
   const [inputGuard, setInputGuard] = useState([]);   
 
-  const selectOption = (value) => {
-
-    setInputGuard(array => {
-      array.push(value);
-      return array;
-    });
+  const selectOption = (newValue) => {
 
     setInputFilter(array => {
-      return array.filter(element => value.value != element.value)});
+      if(operation=="Изменить" && inputGuard){
+        array.unshift(inputGuard);
+      }
+      return array.filter(element => newValue.value != element.value)
+    });
 
     setOptionsForWork(array => {
-      return array.filter(element => value.value != element.value)});
+      if(operation=="Изменить" && inputGuard){
+        array.unshift(inputGuard);
+      }
+      return array.filter(element => newValue.value != element.value)
+    });
+
+    if( operation=="Изменить" ){
+      setInputGuard(newValue);
+    }else{
+      setInputGuard(array => {
+        array.push(newValue);
+        return array;
+      });
+    }
 
   }  
   
@@ -85,19 +97,22 @@ export function FGuardRowEditFormSecond({ form, setForm, submitAdd, submitEdit, 
       Чистка/Обновление инпутов
   -------------------------------------------------------------------------------------------------------*/
   useEffect(() => {
+    document.body.classList.remove("overscroll-y-contain");
     if (form.error) {
       setError(form.error);
     } else if (form.isOpen) {
+      // console.log(form.guard);
       setOperation(form.operation);
-      setInputGuard(form.guard || []);
-      const options = optionGuards.map((value)=>{ 
-        const newValue = value; 
-        newValue.lower = value.label.toLowerCase(); 
-        return newValue;
-      });
-      setOptionsForWork(options);
-      setInputFilter(options);
+      setInputGuard(form.guard ? null : []);
+      // const options = optionGuards.map((value)=>{ 
+      //   const newValue = value; 
+      //   newValue.lower = value.label.toLowerCase(); 
+      //   return newValue;
+      // });
+      setOptionsForWork(optionGuards);
+      setInputFilter(optionGuards);
       setError(null);
+      document.body.classList.add("overscroll-y-contain");
     }
   }, [form])
   /*-------------------------------------------------------------------------------------------------------
@@ -105,37 +120,45 @@ export function FGuardRowEditFormSecond({ form, setForm, submitAdd, submitEdit, 
 
   return (
     <FModalForm
-      title={`${operation} охранника`}
+      title={`${operation} охранника${operation=="Изменить" && ' - ' + [form?.guard?.surname, form?.guard?.firstName].join(' ')}`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
-      className="flex flex-col items-start p-4 w-full max-h-[90vh] overflow-y-auto"
+      className="flex flex-col items-start p-4 w-full max-h-[70vh] overflow-y-auto"
     >
 
-    {/* Выбранные охранники */}
-    {inputGuard && inputGuard.length > 0 && <div className="form-item w-full flex flex-wrap mb-1">
-      {inputGuard.map((value, i)=>{
-        return <button
-            key={"key"+i+value.value} 
-            className='flex items-center justify-center 
-            border rounded-md px-2 m-1 bg-red-600 text-white 
-            hover:bg-red-700 hover:text-color_F active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200'
-            onClick={(event) => {
-              event.stopPropagation();
-              unSelectOption(value)
-            }}
-          >
-            <span className='w-fit'>{value.label}</span>
-            <XIcon
-              className='w-4 h-4'
-            />
-          </button>
-      })}
-    </div>}
+      {/* Выбранные охранники - множество*/}
+      {operation=="Добавить" && inputGuard && inputGuard.length > 0 && <div className="form-item w-full flex flex-wrap mb-1">
+        {inputGuard.map((value, i)=>{
+          return <button
+              key={"key"+i+value.value} 
+              className='flex items-center justify-center 
+              border rounded-md px-2 m-1 bg-red-600 text-white 
+              hover:bg-red-700 hover:text-color_F active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200'
+              onClick={(event) => {
+                event.stopPropagation();
+                unSelectOption(value)
+              }}
+            >
+              <span className='w-fit'>{value.label}</span>
+              <XIcon
+                className='w-4 h-4'
+              />
+            </button>
+        })}
+      </div>}
 
-      {/* Статус ошибки */}
+      {/* Выбранные охранники - одиночный */}
+      {operation=="Изменить" && inputGuard && inputGuard != form.guard?._id  && <div className="form-item w-full flex mb-1 items-center justify-center">
+        <span className="text-color_G bg-color_C rounded-md px-2">
+          Изменить на {inputGuard.label}
+        </span>
+      </div>}
+
+      {/* Фильтр */}
       <div className="form-item w-full">
         <input
           type="text"
+          key={form.key}
           placeholder="Фильтр"
           onChange={filterChange}
           className="w-full p-1
@@ -174,10 +197,9 @@ export function FGuardRowEditFormSecond({ form, setForm, submitAdd, submitEdit, 
         <FButtonRed
           className=""
           disabled={!(form.isOpen && (operation == 'Добавить' ?
-          (inputGuard != "EMPTY") :
-          ((inputGuard != "EMPTY")
-            || (inputGuard != form.guard?._id)
-        )))}
+            ( inputGuard && inputGuard.length > 0 ) :
+            ( inputGuard && inputGuard != form.guard?._id )
+          ))}
           onClick={(e) => operation == 'Добавить' 
           ? submitAdd(e,inputGuard.map(element=>element.value))
           : submitEdit(e,inputGuard.value)}

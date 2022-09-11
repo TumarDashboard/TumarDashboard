@@ -108,7 +108,7 @@ export function timesheetPrint( responce, date ) {
       rowsCount+=tableRowsCount;
 
       // Наименование таблицы
-      var tableCaptionRow = worksheet.addRow([[guardPost.number?'№'+guardPost.number:null, guardPost.callsign, guardPost.name, guardPost.address].join(', ')]);
+      var tableCaptionRow = worksheet.addRow([[guardPost.number?'№'+guardPost.number:null, guardPost.callsign, guardPost.name, guardPost.address].filter(Boolean).join(', ')]);
       var tableCustomCell = tableCaptionRow.getCell(1);
       tableCustomCell.font = Style.FontSmallBold;
       tableCustomCell.alignment = Style.AlignmentMiddleCenter;
@@ -178,7 +178,6 @@ export function timesheetPrint( responce, date ) {
           for (let i = 0; i < daysCount; i++) {
 
             tableBodyCell = tableBodyRow.getCell(3+i);
-            tableBodyCell.font = Style.FontSmall;
             tableBodyCell.alignment = Style.AlignmentMiddleCenter;
             tableBodyCell.border = Style.BorderThin;
 
@@ -187,9 +186,19 @@ export function timesheetPrint( responce, date ) {
             if( index>=0 ){
 
               let shift = parseInt(guard.timesheetShifts[index]);
-              hoursCount += shift;
 
-              tableBodyCell.value = shift;
+              if( shift >= 0 ){
+                hoursCount += shift ;
+                tableBodyCell.value = shift;
+                tableBodyCell.font = Style.FontSmall;
+              }else{
+                tableBodyCell.value = guard.timesheetShifts[index];
+                tableBodyCell.font = Style.FontSmallBold;
+              }
+
+            }else{
+
+              tableBodyCell.font = Style.FontSmall;
 
             }
           }

@@ -12,7 +12,7 @@ export function FSelectShifts({ selected, onChange }) {
 
     const addSelected = (e) => {
         if (!selected || selected.length < maxlength) {
-            onChange(arr => [...arr, e.target.value]);
+            onChange(arr => [...arr, e.target.id]);
         } else {
             setMaxSelected(true);
             setTimeout(() => { setMaxSelected(false) }, 2000)
@@ -31,12 +31,23 @@ export function FSelectShifts({ selected, onChange }) {
                 key={i}
                 className="text-center select-none font-bold hover:bg-red-600 hover:text-color_G py-1 rounded-md hover:scale-125"
                 onMouseDown={addSelected}
-                value={i}
+                id={i}
             >
                 {i}
             </li>
         )
     }
+
+    list.push(
+        <li
+            key={"B"}
+            className="text-center select-none font-bold hover:bg-red-600 hover:text-color_G py-1 rounded-md hover:scale-125"
+            onMouseDown={addSelected}
+            id={"B"}
+        >
+            B
+        </li>
+    )
 
     return (
         <div
