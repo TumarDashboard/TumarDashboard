@@ -151,7 +151,7 @@ class GuardPostService {
 
             if (mongoGuardPost.photo.startsWith('https://ui-avatars.com/api/?name=') &&
                 !guardPostData.photo &&
-                ((guardPostData.number && (mongoGuardPost.number != guardPostData.number))
+                ((mongoGuardPost.number != guardPostData.number)
                     || (mongoGuardPost.callsign.localeCompare(guardPostData.callsign) != 0))) {
 
                 guardPostData.photo = `https://ui-avatars.com/api/?name=${guardPostData.number ? guardPostData.number : guardPostData.callsign.replace(/ /ig, ',')

@@ -54,7 +54,6 @@ class TimesheetService {
                     }
                 }
             ]);
-
             // change mongoTimesheetsGuardsModel
             if( manager && manager != 'EMPTY' ){
 
@@ -147,8 +146,8 @@ class TimesheetService {
 
             //get manager data
             const timesheetsGuardPostManagers = await mongoTimesheetsGuardPostManagersModel.find({guardPost: guardPost, month: month}).lean();
-
-            return { guardsRow, optionGuards, manager: timesheetsGuardPostManagers.manager ? timesheetsGuardPostManagers.manager.toString() : "EMPTY" }
+            const manager = timesheetsGuardPostManagers && timesheetsGuardPostManagers.length>0 ? timesheetsGuardPostManagers[0].manager.toString() : "EMPTY";
+            return { guardsRow, optionGuards, manager}
 
         } catch (error) {
             console.log(error);

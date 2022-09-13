@@ -71,9 +71,6 @@ export default function FFormGuards({ guards, guardPosts, users }) {
 
       setGuardsTable(array => {
         array.unshift(responce.guard);
-        // array.sort((a, b) => {
-        //   return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
-        // })
         return array;
       });
 
@@ -121,14 +118,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
       );
 
       setGuardsTable(array => {
-        array[guardEditForm.index] = responce.guardPost;
-        // var index = array.indexOf(guardEditForm.guard);
-        // if (index !== -1) {
-        //   array[index] = responce.guard;
-        // }
-        // array.sort((a, b) => {
-        //   return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
-        // })
+        array[guardEditForm.index] = responce.guard;
         return array;
       });
 

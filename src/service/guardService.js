@@ -170,12 +170,11 @@ class GuardService {
         }
 
         if (mongoGuard.uiAvatarsSrc.startsWith('https://ui-avatars.com/api/?name=') &&
-            !guardPostData.uiAvatarsSrc &&
-            ((mongoGuardPost.surname.localeCompare(guardPostData.surname) != 0 )
-                || (mongoGuardPost.firstName.localeCompare(guardPostData.firstName) != 0 ))) {
-
+            !guardData.uiAvatarsSrc &&
+            ((guardData.surname.localeCompare(mongoGuard.surname) != 0 )
+                || (guardData.firstName.localeCompare(mongoGuard.firstName) != 0 ))) {
+            
             guardData.uiAvatarsSrc = `https://ui-avatars.com/api/?name=${guardData.surname}+${guardData.firstName}&size=256&font-size=0.33&length=2&background=random`;
-
         }
 
         mongoGuard = await mongoGuardsModel.
@@ -198,7 +197,6 @@ class GuardService {
         //DTO
 
         const dtoGuard = new DTOGuard(mongoGuard);
-
         //Result
 
         return { guard: dtoGuard }

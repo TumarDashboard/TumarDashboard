@@ -100,7 +100,7 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
         setTimesheetTableHeader(getDaysFromMonth(value));
 
         const { guardsRow, optionGuards, manager } = await getTimesheet(guardPost._id, value);
-
+        console.log(manager);
         if (value == currentMonth) {
           setInputGuardPostManager(guardPost.manager ? guardPost.manager._id : 'EMPTY')
         } else {
@@ -134,14 +134,14 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
 
       if (timesheetTableBody.length > 0) {
         setOptionGuards(array => {
-          return array.concat(timesheetTableBody.map(guard => {
+          return timesheetTableBody.map(guard => {
             const text = [guard.surname, guard.firstName].join(' ');
             return {
               label: text,
               value: guard._id,
               lower: text.toLowerCase()
             }
-          }))
+          }).concat(array)
         });
       } else {
         setOptionGuards(guards?.map(guard => {
@@ -443,6 +443,10 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
         inputGuardPostDescription
       );
 
+      if( responce.guardPost?.manager._id != guardPostData.manager._id){
+        setTimesheetChanged(false);
+      }
+
       setGuardPostData(responce.guardPost);
 
       setGuardPostDataShifts(responce.guardPost?.shifts?.length > 0 ? [...new Set(responce.guardPost.shifts)].map(String) : ['8']);
@@ -454,8 +458,6 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
       }
 
       setGuardPostEditForm({ isOpen: false });
-
-      setTimesheetChanged(false);
 
     } catch (error) {
 
@@ -916,9 +918,11 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
                       var shift;
                       if( indexInTimesheetDays >= 0 ){
                         shift = guard.timesheetShifts[indexInTimesheetDays];
-                        shiftsCount++;
                         let shiftHours = parseInt(shift);
-                        hoursCount += shiftHours >= 0 ? shiftHours : 0;
+                        if(shiftHours>=0){
+                          shiftsCount++;
+                          hoursCount += shiftHours;
+                        }
                       }
                       return <td
                         key={i}
