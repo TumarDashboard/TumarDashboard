@@ -34,7 +34,7 @@ function refreshStore(initialData = null, isAuth) {
   const router = useRouter();
 
   const { data, error } = useSWR(`/authorization/refresh?store=${isAuth ? 'update' : 'initialize'}`, fetchAuth, { shouldRetryOnError: false });
-
+  
   const _mobxUser = mobxUser ?? new MOBXuser();
   const _mobxUI = mobxUI ?? new MOBXui();
 
@@ -45,17 +45,17 @@ function refreshStore(initialData = null, isAuth) {
       console.log(error);
 
       localStorage.removeItem('token');
-      _mobxUser.setAuth(false);
-      _mobxUser.setUser({});
+      // _mobxUser.setAuth(false);
+      // _mobxUser.setUser({});
 
-      if (initialData?.checkAuth) {
+      // if (initialData?.checkAuth ) {
         
-        router.push({
-          pathname: '/authorization/login',
-          query: { from: router.asPath },
-        }, undefined, { shallow: true });
+      //   router.push({
+      //     pathname: '/authorization/login',
+      //     query: { from: router.asPath },
+      //   }, undefined, { shallow: true });
 
-      }
+      // }
 
     } else if (data) {
 

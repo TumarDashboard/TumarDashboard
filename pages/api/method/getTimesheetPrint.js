@@ -10,13 +10,14 @@ export default catchErrorsApi( async (req, res) => {
         methods: ['POST']
       });
       
-    const data = await service.getTimesheetPrint( req.body );
-
+    const {document, googleDriveFileID} = await service.getTimesheetPrint( req.body );
+    
     res.writeHead(200, {
-        'Content-Type': 'vnd.ms-excel'
+        'Content-Type': 'vnd.ms-excel',
+        'googleDriveFileID': googleDriveFileID
     });
 
-    await data.write(res);
+    await document.write(res);
         
     return res.end();
 

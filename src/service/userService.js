@@ -313,6 +313,30 @@ class UserService {
         return await tokenService.removeTokenByID(requestData.id);
 
     }
+
+    async getUsersInitialsWithPositions(positions){
+
+        if( !positions || positions.length == 0 )
+            return {};
+
+        await mongoConnect();
+
+        const users = await mongoUserModel.find({positions: {"$in": positions}}, 'surname firstName patronymic positions').lean();
+
+        const result = {};
+
+        for (const position of positions) {
+            const usersOnPosition = users.filter((user)=>user.positions.includes(position));
+            result[position] = usersOnPosition.length > 0 ? [
+                usersOnPosition[0].surname,
+                usersOnPosition[0].firstName?.length > 0 ? usersOnPosition[0].firstName.charAt(0) + '.' : null,
+                usersOnPosition[0].patronymic?.length > 0 ? usersOnPosition[0].patronymic.charAt(0) + '.' : null,
+              ].filter(Boolean).join(' ') : '';
+        }
+
+        return result;
+
+    }
 }
 
 export default new UserService();

@@ -13,12 +13,11 @@ import { editGuardPost, deleteGuardPost } from '../../src/dtos/dtoGuardPost';
 import { changeTimesheet, getTimesheet } from '../../src/dtos/dtoTimesheet';
 import { FGuardPostDeleteForm } from '../modal/FGuardPostDeleteForm';
 import { FGuardPostEditForm } from '../modal/FGuardPostEditForm';
-import { FGuardRowEditForm } from '../modal/FGuardRowEditForm';
 import { FInputMonth } from '../low/FInputMonth';
 import { FSelect } from '../low/FSelect';
 import { array } from 'yup';
 import { getCurrentMonth, getDaysFromMonth } from '../../src/utils/dateUtils';
-import { FGuardRowEditFormSecond } from '../modal/FGuardRowEditFormSecond';
+import { FGuardRowEditForm } from '../modal/FGuardRowEditForm';
 
 const inputs = {
   initial: {
@@ -34,6 +33,8 @@ const inputs = {
     },
   },
 };
+
+var isDrag = false;
 
 export default function FFormGuardPostID({ guardPost, guards, users, usersAll }) {
   /*-------------------------------------------------------------------------------------------------------
@@ -279,7 +280,7 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
 
       setOptionGuards(array => {
         const text = [deletedGuard.surname, deletedGuard.firstName].join(' ');
-        array.push({
+        array.unshift({
           label: text,
           value: deletedGuard._id,
           lower: text.toLowerCase()
@@ -699,6 +700,8 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
       {/* {Таблица физ. постов} */}
       <div
         className='flex-initial flex overflow-auto z-30 min-h-max max-h-screen'
+        // style={{'touch-action': 'none'}}
+        ref={constraintsRef}
       >
         <div
           className='flex-1 w-0'
@@ -788,7 +791,6 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
             {/* Тело таблицы */}
             {timesheetTableBody.length > 0 &&
               <tbody
-                ref={constraintsRef}
                 className="block md:table-row-group z-10"
               >
                 
@@ -798,16 +800,18 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
                   drag="y"
                   dragControls={dragControls}
                   dragConstraints={constraintsRef}
-                  dragMomentum={true}
                   onPointerUp={event => {
+                    constraintsRef.current.style.touchAction = '';
                     setCurrentIndexDrag(-1);
                     setCurrentOffset(0);
                   }}
                   onDragEnd={(event, info) => {
+                    constraintsRef.current.style.touchAction = '';
                     setCurrentIndexDrag(-1);
                     setCurrentOffset(0);
                   }}
                   onDrag={(event, info) => {
+                    // event.preventDefault();
                     if (currentIndexDrag>-1 && Math.abs(info.offset.y - currentOffset) > 32) {
                       if (info.offset.y < currentOffset && currentIndexDrag > 0) {
                         setCurrentOffset(info.offset.y);
@@ -830,7 +834,7 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
                       }
                     }
                   }}
-                  className={`text-center z-50 fixed opacity-20
+                  className={`text-center z-50 fixed opacity-50
                   `}
                 >
                   {currentIndexDrag >= 0 && <div className="flex flex-row items-center justify-between w-full">
@@ -859,11 +863,18 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
                   >
                     <td
                       onPointerDown={event => {
+                        constraintsRef.current.style.touchAction = 'none';
                         setCurrentOffset(0);
                         setCurrentIndexDrag(index);
                         dragControls.start(event, { snapToCursor: true })
                       }}
                       onPointerUp={event => {
+                        constraintsRef.current.style.touchAction = '';
+                        setCurrentIndexDrag(-1);
+                        setCurrentOffset(0);
+                      }}
+                      onPointerCancel={event => {
+                        constraintsRef.current.style.touchAction = '';
                         setCurrentIndexDrag(-1);
                         setCurrentOffset(0);
                       }}
@@ -899,7 +910,7 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
                             }}
                           >
                             <PencilAltIcon
-                              className="h-4 w-4 fill-orange-800"
+                              className="h-6 w-6 fill-orange-800"
                             />
                           </button>
                           <button
@@ -907,7 +918,7 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
                             onClick={(event) => guardRowDelete(event, guard)}
                           >
                             <TrashIcon
-                              className="h-4 w-4"
+                              className="h-6 w-6"
                             />
                           </button>
                         </div>
@@ -952,7 +963,7 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
               <tfoot className='block md:table-footer-group'>
                 <tr className="block md:table-row absolute -top-full md:top-auto -left-full 
                 md:left-auto md:relative z-10">
-                  <td className="bg-color_B p-2 block md:table-cell left-0 sticky border-r-[1px]">
+                  <td className="bg-color_B p-2 block md:table-cell left-0 sticky border-r-[1px] select-none">
                     <button
                       className='flex items-center justify-center align-middle text-white text-center w-full disabled:opacity-25'
                       onClick={(event) => {
@@ -975,7 +986,7 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
                     </span>
                   </td>
                   <td
-                    className="bg-color_B p-2 block md:table-cell right-0 sticky"
+                    className="bg-color_B p-2 block md:table-cell right-0 sticky select-none"
                     colSpan={5}
                   >
                     <div className='flex justify-center'>
@@ -1001,7 +1012,7 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
       </div>
 
       {/* {Форма добавления/редактирования строки охранника} */}
-      <FGuardRowEditFormSecond
+      <FGuardRowEditForm
         form={guardRowEditForm}
         setForm={setGuardRowEditForm}
         submitAdd={guardRowAdd}

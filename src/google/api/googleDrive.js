@@ -2,6 +2,7 @@ import { google } from 'googleapis';
 import OAUTH2Client from '../googleConnect';
 import fs from 'fs';
 import stream from 'stream';
+import { getCurrentTimeStamp } from '../../utils/dateUtils';
 
 class GoogleDrive {
 
@@ -163,6 +164,31 @@ class GoogleDrive {
     if (existsFile) {
       this.deleteFile(existsFile);
     }
+  }
+
+  //function to upload the excel timesheet file
+  async uploadExcelTimesheet(document, month) {
+
+    await OAUTH2Client.checkAuth();
+    
+    // const buffer = Buffer.from(data, 'base64');
+    const bufferStream = new stream.PassThrough();
+    
+    await document.write(bufferStream);
+
+    bufferStream.end();
+
+    const response = await this.drive.files.create({
+      requestBody: {
+        name: `Табель-${month}-${getCurrentTimeStamp()}.xlsx`,
+        parents: [process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHIFTS]
+      },
+      media: {
+        body: bufferStream,
+      },
+    });
+
+    return response.data.id;
   }
 
 }

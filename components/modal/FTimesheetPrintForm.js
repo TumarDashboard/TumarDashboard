@@ -14,7 +14,6 @@ import { equalArrays } from '../../src/utils/arrayUtils';
 import { getCurrentMonth } from '../../src/utils/dateUtils';
 import { FInputMonth } from '../low/FInputMonth';
 import { getTimesheetPrint } from '../../src/dtos/dtoTimesheet';
-import { timesheetPrint } from '../../src/utils/timesheetUtils';
 import { ApiError } from '../../middleware/exceptions';
 
 export function FTimesheetPrintForm({ form, setForm, MOBXui, errorCallback, guardPosts }) {
@@ -49,19 +48,19 @@ export function FTimesheetPrintForm({ form, setForm, MOBXui, errorCallback, guar
 
     MOBXui.setLoading();
 
-    var responce;
-
     try {
 
-      responce = await getTimesheetPrint(guardPosts.map(value=>value._id), timesheetMonth);
-    
-      var xlsblob = await responce.blob();
+      const responce = await getTimesheetPrint(guardPosts.map(value=>value._id), timesheetMonth);
+
+      const googleDriveFileID = responce.headers.get('googleDriveFileID');
+
+      const xlsblob = await responce.blob();
       
-      var xlsName = 'Табель-' + timesheetMonth + '.xlsx';
+      const xlsName = 'Табель-' + timesheetMonth + '.xlsx';
 
-      var url = window.URL.createObjectURL(xlsblob);
+      const url = window.URL.createObjectURL(xlsblob);
 
-      setFile({ url: url, name: xlsName, file: new File([xlsblob], xlsName + '.csv', {type: 'text/csv'}) });
+      setFile({ url: url, name: xlsName, googleDriveFileID: googleDriveFileID ? googleDriveFileID : null });
 
     } catch (error) {
     
@@ -87,8 +86,7 @@ export function FTimesheetPrintForm({ form, setForm, MOBXui, errorCallback, guar
     try {
 
       await navigator.share({
-        title: file.name,
-        files: [file.file],
+        url: file.googleDriveFileID
       })
 
     } catch (error) {
@@ -166,7 +164,7 @@ export function FTimesheetPrintForm({ form, setForm, MOBXui, errorCallback, guar
           </a>
         </div>
 
-        {navigator?.canShare && 
+        {navigator?.canShare && file.googleDriveFileID &&
         <div className="form-item justify-start ml-2">
           <button
               className="items-center justify-start h-10 px-2 py-1 bg-white

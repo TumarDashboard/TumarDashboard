@@ -13,7 +13,8 @@ import DTOGuard from "../dtos/dtoGuard";
 import mongoTimesheetsGuardPostManagersModel from "../mongo/models/mongoTimesheetsGuardPostManagersModel";
 import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
 import { FPositionBUH, FPositionHRM, FPositionZDIR } from "../../components/variable/FPositionItemList";
-import { timesheetPrint, timesheetPrintServer } from "../utils/timesheetUtils";
+import { timesheetPrintServer } from "../utils/timesheetUtils";
+import userService from "./userService";
 
 class TimesheetService {
 
@@ -331,34 +332,14 @@ class TimesheetService {
             }
 
             // Добавляем данные о пользователях
-            const users = await mongoUserModel.find({positions: {"$in": [FPositionZDIR, FPositionHRM, FPositionBUH]}}, 'surname firstName patronymic positions').lean();
+            const usersOnPosition = await userService.getUsersInitialsWithPositions([FPositionZDIR, FPositionHRM, FPositionBUH]);
 
-            const usersZDIR = users.filter((user)=>user.positions.includes(FPositionZDIR));
-            const usersHRM = users.filter((user)=>user.positions.includes(FPositionHRM));
-            const usersBUH = users.filter((user)=>user.positions.includes(FPositionBUH));
-
-            const userZDIR = usersZDIR.length > 0 ? [
-                usersZDIR[0].surname,
-                usersZDIR[0].firstName?.length > 0 ? usersZDIR[0].firstName.charAt(0) + '.' : null,
-                usersZDIR[0].patronymic?.length > 0 ? usersZDIR[0].patronymic.charAt(0) + '.' : null,
-              ].filter(Boolean).join(' ') : '';
-
-            const userHRM = usersHRM.length > 0 ? [
-                usersHRM[0].surname,
-                usersHRM[0].firstName?.length > 0 ? usersHRM[0].firstName.charAt(0) + '.' : null,
-                usersHRM[0].patronymic?.length > 0 ? usersHRM[0].patronymic.charAt(0) + '.' : null,
-            ].filter(Boolean).join(' ') : '';
-
-            const userBUH = usersBUH.length > 0 ? [
-                usersBUH[0].surname,
-                usersBUH[0].firstName?.length > 0 ? usersBUH[0].firstName.charAt(0) + '.' : null,
-                usersBUH[0].patronymic?.length > 0 ? usersBUH[0].patronymic.charAt(0) + '.' : null,
-                ].filter(Boolean).join(' ') : '';
-            
             // Формируем документ из полученных данных
-            const document = timesheetPrintServer( responce, {userZDIR,userHRM,userBUH} , date );
+            const document = timesheetPrintServer( responce, usersOnPosition , date );
 
-            return document;
+            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=${await googleDrive.uploadExcelTimesheet( document, month )}`;
+
+            return {document, googleDriveFileID};
 
         } catch (error) {
             console.log(error);

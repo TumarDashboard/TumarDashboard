@@ -42,11 +42,12 @@ module.exports = async (phase, { defaultConfig }) => {
             // #JWT config for redirect auth token
             NEXT_PUBLIC_JWT_REDIRECT_AUTH_EXPIRES_IN: '5m',
             
-            // #Google Drive info
+            // #Google Drive info 
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_DASHBOARD: '1s2KFHjOhXQ9kQ8QcGGofR47PeFNwhD2j',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS: '1oWbuTn70nfV9UMQ90KrIKO4yKbmm4nH0',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS: '16VCgeX_BbwS5UpWdhO0o8loLSPafBPCL',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDS: '1efI0RWRTXHfz4pMz5Nvjna4HFc4ULlmq',
+            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHIFTS: '13nNbh8tsyo-MHAbcLFfdEveO6MW-Dt7r',
         },
 
         images: {
