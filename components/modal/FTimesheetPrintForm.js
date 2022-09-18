@@ -15,6 +15,7 @@ import { getCurrentMonth } from '../../src/utils/dateUtils';
 import { FInputMonth } from '../low/FInputMonth';
 import { getTimesheetPrint } from '../../src/dtos/dtoTimesheet';
 import { timesheetPrint } from '../../src/utils/timesheetUtils';
+import { ApiError } from '../../middleware/exceptions';
 
 export function FTimesheetPrintForm({ form, setForm, MOBXui, errorCallback, guardPosts }) {
 
@@ -48,32 +49,32 @@ export function FTimesheetPrintForm({ form, setForm, MOBXui, errorCallback, guar
 
     MOBXui.setLoading();
 
+    var responce;
+
     try {
 
-      const responce = await getTimesheetPrint(guardPosts.map(value=>value._id), timesheetMonth);
-
-      const date = new Date(timesheetMonth);
-
-      const buffer = await timesheetPrint( responce, date );
-
-      var xlsName = 'Табель.' + date.toLocaleDateString().replace('/','-')+'.xlsx';
-      var xlsblob = new Blob([buffer], {type:"application/octet-stream"}, xlsName);
+      responce = await getTimesheetPrint(guardPosts.map(value=>value._id), timesheetMonth);
+    
+      var xlsblob = await responce.blob();
+      
+      var xlsName = 'Табель-' + timesheetMonth + '.xlsx';
 
       var url = window.URL.createObjectURL(xlsblob);
 
-      setFile({ url: url, name: xlsName, file: new File([xlsblob], xlsName, {type: 'vnd.ms-excel'}) })
+      setFile({ url: url, name: xlsName, file: new File([xlsblob], xlsName + '.csv', {type: 'text/csv'}) });
 
     } catch (error) {
-
+    
       setFile({});
 
       errorCallback(error, setForm);
 
     } finally {
-
+  
       MOBXui.setLoading();
 
     }
+
   }
   
   /*-------------------------------------------------------------------------------------------------------
@@ -86,15 +87,16 @@ export function FTimesheetPrintForm({ form, setForm, MOBXui, errorCallback, guar
     try {
 
       await navigator.share({
+        title: file.name,
         files: [file.file],
-        title: file.name
       })
 
     } catch (error) {
 
-      setFile({});
+      // setFile({});
+      console.log(error);
 
-      errorCallback(error, setForm);
+      errorCallback(ApiError.FileCreateError( error ), setForm);
 
     } 
   }

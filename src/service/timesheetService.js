@@ -12,6 +12,8 @@ import mongoose from "mongoose";
 import DTOGuard from "../dtos/dtoGuard";
 import mongoTimesheetsGuardPostManagersModel from "../mongo/models/mongoTimesheetsGuardPostManagersModel";
 import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
+import { FPositionBUH, FPositionHRM, FPositionZDIR } from "../../components/variable/FPositionItemList";
+import { timesheetPrint, timesheetPrintServer } from "../utils/timesheetUtils";
 
 class TimesheetService {
 
@@ -162,22 +164,26 @@ class TimesheetService {
         try {
 
             //Validate date
-
             const timesheetsData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
                 throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
 
             });
 
+            //Извлечение параметров для формирования
             const {guardPost, month} = timesheetsData;
+            
+            const date = new Date(month);
 
             //Check initials condition
             await mongoConnect();
 
-            const guardPosts = guardPost.map(function(el) { return mongoose.Types.ObjectId(el) })
+            // Формируем ObjectID из списка guardPost на фильтр
+            const guardPosts = guardPost.map(function(el) { return mongoose.Types.ObjectId(el) });
 
-            const responce = await mongoTimesheetsGuardsModel.aggregate([
-                { $match: {guardPost: {$in: guardPosts}, month: new Date(month)} },
+            // Сначала запрашиваем данные из таблицы с ГРАФИКАМИ СМЕН
+            const responceTimesheetsGuardsModel = await mongoTimesheetsGuardsModel.aggregate([
+                { $match: {guardPost: {$in: guardPosts}, month: date} },
                 { $lookup: {
                     from: mongoGuardsModel.collection.name,
                     localField: 'guard',
@@ -225,6 +231,7 @@ class TimesheetService {
                  }},    
                 { $unwind: { path : "$guardPost" } },
                 { $replaceRoot: { newRoot: {
+                    _id: "$_id",
                     name: "$guardPost.name",
                     address: "$guardPost.address",
                     number: "$guardPost.number",
@@ -234,7 +241,124 @@ class TimesheetService {
                 { $sort : { number : 1, callsign: 1 } }
             ]);
 
-            return { ...responce }
+            // Переводим ObjectID найденных ФИЗ. ПОСТОВ с имеющимися ГРАФИКАМИ СМЕН
+            const responceTimesheetsGuardsLean = responceTimesheetsGuardsModel.map((element, index)=>{
+                element._id = element._id.toString();
+                return element;
+            })
+
+            // Запрашиваем данные об имеющихся НСО на искомый ПЕРИОД по данным ФИЗ. ПОСТОВ
+            const responceTimesheetsGuardPostManagersModel  = await mongoTimesheetsGuardPostManagersModel.aggregate([
+                { $match: {guardPost: {$in: guardPosts}, month: date} },
+                { $group: { 
+                    _id: '$manager',
+                    managerSheme: { $first: "$managerSheme" },
+                    guardPosts: { $push: {
+                        guardPost: "$guardPost",
+                    }}
+                }},
+                { $lookup: {
+                    from: mongoUserModel.collection.name,
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'user'
+                }},
+                { $lookup: {
+                    from: mongoUserArchiveModel.collection.name,
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'userArchive'
+                }},
+                {$project: {
+                    guardPosts: 1,
+                    user:{$setUnion: [ "$user", "$userArchive" ]}
+                    }},         
+                { $unwind: { path : "$user" } }, 
+                { $replaceRoot: { newRoot: {
+                    surname: "$user.surname",
+                    firstName: "$user.firstName",
+                    patronymic: "$user.patronymic",
+                    guardPosts: "$guardPosts"
+                } } },
+            ]);
+
+            // Инициируем список индексов с графиками смен, для которых есть НСО
+            const responceTimesheetsGuardsIncludeManagerIndex = [];
+
+            // Формируем ответ, сопоставляя найденных НСО с графиками ФИЗ. ПОСТОВ
+            const responce = responceTimesheetsGuardPostManagersModel.reduce((result, element)=>{
+
+                element.guardPosts = element.guardPosts.map((guardPost)=>{
+                    return guardPost.guardPost.toString();
+                })
+                
+                const guardPosts = responceTimesheetsGuardsLean.filter((guardPost, index)=>{
+
+                    const guardPostInclude = element.guardPosts.includes(guardPost._id);
+
+                    if( guardPostInclude ){
+                        responceTimesheetsGuardsIncludeManagerIndex.push(index);
+                    }
+
+                    return guardPostInclude;
+
+                });
+
+                if( guardPosts.length > 0 ){
+                    result.push({
+                        surname: element.surname,
+                        firstName: element.firstName,
+                        patronymic: element.patronymic,
+                        guardPosts: guardPosts
+                    })
+                }
+
+                return result;
+
+            }, []);
+
+            // Формируем список ФИЗ. ПОСТОВ без НСО
+            const guardPostsEmptyManager = responceTimesheetsGuardsLean.filter((guardPost, index)=>!responceTimesheetsGuardsIncludeManagerIndex.includes(index));
+
+            // Добавляем данные о ФИЗ. ПОСТАХ без НСО
+            if( guardPostsEmptyManager.length > 0 ){
+                responce.push({
+                    surname: '',
+                    firstName: '',
+                    patronymic: '',
+                    guardPosts: guardPostsEmptyManager
+                })
+            }
+
+            // Добавляем данные о пользователях
+            const users = await mongoUserModel.find({positions: {"$in": [FPositionZDIR, FPositionHRM, FPositionBUH]}}, 'surname firstName patronymic positions').lean();
+
+            const usersZDIR = users.filter((user)=>user.positions.includes(FPositionZDIR));
+            const usersHRM = users.filter((user)=>user.positions.includes(FPositionHRM));
+            const usersBUH = users.filter((user)=>user.positions.includes(FPositionBUH));
+
+            const userZDIR = usersZDIR.length > 0 ? [
+                usersZDIR[0].surname,
+                usersZDIR[0].firstName?.length > 0 ? usersZDIR[0].firstName.charAt(0) + '.' : null,
+                usersZDIR[0].patronymic?.length > 0 ? usersZDIR[0].patronymic.charAt(0) + '.' : null,
+              ].filter(Boolean).join(' ') : '';
+
+            const userHRM = usersHRM.length > 0 ? [
+                usersHRM[0].surname,
+                usersHRM[0].firstName?.length > 0 ? usersHRM[0].firstName.charAt(0) + '.' : null,
+                usersHRM[0].patronymic?.length > 0 ? usersHRM[0].patronymic.charAt(0) + '.' : null,
+            ].filter(Boolean).join(' ') : '';
+
+            const userBUH = usersBUH.length > 0 ? [
+                usersBUH[0].surname,
+                usersBUH[0].firstName?.length > 0 ? usersBUH[0].firstName.charAt(0) + '.' : null,
+                usersBUH[0].patronymic?.length > 0 ? usersBUH[0].patronymic.charAt(0) + '.' : null,
+                ].filter(Boolean).join(' ') : '';
+            
+            // Формируем документ из полученных данных
+            const document = timesheetPrintServer( responce, {userZDIR,userHRM,userBUH} , date );
+
+            return document;
 
         } catch (error) {
             console.log(error);

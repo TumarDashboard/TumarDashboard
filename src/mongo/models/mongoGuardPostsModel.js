@@ -26,12 +26,12 @@ export const MongooseSchema = new mongoose.Schema({
 
   manager:{
     type: mongoose.Schema.Types.ObjectId, 
-    // ref: 'User'
     refPath: 'managerSheme'
   },
 
   managerSheme:{
     type: String,
+    default: 'User',
     enum: ['User', 'UserArchive']
   },
 

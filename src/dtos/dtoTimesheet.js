@@ -1,5 +1,5 @@
 import { object, lazy, string } from "yup";
-import { fetchAuthMethod } from "../../middleware/requests";
+import { fetchAuthFileMethod, fetchAuthMethod } from "../../middleware/requests";
 import { mapValue } from "../utils/arrayUtils";
 
 export default class DTOTimesheet {
@@ -57,5 +57,5 @@ export const getTimesheet = async (guardPost, month) => {
 }
 
 export const getTimesheetPrint = async (guardPost, month) => {
-    return await fetchAuthMethod('/method/getTimesheetPrint', { guardPost, month });
+    return await fetchAuthFileMethod('/method/getTimesheetPrint', { guardPost, month });
 }

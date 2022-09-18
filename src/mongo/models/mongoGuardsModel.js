@@ -30,6 +30,7 @@ export const MongooseSchema = new mongoose.Schema({
 
   managerSheme:{
     type: String,
+    default: 'User',
     enum: ['User', 'UserArchive']
   },
 

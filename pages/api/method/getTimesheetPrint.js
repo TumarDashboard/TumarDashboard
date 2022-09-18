@@ -11,7 +11,13 @@ export default catchErrorsApi( async (req, res) => {
       });
       
     const data = await service.getTimesheetPrint( req.body );
-    
-    return res.json(data);
+
+    res.writeHead(200, {
+        'Content-Type': 'vnd.ms-excel'
+    });
+
+    await data.write(res);
+        
+    return res.end();
 
 })

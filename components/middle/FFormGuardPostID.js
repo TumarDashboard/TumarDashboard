@@ -97,10 +97,11 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
     try {
 
       if (value) {
+
         setTimesheetTableHeader(getDaysFromMonth(value));
 
         const { guardsRow, optionGuards, manager } = await getTimesheet(guardPost._id, value);
-        console.log(manager);
+        
         if (value == currentMonth) {
           setInputGuardPostManager(guardPost.manager ? guardPost.manager._id : 'EMPTY')
         } else {
@@ -854,7 +855,7 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
                   var hoursCount = 0;
                   return <tr
                     key={guard._id}
-                    className={`block md:table-row mb-2 ${(index & 1) ? "bg-stone-50" : "bg-stone-100"}`}
+                    className={`block md:table-row mb-2 ${(index & 1) ? "bg-stone-50" : "bg-stone-200"}`}
                   >
                     <td
                       onPointerDown={event => {
@@ -867,7 +868,7 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
                         setCurrentOffset(0);
                       }}
                       className={`text-center block md:table-cell border-b-[1px] border-r-[1px] left-0 sticky
-                          ${(index & 1) ? "bg-stone-50" : "bg-stone-100"}
+                          ${(index & 1) ? "bg-stone-50" : "bg-stone-200"}
                           ${currentIndexDrag == index && "drop-shadow-md scale-105 sepia z-40"}
                         `}
                     >

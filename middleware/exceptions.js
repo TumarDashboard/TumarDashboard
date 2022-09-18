@@ -39,6 +39,10 @@ export class ApiError extends Error {
         return new ApiError( 520, JSON.stringify({message:"Ошибка доступа к облаку Google", email, authorizeUrl}) );
     }
 
+    static FileCreateError(message) {
+        return new ApiError(400, message);
+    }
+
 }
 
 export function catchErrorsApi(handler) {
