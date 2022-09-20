@@ -11,7 +11,7 @@ export default catchErrorsApi( async (req, res) => {
       });
       
     const data = await service.getTimesheet( req.body );
-    console.log(data);
+    
     return res.json(data);
 
 })

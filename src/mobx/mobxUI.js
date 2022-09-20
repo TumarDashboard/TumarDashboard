@@ -25,7 +25,9 @@ export default class MOBXui {
 
         if (this.isLoading) {
 
-            setTimeout(() => runInAction(() => this.isLoading = false), 1000);
+            setTimeout(() => runInAction(() => {
+                this.isLoading = false
+            }), 1000);
 
         } else {
 

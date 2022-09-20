@@ -42,7 +42,8 @@ export default function GuardPostID({ isFirstMount, ...props }) {
         >
           <FFormGuardPostID
             guardPost={props.guardPost}
-            guards={props.guards}
+            guardPosts={props.guardPosts}
+            guardsData={props.guards}
             users={props.users}
             usersAll={props.usersAll}
           />
@@ -98,27 +99,37 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   })
 
   const usersAll = users.concat( usersArchive );
-
+  
   // Физ пост
-  const guardPost = await mongoGuardPostsModel.findById(queryPath[0]).populate('manager', 'surname firstName').lean();
+  var guardPost;
+  const guardPosts = await mongoGuardPostsModel.find().populate('manager', 'surname firstName').lean();
+  guardPosts.sort((a, b) => {
+    return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
+      a.number - b.number ||
+      a.callsign.localeCompare(b.callsign)
+  }).forEach(value => {
+    value._id = value._id.toString();
+    if(!guardPost && queryPath[0]===value._id){
+      guardPost = value;
+      if (guardPost.manager) {
+        guardPost.manager._id = guardPost.manager._id.toString();
+        let index = usersAll.findIndex(x => x._id==guardPost.manager._id); 
+        if( index === -1 ){
+          usersAll.unshift(guardPost.manager)
+        }
+      }  
+    }else if (value.manager) {
+      value.manager._id = value.manager._id.toString();
+    }
+  })
 
   if (!guardPost) {
     throw ApiError.BadRequest('Физ. пост с указанным ID не найден');
   }
 
-  guardPost._id = guardPost._id.toString();
-
-  if (guardPost.manager) {
-    guardPost.manager._id = guardPost.manager._id.toString();
-    let index = usersAll.findIndex(x => x._id==guardPost.manager._id); 
-    if( index === -1 ){
-      usersAll.unshift(guardPost.manager)
-    }
-  }
-
   // Передача данных
   return {
-    props: { guardPost, guards, users, usersAll, initialState: { checkAuth: true } }
+    props: { guardPost, guardPosts, guards, users, usersAll, initialState: { checkAuth: true } }
   }
 
 })

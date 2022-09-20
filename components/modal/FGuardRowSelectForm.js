@@ -1,4 +1,4 @@
-import { XIcon } from '@heroicons/react/solid';
+import { XIcon, PlusIcon } from '@heroicons/react/solid';
 import { FModalForm } from './FModalForm';
 import { useState, useEffect } from 'react';
 import { FInputFile } from "../low/FInputFile";
@@ -13,8 +13,10 @@ import Select from 'react-select';
 import { useId } from 'react';
 import { FInputText } from '../low/FInputText';
 import { array } from 'yup';
+import { FGuardEditForm } from './FGuardEditForm';
+import { createGuard } from '../../src/dtos/dtoGuard';
 
-export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, optionGuards }) {
+export function FGuardRowSelectForm({ form, setForm, submitAdd, submitEdit, optionGuards, setGuards, users, guardPosts, MOBXui, errorCallback }) {
 
   /*-------------------------------------------------------------------------------------------------------
       Операция
@@ -34,8 +36,11 @@ export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, option
 
   const [inputFilter, setInputFilter] = useState([]);   
 
+  const [inputFilterText, setInputFilterText] = useState([]);
+
   const filterChange = (e) => {
     var text = e.target.value.toLowerCase();
+    setInputFilterText(e.target.value);
     if( text ){
       setInputFilter(optionsForWork.filter((value) => { return value.lower?.includes(text) }))
     }else{
@@ -94,6 +99,68 @@ export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, option
   }
 
   /*-------------------------------------------------------------------------------------------------------
+      Модальное окно Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const [guardEditForm, setGuardEditForm] = useState({
+    isOpen: false
+  });
+
+  /*-------------------------------------------------------------------------------------------------------
+      Добавление охранника Формой редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const guardAdd = async (event,
+    inputGuardSurname,
+    inputGuardFirstName,
+    inputGuardPatronymic,
+    inputGuardUIAvatarsSrc,
+    inputGuardTelephone,
+    inputGuardManager,
+    inputGuardGuardPosts) => {
+
+    event.preventDefault();
+
+    MOBXui.setLoading();
+
+    try {
+
+      const responce = await createGuard(
+        inputGuardSurname,
+        inputGuardFirstName,
+        inputGuardPatronymic,
+        inputGuardUIAvatarsSrc,
+        inputGuardTelephone,
+        inputGuardManager,
+        inputGuardGuardPosts
+      );
+
+      setGuards(array => {
+        array.unshift(responce.guard);
+        return array;
+      });    
+
+      const text = [responce.guard.surname, responce.guard.firstName].join(' ');
+      
+      selectOption({
+        label: text,
+        value: responce.guard._id,
+        lower: text.toLowerCase()
+      });
+
+      setGuardEditForm({ isOpen: false });
+
+    } catch (error) {
+
+      errorCallback(error, setGuardEditForm);
+
+    } finally {
+
+      MOBXui.setLoading();
+
+    }
+
+  }
+
+  /*-------------------------------------------------------------------------------------------------------
       Чистка/Обновление инпутов
   -------------------------------------------------------------------------------------------------------*/
   useEffect(() => {
@@ -101,14 +168,8 @@ export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, option
     if (form.error) {
       setError(form.error);
     } else if (form.isOpen) {
-      // console.log(form.guard);
       setOperation(form.operation);
       setInputGuard(form.guard ? null : []);
-      // const options = optionGuards.map((value)=>{ 
-      //   const newValue = value; 
-      //   newValue.lower = value.label.toLowerCase(); 
-      //   return newValue;
-      // });
       setOptionsForWork(optionGuards);
       setInputFilter(optionGuards);
       setError(null);
@@ -120,7 +181,7 @@ export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, option
 
   return (
     <FModalForm
-      title={`${operation} охранника${operation=="Изменить" && ' - ' + [form?.guard?.surname, form?.guard?.firstName].join(' ')}`}
+      title={`${operation} охранника${operation=="Изменить" ? ' - ' + [form?.guard?.surname, form?.guard?.firstName].join(' '):''}`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
       className="flex flex-col items-start p-4 w-full max-h-[70vh] overflow-y-auto"
@@ -154,16 +215,66 @@ export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, option
         </span>
       </div>}
 
-      {/* Фильтр */}
-      <div className="form-item w-full">
-        <input
-          type="text"
-          key={form.key}
-          placeholder="Фильтр"
-          onChange={filterChange}
-          className="w-full p-1
-          border border-gray-300 rounded-md"
-        />
+      {/* Фильтр и Кнопка вызова Формы добавления охранника */}
+      <div className="flex w-full">
+
+        {/* Фильтр */}
+        <div className="flex-1 form-item mr-2 flex relative w-full">
+          <input
+            type="text"
+            key={form.key}
+            placeholder="Фильтр"
+            value={inputFilterText}
+            onChange={filterChange}
+            className="w-full p-1
+            border border-gray-300 rounded-md"
+          />
+          <div
+          className=''
+          >
+
+          <button
+            className="h-4 w-4 flex justify-center items-center rounded-md
+            hover:bg-color_C active:bg-color_B
+            fixed -ml-6 mt-2"
+            onClick={() => {
+              setInputFilterText('');
+              setInputFilter(optionsForWork)
+            }}
+          >
+            <XIcon
+              className="h-4 w-4 fill-color_F
+              hover:fill-color_G"
+            />
+          </button>
+          </div>
+        </div>
+
+        {/* Кнопка вызова Формы добавления охранника */}
+        <div className="form-item">
+
+          <button
+            className="bg-color_B h-8 w-8 flex justify-center items-center rounded-md
+            hover:bg-color_C active:bg-color_B"
+            onClick={() => {
+              setGuardEditForm({
+                isOpen: true,
+                operation: 'Добавить',
+                guard:{
+                  surname: inputFilterText
+                },
+                key: Math.random().toString(36)
+              })
+            }}
+          >
+            <PlusIcon
+              className="h-8 w-8 fill-color_F
+              hover:fill-color_G"
+            />
+          </button>
+
+        </div>
+
       </div>
 
       {/* Охранник */}
@@ -215,6 +326,15 @@ export function FGuardRowEditForm({ form, setForm, submitAdd, submitEdit, option
         </FButtonWhite>
 
       </div>
+
+      {/* {Форма добавления/редактирования физ. поста} */}
+      <FGuardEditForm
+        form={guardEditForm}
+        setForm={setGuardEditForm}
+        submitAdd={guardAdd}
+        guardPosts={guardPosts}
+        users={users}
+      />
 
     </FModalForm >
   )

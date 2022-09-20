@@ -218,7 +218,7 @@ class GuardService {
 
         await googleDrive.deleteGuardAvatar(idGuard);
 
-        //Mongo
+        //Mongo 
             
         await mongoConnect();
 

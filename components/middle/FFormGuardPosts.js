@@ -208,7 +208,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
       if (error.statusCode == 520) {
 
         callback({ isOpen: false });
-
+        console.log(error.message);
         const message = JSON.parse(error.message);
 
         MOBXui.openGoogleAuthError(message.email, message.authorizeUrl);
@@ -309,6 +309,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
               key={guardPost._id}
               onClick={(event) => {
                 event.stopPropagation();
+                MOBXui.setLoading();
                 router.push({
                   pathname: '/dashboard/guardPosts/[guardPostID]',
                   query: { guardPostID: guardPost._id },

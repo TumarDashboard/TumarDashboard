@@ -17,7 +17,7 @@ import { FInputMonth } from '../low/FInputMonth';
 import { FSelect } from '../low/FSelect';
 import { array } from 'yup';
 import { getCurrentMonth, getDaysFromMonth } from '../../src/utils/dateUtils';
-import { FGuardRowEditForm } from '../modal/FGuardRowEditForm';
+import { FGuardRowSelectForm } from '../modal/FGuardRowSelectForm';
 
 const inputs = {
   initial: {
@@ -36,7 +36,7 @@ const inputs = {
 
 var isDrag = false;
 
-export default function FFormGuardPostID({ guardPost, guards, users, usersAll }) {
+export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, users, usersAll }) {
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
   -------------------------------------------------------------------------------------------------------*/
@@ -45,6 +45,8 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
   const { MOBXuser, MOBXui } = useStore();
 
   const [guardPostData, setGuardPostData] = useState(guardPost);
+
+  const [guards, setGuards] = useState(guardsData);
 
   const [guardPostDataShifts, setGuardPostDataShifts] = useState(guardPost?.shifts?.length > 0 ? [...new Set(guardPost.shifts)].map(String) : ['8']);
 
@@ -938,8 +940,10 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
                       }
                       return <td
                         key={i}
-                        className={`text-center block md:table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none
-                        ${value=="сб" || value=="вс" ? "bg-amber-100" : ""}`}
+                        className={`text-center block md:table-cell  border-r-[1px] last:border-r-[0px] select-none 
+                        ${value=="сб" || value=="вс" ? "bg-amber-100" : ""}
+                        ${(index & 1) ? "border-y-[1px]" : "border-stone-300"}
+                        `}
                         onClick={(event) => {
                           guardCellHandle(event, guard, i)
                         }}
@@ -1012,12 +1016,17 @@ export default function FFormGuardPostID({ guardPost, guards, users, usersAll })
       </div>
 
       {/* {Форма добавления/редактирования строки охранника} */}
-      <FGuardRowEditForm
+      <FGuardRowSelectForm
         form={guardRowEditForm}
         setForm={setGuardRowEditForm}
         submitAdd={guardRowAdd}
         submitEdit={guardRowEdit}
         optionGuards={optionGuards}
+        setGuards={setGuards}
+        users={users}
+        guardPosts={guardPosts}
+        MOBXui={MOBXui}
+        errorCallback={errorCallback}
       />
 
       {/* {Форма добавления/редактирования физ. поста} */}
