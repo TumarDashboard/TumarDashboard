@@ -36,6 +36,8 @@ const inputs = {
 
 var isDrag = false;
 
+const defaultDayShift = 8;
+
 export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, users, usersAll }) {
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
@@ -46,11 +48,20 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
   const [guardPostData, setGuardPostData] = useState(guardPost);
 
+  const [summGuardPostShifts, setSummGuardPostShifts] = useState(guardPost.shifts?.length > 0 ?
+    guardPost.shifts.reduce((result, value) => {
+      let shiftHours = parseInt(value);
+      if (shiftHours > 0) {
+        result += shiftHours;
+      }
+      return result;
+    }, 0) : defaultDayShift);
+
   const [guards, setGuards] = useState(guardsData);
 
-  const [guardPostDataShifts, setGuardPostDataShifts] = useState(guardPost?.shifts?.length > 0 ? [...new Set(guardPost.shifts)].map(String) : ['8']);
+  const [guardPostDataShifts, setGuardPostDataShifts] = useState(guardPost?.shifts?.length > 0 ? [...new Set(guardPost.shifts)].map(String) : [defaultDayShift]);
 
-  const [guardCellHandelMemory, setGuardCellHandelMemory] = useState(guardPost?.shifts?.length > 0 ? guardPost.shifts[0] : '8');
+  const [guardCellHandelMemory, setGuardCellHandelMemory] = useState(guardPost?.shifts?.length > 0 ? guardPost.shifts[0] : defaultDayShift);
 
   const [error, setError] = useState('');
   /*-------------------------------------------------------------------------------------------------------
@@ -83,6 +94,8 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
   const [timesheetTableHeader, setTimesheetTableHeader] = useState([]);
 
+  const [timesheetTableFooter, setTimesheetTableFooter] = useState([]);
+
   const updateDate = async (value) => {
 
     setError('');
@@ -101,10 +114,12 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
       if (value) {
 
-        setTimesheetTableHeader(getDaysFromMonth(value));
+        const daysFromMonth = getDaysFromMonth(value);
+
+        setTimesheetTableHeader(daysFromMonth);
 
         const { guardsRow, optionGuards, manager } = await getTimesheet(guardPost._id, value);
-        
+
         if (value == currentMonth) {
           setInputGuardPostManager(guardPost.manager ? guardPost.manager._id : 'EMPTY')
         } else {
@@ -127,6 +142,26 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
           }, []));
 
           setTimesheetTableBody(guardsRow);
+
+          const tableFooter = new Array(daysFromMonth.length + 2).fill(0);
+          const shiftsCount = 0;
+          const hoursCount = 0;
+
+          for (const guard of guardsRow) {
+            for (let i = 0; i < guard.timesheetDays.length; i++) {
+              let shiftHours = parseInt(guard.timesheetShifts[i]);
+              if (shiftHours >= 0) {
+                shiftsCount++;
+                hoursCount += shiftHours;
+                tableFooter[guard.timesheetDays[i]] += shiftHours;
+              }
+            }
+          }
+
+          tableFooter[daysFromMonth.length] = shiftsCount;
+          tableFooter[daysFromMonth.length + 1] = hoursCount;
+
+          setTimesheetTableFooter(tableFooter);
 
           return;
 
@@ -159,6 +194,8 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
       }
 
       setTimesheetTableBody([]);
+
+      setTimesheetTableFooter([]);
 
     } catch (error) {
 
@@ -327,38 +364,42 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
     }
 
     const index = guard.timesheetDays.indexOf(day);
-
+    var cellHandleAdd = 0;
+    var cellHandleDelete = 0;
     if (index == -1) {
 
-      // console.log('add %d shift to a %d', guardCellHandelMemory, day);
-
       guard.timesheetShifts.push(guardCellHandelMemory);
-
       guard.timesheetDays.push(day);
+      cellHandleAdd = guardCellHandelMemory;
 
     } else {
 
       const shift = guard.timesheetShifts[index];
-
       const indexShift = guardPostDataShifts.lastIndexOf(shift);
-
-      // console.log('%d in %O finded with index', shift, guardPostDataShifts, indexShift);
 
       if (indexShift + 1 < guardPostDataShifts.length) {
 
-        setGuardCellHandelMemory(guardPostDataShifts[indexShift + 1]);
-
-        guard.timesheetShifts[index] = guardPostDataShifts[indexShift + 1];
-
-        // console.log('change %d to %d shift with a day %d', guardPostDataShifts[indexShift], guardPostDataShifts[indexShift + 1], day);
+        cellHandleAdd = guardPostDataShifts[indexShift + 1];
+        cellHandleDelete = guard.timesheetShifts[index];
+        setGuardCellHandelMemory(cellHandleAdd);
+        guard.timesheetShifts[index] = cellHandleAdd;
 
       } else {
-        setGuardCellHandelMemory(guardPostDataShifts[0]);
-        guard.timesheetShifts.splice(index, 1);
-        guard.timesheetDays.splice(index, 1);
 
-        // console.log('delete %d', day);
+        setGuardCellHandelMemory(guardPostDataShifts[0]);
+        guard.timesheetDays.splice(index, 1);
+        cellHandleDelete = guard.timesheetShifts.splice(index, 1)[0];
+
       }
+    }
+
+    let shiftHours = parseInt(cellHandleAdd);
+    if (shiftHours > 0 || cellHandleDelete > 0) {
+      setTimesheetTableFooter(array => {
+        array[day] += shiftHours;
+        array[day] -= cellHandleDelete;
+        return [...array];
+      });
     }
 
     setTimesheetTableHeader(array => [...array]);
@@ -447,7 +488,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
         inputGuardPostDescription
       );
 
-      if( responce.guardPost?.manager._id != guardPostData.manager._id){
+      if (responce.guardPost?.manager._id != guardPostData.manager._id) {
         setTimesheetChanged(false);
       }
 
@@ -460,6 +501,15 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
       if (timesheetMonth == currentMonth) {
         setInputGuardPostManager(responce.guardPost.manager ? responce.guardPost.manager._id : 'EMPTY');
       }
+
+      setSummGuardPostShifts(responce.guardPost.shifts?.length > 0 ?
+        responce.guardPost.shifts.reduce((result, value) => {
+          let shiftHours = parseInt(value);
+          if (shiftHours > 0) {
+            result += shiftHours;
+          }
+          return result;
+        }, 0) : defaultDayShift);
 
       setGuardPostEditForm({ isOpen: false });
 
@@ -526,6 +576,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
   ----------------------------------------------------------------------------------------------------------------------------*/
   const [currentIndexDrag, setCurrentIndexDrag] = useState(-1);
   const [currentOffset, setCurrentOffset] = useState(-1);
+  const [currentMove, setCurrentMove] = useState(-1);
   const dragControls = useDragControls();
   const constraintsRef = useRef(null);
 
@@ -575,6 +626,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
       variants={inputs}
       className="w-full h-full flex flex-col"
     >
+      {/* {Данные физ поста} */}
       <div className="p-2">
 
         {/* {Панель управления} */}
@@ -699,9 +751,9 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
       </div>
 
-      {/* {Таблица физ. постов} */}
+      {/* {График} */}
       <div
-        className='flex-initial flex overflow-auto z-30 min-h-max max-h-screen'
+        className='flex-initial flex z-30 min-h-max max-h-screen overflow-x-auto '
         // style={{'touch-action': 'none'}}
         ref={constraintsRef}
       >
@@ -711,6 +763,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
           <table className="w-full block md:table table-auto border-separate [border-spacing:0]">
             {/* Заголовок таблицы */}
             <thead className="block md:table-header-group z-50 top-0 sticky">
+
               <tr
                 className="block md:table-row 
                 absolute -top-full -left-full 
@@ -780,7 +833,9 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                   return <th
                     key={i}
                     className={`p-2 font-bold text-center block md:table-cell min-w-[35px]
-                    border-b-[1px] border-r-[1px] ${value=="сб" || value=="вс" ? "bg-amber-100 text-orange-900" : "bg-stone-50 text-orange-700"}`}>
+                    border-b-[1px] border-r-[1px] ${value == "сб" || value == "вс" ? "bg-amber-100 text-orange-900" : "bg-stone-50 text-orange-700"}
+                    ${currentMove == i ? 'saturate-200 drop-shadow-lg ring-1 rounded-sm ring-offset-2' : ''}
+                    `}>
                     <p className='text-sm'>{value}</p>
                     <p>{i + 1}</p>
                   </th>;
@@ -794,65 +849,68 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
             {timesheetTableBody.length > 0 &&
               <tbody
                 className="block md:table-row-group z-10"
+                onPointerLeave={event => {
+                  setCurrentMove(-1);
+                }}
               >
-                
+
                 {/* Значок перемещения строки */}
                 <tr>
-                <motion.td
-                  drag="y"
-                  dragControls={dragControls}
-                  dragConstraints={constraintsRef}
-                  onPointerUp={event => {
-                    constraintsRef.current.style.touchAction = '';
-                    setCurrentIndexDrag(-1);
-                    setCurrentOffset(0);
-                  }}
-                  onDragEnd={(event, info) => {
-                    constraintsRef.current.style.touchAction = '';
-                    setCurrentIndexDrag(-1);
-                    setCurrentOffset(0);
-                  }}
-                  onDrag={(event, info) => {
-                    // event.preventDefault();
-                    if (currentIndexDrag>-1 && Math.abs(info.offset.y - currentOffset) > 32) {
-                      if (info.offset.y < currentOffset && currentIndexDrag > 0) {
-                        setCurrentOffset(info.offset.y);
-                        setTimesheetTableBody(array => {
-                          const currentElement = array[currentIndexDrag];
-                          array[currentIndexDrag] = array[currentIndexDrag - 1];
-                          array[currentIndexDrag - 1] = currentElement;
-                          setCurrentIndexDrag(currentIndexDrag - 1);
-                          return array;
-                        })
-                      } else if (info.offset.y > currentOffset && currentIndexDrag + 1 < timesheetTableBody.length) {
-                        setCurrentOffset(info.offset.y);
-                        setTimesheetTableBody(array => {
-                          const currentElement = array[currentIndexDrag];
-                          array[currentIndexDrag] = array[currentIndexDrag + 1];
-                          array[currentIndexDrag + 1] = currentElement;
-                          setCurrentIndexDrag(currentIndexDrag + 1);
-                          return array;
-                        })
+                  <motion.td
+                    drag="y"
+                    dragControls={dragControls}
+                    dragConstraints={constraintsRef}
+                    onPointerUp={event => {
+                      constraintsRef.current.style.touchAction = '';
+                      setCurrentIndexDrag(-1);
+                      setCurrentOffset(0);
+                    }}
+                    onDragEnd={(event, info) => {
+                      constraintsRef.current.style.touchAction = '';
+                      setCurrentIndexDrag(-1);
+                      setCurrentOffset(0);
+                    }}
+                    onDrag={(event, info) => {
+                      // event.preventDefault();
+                      if (currentIndexDrag > -1 && Math.abs(info.offset.y - currentOffset) > 32) {
+                        if (info.offset.y < currentOffset && currentIndexDrag > 0) {
+                          setCurrentOffset(info.offset.y);
+                          setTimesheetTableBody(array => {
+                            const currentElement = array[currentIndexDrag];
+                            array[currentIndexDrag] = array[currentIndexDrag - 1];
+                            array[currentIndexDrag - 1] = currentElement;
+                            setCurrentIndexDrag(currentIndexDrag - 1);
+                            return array;
+                          })
+                        } else if (info.offset.y > currentOffset && currentIndexDrag + 1 < timesheetTableBody.length) {
+                          setCurrentOffset(info.offset.y);
+                          setTimesheetTableBody(array => {
+                            const currentElement = array[currentIndexDrag];
+                            array[currentIndexDrag] = array[currentIndexDrag + 1];
+                            array[currentIndexDrag + 1] = currentElement;
+                            setCurrentIndexDrag(currentIndexDrag + 1);
+                            return array;
+                          })
+                        }
                       }
-                    }
-                  }}
-                  className={`text-center z-50 fixed opacity-50
+                    }}
+                    className={`text-center z-50 fixed opacity-50
                   `}
-                >
-                  {currentIndexDrag >= 0 && <div className="flex flex-row items-center justify-between w-full">
+                  >
+                    {currentIndexDrag >= 0 && <div className="flex flex-row items-center justify-between w-full">
 
-                    {timesheetTableBody[currentIndexDrag].uiAvatarsSrc && <div className="w-8 h-8"><Image
-                      className="rounded-full"
-                      width={32}
-                      height={32}
-                      src={timesheetTableBody[currentIndexDrag].uiAvatarsSrc}
-                      alt=""
-                    /></div>}
+                      {timesheetTableBody[currentIndexDrag].uiAvatarsSrc && <div className="w-8 h-8"><Image
+                        className="rounded-full"
+                        width={32}
+                        height={32}
+                        src={timesheetTableBody[currentIndexDrag].uiAvatarsSrc}
+                        alt=""
+                      /></div>}
 
-                    <p className="font-semibold text-black ml-1 text-xl font-bold select-none w-max">{[timesheetTableBody[currentIndexDrag].surname, timesheetTableBody[currentIndexDrag].firstName].join(' ')}</p>
+                      <p className="font-semibold text-black ml-1 text-xl font-bold select-none w-max">{[timesheetTableBody[currentIndexDrag].surname, timesheetTableBody[currentIndexDrag].firstName].join(' ')}</p>
 
-                  </div>}
-                </motion.td>
+                    </div>}
+                  </motion.td>
                 </tr>
 
                 {/* Список строк */}
@@ -861,7 +919,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                   var hoursCount = 0;
                   return <tr
                     key={guard._id}
-                    className={`block md:table-row mb-2 ${(index & 1) ? "bg-stone-50" : "bg-stone-200"}`}
+                    className={`block md:table-row mb-2 group ${(index & 1) ? "bg-stone-50" : "bg-stone-200"}`}
                   >
                     <td
                       onPointerDown={event => {
@@ -880,7 +938,8 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                         setCurrentIndexDrag(-1);
                         setCurrentOffset(0);
                       }}
-                      className={`text-center block md:table-cell border-b-[1px] border-r-[1px] left-0 sticky
+                      className={`text-center block md:table-cell border-b-[1px] border-r-[1px] left-0 sticky 
+                          group-hover:z-40 group-hover:ring-1 group-hover:rounded-sm group-hover:drop-shadow-lg ring-offset-2 
                           ${(index & 1) ? "bg-stone-50" : "bg-stone-200"}
                           ${currentIndexDrag == index && "drop-shadow-md scale-105 sepia z-40"}
                         `}
@@ -930,10 +989,10 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                     {timesheetTableHeader.map((value, i) => {
                       const indexInTimesheetDays = guard.timesheetDays?.indexOf(i);
                       var shift;
-                      if( indexInTimesheetDays >= 0 ){
+                      if (indexInTimesheetDays >= 0) {
                         shift = guard.timesheetShifts[indexInTimesheetDays];
                         let shiftHours = parseInt(shift);
-                        if(shiftHours>=0){
+                        if (shiftHours >= 0) {
                           shiftsCount++;
                           hoursCount += shiftHours;
                         }
@@ -941,12 +1000,19 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                       return <td
                         key={i}
                         className={`text-center block md:table-cell  border-r-[1px] last:border-r-[0px] select-none 
-                        ${value=="сб" || value=="вс" ? "bg-amber-100" : ""}
+                        ${value == "сб" || value == "вс" ? "bg-amber-100" : ""}
                         ${(index & 1) ? "border-y-[1px]" : "border-stone-300"}
                         `}
                         onClick={(event) => {
                           guardCellHandle(event, guard, i)
                         }}
+                        onDoubleClick={(event) => {
+                          console.log('doubleClick');
+                        }}
+                        onPointerMove={event => {
+                          setCurrentMove(i);
+                        }
+                        }
                       >
                         {shift}
                       </td>;
@@ -963,52 +1029,82 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
               </tbody>}
 
             {/* Итоги таблицы */}
-            {timesheetTableHeader.length > 0 &&
-              <tfoot className='block md:table-footer-group'>
-                <tr className="block md:table-row absolute -top-full md:top-auto -left-full 
-                md:left-auto md:relative z-10">
-                  <td className="bg-color_B p-2 block md:table-cell left-0 sticky border-r-[1px] select-none">
-                    <button
-                      className='flex items-center justify-center align-middle text-white text-center w-full disabled:opacity-25'
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setGuardRowEditForm({
-                          isOpen: true,
-                          operation: 'Добавить',
-                          key: Math.random().toString(36)
-                        })
-                      }}
-                      disabled={optionGuards.length <= 1}
-                    >
-                      <PlusIcon className='w-4 h-4' />
-                      <span>Добавить</span>
-                    </button>
-                  </td>
-                  <td className="bg-color_B p-2 text-white font-bold text-left block md:table-cell" colSpan={timesheetTableHeader.length - 3}>
-                    <span className="text-color_C italic break-words">
-                      {error}
-                    </span>
-                  </td>
-                  <td
-                    className="bg-color_B p-2 block md:table-cell right-0 sticky select-none"
-                    colSpan={5}
-                  >
-                    <div className='flex justify-center'>
-                      <FButtonRed
-                        className="flex"
-                        onClick={timesheetChangeHandle}
-                        disabled={timesheetChanged}
-                      >
-                        <ArchiveIcon
-                          className="h-4 w-4"
-                        />
-                        Сохранить
-                      </FButtonRed>
+            <tfoot className='block md:table-footer-group select-none'>
 
-                    </div>
-                  </td>
-                </tr>
-              </tfoot>}
+              <tr
+                className={`block md:table-row mb-2 group ${(timesheetTableBody.length & 1) ? "bg-stone-50" : "bg-stone-200"}`}
+              >
+
+                <td className="bg-color_B p-2 block md:table-cell left-0 sticky border-r-[1px] z-50" rowSpan="2">
+                  <button
+                    className='flex items-center justify-center align-middle text-white text-center w-full disabled:opacity-25'
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setGuardRowEditForm({
+                        isOpen: true,
+                        operation: 'Добавить',
+                        key: Math.random().toString(36)
+                      })
+                    }}
+                    disabled={optionGuards.length <= 1}
+                  >
+                    <PlusIcon className='w-4 h-4' />
+                    <span>Добавить</span>
+                  </button>
+                </td>
+
+                {timesheetTableFooter.map((value, i) => {
+                  const isDayOff = i < timesheetTableHeader.length && (timesheetTableHeader[i] == "сб" || timesheetTableHeader[i] == "вс")
+                  return <td
+                    key={i}
+                    className={`text-center text-sm block md:table-cell min-w-[35px]
+                      border-b-[1px] border-r-[1px] 
+                      ${i >= timesheetTableHeader.length ? "font-bold" : ""}
+                      ${value > 0 && i < timesheetTableHeader.length ? (
+                        value < summGuardPostShifts ?
+                          (isDayOff ? " bg-rose-300 text-orange-900" : " bg-rose-200 text-orange-700")
+                          :
+                          (isDayOff ? " bg-emerald-300 text-orange-900" : " bg-emerald-200 text-orange-700")
+                      ) : (
+                        isDayOff ? " bg-amber-100 text-orange-900" : " bg-stone-50 text-orange-700"
+                      )}`}>
+                    <p>{value > 0 ? value : ''}</p>
+                  </td>;
+                })}
+
+              </tr>
+
+              <tr className="block md:table-row absolute -top-full md:top-auto -left-full 
+                md:left-auto md:relative z-10">
+
+                <td className="bg-color_B p-2 text-white font-bold text-left block md:table-cell" colSpan={timesheetTableHeader.length - 3}>
+                  <span className="text-color_C italic break-words">
+                    {error}
+                  </span>
+                </td>
+
+                <td
+                  className="bg-color_B p-2 block md:table-cell right-0 sticky"
+                  colSpan={5}
+                >
+                  <div className='flex justify-center'>
+                    <FButtonRed
+                      className="flex py-1"
+                      onClick={timesheetChangeHandle}
+                      disabled={timesheetChanged}
+                    >
+                      <ArchiveIcon
+                        className="h-6 w-6"
+                      />
+                      Сохранить
+                    </FButtonRed>
+
+                  </div>
+                </td>
+
+              </tr>
+
+            </tfoot>
 
           </table>
 
