@@ -16,7 +16,7 @@ import { array } from 'yup';
 import { FGuardEditForm } from './FGuardEditForm';
 import { createGuard } from '../../src/dtos/dtoGuard';
 
-export function FGuardRowSelectForm({ form, setForm, submitAdd, submitEdit, optionGuards, setGuards, users, guardPosts, MOBXui, errorCallback }) {
+export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit, optionGuards, setGuards, users, guardPosts, MOBXui, errorCallback }) {
 
   /*-------------------------------------------------------------------------------------------------------
       Операция

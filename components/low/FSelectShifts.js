@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { XIcon, ChevronDownIcon } from '@heroicons/react/solid';
+import FShiftItemList from '../variable/FShiftsItemList';
 
 const maxlength = process.env.NEXT_PUBLIC_MAX_COUNT_SHIFTS;
 
@@ -23,31 +24,16 @@ export function FSelectShifts({ selected, onChange }) {
         onChange(selected.filter((_, index) => index !== i));
     }
 
-    const list = [];
-
-    for (let i = 1; i < 25; i++) {
-        list.push(
-            <li
-                key={i}
-                className="text-center select-none font-bold hover:bg-red-600 hover:text-color_G py-1 rounded-md hover:scale-125"
-                onMouseDown={addSelected}
-                id={i}
-            >
-                {i}
-            </li>
-        )
-    }
-
-    list.push(
-        <li
-            key={"B"}
+    const list = FShiftItemList.map((value, index) =>{
+        return <li
+            key={index}
             className="text-center select-none font-bold hover:bg-red-600 hover:text-color_G py-1 rounded-md hover:scale-125"
-            onMouseDown={addSelected}
-            id={"B"}
+            onPointerDown={addSelected}
+            id={value}
         >
-            B
+            {value}
         </li>
-    )
+    });
 
     return (
         <div

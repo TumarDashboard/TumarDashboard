@@ -17,7 +17,9 @@ import { FInputMonth } from '../low/FInputMonth';
 import { FSelect } from '../low/FSelect';
 import { array } from 'yup';
 import { getCurrentMonth, getDaysFromMonth } from '../../src/utils/dateUtils';
-import { FGuardRowSelectForm } from '../modal/FGuardRowSelectForm';
+import { FGuardRowSelectGuardForm } from '../modal/FGuardRowSelectGuardForm';
+import { FModalForm } from '../modal/FModalForm';
+import { FGuardRowSelectShiftForm } from '../modal/FGuardRowSelectShiftForm';
 
 const inputs = {
   initial: {
@@ -37,6 +39,8 @@ const inputs = {
 var isDrag = false;
 
 const defaultDayShift = 8;
+
+var pointTimeout = null;
 
 export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, users, usersAll }) {
   /*-------------------------------------------------------------------------------------------------------
@@ -126,6 +130,8 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
           setInputGuardPostManager(manager)
         }
 
+        const tableFooter = new Array(daysFromMonth.length + 2).fill(0);
+
         if (guardsRow && guardsRow.length > 0 && optionGuards && optionGuards.length > 0) {
 
           setOptionGuards(guards?.reduce((result, guard) => {
@@ -143,7 +149,6 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
           setTimesheetTableBody(guardsRow);
 
-          const tableFooter = new Array(daysFromMonth.length + 2).fill(0);
           const shiftsCount = 0;
           const hoursCount = 0;
 
@@ -167,8 +172,11 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
         }
 
+        setTimesheetTableFooter(tableFooter);
+
       } else {
         setTimesheetTableHeader([]);
+        setTimesheetTableFooter([]);
       }
 
       if (timesheetTableBody.length > 0) {
@@ -195,8 +203,6 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
       setTimesheetTableBody([]);
 
-      setTimesheetTableFooter([]);
-
     } catch (error) {
 
       errorCallback(error, setGuardPostEditForm);
@@ -216,7 +222,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
   /*----------------------------------------------------------------------------------------------------------------------------
   ----Модальное окно Формы редактирования Строки охранника----------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------*/
-  const [guardRowEditForm, setGuardRowEditForm] = useState({
+  const [guardRowSelectGuardForm, setGuardRowSelectGuardForm] = useState({
     isOpen: false
   });
 
@@ -244,17 +250,87 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
         return array.concat(guards?.filter(element => inputGuard.includes(element._id)));
       });
 
-      setGuardRowEditForm({ isOpen: false });
+      setGuardRowSelectGuardForm({ isOpen: false });
 
     } catch (error) {
 
-      errorCallback(error, setGuardRowEditForm);
+      errorCallback(error, setGuardRowSelectGuardForm);
 
     } finally {
 
       MOBXui.setLoading();
 
     }
+  }
+
+  /*----------------------------------------------------------------------------------------------------------------------------
+  ----Модальное окно Формы редактирования Смены охранника-----------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------------------------*/
+  const [guardRowSelectShiftForm, setGuardRowSelectShiftForm] = useState({
+    isOpen: false
+  });
+
+  /*-------------------------------------------------------------------------------------------------------
+      Функция добавления Формы редактирования Строки охранника
+  -------------------------------------------------------------------------------------------------------*/
+  const guardCellSelectShift = (event) => {
+
+    // event.preventDefault();
+    
+    console.log(event.target.id);
+
+    const guard = guardRowSelectShiftForm.guard;
+    const day = guardRowSelectShiftForm.day;
+
+    if (!guard.timesheetDays) {
+      guard.timesheetDays = [];
+      guard.timesheetShifts = [];
+    }
+
+    const index = guard.timesheetDays.indexOf(day);
+
+    var cellHandleAdd = 0;
+    var cellHandleDelete = 0;
+
+    if (index == -1) {
+
+      guard.timesheetShifts.push(event.target.id);
+      guard.timesheetDays.push(day);
+      cellHandleAdd = event.target.id;
+
+    } else {
+
+        cellHandleAdd = event.target.id;
+        cellHandleDelete = guard.timesheetShifts[index];
+        guard.timesheetShifts[index] = event.target.id;
+
+    }
+
+    let shiftHoursAdd = parseInt(cellHandleAdd);
+    let shiftHoursDelete = parseInt(cellHandleDelete);
+    
+    if (shiftHoursAdd > 0 || shiftHoursDelete > 0) {
+      setTimesheetTableFooter(array => {
+        array[day] += shiftHoursAdd;
+        array[day] -= shiftHoursDelete;
+
+        array[array.length-2] += index == -1 ? 1 : ( shiftHoursDelete > 0 && shiftHoursAdd <= 0 ? -1 : 0 );
+
+        array[array.length-1] += shiftHoursAdd;
+        array[array.length-1] -= shiftHoursDelete;
+
+        return [...array];
+      });
+    }
+
+    setTimesheetTableBody( array => {
+      array[guardRowSelectShiftForm.index] = guard;
+      return array;
+    })
+    // setTimesheetTableHeader(array => [...array]);
+
+    setGuardRowSelectShiftForm({ isOpen: false });
+    
   }
 
   /*-------------------------------------------------------------------------------------------------------
@@ -274,25 +350,25 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
     try {
 
       setOptionGuards(array => {
-        const text = [guardRowEditForm.guard.surname, guardRowEditForm.guard.firstName].join(' ');
+        const text = [guardRowSelectGuardForm.guard.surname, guardRowSelectGuardForm.guard.firstName].join(' ');
         array.unshift({
           label: text,
-          value: guardRowEditForm.guard._id,
+          value: guardRowSelectGuardForm.guard._id,
           lower: text.toLowerCase()
         });
         return array.filter(element => inputGuard != element.value)
       });
 
       setTimesheetTableBody(array => {
-        array[guardRowEditForm.index] = guards?.find(element => inputGuard === element._id);
+        array[guardRowSelectGuardForm.index] = guards?.find(element => inputGuard === element._id);
         return array;
       });
 
-      setGuardRowEditForm({ isOpen: false });
+      setGuardRowSelectGuardForm({ isOpen: false });
 
     } catch (error) {
 
-      errorCallback(error, setGuardRowEditForm);
+      errorCallback(error, setGuardRowSelectGuardForm);
 
     } finally {
 
@@ -334,11 +410,11 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
         return result
       });
 
-      setGuardRowEditForm({ isOpen: false });
+      setGuardRowSelectGuardForm({ isOpen: false });
 
     } catch (error) {
 
-      errorCallback(error, setGuardRowEditForm);
+      errorCallback(error, setGuardRowSelectGuardForm);
 
     } finally {
 
@@ -364,8 +440,10 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
     }
 
     const index = guard.timesheetDays.indexOf(day);
+
     var cellHandleAdd = 0;
     var cellHandleDelete = 0;
+
     if (index == -1) {
 
       guard.timesheetShifts.push(guardCellHandelMemory);
@@ -393,11 +471,20 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
       }
     }
 
-    let shiftHours = parseInt(cellHandleAdd);
-    if (shiftHours > 0 || cellHandleDelete > 0) {
+    let shiftHoursAdd = parseInt(cellHandleAdd);
+    let shiftHoursDelete = parseInt(cellHandleDelete);
+
+    if (shiftHoursAdd > 0 || shiftHoursDelete > 0) {
       setTimesheetTableFooter(array => {
-        array[day] += shiftHours;
-        array[day] -= cellHandleDelete;
+
+        array[day] += shiftHoursAdd;
+        array[day] -= shiftHoursDelete;
+
+        array[array.length-2] += index == -1 ? 1 : ( shiftHoursDelete > 0 && shiftHoursAdd <= 0 ? -1 : 0 );
+
+        array[array.length-1] += shiftHoursAdd;
+        array[array.length-1] -= shiftHoursDelete;
+
         return [...array];
       });
     }
@@ -754,13 +841,13 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
       {/* {График} */}
       <div
         className='flex-initial flex z-30 min-h-max max-h-screen overflow-x-auto '
-        // style={{'touch-action': 'none'}}
         ref={constraintsRef}
       >
         <div
           className='flex-1 w-0'
         >
           <table className="w-full block md:table table-auto border-separate [border-spacing:0]">
+
             {/* Заголовок таблицы */}
             <thead className="block md:table-header-group z-50 top-0 sticky">
 
@@ -961,7 +1048,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                             className="flex disabled:opacity-25 mr-2"
                             disabled={optionGuards.length <= 1}
                             onClick={() => {
-                              setGuardRowEditForm({
+                              setGuardRowSelectGuardForm({
                                 isOpen: true,
                                 index: index,
                                 operation: 'Изменить',
@@ -1003,11 +1090,35 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                         ${value == "сб" || value == "вс" ? "bg-amber-100" : ""}
                         ${(index & 1) ? "border-y-[1px]" : "border-stone-300"}
                         `}
-                        onClick={(event) => {
-                          guardCellHandle(event, guard, i)
+                        onPointerDown={(event) => {
+                          pointTimeout = setTimeout(()=>{
+                            setGuardRowSelectShiftForm({
+                              isOpen: true,
+                              guard: guard,
+                              index: index,
+                              day: i
+                            })
+                            pointTimeout = null;
+                          }, 1000);
+                        }}                        
+                        onPointerUp={(event) => {  
+                          if (pointTimeout){
+                            clearTimeout(pointTimeout);
+                            guardCellHandle(event, guard, i)
+                            pointTimeout = null;
+                          }
                         }}
-                        onDoubleClick={(event) => {
-                          console.log('doubleClick');
+                        onPointerLeave={(event) => {  
+                          if (pointTimeout){
+                            clearTimeout(pointTimeout);
+                            pointTimeout = null;
+                          }
+                        }}
+                        onPointerCancel={(event) => {  
+                          if (pointTimeout){
+                            clearTimeout(pointTimeout);
+                            pointTimeout = null;
+                          }
                         }}
                         onPointerMove={event => {
                           setCurrentMove(i);
@@ -1040,7 +1151,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                     className='flex items-center justify-center align-middle text-white text-center w-full disabled:opacity-25'
                     onClick={(event) => {
                       event.stopPropagation();
-                      setGuardRowEditForm({
+                      setGuardRowSelectGuardForm({
                         isOpen: true,
                         operation: 'Добавить',
                         key: Math.random().toString(36)
@@ -1107,14 +1218,13 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
             </tfoot>
 
           </table>
-
         </div>
       </div>
 
       {/* {Форма добавления/редактирования строки охранника} */}
-      <FGuardRowSelectForm
-        form={guardRowEditForm}
-        setForm={setGuardRowEditForm}
+      <FGuardRowSelectGuardForm
+        form={guardRowSelectGuardForm}
+        setForm={setGuardRowSelectGuardForm}
         submitAdd={guardRowAdd}
         submitEdit={guardRowEdit}
         optionGuards={optionGuards}
@@ -1123,6 +1233,13 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
         guardPosts={guardPosts}
         MOBXui={MOBXui}
         errorCallback={errorCallback}
+      />
+
+      {/* {Форма редактирования ячейки} */}
+      <FGuardRowSelectShiftForm
+        form={guardRowSelectShiftForm}
+        setForm={setGuardRowSelectShiftForm}
+        submitHandle={guardCellSelectShift}
       />
 
       {/* {Форма добавления/редактирования физ. поста} */}
