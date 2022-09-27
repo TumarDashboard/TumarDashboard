@@ -84,6 +84,11 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
   const [inputGuardPostShifts, setInputGuardPostShifts] = useState([]);
 
   /*-------------------------------------------------------------------------------------------------------
+      Тариф Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const [inputGuardPostRate, setInputGuardPostRate] = useState('');
+
+  /*-------------------------------------------------------------------------------------------------------
       Чистка/Обновление инпутов
   -------------------------------------------------------------------------------------------------------*/
   useEffect(() => {
@@ -100,6 +105,7 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
       setInputGuardPostPhoto(null);
       setInputGuardPostManager(form.guardPost?.manager?._id || 'EMPTY');
       setInputGuardPostShifts(form.guardPost?.shifts || []);
+      setInputGuardPostRate(form.guardPost?.rate);
       setError(null);
     }
   }, [ form ])
@@ -207,6 +213,21 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
         />
       </div>
 
+      <div className="form-item flex items-center mt-4 ">
+        <label className="text-lg pr-4">Тариф</label>         
+        <input
+            id='guard-post-rate'
+            type="number"
+            name='guard-post-rate'
+            placeholder='###'
+            value={inputGuardPostRate ? inputGuardPostRate : ''}
+            onChange={(e)=>{setInputGuardPostRate(e.target.value)}}
+            className="border border-gray-300 block w-full
+            focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
+            rounded-md shadow-sm disabled:bg-gray-100 "
+        />
+      </div>
+
       {/* Статус ошибки */}
       <div className="form-item">
         <span className="text-color_C italic break-words">
@@ -229,6 +250,7 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
               || (inputGuardPostManager != form.guardPost?.manager?._id)
               || (inputGuardPostDescription != form.guardPost?.description)
               || (!equalArrays(inputGuardPostShifts, form.guardPost?.shifts))
+              || (inputGuardPostRate != form.guardPost?.rate)
               || inputGuardPostPhoto != null)
           ))}
           onClick={(e) => operation == 'Добавить' ? submitAdd(e,
@@ -239,7 +261,8 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
               inputGuardPostPhoto,
               inputGuardPostManager,
               inputGuardPostShifts,
-              inputGuardPostDescription
+              inputGuardPostDescription,
+              inputGuardPostRate
             ) : submitEdit(e,
               inputGuardPostNumber,
               inputGuardPostCallsign,
@@ -248,7 +271,8 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
               inputGuardPostPhoto,
               inputGuardPostManager,
               inputGuardPostShifts,
-              inputGuardPostDescription
+              inputGuardPostDescription,
+              inputGuardPostRate
             )}
         >
           {operation}

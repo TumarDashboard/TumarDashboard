@@ -146,6 +146,10 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
             return result;
           }, []));
+          
+          guardsRow.sort((a, b)=>{
+            return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
+          })
 
           setTimesheetTableBody(guardsRow);
 
@@ -205,7 +209,11 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
     } catch (error) {
 
-      errorCallback(error, setGuardPostEditForm);
+      if (error instanceof ApiError) {
+        setError(error.message)
+      } else {
+        throw error
+      }
 
     } finally {
 
@@ -306,8 +314,10 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
     }
 
-    let shiftHoursAdd = parseInt(cellHandleAdd);
-    let shiftHoursDelete = parseInt(cellHandleDelete);
+    var shiftHoursAdd = parseInt(cellHandleAdd);
+    shiftHoursAdd = shiftHoursAdd ? shiftHoursAdd : 0;
+    var shiftHoursDelete = parseInt(cellHandleDelete);
+    shiftHoursDelete = shiftHoursDelete ? shiftHoursDelete : 0;
     
     if (shiftHoursAdd > 0 || shiftHoursDelete > 0) {
       setTimesheetTableFooter(array => {
@@ -471,8 +481,10 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
       }
     }
 
-    let shiftHoursAdd = parseInt(cellHandleAdd);
-    let shiftHoursDelete = parseInt(cellHandleDelete);
+    var shiftHoursAdd = parseInt(cellHandleAdd);
+    shiftHoursAdd = shiftHoursAdd ? shiftHoursAdd : 0;
+    var shiftHoursDelete = parseInt(cellHandleDelete);
+    shiftHoursDelete = shiftHoursDelete ? shiftHoursDelete : 0;
 
     if (shiftHoursAdd > 0 || shiftHoursDelete > 0) {
       setTimesheetTableFooter(array => {
@@ -480,7 +492,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
         array[day] += shiftHoursAdd;
         array[day] -= shiftHoursDelete;
 
-        array[array.length-2] += index == -1 ? 1 : ( shiftHoursDelete > 0 && shiftHoursAdd <= 0 ? -1 : 0 );
+        array[array.length-2] += index == -1 || isNaN(cellHandleDelete) ? 1 : ( shiftHoursDelete > 0 && shiftHoursAdd <= 0 ? -1 : 0 );
 
         array[array.length-1] += shiftHoursAdd;
         array[array.length-1] -= shiftHoursDelete;
@@ -527,8 +539,12 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
       setTimesheetChanged(true);
 
     } catch (error) {
-
-      errorCallback(error, setGuardPostEditForm);
+      
+      if (error instanceof ApiError) {
+        setError(error.message)
+      } else {
+        throw error
+      }
 
     } finally {
 
@@ -549,12 +565,14 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
   -------------------------------------------------------------------------------------------------------*/
   const guardPostEdit = async (event,
     inputGuardPostNumber,
+    inputGuardPostCallsign,
     inputGuardPostName,
     inputGuardPostAddress,
     inputGuardPostPhoto,
     inputGuardPostManager,
     inputGuardPostShifts,
-    inputGuardPostDescription) => {
+    inputGuardPostDescription,
+    inputGuardPostRate) => {
 
     event.preventDefault();
 
@@ -563,17 +581,22 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
     MOBXui.setLoading();
 
     try {
+      console.log(inputGuardPostRate);
 
       const responce = await editGuardPost(
         guardPostEditForm.guardPost._id,
         inputGuardPostNumber,
+        inputGuardPostCallsign,
         inputGuardPostName,
         inputGuardPostAddress,
         inputGuardPostPhoto,
         inputGuardPostManager,
         inputGuardPostShifts,
-        inputGuardPostDescription
+        inputGuardPostDescription,
+        inputGuardPostRate
       );
+
+      console.log(responce);
 
       if (responce.guardPost?.manager._id != guardPostData.manager._id) {
         setTimesheetChanged(false);
@@ -791,7 +814,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
             {/* Менеджер */}
             {guardPostData.manager &&
               <div className='form-item items-center'>
-                <span className='break-all md:break-normal'><b className=''>НСО</b> {[guardPostData.manager?.surname, guardPostData.manager?.firstName].join(' ')}</span>
+                <span className='break-all md:break-normal'><b className=''>НСО:</b> {[guardPostData.manager?.surname, guardPostData.manager?.firstName].join(' ')}</span>
               </div>}
 
             {/* Смены */}
@@ -827,12 +850,18 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
               <span className="break-all md:break-normal">{guardPostData.description}</span>
             </div>}
 
+          {/* Тариф */}
+          {guardPostData.rate &&
+            <div className='form-item w-full items-center'>
+              <span className="break-all md:break-normal"><b className='hidden md:inline-block'>Тариф:</b> {guardPostData.rate}</span>
+            </div>}
+
           {/* Статус ошибки */}
-          {error && <div className="">
+          {/* {error && <div className="">
             <span className="text-color_C italic break-words">
               {error}
             </span>
-          </div>}
+          </div>} */}
 
         </div>
 
@@ -1173,9 +1202,13 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                       ${i >= timesheetTableHeader.length ? "font-bold" : ""}
                       ${value > 0 && i < timesheetTableHeader.length ? (
                         value < summGuardPostShifts ?
-                          (isDayOff ? " bg-rose-300 text-orange-900" : " bg-rose-200 text-orange-700")
-                          :
-                          (isDayOff ? " bg-emerald-300 text-orange-900" : " bg-emerald-200 text-orange-700")
+                          ( isDayOff ? " bg-rose-300 text-orange-900" : " bg-rose-200 text-orange-700" )
+                          : (
+                            value > summGuardPostShifts ?
+                              (isDayOff ? " bg-orange-300 text-rose-900" : " bg-orange-200 text-rose-700")
+                              :
+                              (isDayOff ? " bg-emerald-300 text-orange-900" : " bg-emerald-200 text-orange-700")
+                          )
                       ) : (
                         isDayOff ? " bg-amber-100 text-orange-900" : " bg-stone-50 text-orange-700"
                       )}`}>
@@ -1188,10 +1221,10 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
               <tr className="block md:table-row absolute -top-full md:top-auto -left-full 
                 md:left-auto md:relative z-10">
 
-                <td className="bg-color_B p-2 text-white font-bold text-left block md:table-cell" colSpan={timesheetTableHeader.length - 3}>
-                  <span className="text-color_C italic break-words">
+                <td className="bg-color_B p-2 block md:table-cell text-left text-red-700 italic break-words" colSpan={timesheetTableHeader.length - 3}>
+                  {/* <span className=""> */}
                     {error}
-                  </span>
+                  {/* </span> */}
                 </td>
 
                 <td

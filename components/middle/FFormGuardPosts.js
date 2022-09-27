@@ -56,7 +56,8 @@ export default function FFormGuardPosts({ guardPosts, users }) {
     inputGuardPostPhoto,
     inputGuardPostManager,
     inputGuardPostShifts,
-    inputGuardPostDescription) => {
+    inputGuardPostDescription,
+    inputGuardPostRate) => {
 
     event.preventDefault();
 
@@ -72,19 +73,12 @@ export default function FFormGuardPosts({ guardPosts, users }) {
         inputGuardPostPhoto,
         inputGuardPostManager,
         inputGuardPostShifts,
-        inputGuardPostDescription
+        inputGuardPostDescription,
+        inputGuardPostRate
       );
 
       setGuardPostsTable(array => {
         array.unshift(responce.guardPost);
-        // array.sort((a, b) => {    
-        //   return (a.manager === undefined || a.manager === null) - (b.manager === undefined || b.manager === null)||
-        //   a.manager.surname.localeCompare(b.manager.surname) ||
-        //   a.number - b.number 
-        //   // return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
-        //   //   a.number - b.number ||
-        //   //   a.callsign.localeCompare(b.callsign)
-        // })
         return array;
       });
 
@@ -112,7 +106,8 @@ export default function FFormGuardPosts({ guardPosts, users }) {
     inputGuardPostPhoto,
     inputGuardPostManager,
     inputGuardPostShifts,
-    inputGuardPostDescription) => {
+    inputGuardPostDescription,
+    inputGuardPostRate) => {
 
     event.preventDefault();
 
@@ -129,7 +124,8 @@ export default function FFormGuardPosts({ guardPosts, users }) {
         inputGuardPostPhoto,
         inputGuardPostManager,
         inputGuardPostShifts,
-        inputGuardPostDescription
+        inputGuardPostDescription,
+        inputGuardPostRate
       );
 
       setGuardPostsTable(array => {

@@ -129,8 +129,9 @@ class TimesheetService {
             await mongoConnect();
 
             //get timesheet data
-            const responce = await mongoTimesheetsGuardsModel.find({guardPost: guardPost, month: month}, null, {sort: {timesheetDays: 1}}).populate('guard').lean();
+            const responce = await mongoTimesheetsGuardsModel.find({guardPost: guardPost, month: month}).populate('guard').lean();
 
+            // console.log('getTimesheet');
             const optionGuards = [];
             const guardsRow = responce.map(timesheet=>{
 

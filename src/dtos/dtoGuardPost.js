@@ -16,6 +16,7 @@ export default class DTOGuardPost {
     manager;
     shifts;
     description;
+    rate;
 
     constructor(model) {
         this._id = model._id;
@@ -27,6 +28,7 @@ export default class DTOGuardPost {
         this.manager = model.manager;
         this.shifts = model.shifts;
         this.description = model.description;
+        this.rate = model.rate;
     }
 
 }
@@ -78,12 +80,12 @@ export const validateYup = (dtoGuardPost, options) => {
 
 }
 
-export const createGuardPost = async (number, callsign, name, address, photo, manager, shifts, description) => {
-    return await fetchAuthMethod('/method/createGuardPost', { number, callsign, name, address, photo, manager, shifts, description });
+export const createGuardPost = async (number, callsign, name, address, photo, manager, shifts, description, rate) => {
+    return await fetchAuthMethod('/method/createGuardPost', { number, callsign, name, address, photo, manager, shifts, description, rate });
 }
 
-export const editGuardPost = async (id, number, callsign, name, address, photo, manager, shifts, description) => {
-    return await fetchAuthMethod('/method/editGuardPost', { id, number, callsign, name, address, photo, manager, shifts, description });
+export const editGuardPost = async (id, number, callsign, name, address, photo, manager, shifts, description, rate) => {
+    return await fetchAuthMethod('/method/editGuardPost', { id, number, callsign, name, address, photo, manager, shifts, description, rate });
 }
 
 export const deleteGuardPost = async (idGuardPost, idUser, reason) => {

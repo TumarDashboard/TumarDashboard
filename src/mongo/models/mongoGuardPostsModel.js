@@ -38,6 +38,10 @@ export const MongooseSchema = new mongoose.Schema({
   shifts: {
     type: [String]
   },
+
+  rate: {
+    type: Number,
+  },
   
   description: {
     type: String

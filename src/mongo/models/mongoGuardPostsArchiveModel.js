@@ -56,6 +56,10 @@ export const MongooseSchema = new mongoose.Schema({
     type: String
   },
 
+  rate: {
+    type: Number,
+  },
+
 })
 
 export default mongoose.models == null ? mongoose.model('GuardPostsArchive', MongooseSchema) : (mongoose.models.GuardPostsArchive || mongoose.model('GuardPostsArchive', MongooseSchema))
