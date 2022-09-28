@@ -244,7 +244,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
 
       </div>
 
-      {/* {Таблица физ. постов} */}
+      {/* {Таблица охранников} */}
       <table className="min-w-full border-collapse block md:table">
 
         <thead className="block md:table-header-group">
@@ -286,6 +286,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
                         onClick={() => {
                           setGuardEditForm({
                             isOpen: true,
+                            index: index,
                             operation: 'Изменить',
                             key: Math.random().toString(36),
                             guard: guard

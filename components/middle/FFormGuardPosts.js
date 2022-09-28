@@ -128,6 +128,8 @@ export default function FFormGuardPosts({ guardPosts, users }) {
         inputGuardPostRate
       );
 
+      console.log(responce);
+
       setGuardPostsTable(array => {
         array[guardPostEditForm.index] = responce.guardPost;
         return array;
@@ -335,6 +337,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                           event.stopPropagation();
                           setGuardPostEditForm({
                             isOpen: true,
+                            index: index,
                             operation: 'Изменить',
                             key: Math.random().toString(36),
                             guardPost: guardPost
@@ -389,6 +392,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                       className="mr-2 flex"
                       onClick={(event) => {
                         event.stopPropagation();
+                        console.log(guardPost);
                         setGuardPostEditForm({
                           isOpen: true,
                           index: index,

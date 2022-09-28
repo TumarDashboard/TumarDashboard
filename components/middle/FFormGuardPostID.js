@@ -581,7 +581,6 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
     MOBXui.setLoading();
 
     try {
-      console.log(inputGuardPostRate);
 
       const responce = await editGuardPost(
         guardPostEditForm.guardPost._id,
@@ -595,8 +594,6 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
         inputGuardPostDescription,
         inputGuardPostRate
       );
-
-      console.log(responce);
 
       if (responce.guardPost?.manager._id != guardPostData.manager._id) {
         setTimesheetChanged(false);
@@ -743,7 +740,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
         <div className="w-full flex pt-2 justify-between items-center">
 
           <button
-            className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
+            className="bg-slate-300 h-10 w-10 flex justify-center items-center rounded-lg
           hover:bg-color_C active:bg-color_B"
             onClick={(event) => {
               event.stopPropagation();
@@ -756,7 +753,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
             />
           </button>
 
-          <div className="flex flex-row items-center justify-between md:justify-start bg-white p-4 rounded-t-md border-t-8 border-red-700">
+          <div className="flex flex-row items-center justify-between md:justify-start bg-white mx-2 p-4 rounded-t-md border-t-8 border-red-700">
             {guardPostData.photo && <Image
               className="h-8 w-8 rounded-full"
               width={32}
@@ -853,7 +850,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
           {/* Тариф */}
           {guardPostData.rate &&
             <div className='form-item w-full items-center'>
-              <span className="break-all md:break-normal"><b className='hidden md:inline-block'>Тариф:</b> {guardPostData.rate}</span>
+              <span className="break-all md:break-normal"><b className='inline-block'>Тариф:</b> {guardPostData.rate}</span>
             </div>}
 
           {/* Статус ошибки */}
