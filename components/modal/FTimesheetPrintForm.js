@@ -64,7 +64,7 @@ export function FTimesheetPrintForm({ form, setForm, MOBXui, errorCallback, guar
 
     } catch (error) {
     
-      setFile({});
+      setFile(null);
 
       errorCallback(error, setForm);
 

@@ -238,6 +238,7 @@ class TimesheetService {
                     address: "$guardPost.address",
                     number: "$guardPost.number",
                     callsign: "$guardPost.callsign",
+                    rate: "$guardPost.rate",
                     guardRow: "$guardRow"
                 } } },
                 { $sort : { number : 1, callsign: 1 } }

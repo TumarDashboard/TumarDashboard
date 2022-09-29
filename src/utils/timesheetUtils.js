@@ -9,7 +9,7 @@ const tableHeader = {
     text: '№\r\nп/п'
   },
   Initials: {
-    width: 31.25,
+    width: 20.25,
     text: 'Ф.И.О.',
   },
   Days: {
@@ -18,6 +18,14 @@ const tableHeader = {
   Count: {
     width: 6.15,
     text: 'кол-во\r\nчас',
+  },
+  Rate: {
+    width: 6.15,
+    text: 'тариф',
+  },
+  RateSumm: {
+    width: 7,
+    text: 'сумма',
   }
 }
 
@@ -35,10 +43,14 @@ const Style = {
   FontDefaultBold: { name: "Calibri", family: 1, size: defaultFontSize, bold: true },
   FontSmall: { name: "Calibri", family: 1, size: smallFontSize },
   FontSmallBold: { name: "Calibri", family: 1, size: smallFontSize, bold: true },
-  FillYellow1: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'f4b084' }, },
-  FillYellow2: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'f8cbad' }, },
-  FillYellow3: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'ffe699' }, },
-  FillYellow4: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'fff2cc' }, },
+  // FillYellow1: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'f4b084' }, },
+  // FillYellow2: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'f8cbad' }, },
+  // FillYellow3: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'ffe699' }, },
+  // FillYellow4: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'fff2cc' }, },
+  FillYellow1: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'ffff00' }, },
+  FillYellow2: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'ffff00' }, },
+  FillYellow3: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'fff2cc' }, },
+  FillYellow4: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'ffffff' }, },
   BorderThin: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
 }
 
@@ -46,7 +58,7 @@ export function timesheetPrintServer( responce, usersData, date ) {
 
   const daysTimesheet = getDaysFromMonth(date);
   const daysCount = daysTimesheet.length;
-  const columns = daysCount + 3;
+  const columns = daysCount + 5;
 
   // Workbook and worksheet create
   var ExcelJSWorkbook = new ExcelJS.Workbook();
@@ -109,6 +121,8 @@ export function timesheetPrintServer( responce, usersData, date ) {
     worksheet.getColumn(1).width = tableHeader.Index.width;
     worksheet.getColumn(2).width = tableHeader.Initials.width;
     worksheet.getColumn(3 + daysCount).width = tableHeader.Count.width;
+    worksheet.getColumn(4 + daysCount).width = tableHeader.Rate.width;
+    worksheet.getColumn(5 + daysCount).width = tableHeader.RateSumm.width;
     for (let i = 0; i < daysCount; i++) {
       worksheet.getColumn(3 + i).width = tableHeader.Days.width;
     }
@@ -116,6 +130,7 @@ export function timesheetPrintServer( responce, usersData, date ) {
     var rowsCount = 0;
 
     for (const guardPost of NSOdata.guardPosts) {
+      
       var tableRowsCount = guardPost.guardRow?.length > 0 ? guardPost.guardRow.length + 5 : 3;
 
       if (rowsCount > 0) {
@@ -149,21 +164,35 @@ export function timesheetPrintServer( responce, usersData, date ) {
       tableCustomCell.value = tableHeader.Index.text;
       tableCustomCell.font = Style.FontSmall;
       tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
-      tableCustomCell.fill = Style.FillYellow2;
+      tableCustomCell.fill = Style.FillYellow1;
       tableCustomCell.border = Style.BorderThin;
 
       tableCustomCell = tableHeaderRow.getCell(2);
       tableCustomCell.value = tableHeader.Initials.text;
       tableCustomCell.font = Style.FontSmall;
       tableCustomCell.alignment = Style.AlignmentMiddleCenter;
-      tableCustomCell.fill = Style.FillYellow2;
+      tableCustomCell.fill = Style.FillYellow1;
       tableCustomCell.border = Style.BorderThin;
 
       tableCustomCell = tableHeaderRow.getCell(3 + daysCount);
       tableCustomCell.value = tableHeader.Count.text;
       tableCustomCell.font = Style.FontSmall;
       tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
-      tableCustomCell.fill = Style.FillYellow2;
+      tableCustomCell.fill = Style.FillYellow1;
+      tableCustomCell.border = Style.BorderThin;
+
+      tableCustomCell = tableHeaderRow.getCell(4 + daysCount);
+      tableCustomCell.value = tableHeader.Rate.text;
+      tableCustomCell.font = Style.FontSmall;
+      tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
+      tableCustomCell.fill = Style.FillYellow1;
+      tableCustomCell.border = Style.BorderThin;
+
+      tableCustomCell = tableHeaderRow.getCell(5 + daysCount);
+      tableCustomCell.value = tableHeader.RateSumm.text;
+      tableCustomCell.font = Style.FontSmall;
+      tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
+      tableCustomCell.fill = Style.FillYellow1;
       tableCustomCell.border = Style.BorderThin;
 
       for (let i = 0; i < daysCount; i++) {
@@ -174,10 +203,10 @@ export function timesheetPrintServer( responce, usersData, date ) {
         tableCustomCell.border = Style.BorderThin;
         if( daysTimesheet[i] == 'сб' || daysTimesheet[i] == 'вс' ){
           tableCustomCell.font = Style.FontSmallBold;
-          tableCustomCell.fill = Style.FillYellow1;
+          tableCustomCell.fill = Style.FillYellow2;
         }else{
           tableCustomCell.font = Style.FontSmall;
-          tableCustomCell.fill = Style.FillYellow2;
+          tableCustomCell.fill = Style.FillYellow1;
         }
       }
 
@@ -187,6 +216,10 @@ export function timesheetPrintServer( responce, usersData, date ) {
         var totalHoursCount = 0;
         var totalHoursAddressStart = '';
         var totalHoursAddressFinish = '';
+        var totalRateSummCount = 0;
+        var totalRateSummAddressStart = '';
+        var totalRateSummAddressFinish = '';
+        var rate = guardPost.rate ? guardPost.rate : 0;
         // Тело таблицы
         guardPost.guardRow.forEach((guard, i) => {
 
@@ -199,7 +232,7 @@ export function timesheetPrintServer( responce, usersData, date ) {
           tableBodyCell.font = Style.FontSmall;
           tableBodyCell.alignment = Style.AlignmentMiddleCenter;
           tableBodyCell.border = Style.BorderThin;
-          tableBodyCell.fill = Style.FillYellow2;
+          tableBodyCell.fill = bodyRowFillColor;
 
           tableBodyCell = tableBodyRow.getCell(2);
           tableBodyCell.value = [guard.surname, guard.firstName].join(' ');
@@ -243,6 +276,7 @@ export function timesheetPrintServer( responce, usersData, date ) {
             }
           }
 
+          // Сумма часов в строке
           tableBodyCell = tableBodyRow.getCell(3 + daysCount);
           tableBodyCell.value = { formula: `SUM(${tableBodyRow.getCell(3).address}:${tableBodyRow.getCell(2 + daysCount).address})`, result: hoursCount };
           tableBodyCell.font = Style.FontSmallBold;
@@ -260,22 +294,50 @@ export function timesheetPrintServer( responce, usersData, date ) {
             totalHoursAddressFinish = tableBodyCell.address;
           }
 
+          // Тариф
+          tableBodyCell = tableBodyRow.getCell(4 + daysCount);
+          tableBodyCell.value = rate;
+          tableBodyCell.font = Style.FontSmallBold;
+          tableBodyCell.alignment = Style.AlignmentMiddleCenter;
+          tableBodyCell.border = Style.BorderThin;
+          tableBodyCell.fill = bodyRowFillColor;
+
+          // Сумма Тариф*часы
+          let rateSumm = hoursCount*rate;
+          tableBodyCell = tableBodyRow.getCell(5 + daysCount);
+          tableBodyCell.value = { formula: `PRODUCT(${tableBodyRow.getCell(3 + daysCount).address}:${tableBodyRow.getCell(4 + daysCount).address})`, result: rateSumm };
+          tableBodyCell.font = Style.FontSmallBold;
+          tableBodyCell.alignment = Style.AlignmentMiddleCenter;
+          tableBodyCell.border = Style.BorderThin;
+          tableBodyCell.fill = bodyRowFillColor;
+
+          totalRateSummCount += rateSumm;
+
+          if (i == 0) {
+            totalRateSummAddressStart = tableBodyCell.address;
+          }
+
+          if (i == (guardPost.guardRow.length - 1)) {
+            totalRateSummAddressFinish = tableBodyCell.address;
+          }
         })
 
         // Строка итогов
         const tableFooterRow = worksheet.addRow();
 
+        const bodyFooterFillColor = guardPost.guardRow.length & 1 ? Style.FillYellow3 : Style.FillYellow4;
+
         var tableFooterCell = tableFooterRow.getCell(1);
         tableFooterCell.font = Style.FontSmall;
         tableFooterCell.alignment = Style.AlignmentMiddleCenter;
         tableFooterCell.border = Style.BorderThin;
-        tableFooterCell.fill = Style.FillYellow1;
+        tableFooterCell.fill = bodyFooterFillColor;
 
         tableFooterCell = tableFooterRow.getCell(2);
         tableFooterCell.font = Style.FontSmall;
         tableFooterCell.alignment = Style.AlignmentMiddleLeft;
         tableFooterCell.border = Style.BorderThin;
-        tableFooterCell.fill = Style.FillYellow1;
+        tableFooterCell.fill = bodyFooterFillColor;
 
         for (let i = 0; i < daysCount; i++) {
 
@@ -283,16 +345,31 @@ export function timesheetPrintServer( responce, usersData, date ) {
           tableFooterCell.font = Style.FontSmall;
           tableFooterCell.alignment = Style.AlignmentMiddleCenter;
           tableFooterCell.border = Style.BorderThin;
-          tableFooterCell.fill = Style.FillYellow1;
+          tableFooterCell.fill = bodyFooterFillColor;
 
         }
-
+        // Итого сумма часов
         tableFooterCell = tableFooterRow.getCell(3 + daysCount);
         tableFooterCell.value = { formula: `SUM(${totalHoursAddressStart}:${totalHoursAddressFinish})`, result: totalHoursCount };
         tableFooterCell.font = Style.FontSmallBold;
         tableFooterCell.alignment = Style.AlignmentMiddleCenter;
         tableFooterCell.border = Style.BorderThin;
-        tableFooterCell.fill = Style.FillYellow1;
+        tableFooterCell.fill = bodyFooterFillColor;
+
+        // Итого тариф
+        tableFooterCell = tableFooterRow.getCell(4 + daysCount);
+        tableFooterCell.font = Style.FontSmallBold;
+        tableFooterCell.alignment = Style.AlignmentMiddleCenter;
+        tableFooterCell.border = Style.BorderThin;
+        tableFooterCell.fill = bodyFooterFillColor;
+
+        // Итого сумма по тарифу
+        tableFooterCell = tableFooterRow.getCell(5 + daysCount);
+        tableFooterCell.value = { formula: `SUM(${totalRateSummAddressStart}:${totalRateSummAddressFinish})`, result: totalRateSummCount };
+        tableFooterCell.font = Style.FontSmallBold;
+        tableFooterCell.alignment = Style.AlignmentMiddleCenter;
+        tableFooterCell.border = Style.BorderThin;
+        tableFooterCell.fill = bodyFooterFillColor;
 
       } else {
 
