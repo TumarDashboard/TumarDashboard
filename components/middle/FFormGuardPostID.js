@@ -1,4 +1,4 @@
-import { ArchiveIcon, PlusIcon, ReplyIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
+import { ArchiveIcon, StopIcon, PlusIcon, ReplyIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
 import { motion, useDragControls } from "framer-motion";
 import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
@@ -525,6 +525,31 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
     }
 
     setTimesheetTableHeader(array => [...array]);
+
+  }
+
+  /*----------------------------------------------------------------------------------------------------------------------------
+  ----Функция очистки Строк охранников------------------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------------------------*/
+  const guardCellsClear= (event) => {
+
+    event.preventDefault();
+
+    setError('');
+
+    setTimesheetChanged(false);
+
+    setTimesheetTableBody( array =>{
+      array.forEach((guard)=>{
+        guard.timesheetDays=[];
+        guard.timesheetShifts=[];
+      })
+      return array;
+    })
+
+    setTimesheetTableFooter( array =>{
+      return array.fill(0);
+    })
 
   }
 
@@ -1248,7 +1273,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
               <tr className="block md:table-row absolute -top-full md:top-auto -left-full 
                 md:left-auto md:relative z-10">
 
-                <td className="bg-color_B p-2 block md:table-cell text-left text-red-700 italic break-words" colSpan={timesheetTableHeader.length - 3}>
+                <td className="bg-color_B p-2 block md:table-cell text-left text-red-700 italic break-words" colSpan={timesheetTableHeader.length - 6}>
                   {/* <span className=""> */}
                     {error}
                   {/* </span> */}
@@ -1256,9 +1281,21 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
                 <td
                   className="bg-color_B p-2 block md:table-cell right-0 sticky"
-                  colSpan={5}
+                  colSpan={8}
                 >
                   <div className='flex justify-center'>
+
+                    <FButtonRed
+                      className="flex py-1 mr-2"
+                      onClick={guardCellsClear}
+                      disabled={timesheetTableFooter.length == 0 || timesheetTableFooter[timesheetTableFooter.length-1] == 0}
+                    >
+                      <StopIcon
+                        className="h-6 w-6"
+                      />
+                      <span className='hidden lg:block'>Очистить</span>
+                    </FButtonRed>
+
                     <FButtonRed
                       className="flex py-1"
                       onClick={timesheetChangeHandle}
