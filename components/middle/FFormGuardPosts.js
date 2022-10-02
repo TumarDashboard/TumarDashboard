@@ -126,9 +126,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
         inputGuardPostShifts,
         inputGuardPostDescription,
         inputGuardPostRate
-      );
-
-      console.log(responce);
+      );s
 
       setGuardPostsTable(array => {
         array[guardPostEditForm.index] = responce.guardPost;
@@ -206,7 +204,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
       if (error.statusCode == 520) {
 
         callback({ isOpen: false });
-        console.log(error.message);
+        
         const message = JSON.parse(error.message);
 
         MOBXui.openGoogleAuthError(message.email, message.authorizeUrl);
@@ -392,7 +390,6 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                       className="mr-2 flex"
                       onClick={(event) => {
                         event.stopPropagation();
-                        console.log(guardPost);
                         setGuardPostEditForm({
                           isOpen: true,
                           index: index,

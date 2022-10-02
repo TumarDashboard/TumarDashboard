@@ -35,8 +35,6 @@ export function FTimesheetPrintForm({ form, setForm, MOBXui, errorCallback, guar
   -------------------------------------------------------------------------------------------------------*/
   const timesheetChangeHandle = async (event) => {  
 
-    event.preventDefault();
-
     setError('');
     setFile({ url: '', name: 'Выгрузка...' });
 
@@ -92,7 +90,6 @@ export function FTimesheetPrintForm({ form, setForm, MOBXui, errorCallback, guar
     } catch (error) {
 
       // setFile({});
-      console.log(error);
 
       errorCallback(ApiError.FileCreateError( error ), setForm);
 

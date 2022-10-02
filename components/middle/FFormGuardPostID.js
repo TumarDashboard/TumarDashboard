@@ -283,10 +283,6 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
   -------------------------------------------------------------------------------------------------------*/
   const guardCellSelectShift = (event) => {
 
-    // event.preventDefault();
-    
-    console.log(event.target.id);
-
     const guard = guardRowSelectShiftForm.guard;
     const day = guardRowSelectShiftForm.day;
 
@@ -374,6 +370,19 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
         return array;
       });
 
+      setTimesheetTableFooter(array=>{
+
+        guardRowSelectGuardForm.guard.timesheetDays?.forEach(day => {
+          array[day] -= guardRowSelectGuardForm.guard.timesheetShifts[day];
+        });
+
+        inputGuard.timesheetDays?.forEach(element => {
+          array[day] += inputGuard.timesheetShifts[day];
+        });
+
+        return array;
+      })
+
       setGuardRowSelectGuardForm({ isOpen: false });
 
     } catch (error) {
@@ -419,6 +428,15 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
         })
         return result
       });
+
+      setTimesheetTableFooter(array=>{
+
+        deletedGuard.guard.timesheetDays?.forEach(day => {
+          array[day] -= deletedGuard.timesheetShifts[day];
+        });
+
+        return array;
+      })
 
       setGuardRowSelectGuardForm({ isOpen: false });
 
@@ -1034,6 +1052,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                     key={guard._id}
                     className={`block md:table-row mb-2 group ${(index & 1) ? "bg-stone-50" : "bg-stone-200"}`}
                   >
+                    {/* Инициалы */}
                     <td
                       onPointerDown={event => {
                         constraintsRef.current.style.touchAction = 'none';
@@ -1099,6 +1118,8 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
                       </div>
                     </td>
+
+                    {/* Смены */}
                     {timesheetTableHeader.map((value, i) => {
                       const indexInTimesheetDays = guard.timesheetDays?.indexOf(i);
                       var shift;
@@ -1154,9 +1175,13 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                         {shift}
                       </td>;
                     })}
+
+                    {/* Колличество смен */}
                     <td className="text-center font-bold block md:table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none">
                       {shiftsCount > 0 ? shiftsCount : null}
                     </td>
+
+                    {/* Колличество часов */}
                     <td className="text-center font-bold block md:table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none">
                       {hoursCount > 0 ? hoursCount : null}
                     </td>
