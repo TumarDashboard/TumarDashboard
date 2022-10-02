@@ -70,7 +70,7 @@ export function FGuardPostDeleteForm({ form, setForm, submit }) {
 
         <FButtonRed
           className=""
-          disabled={inputValidate != form.guardPostCallsign}
+          disabled={inputValidate.localeCompare(form.guardPostCallsign, undefined, { sensitivity: 'base', ignorePunctuation: true })}
           onClick={(e)=>submit( e, inputReason )}
         >
           Удалить

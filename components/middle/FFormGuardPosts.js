@@ -126,7 +126,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
         inputGuardPostShifts,
         inputGuardPostDescription,
         inputGuardPostRate
-      );s
+      );
 
       setGuardPostsTable(array => {
         array[guardPostEditForm.index] = responce.guardPost;

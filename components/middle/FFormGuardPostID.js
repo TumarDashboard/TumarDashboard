@@ -531,7 +531,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
   /*----------------------------------------------------------------------------------------------------------------------------
   ----Функция очистки Строк охранников------------------------------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------*/
-  const guardCellsClear= (event) => {
+  const guardCellsClear = (event) => {
 
     event.preventDefault();
 
@@ -838,7 +838,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                 setGuardPostDeleteForm({
                   isOpen: true,
                   key: Math.random().toString(36),
-                  guardPostName: guardPostData.name,
+                  guardPostCallsign: guardPostData.callsign,
                   guardPostId: guardPostData._id,
                 })
               }}

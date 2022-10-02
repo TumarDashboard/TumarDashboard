@@ -200,7 +200,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
 
       } else {
         callback(form => {
-          let formNew = {...form};
+          let formNew = { ...form };
           formNew.error = error.message;
           return formNew;
         });

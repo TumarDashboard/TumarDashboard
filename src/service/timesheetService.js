@@ -243,7 +243,7 @@ class TimesheetService {
                 } } },
                 { $sort : { number : 1, callsign: 1 } }
             ]);
-            console.log(responceTimesheetsGuardsModel);
+            
             // Переводим ObjectID найденных ФИЗ. ПОСТОВ с имеющимися ГРАФИКАМИ СМЕН
             const responceTimesheetsGuardsLean = responceTimesheetsGuardsModel.map((element, index)=>{
                 element._id = element._id.toString();

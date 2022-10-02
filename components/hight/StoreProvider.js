@@ -6,7 +6,8 @@ import useSWR from 'swr'
 import { fetchAuth } from '../../middleware/requests';
 import { useRouter } from 'next/router';
 import { FButtonRed } from '../low/FButtonRed';
-import { RefreshIcon } from '@heroicons/react/solid';
+import { RefreshIcon, UserCircleIcon } from '@heroicons/react/solid';
+import FNextLink from '../low/FNextLink';
 
 let mobxUser;
 let mobxUI;
@@ -81,7 +82,7 @@ export function StoreProvider({ isFirstMount, children, initialState: initialDat
         </div>
         <div className='flex justify-center my-2'>
           <FButtonRed
-            className="flex"
+            className="flex mr-2"
             onClick={async(e) => {
               try {
                 _mobxUI.setLoading();
@@ -102,6 +103,13 @@ export function StoreProvider({ isFirstMount, children, initialState: initialDat
             />
             Обновить
           </FButtonRed>
+          
+          <FNextLink
+              href="/authorization/login"
+              className='text-color_C hover:bg-color_C hover:text-color_G px-3 py-2 rounded-md text-sm font-bold font-font_B'
+          >
+            <UserCircleIcon className="h-8 w-8" />
+          </FNextLink>
 
         </div>
       </div>}
