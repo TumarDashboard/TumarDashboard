@@ -283,6 +283,11 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
   -------------------------------------------------------------------------------------------------------*/
   const guardCellSelectShift = (event) => {
 
+    setGuardPostDataShifts(array=>{
+      array.push(event.target.id);
+      return array;
+    })
+
     const guard = guardRowSelectShiftForm.guard;
     const day = guardRowSelectShiftForm.day;
 
