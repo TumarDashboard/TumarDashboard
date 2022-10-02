@@ -180,6 +180,7 @@ class UserService {
     async checkAuth(refreshToken, store) {
         try {
 
+            // throw ApiError.UnauthorizedError();
             if (!refreshToken) {
                 console.log('отстутствует refreshToken', refreshToken );
                 throw ApiError.UnauthorizedError();

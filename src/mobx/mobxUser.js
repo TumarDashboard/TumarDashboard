@@ -84,7 +84,10 @@ export default class MOBXuser {
         try {
 
             await fetchAuth('/authorization/logout');
+            
             localStorage.removeItem('token');
+
+            removeCookies( "refreshToken", {req, res, path: '/'});
 
         } catch (error) {
 
