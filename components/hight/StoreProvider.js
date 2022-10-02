@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import MOBXui from '../../src/mobx/mobxUI';
 import MOBXuser from '../../src/mobx/mobxUser';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useSWR from 'swr'
 import {fetchAuth} from '../../middleware/requests';
 import { useRouter } from 'next/router';
@@ -21,13 +21,23 @@ export function useStore() {
 
 export function StoreProvider({ isFirstMount, children, initialState: initialData }) {
 
-  const context = refreshStore(initialData, mobxUser?.isAuth == true);
+  const [error, setError]= useState(null);
 
-  return <StoreContext.Provider value={context}>{children}</StoreContext.Provider>
+  const context = refreshStore(initialData, mobxUser?.isAuth == true, setError);
+
+  return <StoreContext.Provider value={context}>
+    {error && 
+      <div 
+      className="fixed z-[1400] w-full bg-white text-color_C italic break-words"
+      >
+        error
+      </div>}
+    {children}
+  </StoreContext.Provider>
 
 }
 
-function refreshStore(initialData = null, isAuth) {
+function refreshStore(initialData = null, isAuth, setError) {
 
   // load MOBXuser
 
@@ -45,6 +55,8 @@ function refreshStore(initialData = null, isAuth) {
       console.log(error);
 
       localStorage.removeItem('token');
+
+      setError(error.message);
       // _mobxUser.setAuth(false);
       // _mobxUser.setUser({});
 
@@ -60,6 +72,8 @@ function refreshStore(initialData = null, isAuth) {
     } else if (data) {
 
       localStorage.setItem('token', data.accessToken);
+
+      setError(null);
 
       _mobxUser.setAuth(true);
       

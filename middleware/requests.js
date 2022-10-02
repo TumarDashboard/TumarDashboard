@@ -14,10 +14,16 @@ export async function fetchAuth(url, data = {}, method = 'POST'){
         referrerPolicy: 'no-referrer',
         body: JSON.stringify(data) // body data type must match "Content-Type" header
     });
-    const body = await response.json();
-    if (!response.ok)
-        throw new ApiError(response.status, body.message);
-    return body;
+    if( response.ok ){
+        return await response.json();
+    }else{
+        var text = await response.text(); 
+        try {
+            const data = JSON.parse(text);
+            var text = data.message;
+        } catch (error) {}
+        throw new ApiError(response.status, text);
+    }
 }
 
 export async function fetchAuthMethod( url, data ){
@@ -55,8 +61,12 @@ export async function fetchAuthFile(url, data = {}, method = 'POST'){
     if (response.ok){
         return response;
     }else{
-        const body = await response.json();
-        throw new ApiError(response.status, body.message);
+        var text = await response.text(); 
+        try {
+            const data = JSON.parse(text);
+            var text = data.message;
+        } catch (error) {}
+        throw new ApiError(response.status, text);
     }
 
 }
