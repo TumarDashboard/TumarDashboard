@@ -402,7 +402,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                       <PencilAltIcon
                         className="h-4 w-4"
                       />
-                      <span className='hidden lg:block'>Изменить</span>
+                      <span className='hidden xl:block'>Изменить</span>
                     </FButtonRed>
 
                     <FButtonWhite
@@ -420,7 +420,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                       <TrashIcon
                         className="h-4 w-4"
                       />
-                      <span className='hidden lg:block'>Удалить</span>
+                      <span className='hidden xl:block'>Удалить</span>
                     </FButtonWhite>
 
                   </div>

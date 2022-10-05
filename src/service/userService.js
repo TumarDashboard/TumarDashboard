@@ -195,17 +195,15 @@ class UserService {
             if (!userData || !tokenFromDb) {
                 throw ApiError.UnauthorizedError();
             }
-    
+
             const mongoUser = await mongoUserModel.findById(userData.id, store == 'update' ? '-uiAvatarsSrc' : '').lean();
     
             if (!mongoUser) {
                 console.log('отстутствует mongoUser',userData, tokenFromDb, mongoUser );
                 throw ApiError.BadRequest(`При обновлении токена сессии была обнаружена ошибка`);
             }
-    
-            // const dtoUser = new DTOUser(mongoUser);
-    
-            return userData;
+            
+            return store == 'update' ? userData : new DTOUser(mongoUser);
             
         } catch (error) {
             console.log(error, refreshToken);

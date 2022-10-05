@@ -8,7 +8,7 @@ function classNames(...classes) {
 }
 
 export default function FNavbarProfile({ uiAvatarsSrc, logout }) {
-
+  console.log(uiAvatarsSrc);
   return (
     <Disclosure as="nav" className="bg-color_A">
       {({ open }) => (

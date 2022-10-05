@@ -34,7 +34,8 @@ export default class MOBXuser {
     updateUser(user){
 
         Object.keys(user).forEach((key) => {
-            this.user[key] = user[key];
+            if(user[key] && user[key] != '')
+                this.user[key] = user[key];
         })
 
     }
@@ -87,7 +88,7 @@ export default class MOBXuser {
             
             localStorage.removeItem('token');
 
-            removeCookies( "refreshToken", {req, res, path: '/'});
+            removeCookies( "refreshToken", { path: '/'});
 
         } catch (error) {
 

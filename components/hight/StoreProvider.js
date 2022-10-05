@@ -11,6 +11,7 @@ import FNextLink from '../low/FNextLink';
 
 let mobxUser;
 let mobxUI;
+
 export const StoreContext = createContext();
 
 export function useStore() {
@@ -24,61 +25,22 @@ export function useStore() {
 
 export function StoreProvider({ isFirstMount, children, initialState: initialData }) {
 
-  const router = useRouter();
+  const { MOBXuser, MOBXui, error } = refreshStore(initialData, mobxUser?.isAuth == true);
 
-  var {data, error} = useSWR(`/authorization/refresh?store=${mobxUser?.isAuth == true ? 'update' : 'initialize'}`, fetchAuth, { shouldRetryOnError: false });
-
-  const _mobxUser = mobxUser ?? new MOBXuser();
-  const _mobxUI = mobxUI ?? new MOBXui();
-
-  useEffect(() => {
-
-    if (error) {
-
-      console.log(error);
-
-      localStorage.removeItem('token');
-
-    } else if (data) {
-
-      localStorage.setItem('token', data.accessToken);
-
-      _mobxUser.setAuth(true);
-
-      if (mobxUser?.isAuth == true)
-        _mobxUser.updateUser(data.user);
-      else
-        _mobxUser.setUser(data.user);
-
-      if (initialData?.checkAuth && !data.user?.isActivated) {
-
-        router.push('/authorization/activatelink');
-
-      }
-
-    }
-
-  }, [data, error]);
-
-  if (typeof window != 'undefined') {
-    if (!mobxUser) mobxUser = _mobxUser;
-    if (!mobxUI) mobxUI = _mobxUI;
-  }
-
-  return <StoreContext.Provider value={{ MOBXuser: _mobxUser, MOBXui: _mobxUI}}>
+  return <StoreContext.Provider value={{MOBXuser, MOBXui}}>
 
     {initialData?.checkAuth && error &&
       <div
         className="fixed z-[1400] w-full bg-white flex flex-col justify-center"
       >
         <div
-          className='flex w-full justify-center'>
-          <span className="text-black font-bold mr-1">
-            Ошибка подключения к базе данных:
-          </span>
-          <span className="text-color_C italic break-words">
+          className='flex w-full justify-center mx-2 mt-1'>
+          <p className="text-black font-bold mr-1">
+            Ошибка доступа к платформе:
+          </p>
+          <p className="text-color_C italic break-words">
             {error.message}
-          </span>
+          </p>
         </div>
         <div className='flex justify-center my-2'>
           <FButtonRed
@@ -90,7 +52,6 @@ export function StoreProvider({ isFirstMount, children, initialState: initialDat
                 localStorage.setItem('token', responce.accessToken);
                 _mobxUser.setAuth(true);
                 _mobxUser.setUser(responce.user);
-                error = null;
               } catch (error) {
                 
               }finally{
@@ -120,4 +81,60 @@ export function StoreProvider({ isFirstMount, children, initialState: initialDat
 
 }
 
+function refreshStore(initialData = null, isAuth) {
 
+  // load MOBXuser
+
+  const router = useRouter();
+
+  const { data, error } = useSWR(`/authorization/refresh?store=${isAuth ? 'update' : 'initialize'}`, fetchAuth, { shouldRetryOnError: false });
+  
+  const _mobxUser = mobxUser ?? new MOBXuser();
+  const _mobxUI = mobxUI ?? new MOBXui();
+
+  useEffect(() => {
+
+    if (error) {
+      
+      console.log(error);
+
+      localStorage.removeItem('token');
+
+    } else if (data) {
+
+      localStorage.setItem('token', data.accessToken);
+
+      _mobxUser.setAuth(true);
+      
+      if (isAuth)
+        _mobxUser.updateUser(data.user);
+      else
+        _mobxUser.setUser(data.user);
+
+      if (initialData?.checkAuth && !data.user?.isActivated) {
+
+        router.push('/authorization/activatelink');
+
+      }
+
+    }
+
+  }, [data, error]);
+
+  // For SSG and SSR always create a new store
+  if (typeof window === 'undefined') return {
+    MOBXuser: _mobxUser,
+    MOBXui: _mobxUI
+  }
+
+  // Create the store once in the client
+  if (!mobxUser) mobxUser = _mobxUser;
+  if (!mobxUI) mobxUI = _mobxUI;
+
+  return {
+    MOBXuser: _mobxUser,
+    MOBXui: _mobxUI,
+    error: error
+  }
+
+}
