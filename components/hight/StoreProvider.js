@@ -25,7 +25,7 @@ export function useStore() {
 
 export function StoreProvider({ isFirstMount, children, initialState: initialData }) {
 
-  const { MOBXuser, MOBXui, error } = refreshStore(initialData, mobxUser?.isAuth == true);
+  var { MOBXuser, MOBXui, error } = refreshStore(initialData, mobxUser?.isAuth == true);
 
   return <StoreContext.Provider value={{MOBXuser, MOBXui}}>
 
@@ -47,15 +47,16 @@ export function StoreProvider({ isFirstMount, children, initialState: initialDat
             className="flex mr-2"
             onClick={async(e) => {
               try {
-                _mobxUI.setLoading();
+                MOBXui.setLoading();
                 const responce = await fetchAuth(`/authorization/refresh?store=${mobxUser?.isAuth == true ? 'update' : 'initialize'}`);
                 localStorage.setItem('token', responce.accessToken);
                 _mobxUser.setAuth(true);
                 _mobxUser.setUser(responce.user);
+                error = null;
               } catch (error) {
                 
               }finally{
-                _mobxUI.setLoading();
+                MOBXui.setLoading();
               }
             }}
           >
