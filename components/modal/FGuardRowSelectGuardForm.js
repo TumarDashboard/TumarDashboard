@@ -34,16 +34,16 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
       Фильтр Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
 
-  const [inputFilter, setInputFilter] = useState([]);   
+  const [inputFilter, setInputFilter] = useState([]);
 
   const [inputFilterText, setInputFilterText] = useState([]);
 
   const filterChange = (e) => {
     var text = e.target.value.toLowerCase();
     setInputFilterText(e.target.value);
-    if( text ){
+    if (text) {
       setInputFilter(optionsForWork.filter((value) => { return value.lower?.includes(text) }))
-    }else{
+    } else {
       setInputFilter(optionsForWork)
     }
   }
@@ -52,39 +52,40 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
       Выбранные данные для работы Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
 
-  const [inputGuard, setInputGuard] = useState([]);   
+  const [inputGuard, setInputGuard] = useState([]);
 
   const selectOption = (newValue) => {
 
     setInputFilter(array => {
-      if(operation=="Изменить" && inputGuard){
+      if (operation == "Изменить" && inputGuard) {
         array.unshift(inputGuard);
       }
       return array.filter(element => newValue.value != element.value)
     });
 
     setOptionsForWork(array => {
-      if(operation=="Изменить" && inputGuard){
+      if (operation == "Изменить" && inputGuard) {
         array.unshift(inputGuard);
       }
       return array.filter(element => newValue.value != element.value)
     });
 
-    if( operation=="Изменить" ){
+    if (operation == "Изменить") {
       setInputGuard(newValue);
-    }else{
+    } else {
       setInputGuard(array => {
         array.push(newValue);
         return array;
       });
     }
 
-  }  
-  
+  }
+
   const unSelectOption = (value) => {
 
     setInputGuard(array => {
-      return array.filter(element => value.value != element.value)});
+      return array.filter(element => value.value != element.value)
+    });
 
     setInputFilter(array => {
       array.unshift(value);
@@ -136,10 +137,10 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
       setGuards(array => {
         array.unshift(responce.guard);
         return array;
-      });    
+      });
 
       const text = [responce.guard.surname, responce.guard.firstName].join(' ');
-      
+
       selectOption({
         label: text,
         value: responce.guard._id,
@@ -181,35 +182,35 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
 
   return (
     <FModalForm
-      title={`${operation} охранника${operation=="Изменить" ? ' - ' + [form?.guard?.surname, form?.guard?.firstName].join(' '):''}`}
+      title={`${operation} охранника${operation == "Изменить" ? ' - ' + [form?.guard?.surname, form?.guard?.firstName].join(' ') : ''}`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
       className="flex flex-col items-start p-4 w-full max-h-[70vh] overflow-y-auto"
     >
 
       {/* Выбранные охранники - множество*/}
-      {operation=="Добавить" && inputGuard && inputGuard.length > 0 && <div className="form-item w-full flex flex-wrap mb-1">
-        {inputGuard.map((value, i)=>{
+      {operation == "Добавить" && inputGuard && inputGuard.length > 0 && <div className="form-item w-full flex flex-wrap mb-1">
+        {inputGuard.map((value, i) => {
           return <button
-              key={"key"+i+value.value} 
-              className='flex items-center justify-center 
+            key={"key" + i + value.value}
+            className='flex items-center justify-center 
               border rounded-md px-2 m-1 bg-red-600 text-white 
               hover:bg-red-700 hover:text-color_F active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200'
-              onClick={(event) => {
-                event.stopPropagation();
-                unSelectOption(value)
-              }}
-            >
-              <span className='w-fit'>{value.label}</span>
-              <XIcon
-                className='w-4 h-4'
-              />
-            </button>
+            onClick={(event) => {
+              event.stopPropagation();
+              unSelectOption(value)
+            }}
+          >
+            <span className='w-fit'>{value.label}</span>
+            <XIcon
+              className='w-4 h-4'
+            />
+          </button>
         })}
       </div>}
 
       {/* Выбранные охранники - одиночный */}
-      {operation=="Изменить" && inputGuard && inputGuard != form.guard?._id  && <div className="form-item w-full flex mb-1 items-center justify-center">
+      {operation == "Изменить" && inputGuard && inputGuard != form.guard?._id && <div className="form-item w-full flex mb-1 items-center justify-center">
         <span className="text-color_G bg-color_C rounded-md px-2">
           Изменить на {inputGuard.label}
         </span>
@@ -229,25 +230,26 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
             className="w-full p-1
             border border-gray-300 rounded-md"
           />
+{/* fixed -ml-6 mt-2 */}
           <div
-          className=''
+            className=''
           >
-
-          <button
-            className="h-4 w-4 flex justify-center items-center rounded-md
+            <button
+              className="h-4 w-4 flex justify-center items-center rounded-md
             hover:bg-color_C active:bg-color_B
-            fixed -ml-6 mt-2"
-            onClick={() => {
-              setInputFilterText('');
-              setInputFilter(optionsForWork)
-            }}
-          >
-            <XIcon
-              className="h-4 w-4 fill-color_F
+            "
+              onClick={() => {
+                setInputFilterText('');
+                setInputFilter(optionsForWork)
+              }}
+            >
+              <XIcon
+                className="h-4 w-4 fill-color_F
               hover:fill-color_G"
-            />
-          </button>
+              />
+            </button>
           </div>
+
         </div>
 
         {/* Кнопка вызова Формы добавления охранника */}
@@ -260,7 +262,7 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
               setGuardEditForm({
                 isOpen: true,
                 operation: 'Добавить',
-                guard:{
+                guard: {
                   surname: inputFilterText
                 },
                 key: Math.random().toString(36)
@@ -279,19 +281,19 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
 
       {/* Охранник */}
       <div className="form-item w-full mt-2 flex flex-col items-center min-h-[48px] overflow-y-auto border rounded-md">
-        {inputFilter && inputFilter.length > 0 && inputFilter.map((value, i)=>{
+        {inputFilter && inputFilter.length > 0 && inputFilter.map((value, i) => {
           return <button
-              key={"key"+i+value.value} 
-              className='w-full 
+            key={"key" + i + value.value}
+            className='w-full 
               hover:bg-color_C hover:text-color_G active:bg-color_C'
-              onClick={(event) => {
-                event.stopPropagation();
-                selectOption(value)
-              }}
-            >
-              {value.label}
-            </button>
-        })}        
+            onClick={(event) => {
+              event.stopPropagation();
+              selectOption(value)
+            }}
+          >
+            {value.label}
+          </button>
+        })}
         {inputFilter.length == 0 && <span>Нет данных</span>}
       </div>
 
@@ -308,12 +310,12 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
         <FButtonRed
           className=""
           disabled={!(form.isOpen && (operation == 'Добавить' ?
-            ( inputGuard && inputGuard.length > 0 ) :
-            ( inputGuard && inputGuard != form.guard?._id )
+            (inputGuard && inputGuard.length > 0) :
+            (inputGuard && inputGuard != form.guard?._id)
           ))}
-          onClick={(e) => operation == 'Добавить' 
-          ? submitAdd(e,inputGuard.map(element=>element.value))
-          : submitEdit(e,inputGuard.value)}
+          onClick={(e) => operation == 'Добавить'
+            ? submitAdd(e, inputGuard.map(element => element.value))
+            : submitEdit(e, inputGuard.value)}
         >
           {operation}
         </FButtonRed>

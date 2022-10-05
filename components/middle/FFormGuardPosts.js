@@ -304,12 +304,8 @@ export default function FFormGuardPosts({ guardPosts, users }) {
               className="rounded-md md:border-none block md:table-row bg-color_G mb-2 cursor-pointer" 
               key={guardPost._id}
               onClick={(event) => {
-                event.stopPropagation();
-                MOBXui.setLoading();
-                router.push({
-                  pathname: '/dashboard/guardPosts/[guardPostID]',
-                  query: { guardPostID: guardPost._id },
-                })
+                event.stopPropagation();           
+                router.push(`/dashboard/guardPosts/${guardPost._id}`)
               }}
               >
 
