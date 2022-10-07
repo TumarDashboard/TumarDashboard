@@ -181,27 +181,43 @@ class UserService {
         try {
 
             // throw ApiError.UnauthorizedError();
+            console.log('checkAuth for token: %s',refreshToken);
+
             if (!refreshToken) {
-                console.log('отстутствует refreshToken', refreshToken );
+                console.log('checkAuth error: отстутствует refreshToken: %s', refreshToken );
                 throw ApiError.UnauthorizedError();
             }
     
             const userData = await tokenService.validateRefreshToken(refreshToken);
 
+            console.log('checkAuth validate userData from refreshToken: %o', userData);
+
+            if (!userData) {
+                console.log('checkAuth error: отстутствует userData: %o', userData );
+                throw ApiError.UnauthorizedError();
+            }
+
             await mongoConnect();
     
             const tokenFromDb = await tokenService.findToken(refreshToken);
 
-            if (!userData || !tokenFromDb) {
+            console.log('checkAuth finded tokenFromDb in db: %o', tokenFromDb);
+
+            if (!tokenFromDb) {
+                console.log('checkAuth error: отстутствует tokenFromDb: %o', tokenFromDb );
                 throw ApiError.UnauthorizedError();
             }
 
             const mongoUser = await mongoUserModel.findById(userData.id, store == 'update' ? '-uiAvatarsSrc' : '').lean();
+
+            console.log('checkAuth finded mongoUser in db: %o', mongoUser);
     
             if (!mongoUser) {
-                console.log('отстутствует mongoUser',userData, tokenFromDb, mongoUser );
+                console.log('checkAuth error: отстутствует mongoUser: %o', mongoUser );
                 throw ApiError.BadRequest(`При обновлении токена сессии была обнаружена ошибка`);
             }
+
+            console.log('checkAuth is finished with store "%o" and return %o', store, store == 'update' ? userData : new DTOUser(mongoUser));
             
             return store == 'update' ? userData : new DTOUser(mongoUser);
             
