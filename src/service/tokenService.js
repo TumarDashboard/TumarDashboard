@@ -96,6 +96,12 @@ export async function removeTokenByID(userId) {
 
 }
 
+export async function findTokenByUserID(userId) {
+
+    return await mongoTokenModel.findOne({ user: userId }).lean();
+
+}
+
 export async function findToken(refreshToken) {
 
     return await mongoTokenModel.findOne({ refreshToken: refreshToken }).lean();

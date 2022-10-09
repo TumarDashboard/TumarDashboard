@@ -32,7 +32,7 @@ export default function catchAuthServer(handler) {
     
             const refreshToken = req.cookies['refreshToken'];
             
-            const userData = await userService.checkAuth( refreshToken );
+            const userData = await userService.checkAuth( refreshToken, 'update' );
             
             if (!userData?.isActivated) {
                 return redirect('/authorization/activatelink', resolvedUrl, req, res);

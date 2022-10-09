@@ -162,6 +162,8 @@ class UserService {
         if( dtoUser.exp - dtoUser.iat > 5000 ){
 
             const accessToken = await tokenService.generateAccessToken({ ...dtoUser });
+
+            console.log('refresh autorizate token %o for user %o', refreshToken, dtoUser);
     
             return { accessToken: accessToken, refreshToken: refreshToken, user: dtoUser }
 
@@ -170,6 +172,8 @@ class UserService {
             const tokens = await tokenService.generateTokens({ ...dtoUser });
     
             await tokenService.saveToken(dtoUser.id, tokens.refreshToken);
+
+            console.log('refresh update refreshToken %o for user %o', tokens.refreshToken, dtoUser);
     
             return { ...tokens, user: dtoUser }
 
@@ -204,7 +208,13 @@ class UserService {
             console.log('checkAuth finded tokenFromDb in db: %o', tokenFromDb);
 
             if (!tokenFromDb) {
+
                 console.log('checkAuth error: отстутствует tokenFromDb: %o', tokenFromDb );
+    
+                const tokenFromDbByID = await tokenService.findTokenByUserID(userData.id);
+
+                console.log('checkAuth error: текущий tokenFromDbByID: %o', tokenFromDbByID );
+
                 throw ApiError.UnauthorizedError();
             }
 
