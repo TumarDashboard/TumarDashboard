@@ -146,8 +146,8 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
             return result;
           }, []));
-          
-          guardsRow.sort((a, b)=>{
+
+          guardsRow.sort((a, b) => {
             return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
           })
 
@@ -283,7 +283,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
   -------------------------------------------------------------------------------------------------------*/
   const guardCellSelectShift = (event) => {
 
-    setGuardPostDataShifts(array=>{
+    setGuardPostDataShifts(array => {
       array.push(event.target.id);
       return array;
     })
@@ -309,9 +309,9 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
     } else {
 
-        cellHandleAdd = event.target.id;
-        cellHandleDelete = guard.timesheetShifts[index];
-        guard.timesheetShifts[index] = event.target.id;
+      cellHandleAdd = event.target.id;
+      cellHandleDelete = guard.timesheetShifts[index];
+      guard.timesheetShifts[index] = event.target.id;
 
     }
 
@@ -319,29 +319,29 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
     shiftHoursAdd = shiftHoursAdd ? shiftHoursAdd : 0;
     var shiftHoursDelete = parseInt(cellHandleDelete);
     shiftHoursDelete = shiftHoursDelete ? shiftHoursDelete : 0;
-    
+
     if (shiftHoursAdd > 0 || shiftHoursDelete > 0) {
       setTimesheetTableFooter(array => {
         array[day] += shiftHoursAdd;
         array[day] -= shiftHoursDelete;
 
-        array[array.length-2] += index == -1 ? 1 : ( shiftHoursDelete > 0 && shiftHoursAdd <= 0 ? -1 : 0 );
+        array[array.length - 2] += index == -1 ? 1 : (shiftHoursDelete > 0 && shiftHoursAdd <= 0 ? -1 : 0);
 
-        array[array.length-1] += shiftHoursAdd;
-        array[array.length-1] -= shiftHoursDelete;
+        array[array.length - 1] += shiftHoursAdd;
+        array[array.length - 1] -= shiftHoursDelete;
 
         return [...array];
       });
     }
 
-    setTimesheetTableBody( array => {
+    setTimesheetTableBody(array => {
       array[guardRowSelectShiftForm.index] = guard;
       return array;
     })
     // setTimesheetTableHeader(array => [...array]);
 
     setGuardRowSelectShiftForm({ isOpen: false });
-    
+
   }
 
   /*-------------------------------------------------------------------------------------------------------
@@ -375,7 +375,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
         return array;
       });
 
-      setTimesheetTableFooter(array=>{
+      setTimesheetTableFooter(array => {
 
         guardRowSelectGuardForm.guard.timesheetDays?.forEach(day => {
           array[day] -= guardRowSelectGuardForm.guard.timesheetShifts[day];
@@ -434,7 +434,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
         return result
       });
 
-      setTimesheetTableFooter(array=>{
+      setTimesheetTableFooter(array => {
 
         deletedGuard.guard.timesheetDays?.forEach(day => {
           array[day] -= deletedGuard.timesheetShifts[day];
@@ -515,10 +515,10 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
         array[day] += shiftHoursAdd;
         array[day] -= shiftHoursDelete;
 
-        array[array.length-2] += index == -1 || isNaN(cellHandleDelete) ? 1 : ( shiftHoursDelete > 0 && shiftHoursAdd <= 0 ? -1 : 0 );
+        array[array.length - 2] += index == -1 || isNaN(cellHandleDelete) ? 1 : (shiftHoursDelete > 0 && shiftHoursAdd <= 0 ? -1 : 0);
 
-        array[array.length-1] += shiftHoursAdd;
-        array[array.length-1] -= shiftHoursDelete;
+        array[array.length - 1] += shiftHoursAdd;
+        array[array.length - 1] -= shiftHoursDelete;
 
         return [...array];
       });
@@ -539,15 +539,15 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
     setTimesheetChanged(false);
 
-    setTimesheetTableBody( array =>{
-      array.forEach((guard)=>{
-        guard.timesheetDays=[];
-        guard.timesheetShifts=[];
+    setTimesheetTableBody(array => {
+      array.forEach((guard) => {
+        guard.timesheetDays = [];
+        guard.timesheetShifts = [];
       })
       return array;
     })
 
-    setTimesheetTableFooter( array =>{
+    setTimesheetTableFooter(array => {
       return array.fill(0);
     })
 
@@ -587,7 +587,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
       setTimesheetChanged(true);
 
     } catch (error) {
-      
+
       if (error instanceof ApiError) {
         setError(error.message)
       } else {
@@ -1168,7 +1168,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                         ${(index & 1) ? "border-y-[1px]" : "border-stone-300"}
                         `}
                         onPointerDown={(event) => {
-                          pointTimeout = setTimeout(()=>{
+                          pointTimeout = setTimeout(() => {
                             setGuardRowSelectShiftForm({
                               isOpen: true,
                               guard: guard,
@@ -1177,22 +1177,22 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                             })
                             pointTimeout = null;
                           }, 1000);
-                        }}                        
-                        onPointerUp={(event) => {  
-                          if (pointTimeout){
+                        }}
+                        onPointerUp={(event) => {
+                          if (pointTimeout) {
                             clearTimeout(pointTimeout);
                             guardCellHandle(event, guard, i)
                             pointTimeout = null;
                           }
                         }}
-                        onPointerLeave={(event) => {  
-                          if (pointTimeout){
+                        onPointerLeave={(event) => {
+                          if (pointTimeout) {
                             clearTimeout(pointTimeout);
                             pointTimeout = null;
                           }
                         }}
-                        onPointerCancel={(event) => {  
-                          if (pointTimeout){
+                        onPointerCancel={(event) => {
+                          if (pointTimeout) {
                             clearTimeout(pointTimeout);
                             pointTimeout = null;
                           }
@@ -1221,98 +1221,99 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
               </tbody>}
 
             {/* Итоги таблицы */}
-            <tfoot className='block md:table-footer-group select-none'>
+            {timesheetTableHeader.length > 0 &&
+              <tfoot className='block md:table-footer-group select-none'>
 
-              <tr
-                className={`block md:table-row mb-2 group ${(timesheetTableBody.length & 1) ? "bg-stone-50" : "bg-stone-200"}`}
-              >
-
-                <td className="bg-color_B p-2 block md:table-cell left-0 sticky border-r-[1px] z-50" rowSpan="2">
-                  <button
-                    className='flex items-center justify-center align-middle text-white text-center w-full disabled:opacity-25'
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setGuardRowSelectGuardForm({
-                        isOpen: true,
-                        operation: 'Добавить',
-                        key: Math.random().toString(36)
-                      })
-                    }}
-                    disabled={optionGuards.length <= 1}
-                  >
-                    <PlusIcon className='w-4 h-4' />
-                    <span>Добавить</span>
-                  </button>
-                </td>
-
-                {timesheetTableFooter.map((value, i) => {
-                  const isDayOff = i < timesheetTableHeader.length && (timesheetTableHeader[i] == "сб" || timesheetTableHeader[i] == "вс")
-                  return <td
-                    key={i}
-                    className={`text-center text-sm block md:table-cell min-w-[35px]
-                      border-b-[1px] border-r-[1px] 
-                      ${i >= timesheetTableHeader.length ? "font-bold" : ""}
-                      ${value > 0 && i < timesheetTableHeader.length ? (
-                        value < summGuardPostShifts ?
-                          ( isDayOff ? " bg-rose-300 text-orange-900" : " bg-rose-200 text-orange-700" )
-                          : (
-                            value > summGuardPostShifts ?
-                              (isDayOff ? " bg-orange-300 text-rose-900" : " bg-orange-200 text-rose-700")
-                              :
-                              (isDayOff ? " bg-emerald-300 text-orange-900" : " bg-emerald-200 text-orange-700")
-                          )
-                      ) : (
-                        isDayOff ? " bg-amber-100 text-orange-900" : " bg-stone-50 text-orange-700"
-                      )}`}>
-                    <p>{value > 0 ? value : ''}</p>
-                  </td>;
-                })}
-
-              </tr>
-
-              <tr className="block md:table-row absolute -top-full md:top-auto -left-full 
-                md:left-auto md:relative z-10">
-
-                <td className="bg-color_B p-2 block md:table-cell text-left text-red-700 italic break-words" colSpan={timesheetTableHeader.length - 6}>
-                  {/* <span className=""> */}
-                    {error}
-                  {/* </span> */}
-                </td>
-
-                <td
-                  className="bg-color_B p-2 block md:table-cell right-0 sticky"
-                  colSpan={8}
+                <tr
+                  className={`block md:table-row mb-2 group ${(timesheetTableBody.length & 1) ? "bg-stone-50" : "bg-stone-200"}`}
                 >
-                  <div className='flex justify-center'>
 
-                    <FButtonRed
-                      className="flex py-1 mr-2"
-                      onClick={guardCellsClear}
-                      disabled={timesheetTableFooter.length == 0 || timesheetTableFooter[timesheetTableFooter.length-1] == 0}
+                  <td className="bg-color_B p-2 block md:table-cell left-0 sticky border-r-[1px] z-50" rowSpan="2">
+                    <button
+                      className='flex items-center justify-center align-middle text-white text-center w-full disabled:opacity-25'
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setGuardRowSelectGuardForm({
+                          isOpen: true,
+                          operation: 'Добавить',
+                          key: Math.random().toString(36)
+                        })
+                      }}
+                      disabled={optionGuards.length <= 1}
                     >
-                      <StopIcon
-                        className="h-6 w-6"
-                      />
-                      <span className='hidden lg:block'>Очистить</span>
-                    </FButtonRed>
+                      <PlusIcon className='w-4 h-4' />
+                      <span>Добавить</span>
+                    </button>
+                  </td>
 
-                    <FButtonRed
-                      className="flex py-1"
-                      onClick={timesheetChangeHandle}
-                      disabled={timesheetChanged}
-                    >
-                      <ArchiveIcon
-                        className="h-6 w-6"
-                      />
-                      Сохранить
-                    </FButtonRed>
+                  {timesheetTableFooter.map((value, i) => {
+                    const isDayOff = i < timesheetTableHeader.length && (timesheetTableHeader[i] == "сб" || timesheetTableHeader[i] == "вс")
+                    return <td
+                      key={i}
+                      className={`text-center text-sm block md:table-cell min-w-[35px]
+                    border-b-[1px] border-r-[1px] 
+                    ${i >= timesheetTableHeader.length ? "font-bold" : ""}
+                    ${value > 0 && i < timesheetTableHeader.length ? (
+                          value < summGuardPostShifts ?
+                            (isDayOff ? " bg-rose-300 text-orange-900" : " bg-rose-200 text-orange-700")
+                            : (
+                              value > summGuardPostShifts ?
+                                (isDayOff ? " bg-orange-300 text-rose-900" : " bg-orange-200 text-rose-700")
+                                :
+                                (isDayOff ? " bg-emerald-300 text-orange-900" : " bg-emerald-200 text-orange-700")
+                            )
+                        ) : (
+                          isDayOff ? " bg-amber-100 text-orange-900" : " bg-stone-50 text-orange-700"
+                        )}`}>
+                      <p>{value > 0 ? value : ''}</p>
+                    </td>;
+                  })}
 
-                  </div>
-                </td>
+                </tr>
 
-              </tr>
+                <tr className="block md:table-row absolute -top-full md:top-auto -left-full 
+              md:left-auto md:relative z-10">
 
-            </tfoot>
+                  <td className="bg-color_B p-2 block md:table-cell text-left text-red-700 italic break-words" colSpan={timesheetTableHeader.length - 6}>
+                    {/* <span className=""> */}
+                    {error}
+                    {/* </span> */}
+                  </td>
+
+                  <td
+                    className="bg-color_B p-2 block md:table-cell right-0 sticky"
+                    colSpan={8}
+                  >
+                    <div className='flex justify-center'>
+
+                      <FButtonRed
+                        className="flex py-1 mr-2"
+                        onClick={guardCellsClear}
+                        disabled={timesheetTableFooter.length == 0 || timesheetTableFooter[timesheetTableFooter.length - 1] == 0}
+                      >
+                        <StopIcon
+                          className="h-6 w-6"
+                        />
+                        <span className='hidden lg:block'>Очистить</span>
+                      </FButtonRed>
+
+                      <FButtonRed
+                        className="flex py-1"
+                        onClick={timesheetChangeHandle}
+                        disabled={timesheetChanged}
+                      >
+                        <ArchiveIcon
+                          className="h-6 w-6"
+                        />
+                        Сохранить
+                      </FButtonRed>
+
+                    </div>
+                  </td>
+
+                </tr>
+
+              </tfoot>}
 
           </table>
         </div>

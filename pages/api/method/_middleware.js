@@ -13,9 +13,22 @@ export default catchErrorsMiddleware( async (req, ev) => {
         var verified = await jwtVerify(
             accesToken,
             new TextEncoder().encode( process.env.NEXT_PRIVATE_JWT_ACCESS_SECRET )
-            ).catch(error=>{
-                throw ApiError.UnauthorizedError();
-            })
+            ).catch(error=>{return null})
+
+        if( !verified ){
+
+            const refreshToken = req.cookies['refreshToken'];
+
+            if (refreshToken) {
+        
+                verified = await jwtVerify(
+                    refreshToken,
+                    new TextEncoder().encode(process.env.NEXT_PRIVATE_JWT_REFRESH_SECRET)
+                ).catch(error => { throw ApiError.UnauthorizedError() })
+        
+            }
+
+        }
 
         const userData = verified.payload;
 
