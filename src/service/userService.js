@@ -232,7 +232,7 @@ class UserService {
             return store == 'update' ? userData : new DTOUser(mongoUser);
             
         } catch (error) {
-            console.log(error, refreshToken);
+            // console.log(error, refreshToken);
             throw error
         }
     }
