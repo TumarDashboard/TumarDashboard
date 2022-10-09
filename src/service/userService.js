@@ -157,9 +157,9 @@ class UserService {
 
     async refresh(refreshToken, store) {
 
-        const dtoUser = await this.checkAuth(refreshToken, store);
+        const {dtoUser, iat, exp} = await this.checkAuth(refreshToken, store);
 
-        if( dtoUser.exp - dtoUser.iat > 5000 ){
+        if( exp - iat > 5000 ){
 
             const accessToken = await tokenService.generateAccessToken({ ...dtoUser });
 
@@ -227,9 +227,11 @@ class UserService {
                 throw ApiError.BadRequest(`При обновлении токена сессии была обнаружена ошибка`);
             }
 
-            console.log('checkAuth is finished with store "%o" and return %o', store, store == 'update' ? userData : new DTOUser(mongoUser));
+            const result = new DTOUser(mongoUser);
+
+            console.log('checkAuth is finished with store "%o" and return %o', store, result);
             
-            return store == 'update' ? userData : new DTOUser(mongoUser);
+            return {dtoUser: result, iat: userData.iat, exp: userData.exp};
             
         } catch (error) {
             // console.log(error, refreshToken);
