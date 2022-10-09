@@ -24,8 +24,6 @@ export default catchErrorsApi( async (req, res) => {
             httpOnly: true,
             path: '/'
         });
-
-        await delay(5000);
     
         return res.json(userData);
 
