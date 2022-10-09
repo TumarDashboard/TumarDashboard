@@ -309,8 +309,9 @@ export default function FFormGuardPosts({ guardPosts, users }) {
               }}
               >
 
-                <td className="px-2 md:border text-center block md:table-cell">
-                    <p className="text-black ml-1 text-lg font-bold">{guardPost.number}</p>
+
+                <td className="px-1 md:p-2 md:border text-left block md:hidden">
+                  <span className="break-all md:break-normal text-xl font-bold">{guardPost.callsign}</span>
                 </td>
 
                 <td className="px-2 md:border text-left block md:table-cell">
@@ -322,7 +323,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                       src={guardPost.photo}
                       alt=""
                     />}
-                    <p className="text-black ml-1 text-xl font-bold">{guardPost.callsign}</p>
+                    <p className="text-black ml-1 text-xl font-bold">{guardPost.number}</p>
                     <div className='flex md:hidden'>
 
                       <FButtonRed
@@ -362,6 +363,10 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
                     </div>
                   </div>
+                </td>
+
+                <td className="px-1 md:p-2 md:border text-left hidden md:table-cell">
+                  <span className="break-all md:break-normal font-bold">{guardPost.callsign}</span>
                 </td>
 
                 <td className="px-1 md:p-2 md:border text-left block md:table-cell">

@@ -163,7 +163,7 @@ class UserService {
 
             const accessToken = await tokenService.generateAccessToken({ ...dtoUser });
 
-            console.log('refresh autorizate token %o for user %o', refreshToken, dtoUser);
+            // console.log('refresh autorizate token %o for user %o', refreshToken, dtoUser);
     
             return { accessToken: accessToken, refreshToken: refreshToken, user: dtoUser }
 
@@ -173,7 +173,7 @@ class UserService {
     
             await tokenService.saveToken(dtoUser.id, tokens.refreshToken);
 
-            console.log('refresh update refreshToken %o for user %o', tokens.refreshToken, dtoUser);
+            // console.log('refresh update refreshToken %o for user %o', tokens.refreshToken, dtoUser);
     
             return { ...tokens, user: dtoUser }
 
@@ -185,19 +185,19 @@ class UserService {
         try {
 
             // throw ApiError.UnauthorizedError();
-            console.log('checkAuth for token: %s',refreshToken);
+            // console.log('checkAuth for token: %s',refreshToken);
 
             if (!refreshToken) {
-                console.log('checkAuth error: отстутствует refreshToken: %s', refreshToken );
+                // console.log('checkAuth error: отстутствует refreshToken: %s', refreshToken );
                 throw ApiError.UnauthorizedError();
             }
     
             const userData = await tokenService.validateRefreshToken(refreshToken);
 
-            console.log('checkAuth validate userData from refreshToken: %o', userData);
+            // console.log('checkAuth validate userData from refreshToken: %o', userData);
 
             if (!userData) {
-                console.log('checkAuth error: отстутствует userData: %o', userData );
+                // console.log('checkAuth error: отстутствует userData: %o', userData );
                 throw ApiError.UnauthorizedError();
             }
 
@@ -205,31 +205,31 @@ class UserService {
     
             const tokenFromDb = await tokenService.findToken(refreshToken);
 
-            console.log('checkAuth finded tokenFromDb in db: %o', tokenFromDb);
+            // console.log('checkAuth finded tokenFromDb in db: %o', tokenFromDb);
 
             if (!tokenFromDb) {
 
-                console.log('checkAuth error: отстутствует tokenFromDb: %o', tokenFromDb );
+                // console.log('checkAuth error: отстутствует tokenFromDb: %o', tokenFromDb );
     
                 const tokenFromDbByID = await tokenService.findTokenByUserID(userData.id);
 
-                console.log('checkAuth error: текущий tokenFromDbByID: %o', tokenFromDbByID );
+                // console.log('checkAuth error: текущий tokenFromDbByID: %o', tokenFromDbByID );
 
                 throw ApiError.UnauthorizedError();
             }
 
             const mongoUser = await mongoUserModel.findById(userData.id, store == 'update' ? '-uiAvatarsSrc' : '').lean();
 
-            console.log('checkAuth finded mongoUser in db: %o', mongoUser);
+            // console.log('checkAuth finded mongoUser in db: %o', mongoUser);
     
             if (!mongoUser) {
-                console.log('checkAuth error: отстутствует mongoUser: %o', mongoUser );
+                // console.log('checkAuth error: отстутствует mongoUser: %o', mongoUser );
                 throw ApiError.BadRequest(`При обновлении токена сессии была обнаружена ошибка`);
             }
 
             const result = new DTOUser(mongoUser);
 
-            console.log('checkAuth is finished with store "%o" and return %o', store, result);
+            // console.log('checkAuth is finished with store "%o" and return %o', store, result);
             
             return {dtoUser: result, iat: userData.iat, exp: userData.exp};
             

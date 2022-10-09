@@ -809,7 +809,10 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
               src={guardPostData.photo}
               alt=""
             />}
-            <p className="text-black ml-1 text-xl font-bold">{[guardPostData.number, guardPostData.callsign].filter(Boolean).join(' ')}</p>
+            {guardPostData.number && <p 
+              className="text-black ml-1 text-xl font-bold">
+              {guardPostData.number}
+              </p>}
           </div>
 
           <div className='flex'>
@@ -854,13 +857,15 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
         {/* {Панель информации} */}
         <div className='w-full flex flex-col bg-white p-2 rounded-md'>
-
+          
+          {/* Менеджер и Смены*/}
           <div className='flex flex-col md:flex-row w-full flex-wrap'>
-            {/* Менеджер */}
-            {guardPostData.manager &&
-              <div className='form-item items-center'>
-                <span className='break-all md:break-normal'><b className=''>НСО:</b> {[guardPostData.manager?.surname, guardPostData.manager?.firstName].join(' ')}</span>
-              </div>}
+
+            {/* Позывной */}
+            {guardPostData.callsign &&
+            <div className='form-item items-center'>
+              <span className="break-all md:break-normal font-bold">{guardPostData.name}</span>
+            </div>}
 
             {/* Смены */}
             {guardPostData.shifts && (guardPostData.shifts.length > 0) &&
@@ -876,6 +881,12 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                 })}
               </div>}
           </div>
+
+          {/* Менеджер */}
+          {guardPostData.manager &&
+            <div className='form-item w-full items-center'>
+              <span className='break-all md:break-normal'><b className=''>НСО:</b> {[guardPostData.manager?.surname, guardPostData.manager?.firstName].join(' ')}</span>
+            </div>}
 
           {/* Наименование */}
           {guardPostData.name &&
