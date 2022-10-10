@@ -22,6 +22,10 @@ export const MongooseSchema = new mongoose.Schema({
     enum: ['User', 'UserArchive']
   },
 
+  rate: {
+    type: Number,
+  },
+
 })
 
-export default mongoose.models == null ? mongoose.model('TimesheetsGuardPostManagers', MongooseSchema) : (mongoose.models.TimesheetsGuardPostManagers || mongoose.model('TimesheetsGuardPostManagers', MongooseSchema))
+export default mongoose.models == null ? mongoose.model('TimesheetsGuardPost', MongooseSchema) : (mongoose.models.TimesheetsGuardPost || mongoose.model('TimesheetsGuardPost', MongooseSchema))

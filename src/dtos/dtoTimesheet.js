@@ -48,8 +48,8 @@ export const validateYup = (dtoGuardPost, options) => {
 
 }
 
-export const changeTimesheet = async (guardPost, month, guardsRow, manager) => {
-    return await fetchAuthMethod('/method/changeTimesheet', { guardPost, month, guardsRow, manager});
+export const changeTimesheet = async (guardPost, month, guardsRow, manager, rate) => {
+    return await fetchAuthMethod('/method/changeTimesheet', { guardPost, month, guardsRow, manager, rate});
 }
 
 export const getTimesheet = async (guardPost, month) => {

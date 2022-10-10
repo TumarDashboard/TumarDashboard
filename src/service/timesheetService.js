@@ -10,7 +10,7 @@ import mongoGuardsModel from "../mongo/models/mongoGuardsModel";
 import mongoGuardsArchiveModel from "../mongo/models/mongoGuardsArchiveModel";
 import mongoose from "mongoose";
 import DTOGuard from "../dtos/dtoGuard";
-import mongoTimesheetsGuardPostManagersModel from "../mongo/models/mongoTimesheetsGuardPostManagersModel";
+import mongoTimesheetsGuardPostModel from "../mongo/models/mongoTimesheetsGuardPostModel";
 import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
 import { FPositionBUH, FPositionHRM, FPositionZDIR } from "../../components/variable/FPositionItemList";
 import { timesheetPrintServer } from "../utils/timesheetUtils";
@@ -21,7 +21,6 @@ class TimesheetService {
     async changeTimesheet(inputData) {
 
         try {
-
             //Validate date
 
             const timesheetsData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
@@ -30,7 +29,7 @@ class TimesheetService {
 
             });
 
-            const {guardPost, month, guardsRow, manager} = timesheetsData;
+            const {guardPost, month, guardsRow, manager, rate} = timesheetsData;
             //Check initials condition
             await mongoConnect();
             
@@ -64,12 +63,13 @@ class TimesheetService {
                 
                 if( user ){
 
-                    await mongoTimesheetsGuardPostManagersModel.updateOne({
+                    await mongoTimesheetsGuardPostModel.updateOne({
                         guardPost: guardPost, 
                         month: month
                     }, {
                         manager: user.id, 
-                        managerSheme: user.constructor.modelName
+                        managerSheme: user.constructor.modelName,
+                        rate: rate
                     }, {
                         upsert: true
                     });
@@ -80,12 +80,13 @@ class TimesheetService {
 
                     if( userArchive ){
 
-                        await mongoTimesheetsGuardPostManagersModel.updateOne({
+                        await mongoTimesheetsGuardPostModel.updateOne({
                             guardPost: guardPost, 
                             month: month
                         }, {
                             manager: userArchive.id, 
-                            managerSheme: userArchive.constructor.modelName
+                            managerSheme: userArchive.constructor.modelName,
+                            rate: rate
                         }, {
                             upsert: true
                         });
@@ -97,8 +98,19 @@ class TimesheetService {
                     }
                 }
 
+            }else if( rate ){
+                await mongoTimesheetsGuardPostModel.updateOne({
+                    guardPost: guardPost, 
+                    month: month
+                }, {
+                    manager: null, 
+                    managerSheme: null,
+                    rate: rate
+                }, {
+                    upsert: true
+                });
             }else{
-                await mongoTimesheetsGuardPostManagersModel.deleteOne({guardPost: guardPost, month: month});
+                await mongoTimesheetsGuardPostModel.deleteOne({guardPost: guardPost, month: month});
             }
 
             return;
@@ -148,10 +160,19 @@ class TimesheetService {
                 return dtoGuard;
             });
 
-            //get manager data
-            const timesheetsGuardPostManagers = await mongoTimesheetsGuardPostManagersModel.find({guardPost: guardPost, month: month}).lean();
-            const manager = timesheetsGuardPostManagers && timesheetsGuardPostManagers.length>0 ? timesheetsGuardPostManagers[0].manager.toString() : "EMPTY";
-            return { guardsRow, optionGuards, manager}
+            //get GuardPost data for request month
+
+            var manager = "EMPTY";
+            var rate = null;
+
+            const timesheetsGuardPost = await mongoTimesheetsGuardPostModel.findOne({guardPost: guardPost, month: month}).lean();
+
+            if( timesheetsGuardPost ){
+                manager = timesheetsGuardPost.manager ? timesheetsGuardPost.manager.toString() : manager;
+                rate = timesheetsGuardPost.rate ? timesheetsGuardPost.rate : rate;
+            }
+
+            return { guardsRow, optionGuards, manager, rate}
 
         } catch (error) {
             console.log(error);
@@ -184,7 +205,7 @@ class TimesheetService {
             const guardPosts = guardPost.map(function(el) { return mongoose.Types.ObjectId(el) });
 
             // Сначала запрашиваем данные из таблицы с ГРАФИКАМИ СМЕН
-            const responceTimesheetsGuardsModel = await mongoTimesheetsGuardsModel.aggregate([
+            const responceTimesheetsGuards = await mongoTimesheetsGuardsModel.aggregate([
                 { $match: {guardPost: {$in: guardPosts}, month: date} },
                 { $lookup: {
                     from: mongoGuardsModel.collection.name,
@@ -245,19 +266,24 @@ class TimesheetService {
             ]);
             
             // Переводим ObjectID найденных ФИЗ. ПОСТОВ с имеющимися ГРАФИКАМИ СМЕН
-            const responceTimesheetsGuardsLean = responceTimesheetsGuardsModel.map((element, index)=>{
+            const responceTimesheetsGuardsLean = responceTimesheetsGuards.map((element, index)=>{
                 element._id = element._id.toString();
                 return element;
             })
 
-            // Запрашиваем данные об имеющихся НСО на искомый ПЕРИОД по данным ФИЗ. ПОСТОВ
-            const responceTimesheetsGuardPostManagersModel  = await mongoTimesheetsGuardPostManagersModel.aggregate([
-                { $match: {guardPost: {$in: guardPosts}, month: date} },
+            // Запрашиваем данные физ поста на искомый ПЕРИОД по данным ФИЗ. ПОСТОВ
+            const responceTimesheetsGuardPost  = await mongoTimesheetsGuardPostModel.aggregate([
+                { $match: {
+                    guardPost: {$in: guardPosts}, 
+                    month: date,         
+                    manager: { $exists: true, $ne: null }} 
+                },
                 { $group: { 
                     _id: '$manager',
                     managerSheme: { $first: "$managerSheme" },
                     guardPosts: { $push: {
                         guardPost: "$guardPost",
+                        rate: "$rate",
                     }}
                 }},
                 { $lookup: {
@@ -289,21 +315,23 @@ class TimesheetService {
             const responceTimesheetsGuardsIncludeManagerIndex = [];
 
             // Формируем ответ, сопоставляя найденных НСО с графиками ФИЗ. ПОСТОВ
-            const responce = responceTimesheetsGuardPostManagersModel.reduce((result, element)=>{
+            const responce = responceTimesheetsGuardPost.reduce((result, element)=>{
 
-                element.guardPosts = element.guardPosts.map((guardPost)=>{
+                const listGuardPosts = element.guardPosts.map((guardPost)=>{
                     return guardPost.guardPost.toString();
                 })
                 
                 const guardPosts = responceTimesheetsGuardsLean.filter((guardPost, index)=>{
 
-                    const guardPostInclude = element.guardPosts.includes(guardPost._id);
+                    const indexOf = listGuardPosts.indexOf(guardPost._id);
 
-                    if( guardPostInclude ){
+                    if( indexOf >= 0 ){
                         responceTimesheetsGuardsIncludeManagerIndex.push(index);
+                        guardPost.rate = element.guardPosts[indexOf].rate ? element.guardPosts[indexOf].rate : guardPost.rate;
+                        return true;
                     }
 
-                    return guardPostInclude;
+                    return false;
 
                 });
 
@@ -319,9 +347,30 @@ class TimesheetService {
                 return result;
 
             }, []);
+            
+            // Запрашиваем данные физ поста на искомый ПЕРИОД по данным ФИЗ. ПОСТОВ без НСО
+            const responceTimesheetsGuardPostEmptyManager = await mongoTimesheetsGuardPostModel.find( {
+                guardPost: {$in: guardPosts}, 
+                month: date, 
+                manager: null
+            }).lean();
+
+            const listGuardPostsEmptyManager = responceTimesheetsGuardPostEmptyManager.map((timeSheetGuardPost)=>{
+                return timeSheetGuardPost.guardPost.toString();
+            })
 
             // Формируем список ФИЗ. ПОСТОВ без НСО
-            const guardPostsEmptyManager = responceTimesheetsGuardsLean.filter((guardPost, index)=>!responceTimesheetsGuardsIncludeManagerIndex.includes(index));
+            const guardPostsEmptyManager = responceTimesheetsGuardsLean.filter((guardPost, index)=>{
+                if( responceTimesheetsGuardsIncludeManagerIndex.includes(index) ){
+                    return false;
+                }else{
+                    const indexOf = listGuardPostsEmptyManager.indexOf(guardPost._id);
+                    if( indexOf >= 0 ){
+                        guardPost.rate = responceTimesheetsGuardPostEmptyManager[indexOf].rate ? responceTimesheetsGuardPostEmptyManager[indexOf].rate : guardPost.rate;
+                    }
+                    return true;
+                }
+            });
 
             // Добавляем данные о ФИЗ. ПОСТАХ без НСО
             if( guardPostsEmptyManager.length > 0 ){
@@ -331,6 +380,10 @@ class TimesheetService {
                     patronymic: '',
                     guardPosts: guardPostsEmptyManager
                 })
+            }
+
+            if(responce.length==0){
+                throw ApiError.FileCreateError('Данные отсутствуют')
             }
 
             // Добавляем данные о пользователях
@@ -344,7 +397,6 @@ class TimesheetService {
             return {document, googleDriveFileID};
 
         } catch (error) {
-            console.log(error);
 
             throw error;
         }

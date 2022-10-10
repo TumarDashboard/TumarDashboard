@@ -89,6 +89,12 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
   const [inputGuardPostManager, setInputGuardPostManager] = useState('EMPTY');
 
   /*-------------------------------------------------------------------------------------------------------
+      Тариф текущего месяца
+  -------------------------------------------------------------------------------------------------------*/
+
+  const [inputGuardPostRate, setInputGuardPostRate] = useState(null);
+
+  /*-------------------------------------------------------------------------------------------------------
       Функция Обновленние данных из базы
   -------------------------------------------------------------------------------------------------------*/
 
@@ -122,12 +128,14 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
         setTimesheetTableHeader(daysFromMonth);
 
-        const { guardsRow, optionGuards, manager } = await getTimesheet(guardPost._id, value);
+        const { guardsRow, optionGuards, manager, rate } = await getTimesheet(guardPost._id, value);
 
         if (value == currentMonth) {
-          setInputGuardPostManager(guardPost.manager ? guardPost.manager._id : 'EMPTY')
+          setInputGuardPostManager(guardPost.manager ? guardPost.manager._id : 'EMPTY');
+          setInputGuardPostRate(guardPost.rate ? guardPost.rate : null )
         } else {
-          setInputGuardPostManager(manager)
+          setInputGuardPostManager(manager);
+          setInputGuardPostRate(rate ? rate : ( guardPost.rate ? guardPost.rate : null ) );
         }
 
         const tableFooter = new Array(daysFromMonth.length + 2).fill(0);
@@ -208,7 +216,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
       setTimesheetTableBody([]);
 
     } catch (error) {
-
+      
       if (error instanceof ApiError) {
         setError(error.message)
       } else {
@@ -581,16 +589,18 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
           }
           return result;
         }, []),
-        inputGuardPostManager,
+        inputGuardPostManager, inputGuardPostRate,
       );
 
       setTimesheetChanged(true);
 
     } catch (error) {
-
+      
       if (error instanceof ApiError) {
+        console.log('error instanceof ApiError');
         setError(error.message)
       } else {
+        console.log('error not instanceof ApiError');
         throw error
       }
 
@@ -962,12 +972,28 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
                       value={timesheetMonth}
                     />
                     {timesheetMonth && timesheetMonth != currentMonth &&
-                      <FSelect
-                        className="ml-4 w-max"
-                        options={optionGuardPostManager}
-                        onChange={(e) => { setInputGuardPostManager(e?.target?.value) }}
-                        value={inputGuardPostManager ? inputGuardPostManager : 'EMPTY'}
-                      />
+                      <div
+                        className="ml-4 flex space-x-2"
+                      >
+                        {/* НСО */}
+                        <FSelect
+                          options={optionGuardPostManager}
+                          onChange={(e) => { setInputGuardPostManager(e?.target?.value) }}
+                          value={inputGuardPostManager ? inputGuardPostManager : 'EMPTY'}
+                        />
+                        {/* Тариф */}
+                        <input
+                            id='guard-post-rate'
+                            type="number"
+                            name='guard-post-rate'
+                            placeholder='Тариф'
+                            value={inputGuardPostRate ? inputGuardPostRate : ''}
+                            onChange={(e)=>{setInputGuardPostRate(e.target.value)}}
+                            className="border border-gray-300 block w-full
+                            focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
+                            rounded-md shadow-sm disabled:bg-gray-100 "
+                        />
+                      </div>
                     }
                   </div>
                 </th>

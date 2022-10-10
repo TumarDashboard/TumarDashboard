@@ -213,8 +213,9 @@ export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users
         />
       </div>
 
+      {/* Тариф */}
       <div className="form-item flex items-center mt-4 ">
-        <label className="text-lg pr-4">Тариф</label>         
+        <label className="text-lg pr-4">Тариф</label>
         <input
             id='guard-post-rate'
             type="number"

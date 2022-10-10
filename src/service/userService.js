@@ -12,7 +12,7 @@ import mongoGuardsArchiveModel from "../mongo/models/mongoGuardsArchiveModel";
 import mongoConnect from "../mongo/mongoConnect";
 import { ApiError } from "../../middleware/exceptions";
 import googleDrive from "../google/api/googleDrive";
-import mongoTimesheetsGuardPostManagersModel from "../mongo/models/mongoTimesheetsGuardPostManagersModel";
+import mongoTimesheetsGuardPostModel from "../mongo/models/mongoTimesheetsGuardPostModel";
 
 class UserService {
 
@@ -331,7 +331,7 @@ class UserService {
 
         await mongoGuardsArchiveModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
 
-        await mongoTimesheetsGuardPostManagersModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
+        await mongoTimesheetsGuardPostModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
         
         await mongoUser.delete();
 
