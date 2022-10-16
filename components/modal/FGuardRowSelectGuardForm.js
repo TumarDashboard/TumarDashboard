@@ -217,10 +217,10 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
       </div>}
 
       {/* Фильтр и Кнопка вызова Формы добавления охранника */}
-      <div className="flex w-full">
+      <div className="flex w-full space-x-2">
 
         {/* Фильтр */}
-        <div className="flex-1 form-item mr-2 flex relative w-full">
+        <div className="flex-1 form-item">
           <input
             type="text"
             key={form.key}
@@ -230,31 +230,30 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
             className="w-full p-1
             border border-gray-300 rounded-md"
           />
-{/* fixed -ml-6 mt-2 */}
-          <div
-            className=''
-          >
-            <button
-              className="h-4 w-4 flex justify-center items-center rounded-md
-            hover:bg-color_C active:bg-color_B
-            "
-              onClick={() => {
-                setInputFilterText('');
-                setInputFilter(optionsForWork)
-              }}
-            >
-              <XIcon
-                className="h-4 w-4 fill-color_F
-              hover:fill-color_G"
-              />
-            </button>
-          </div>
+        </div>
 
+        {/* Кнопка чистки фильтра */}
+        <div
+            className='form-item'
+        >
+          <button
+            className="bg-color_B h-8 w-8 flex justify-center items-center rounded-md
+            hover:bg-color_C active:bg-color_B disabled:opacity-25"
+            onClick={() => {
+              setInputFilterText('');
+              setInputFilter(optionsForWork)
+            }}
+            disabled={inputFilterText.length==0}
+          >
+            <XIcon
+              className="h-8 w-8 fill-color_F
+              hover:fill-color_G"
+            />
+          </button>
         </div>
 
         {/* Кнопка вызова Формы добавления охранника */}
         <div className="form-item">
-
           <button
             className="bg-color_B h-8 w-8 flex justify-center items-center rounded-md
             hover:bg-color_C active:bg-color_B"
@@ -274,13 +273,14 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
               hover:fill-color_G"
             />
           </button>
-
         </div>
 
       </div>
 
       {/* Охранник */}
-      <div className="form-item w-full mt-2 flex flex-col items-center min-h-[48px] overflow-y-auto border rounded-md">
+      <div
+        className="form-item w-full mt-2 flex flex-col items-center min-h-[48px] overflow-y-auto border rounded-md"
+      >
         {inputFilter && inputFilter.length > 0 && inputFilter.map((value, i) => {
           return <button
             key={"key" + i + value.value}

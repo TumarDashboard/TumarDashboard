@@ -1,7 +1,11 @@
-export const FPositionNSO = 'FPNSO';
+export const FPositionEMPTY = 'FPEMP';
+export const FPositionDIR = 'FPDIR';
 export const FPositionZDIR = 'FPZDIR';
+export const FPositionNSO = 'FPNSO';
 export const FPositionHRM = 'FPHRM';
+export const FPositionOPR = 'FPOPR';
 export const FPositionBUH = 'FPBUH';
+export const FPositionTHN = 'FPTHN';
 
 const FPositionItemList = [
     { label: "Отсутствует", value: 'FPEMP' },

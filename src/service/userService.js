@@ -157,9 +157,9 @@ class UserService {
 
     async refresh(refreshToken, store) {
 
-        const {dtoUser, iat, exp} = await this.checkAuth(refreshToken, store);
+        const {dtoUser, noUpdate} = await this.checkAuth(refreshToken, store);
 
-        if( exp - iat > 5000 ){
+        if( noUpdate ){
 
             const accessToken = await tokenService.generateAccessToken({ ...dtoUser });
 
@@ -211,7 +211,7 @@ class UserService {
 
                 // console.log('checkAuth error: отстутствует tokenFromDb: %o', tokenFromDb );
     
-                const tokenFromDbByID = await tokenService.findTokenByUserID(userData.id);
+                // const tokenFromDbByID = await tokenService.findTokenByUserID(userData.id);
 
                 // console.log('checkAuth error: текущий tokenFromDbByID: %o', tokenFromDbByID );
 
@@ -227,24 +227,18 @@ class UserService {
                 throw ApiError.BadRequest(`При обновлении токена сессии была обнаружена ошибка`);
             }
 
-            const result = new DTOUser(mongoUser);
+            const dtoUser = new DTOUser(mongoUser);
+
+            const noUpdate = dtoUser.equals(userData) && ( userData.exp - userData.iat > 5000 );
 
             // console.log('checkAuth is finished with store "%o" and return %o', store, result);
             
-            return {dtoUser: result, iat: userData.iat, exp: userData.exp};
+            return {dtoUser, noUpdate};
             
         } catch (error) {
             // console.log(error, refreshToken);
             throw error
         }
-    }
-
-    async getAllUsers() {
-
-        await mongoConnect();
-
-        return await mongoUserModel.find().lean();
-
     }
 
     async changeUser(inputUserData) {

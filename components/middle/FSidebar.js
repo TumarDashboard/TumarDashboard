@@ -1,7 +1,9 @@
 import Link from 'next/link';
+import { useStore } from "../hight/StoreProvider";
+import { observer } from 'mobx-react-lite';
 import { motion } from "framer-motion";
 import { useRouter } from 'next/router';
-import FDashboardItemList from '../variable/FDashboardItemList';
+import getDashboardItemList from "../variable/FDashboardItemList";
 
 const background = {
     initial: {
@@ -39,7 +41,9 @@ const itemMotion = {
     },
 };
 
-export default function FSidebar() {
+const FSidebar = observer( function FSidebar() {
+
+    const user = useStore().MOBXuser;
 
     const router = useRouter();
 
@@ -58,7 +62,7 @@ export default function FSidebar() {
                 variants={background}
                 className="flex flex-col w-64 bg-color_A min-h-full"
             >
-                {FDashboardItemList.map((item) => {
+                {getDashboardItemList( user?.positions ).map((item) => {
                     return (
                         <motion.div
                             variants={itemMotion}
@@ -84,4 +88,6 @@ export default function FSidebar() {
         </aside>
     );
 
-}
+});
+
+export default FSidebar;

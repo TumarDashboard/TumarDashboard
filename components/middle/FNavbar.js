@@ -8,7 +8,7 @@ import FMenuToggle from "../low/FMenuToggle";
 import { motion, useCycle } from "framer-motion";
 import Link from 'next/link';
 import Image from 'next/image';
-import FDashboardItemList from "../variable/FDashboardItemList";
+import getDashboardItemList from "../variable/FDashboardItemList";
 
 const blackBox = {
     visible: {
@@ -50,7 +50,7 @@ const itemMotion = {
     },
 };
 
-const FNavbar = observer(function FNavbar() {
+const FNavbar = observer( function FNavbar() {
 
     const router = useRouter();
 
@@ -202,7 +202,8 @@ const FNavbar = observer(function FNavbar() {
                     }}
                 >
                     <div className='h-full flex flex-col overflow-y-auto'>
-                        {FDashboardItemList.map((item) => {
+                        { getDashboardItemList( user?.positions ).map((item) => {
+
                             return (
                                 <motion.div
                                     initial={false}
@@ -225,7 +226,7 @@ const FNavbar = observer(function FNavbar() {
                                     </Link>
                                 </motion.div>
                             )
-                        })}
+                        }) }
                     </div>
 
                 </motion.div>

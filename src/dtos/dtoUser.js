@@ -34,6 +34,17 @@ export default class DTOUser {
         this.positions = model.positions;
     }
 
+    equals( dtoUser ){
+
+        for (const key in this) {
+            if( key != 'uiAvatarsSrc' && JSON.stringify(this[key]) != JSON.stringify(dtoUser[key])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }
 
 export const validateYup = (dtoUser, options) => {

@@ -8,6 +8,13 @@ export function equalArrays(a = [], b = []) {
     return true;
 }
 
+export function intersectArrays(a, b) {
+    for (var i = 0; i < a.length; ++i) {
+        if (b.includes(a[i])) return true;
+    }
+    return false;
+}
+
 export function mapValue(object, iteratee) {
     object = Object(object);
     const result = {}

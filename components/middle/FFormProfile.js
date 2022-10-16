@@ -3,14 +3,10 @@ import { useState } from 'react';
 import { useRouter } from "next/router";
 import { observer } from 'mobx-react-lite'
 import Image from 'next/image';
-
 import { useStore } from "../hight/StoreProvider";
 import { changeUser, deleteUser } from "../../src/dtos/dtoUser";
-
 import { ApiError } from "../../middleware/exceptions";
-
 import { FUserDeleteForm } from "../modal/FUserDeleteForm";
-
 import { FInputInitials } from "../low/FInputInitials";
 import { FInputFile } from "../low/FInputFile";
 import { FButtonRed } from "../low/FButtonRed";
@@ -144,7 +140,7 @@ const FFormProfile = observer(function FFormProfile() {
           const message = JSON.parse(error.message)
 
           setOnError(message.message);
-          
+
           MOBXui.openGoogleAuthError(message.email, message.authorizeUrl);
 
         } else {
@@ -238,11 +234,14 @@ const FFormProfile = observer(function FFormProfile() {
         className="w-full m-4 flex flex-col md:flex-row"
       >
 
+        {/* {Изображение аватара, емайл, кнопки управления} */}
         <div
           className="flex-none md:order-last md:ml-4 flex flex-col border-t-8 border-red-700 rounded-t-md"
         >
+
+          {/* {Изображение аватара} */}
           <div
-            className="bg-white w-full flex items-center justify-center p-4"
+            className="bg-white w-full flex items-center justify-center p-4 select-none"
           >
             <Image
               className="object-cover w-44 h-44 rounded-full"
@@ -253,23 +252,27 @@ const FFormProfile = observer(function FFormProfile() {
             />
           </div>
 
+          {/* {Емайл} */}
           <span
             className="flex-none font-bold p-4 bg-white text-center rounded-b-md"
           >
             {MOBXuser?.user?.email}
           </span>
 
+          {/* {Кнопки управления для компьютера} */}
           <div
-            className="flex-1 p-4 hidden md:inline-flex items-center justify-center flex-col"
+            className="flex-1 p-4 hidden md:inline-flex items-center justify-center flex-col select-none"
           >
-            <FButtonRed
-              className="hidden md:inline-flex m-4"
-              onClick={saveChanges}
-              disabled={!(uriAvatar || isInputValidateSurname || isInputValidateFirstName || isInputValidatePatronymic || isInputValidatePositions)}
-            >
-              Сохранить
-            </FButtonRed>
+            {MOBXuser.accessRules.includes('changeUser/self') &&
+              <FButtonRed
+                className="hidden md:inline-flex m-4"
+                onClick={saveChanges}
+                disabled={!(uriAvatar || isInputValidateSurname || isInputValidateFirstName || isInputValidatePatronymic || isInputValidatePositions)}
+              >
+                Сохранить
+              </FButtonRed>}
 
+            {MOBXuser.accessRules.includes('deleteUser') &&
             <FButtonRed
               className="hidden md:inline-flex m-4"
               onClick={() => setUserDeleteForm({
@@ -278,25 +281,28 @@ const FFormProfile = observer(function FFormProfile() {
               })}
             >
               Удалить
-            </FButtonRed>
+            </FButtonRed>}
 
           </div>
 
         </div>
 
+        {/* {Панель информации} */}
         <div
           className="flex-initial flex flex-col space-y-4 w-full md:max-w-xl bg-white p-4 rounded-md"
         >
 
+          {/* {Ввод нового аватара} */}
           <div className="form-item">
-            <label className="text-xl ">Фото</label>
+            <label className="text-xl select-none">Фото</label>
             <FInputFile
               setUri={setUriAvatar}
             />
           </div>
 
+          {/* {Фамилия} */}
           <div className="form-item">
-            <label className="text-xl ">Фамилия</label>
+            <label className="text-xl select-none">Фамилия</label>
             <FInputInitials
               id='family-name'
               placeholder='Фамилия'
@@ -305,8 +311,9 @@ const FFormProfile = observer(function FFormProfile() {
             />
           </div>
 
+          {/* {Имя} */}
           <div className="form-item">
-            <label className="text-xl ">Имя</label>
+            <label className="text-xl select-noneselect-none">Имя</label>
             <FInputInitials
               id='FullName'
               placeholder='Имя'
@@ -315,8 +322,9 @@ const FFormProfile = observer(function FFormProfile() {
             />
           </div>
 
+          {/* {Отчество} */}
           <div className="form-item">
-            <label className="text-xl ">Отчество</label>
+            <label className="text-xl select-noneselect-none">Отчество</label>
             <FInputInitials
               id='additional-name'
               placeholder='Отчество'
@@ -325,40 +333,74 @@ const FFormProfile = observer(function FFormProfile() {
             />
           </div>
 
-          <div className="form-item">
-            <label className="text-xl">Должность</label>
-            <FSelect
-              options={FPositionItemList}
-              onChange={positionsChange}
-              value={inputPositions}
-              defaultValue={MOBXuser?.user?.positions}
-              multiple
-            />
-          </div>
+          {/* {Должность} */}
+          {MOBXuser.accessRules.includes('changeUser') &&
+            <div className="form-item">
+              <label className="text-xl select-noneselect-none">Должность</label>
+              <FSelect
+                options={FPositionItemList}
+                onChange={positionsChange}
+                value={inputPositions}
+                defaultValue={MOBXuser?.user?.positions}
+                multiple
+              />
+            </div>}
 
+          {!MOBXuser.accessRules.includes('changeUser') && (MOBXuser?.user?.positions.length > 0) &&
+            <div className="form-item select-none">
+              <label className="text-xl">Должность</label>
+              <ul
+                  className='block w-full 
+                  border border-gray-300 
+                  p-2 bg-gray-100 
+                  rounded-md shadow-sm'
+              >
+                  {FPositionItemList?.reduce((result, value) => {
+                    if( MOBXuser?.user?.positions.includes(value.value) ){
+                      result.push(
+                        <li
+                          key={value.label + value.value}
+                        >
+                            {value.label}
+                        </li>
+                      );
+                    }
+                    return result;
+                  }, [])}
+              </ul>
+            </div>}
+
+          {/* {Ошибки} */}
           <div className="form-item">
             <span className="text-color_C italic break-words">
               {onError}
             </span>
           </div>
 
-          <FButtonRed
-            className="form-item md:hidden self-end"
-            onClick={saveChanges}
-            disabled={!(uriAvatar || isInputValidateSurname || isInputValidateFirstName || isInputValidatePatronymic || isInputValidatePositions)}
+          {/* {Кнопки управления для телефона} */}
+          <div
+            className="form-item md:hidden self-end flex flex-col space-y-4 select-none"
           >
-            Сохранить
-          </FButtonRed>
 
-          <FButtonRed
-            className="form-item md:hidden self-end"
-            onClick={() => setUserDeleteForm({
-              isOpen: true,
-              email: MOBXuser.user.email
-            })}
-          >
-            Удалить
-          </FButtonRed>
+            {MOBXuser.accessRules.includes('changeUser/self') &&
+            <FButtonRed
+              onClick={saveChanges}
+              disabled={!(uriAvatar || isInputValidateSurname || isInputValidateFirstName || isInputValidatePatronymic || isInputValidatePositions)}
+            >
+              Сохранить
+            </FButtonRed>}
+
+            {MOBXuser.accessRules.includes('deleteUser') &&
+            <FButtonRed
+              onClick={() => setUserDeleteForm({
+                isOpen: true,
+                email: MOBXuser.user.email
+              })}
+            >
+              Удалить
+            </FButtonRed>}
+
+          </div>
 
         </div>
 

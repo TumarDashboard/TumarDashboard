@@ -1,4 +1,4 @@
-import { CalendarIcon, PlusIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
+import { CalendarIcon, PlusIcon, PencilAltIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, XIcon } from '@heroicons/react/solid';
 import { motion } from "framer-motion";
 import Image from 'next/image';
 import { useState } from 'react';
@@ -29,6 +29,56 @@ const inputs = {
   },
 };
 
+const constTableHead = [
+  { value: 'number', label: '№' },
+  { value: 'callsign', label: 'Позывной' },
+  { value: 'name', label: 'Наименование' },
+  { value: 'address', label: 'Адрес' },
+  { value: 'manager', label: 'НСО' },
+  { value: 'control', label: '' },
+];
+
+const sortingTableCallback = (a, b, rule, invert) => {
+  // equal items sort equally
+  if (a[rule] === b[rule]) {
+    return 0;
+  }
+
+  // nulls sort after anything else
+  if (a[rule] === null || a[rule] === undefined) {
+      return 1*invert;
+  }
+  if (b[rule] === null || b[rule] === undefined) {
+      return -1*invert;
+  }
+
+  switch (rule) {
+    case 'number':
+        if( a.number && b.number )
+          return (a.number - b.number)*invert;
+        else return -1;
+    case 'callsign':
+        return (a.callsign?.localeCompare(b.callsign))*invert;
+
+    case 'name':
+        return (a.name?.localeCompare(b.name))*invert;
+
+    case 'address':
+      return (a.address?.localeCompare(b.address))*invert;
+
+    case 'manager':
+        return (a.manager?.surname.localeCompare(b.manager?.surname) || a.manager?.firstName.localeCompare(b.manager?.firstName))*invert;
+
+    case 'control':
+        return false;
+  
+    default:
+      break;
+  }
+}
+
+var filterringTimeout = null;
+
 export default function FFormGuardPosts({ guardPosts, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
@@ -37,14 +87,76 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
   const { MOBXuser, MOBXui } = useStore();
 
-  const [guardPostsTable, setGuardPostsTable] = useState(guardPosts);
+  var tableGuardPosts = guardPosts ? guardPosts : [];
 
+  const [renderTableGuardPosts, setRenderTableGuardPosts] = useState(guardPosts ? guardPosts : []);
+
+
+  /*-------------------------------------------------------------------------------------------------------
+      Сортировка таблицы
+  -------------------------------------------------------------------------------------------------------*/
+  const [sortingRule, setSortingRule] = useState();
+
+  const sortingTable = ( rule ) => {
+
+    const invert = rule == sortingRule ? -1 : 1;
+
+    setRenderTableGuardPosts( array => {
+      return [...array.sort((a, b)=>sortingTableCallback(a, b, rule, invert ))];
+    });
+
+    setSortingRule(rule == sortingRule ? '!'+rule : rule);
+
+  }
+
+  /*-------------------------------------------------------------------------------------------------------
+      Фильтрация таблицы
+  -------------------------------------------------------------------------------------------------------*/
+  const [inputFilterText, setInputFilterText] = useState([]);
+
+  const filteringTable = (text) => {
+    
+    const filtersArray = text.toLowerCase().split(' ');
+
+    setRenderTableGuardPosts(
+
+      tableGuardPosts.filter(value=>{
+
+        const parametrsArray = [
+          value.callsign,
+          value.name,
+          value.address,
+          value.number,
+          value.manager?.surname,
+          value.manager?.firstName,
+        ].filter(Boolean);
+
+        for (const parametr of parametrsArray) {
+          const lowerParametr = parametr.toLowerCase();
+          for (const filter of filtersArray) {
+            if( lowerParametr.includes(filter) ){
+              return true;
+            }
+          }
+        }
+
+        return false;
+
+      })
+
+    );
+
+    setSortingRule(null);
+
+  }
+  
   /*-------------------------------------------------------------------------------------------------------
       Модальное окно Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
   const [guardPostEditForm, setGuardPostEditForm] = useState({
     isOpen: false
   });
+
   /*-------------------------------------------------------------------------------------------------------
       Создание физ. поста Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
@@ -65,6 +177,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
     try {
 
+      // Отправляем запрос на сервер
       const responce = await createGuardPost(
         inputGuardPostNumber,
         inputGuardPostCallsign,
@@ -77,11 +190,16 @@ export default function FFormGuardPosts({ guardPosts, users }) {
         inputGuardPostRate
       );
 
-      setGuardPostsTable(array => {
+      // Обновляем таблицу в памяти
+      tableGuardPosts.unshift(responce.guardPost);
+
+      // Обновляем отображаемую таблицу
+      setRenderTableGuardPosts(array => {
         array.unshift(responce.guardPost);
         return array;
       });
 
+      // Закрываем модальное окно
       setGuardPostEditForm({ isOpen: false });
 
     } catch (error) {
@@ -115,6 +233,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
     try {
 
+      // Отправляем запрос на сервер
       const responce = await editGuardPost(
         guardPostEditForm.guardPost._id,
         inputGuardPostNumber,
@@ -128,11 +247,21 @@ export default function FFormGuardPosts({ guardPosts, users }) {
         inputGuardPostRate
       );
 
-      setGuardPostsTable(array => {
+      // Обновляем таблицу в памяти
+      const index = tableGuardPosts.findIndex(element =>{
+        return element._id == responce.guardPost._id
+      });
+
+      if( index )
+        tableGuardPosts[index] = responce.guardPost;
+
+      // Обновляем отображаемую таблицу
+      setRenderTableGuardPosts(array => {
         array[guardPostEditForm.index] = responce.guardPost;
         return array;
       });
 
+      // Закрываем модальное окно
       setGuardPostEditForm({ isOpen: false });
 
     } catch (error) {
@@ -166,22 +295,28 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
       if (MOBXuser.user && MOBXuser.user.id) {
 
+        // Отправляем запрос на сервер
         const responce = await deleteGuardPost(
           guardPostDeleteForm.guardPostId,
           MOBXuser.user.id,
           reason
         );
 
-        setGuardPostsTable(array => {
+        // Обновляем таблицу в памяти
+        tableGuardPosts = tableGuardPosts.filter(value => {
+            return responce.guardPost._id != value._id;
+          });
+
+        // Обновляем отображаемую таблицу
+        setRenderTableGuardPosts(array => {
           const result = array.filter(value => {
             return responce.guardPost._id != value._id;
           })
           return result
         });
 
-        setGuardPostDeleteForm({
-          isOpen: false
-        });
+        // Закрываем модальное окно
+        setGuardPostDeleteForm({isOpen: false});
       }
 
     } catch (error) {
@@ -240,82 +375,150 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
       {/* {Панель управления} */}
       <div
-        className="w-full flex pt-2 pb-4 pr-4 justify-end"
+        className="w-full flex flex-col md:flex-row items-center space-y-2
+        pt-2 pb-4"
       >
-        {guardPostsTable?.length > 0 && (<button
-          className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
-          hover:bg-color_C active:bg-color_B mr-4"
-          onClick={() => {
-            setTimesheetPrintForm({
-              isOpen: true,
-              key: Math.random().toString(36)
-            })
-          }}
-        >
-          <CalendarIcon
-            className="h-8 w-8 fill-color_C
-            hover:fill-color_F"
-          />
-        </button>)}
 
-        <button
-          className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
-          hover:bg-color_C active:bg-color_B"
-          onClick={() => {
-            setGuardPostEditForm({
-              isOpen: true,
-              operation: 'Добавить',
-              key: Math.random().toString(36)
-            })
-          }}
+        {/* Кнопка выгрузки табеля, кнопка создания физ. поста */}
+        <div
+          className='flex-1 md:order-last md:ml-2 w-full flex justify-end'
         >
-          <PlusIcon
-            className="h-8 w-8 fill-color_C
-            hover:fill-color_F"
+
+          {/* Кнопка выгрузки табеля */}
+          {tableGuardPosts?.length > 0 && (<button
+            className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
+            hover:bg-color_C active:bg-color_B mr-4"
+            onClick={() => {
+              setTimesheetPrintForm({
+                isOpen: true,
+                key: Math.random().toString(36)
+              })
+            }}
+          >
+            <CalendarIcon
+              className="h-8 w-8 fill-color_C
+              hover:fill-color_F"
+            />
+          </button>)}
+
+          {/* Кнопка создания физ. поста */}
+          <button
+            className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
+            hover:bg-color_C active:bg-color_B"
+            onClick={() => {
+              setGuardPostEditForm({
+                isOpen: true,
+                operation: 'Добавить',
+                key: Math.random().toString(36)
+              })
+            }}
+          >
+            <PlusIcon
+              className="h-8 w-8 fill-color_C
+              hover:fill-color_F"
+            />
+          </button>
+
+        </div>
+
+        {/* Фильтр, кнопка чистки фильтра */}
+        <div
+          className='flex-0 w-full flex space-x-2'
+        >
+
+          {/* Фильтр */}
+          <input
+            type="text"
+            placeholder="Фильтр"
+            value={inputFilterText}
+            onChange={(e)=>{
+              setInputFilterText(e.target.value);
+              if( filterringTimeout ){
+                clearTimeout( filterringTimeout );
+                filterringTimeout = null;
+              }
+              filterringTimeout = setTimeout(()=>filteringTable(e.target.value), 500);
+            }}
+            className="flex-1 w-full p-1
+            border border-gray-300 rounded-md"
           />
-        </button>
+
+          {/* Кнопка чистки фильтра */}
+          <button
+            className="bg-color_B h-8 w-8 flex justify-center items-center rounded-md
+            hover:bg-color_C active:bg-color_B disabled:opacity-25"
+            onClick={() => {
+              setInputFilterText('');
+              setRenderTableGuardPosts(tableGuardPosts);
+            }}
+            disabled={inputFilterText.length==0}
+          >
+            <XIcon
+              className="h-8 w-8 fill-color_F
+              hover:fill-color_G"
+            />
+          </button>
+
+        </div>
 
       </div>
 
       {/* {Таблица физ. постов} */}
       <table className="min-w-full border-collapse block md:table">
 
-        <thead className="block md:table-header-group">
+        {/* {Заголовок} */}
+        <thead className="block md:table-header-group select-none">
 
-          <tr className="border md:border-none block md:table-row absolute -top-full md:top-auto -left-full md:left-auto  md:relative">
+        <tr className="border md:border-none block md:table-row absolute -top-full md:top-auto -left-full md:left-auto md:relative">
+            {constTableHead.map( (value, index )=>{
+              return <th 
+                key={value.value + value.label}
+                className="block md:table-cell md:border bg-color_B p-2"
+                onClick={(e)=>sortingTable(value.value)}
+              >
+                <div
+                  className="flex w-full text-white font-bold text-left items-center justify-between"
+                >
+                  <span>{value.label}</span>
+                  
+                  {sortingRule == value.value 
+                  && <ChevronDownIcon className="h-6 w-6 fill-color_F"/>}
 
-            <th className="bg-color_B p-2 text-white font-bold md:border text-center block md:table-cell">№</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-center block md:table-cell">Позывной</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-center block md:table-cell">Наименование</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-center block md:table-cell">Адрес</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-center block md:table-cell">НСО</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-center block md:table-cell"></th>
+                  {sortingRule == '!'+value.value 
+                  && <ChevronUpIcon className="h-6 w-6 fill-color_F"/>}
 
+                </div>
+              </th>
+            })}
           </tr>
 
         </thead>
 
+        {/* {Тело} */}
         <tbody className="block md:table-row-group">
 
-          {guardPostsTable?.map((guardPost,index) => {
+          {renderTableGuardPosts.map((guardPost,index) => {
             return (
 
               <tr 
-              className="rounded-md md:border-none block md:table-row bg-color_G mb-2 cursor-pointer" 
-              key={guardPost._id}
-              onClick={(event) => {
-                event.stopPropagation();           
-                router.push(`/dashboard/guardPosts/${guardPost._id}`)
-              }}
+                className="rounded-md md:border-none block md:table-row bg-color_G mb-2 cursor-pointer" 
+                key={guardPost._id}
+                onClick={(event) => {
+                  event.stopPropagation();           
+                  router.push(`/dashboard/guardPosts/${guardPost._id}`)
+                }}
               >
 
-
+                {/* {Позывной мобильного устройства} */}
                 <td className="px-1 md:p-2 md:border text-left block md:hidden">
                   <span className="break-all md:break-normal text-xl font-bold">{guardPost.callsign}</span>
                 </td>
 
+                {/* {Фото, Номер, Кнопки управления мобильного устройства} */}
                 <td className="px-2 md:border text-left block md:table-cell">
                   <div className="flex flex-row items-center justify-between md:justify-start">
+
+                    {/* {Фото} */}
                     {guardPost.photo && <Image
                       className="h-8 w-8 rounded-full"
                       width={32}
@@ -323,9 +526,12 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                       src={guardPost.photo}
                       alt=""
                     />}
-                    <p className="text-black ml-1 text-xl font-bold">{guardPost.number}</p>
-                    <div className='flex md:hidden'>
 
+                    {/* {Номер} */}
+                    <p className="text-black ml-1 text-xl font-bold">{guardPost.number}</p>
+
+                    {/* {Кнопки управления мобильного устройства} */}
+                    <div className='flex md:hidden'>
                       <FButtonRed
                         className="mr-2 flex"
                         onClick={(event) => {
@@ -343,7 +549,6 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                           className="h-4 w-4"
                         />
                       </FButtonRed>
-
                       <FButtonWhite
                         className="flex"
                         onClick={(event) => {
@@ -360,23 +565,27 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                           className="h-4 w-4"
                         />
                       </FButtonWhite>
-
                     </div>
+
                   </div>
                 </td>
 
+                {/* {Позывной компьютера} */}
                 <td className="px-1 md:p-2 md:border text-left hidden md:table-cell">
                   <span className="break-all md:break-normal font-bold">{guardPost.callsign}</span>
                 </td>
 
+                {/* {Наименование} */}
                 <td className="px-1 md:p-2 md:border text-left block md:table-cell">
-                  <span className="break-all md:break-words">{guardPost.name}</span>
+                  {guardPost.name && <span className="break-all md:break-words">{guardPost.name}</span>}
                 </td>
 
+                {/* {Адрес} */}
                 <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
                   {guardPost.address && <span className="break-all md:break-normal"><b className='md:hidden'>Адрес</b> {guardPost.address}</span>}
                 </td>
 
+                {/* {НСО} */}
                 <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
                   {guardPost.manager &&
                     <span className="break-all md:break-normal">
@@ -384,6 +593,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
                     </span>}
                 </td>
 
+                {/* {Кнопки управления компьютера} */}
                 <td className="p-2 md:border text-left hidden md:table-cell w-1">
                   <div className='flex'>
 
@@ -458,7 +668,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
         setForm={setTimesheetPrintForm}
         MOBXui={MOBXui}
         errorCallback={errorCallback}
-        guardPosts={guardPostsTable}
+        guardPosts={tableGuardPosts}
       />
 
     </motion.div>

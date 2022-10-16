@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { catchErrorsMiddleware } from '../../middleware/exceptions';
 import { jwtVerify } from 'jose';
 import ms from 'ms';
+import { FDashboardAccessRules } from '../../components/hight/AccessRules';
+import { intersectArrays } from '../../src/utils/arrayUtils';
 
 function redirect( to, from ){
 
@@ -18,7 +20,9 @@ function redirect( to, from ){
 }
 
 export default catchErrorsMiddleware(async (req, ev) => {
+    
     const refreshToken = req.cookies['refreshToken'];
+
     if (refreshToken) {
 
         const verified = await jwtVerify(
@@ -31,14 +35,27 @@ export default catchErrorsMiddleware(async (req, ev) => {
         if (userData) {
 
             if (!userData.isActivated) {
+
                 return redirect('/authorization/activatelink', req.nextUrl.pathname);
+
             }
-            
-            if (req.nextUrl.pathname == "/dashboard")
-                return NextResponse.rewrite(`${process.env.NEXT_PUBLIC_CLIENT_URL}/dashboard/profile`).clearCookie('redirectAuth');
-            else {
+
+            const findedRule = FDashboardAccessRules.find( (rule) => req.nextUrl.pathname.search(rule.url) > -1 );
+
+            if( req.nextUrl.pathname != "/dashboard" 
+                && findedRule 
+                && findedRule.access.length > 0 
+                && userData.positions 
+                && userData.positions.length > 0
+                && intersectArrays( findedRule.access, userData.positions )){
+
+                req.user = userData;
+
                 return NextResponse.next().clearCookie('redirectAuth');
+
             }
+
+            return NextResponse.rewrite(`${process.env.NEXT_PUBLIC_CLIENT_URL}/dashboard/profile`).clearCookie('redirectAuth');
 
         }
 

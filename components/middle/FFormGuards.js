@@ -1,4 +1,4 @@
-import { PlusIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
+import { PlusIcon, PencilAltIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, XIcon } from '@heroicons/react/solid';
 import { motion } from "framer-motion";
 import Image from 'next/image';
 import { useState } from 'react';
@@ -27,13 +27,116 @@ const inputs = {
   },
 };
 
+const constTableHead = [
+  { value: 'initials', label: 'Инициалы' },
+  { value: 'telephone', label: 'Телефон' },
+  { value: 'manager', label: 'НСО' },
+  { value: 'control', label: '' },
+];
+
+const sortingTableCallback = (a, b, rule, invert) => {
+  // equal items sort equally
+  if (a[rule] === b[rule]) {
+    return 0;
+  }
+
+  // nulls sort after anything else
+  if (a[rule] === null || a[rule] === undefined) {
+    return 1 * invert;
+  }
+  if (b[rule] === null || b[rule] === undefined) {
+    return -1 * invert;
+  }
+
+  switch (rule) {
+
+    case 'initials':
+      return (a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)) * invert;
+
+    case 'telephone':
+      return (a.telephone?.localeCompare(b.telephone)) * invert;
+
+    case 'manager':
+      return (a.manager?.surname.localeCompare(b.manager?.surname) || a.manager?.firstName.localeCompare(b.manager?.firstName)) * invert;
+
+    case 'control':
+      return false;
+
+    default:
+      break;
+  }
+}
+
+var filterringTimeout = null;
+
 export default function FFormGuards({ guards, guardPosts, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
   -------------------------------------------------------------------------------------------------------*/
   const { MOBXuser, MOBXui } = useStore();
 
-  const [guardsTable, setGuardsTable] = useState(guards);
+  var tableGuards = guards ? guards : [];
+
+  const [renderTableGuards, setRenderTableGuards] = useState(guards ? guards : []);
+
+  /*-------------------------------------------------------------------------------------------------------
+      Сортировка таблицы
+  -------------------------------------------------------------------------------------------------------*/
+  const [sortingRule, setSortingRule] = useState();
+
+  const sortingTable = (rule) => {
+
+    const invert = rule == sortingRule ? -1 : 1;
+
+    setRenderTableGuards(array => {
+      return [...array.sort((a, b) => sortingTableCallback(a, b, rule, invert))];
+    });
+
+    setSortingRule(rule == sortingRule ? '!' + rule : rule);
+
+  }
+
+  /*-------------------------------------------------------------------------------------------------------
+      Фильтрация таблицы
+  -------------------------------------------------------------------------------------------------------*/
+  const [inputFilterText, setInputFilterText] = useState([]);
+
+  const filteringTable = (text) => {
+
+    const filtersArray = text.toLowerCase().split(' ');
+
+    setRenderTableGuards(
+
+      tableGuards.filter(value => {
+
+        const parametrsArray = [
+          value.surname,
+          value.firstName,
+          value.patronymic,
+          ...value.telephone,
+          value.manager?.surname,
+          value.manager?.firstName,
+        ].filter(Boolean);
+
+        for (const parametr of parametrsArray) {
+          const lowerParametr = parametr.toLowerCase();
+          for (const filter of filtersArray) {
+            if (lowerParametr.includes(filter)) {
+              return true;
+            }
+          }
+        }
+
+        return false;
+
+      })
+
+    );
+
+    setSortingRule(null);
+
+  }
+
   /*-------------------------------------------------------------------------------------------------------
       Модальное окно Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
@@ -59,6 +162,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
 
     try {
 
+      // Отправляем запрос на сервер
       const responce = await createGuard(
         inputGuardSurname,
         inputGuardFirstName,
@@ -69,11 +173,16 @@ export default function FFormGuards({ guards, guardPosts, users }) {
         inputGuardGuardPosts
       );
 
-      setGuardsTable(array => {
+      // Обновляем таблицу в памяти
+      tableGuards.unshift(responce.guard);
+
+      // Обновляем отображаемую таблицу
+      setRenderTableGuards(array => {
         array.unshift(responce.guard);
         return array;
       });
 
+      // Закрываем модальное окно
       setGuardEditForm({ isOpen: false });
 
     } catch (error) {
@@ -106,6 +215,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
 
     try {
 
+      // Отправляем запрос на сервер
       const responce = await editGuard(
         guardEditForm.guard._id,
         inputGuardSurname,
@@ -117,11 +227,21 @@ export default function FFormGuards({ guards, guardPosts, users }) {
         inputGuardGuardPosts
       );
 
-      setGuardsTable(array => {
+      // Обновляем таблицу в памяти
+      const index = tableGuards.findIndex(element => {
+        return element._id == responce.guard._id
+      });
+
+      if (index)
+        tableGuards[index] = responce.guard;
+
+      // Обновляем отображаемую таблицу
+      setRenderTableGuards(array => {
         array[guardEditForm.index] = responce.guard;
         return array;
       });
 
+      // Закрываем модальное окно
       setGuardEditForm({ isOpen: false });
 
     } catch (error) {
@@ -155,22 +275,28 @@ export default function FFormGuards({ guards, guardPosts, users }) {
 
       if (MOBXuser.user && MOBXuser.user.id) {
 
+        // Отправляем запрос на сервер
         const responce = await deleteGuard(
           guardDeleteForm.guardId,
           MOBXuser.user.id,
           reason
         );
 
-        setGuardsTable(array => {
+        // Обновляем таблицу в памяти
+        tableGuards = tableGuards.filter(value => {
+          return responce.guard._id != value._id;
+        });
+
+        // Обновляем отображаемую таблицу
+        setRenderTableGuards(array => {
           const result = array.filter(value => {
             return responce.guard._id != value._id;
           })
           return result
         });
 
-        setGuardDeleteForm({
-          isOpen: false
-        });
+        // Закрываем модальное окно
+        setGuardDeleteForm({ isOpen: false });
       }
 
     } catch (error) {
@@ -222,54 +348,121 @@ export default function FFormGuards({ guards, guardPosts, users }) {
 
       {/* {Панель управления} */}
       <div
-        className="w-full flex pt-2 pb-4 pr-4 justify-end"
+        className="w-full flex flex-col md:flex-row items-center space-y-2
+        pt-2 pb-4"
       >
 
-        <button
-          className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
-          hover:bg-color_C active:bg-color_B"
-          onClick={() => {
-            setGuardEditForm({
-              isOpen: true,
-              operation: 'Добавить',
-              key: Math.random().toString(36)
-            })
-          }}
+        {/* Кнопка выгрузки табеля, кнопка создания физ. поста */}
+        <div
+          className='flex-1 md:order-last md:ml-2 w-full flex justify-end'
         >
-          <PlusIcon
-            className="h-8 w-8 fill-color_C
-            hover:fill-color_F"
+
+          {/* Кнопка создания физ. поста */}
+          <button
+            className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
+            hover:bg-color_C active:bg-color_B"
+            onClick={() => {
+              setGuardEditForm({
+                isOpen: true,
+                operation: 'Добавить',
+                key: Math.random().toString(36)
+              })
+            }}
+          >
+            <PlusIcon
+              className="h-8 w-8 fill-color_C
+              hover:fill-color_F"
+            />
+          </button>
+
+        </div>
+
+        {/* Фильтр, кнопка чистки фильтра */}
+        <div
+          className='flex-0 w-full flex space-x-2'
+        >
+
+          {/* Фильтр */}
+          <input
+            type="text"
+            placeholder="Фильтр"
+            value={inputFilterText}
+            onChange={(e)=>{
+              setInputFilterText(e.target.value);
+              if( filterringTimeout ){
+                clearTimeout( filterringTimeout );
+                filterringTimeout = null;
+              }
+              filterringTimeout = setTimeout(()=>filteringTable(e.target.value), 500);
+            }}
+            className="flex-1 w-full p-1
+            border border-gray-300 rounded-md"
           />
-        </button>
+
+          {/* Кнопка чистки фильтра */}
+          <button
+            className="bg-color_B h-8 w-8 flex justify-center items-center rounded-md
+            hover:bg-color_C active:bg-color_B disabled:opacity-25"
+            onClick={() => {
+              setInputFilterText('');
+              setRenderTableGuards(tableGuardPosts);
+            }}
+            disabled={inputFilterText.length == 0}
+          >
+            <XIcon
+              className="h-8 w-8 fill-color_F
+              hover:fill-color_G"
+            />
+          </button>
+
+        </div>
 
       </div>
 
       {/* {Таблица охранников} */}
       <table className="min-w-full border-collapse block md:table">
 
-        <thead className="block md:table-header-group">
+        {/* {Заголовок} */}
+        <thead className="block md:table-header-group select-none">
 
-          <tr className="border md:border-none block md:table-row absolute -top-full md:top-auto -left-full md:left-auto  md:relative">
+          <tr className="border md:border-none block md:table-row absolute -top-full md:top-auto -left-full md:left-auto md:relative">
+            {constTableHead.map((value, index) => {
+              return <th
+                key={value.value + value.label}
+                className="block md:table-cell md:border bg-color_B p-2"
+                onClick={(e) => sortingTable(value.value)}
+              >
+                <div
+                  className="flex w-full text-white font-bold text-left items-center justify-between"
+                >
+                  <span>{value.label}</span>
 
-            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Инициалы</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">Телефон</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell">НСО</th>
-            <th className="bg-color_B p-2 text-white font-bold md:border text-left block md:table-cell"></th>
+                  {sortingRule == value.value
+                    && <ChevronDownIcon className="h-6 w-6 fill-color_F" />}
 
+                  {sortingRule == '!' + value.value
+                    && <ChevronUpIcon className="h-6 w-6 fill-color_F" />}
+
+                </div>
+              </th>
+            })}
           </tr>
 
         </thead>
 
+        {/* {Тело таблицы} */}
         <tbody className="block md:table-row-group">
 
-          {guardsTable?.map((guard, index) => {
+          {renderTableGuards?.map((guard, index) => {
             return (
 
               <tr className="rounded-md md:border-none block md:table-row bg-color_G mb-2" key={guard._id}>
 
+                {/* {Аватар, инициалы, кнопки управления мобильного телефона} */}
                 <td className="p-2 md:border text-left block md:table-cell">
                   <div className="flex flex-row items-center justify-between md:justify-start">
 
+                    {/* {Аватар} */}
                     {guard.uiAvatarsSrc && <Image
                       className="h-8 w-8 rounded-full"
                       width={32}
@@ -278,8 +471,10 @@ export default function FFormGuards({ guards, guardPosts, users }) {
                       alt=""
                     />}
 
+                    {/* {Инициалы} */}
                     <p className="font-semibold text-black ml-1 text-xl font-bold">{[guard.surname, guard.firstName].join(' ')}</p>
 
+                    {/* {Кнопки управления мобильного телефона} */}
                     <div className='flex md:hidden'>
                       <FButtonRed
                         className="mr-2 flex"
@@ -315,6 +510,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
                   </div>
                 </td>
 
+                {/* {Телефон} */}
                 <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
                   {guard.telephone?.length > 0 &&
                     <span className="break-all md:break-normal">
@@ -322,6 +518,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
                     </span>}
                 </td>
 
+                {/* {НСО} */}
                 <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
                   {guard.manager?._id != "EMPTY" &&
                     <span className="break-all md:break-normal">
@@ -329,6 +526,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
                     </span>}
                 </td>
 
+                {/* {Кнопки управления компьютера} */}
                 <td className="p-2 md:border text-left hidden md:block md:table-cell w-1">
                   <div className='flex'>
 
