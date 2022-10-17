@@ -933,7 +933,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
       </div>
 
-      {/* {График} */}
+      {/* {Таблица графика} */}
       <div
         className='flex-initial flex z-30 min-h-max max-h-screen overflow-x-auto '
         ref={constraintsRef}

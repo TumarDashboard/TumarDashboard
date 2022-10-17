@@ -1,4 +1,4 @@
-import { motion, AnimateSharedLayout } from "framer-motion";
+import { motion } from "framer-motion";
 import { XIcon } from '@heroicons/react/solid';
 
 const modal = {
@@ -22,7 +22,6 @@ const modal = {
 
 export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, children, className }) {
   return (
-    <AnimateSharedLayout>
       <motion.div
         className="fixed w-full h-full top-0 left-0 bg-color_F/75 z-50"
         initial="closed"
@@ -61,7 +60,6 @@ export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, childre
         </div>
 
       </motion.div>
-    </AnimateSharedLayout>
   )
 
 }

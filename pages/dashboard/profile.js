@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import { motion } from "framer-motion";
 import FFormProfile from '../../components/middle/FFormProfile';
+import catchAuthServer from '../../middleware/authServer';
 
 const content = (isFirstMount) => ({
   animate: {
@@ -10,7 +11,7 @@ const content = (isFirstMount) => ({
   }
 });
 
-export default function Profile({ isFirstMount }) {
+export default function Profile({ userData, isFirstMount }) {
 
   return (
     <div
@@ -30,7 +31,9 @@ export default function Profile({ isFirstMount }) {
           variants={content(isFirstMount)}
           className="flex overflow-hidden"
         >
-           <FFormProfile/>
+           <FFormProfile
+            userData={userData}
+           />
         </motion.div>
       </motion.section>
     </div>
@@ -39,8 +42,25 @@ export default function Profile({ isFirstMount }) {
 
 Profile.onSidebar = true;
 
-export async function getStaticProps(context) {
-  return {
-    props: { initialState: { checkAuth: true } },
+// export async function getStaticProps(context) {
+//   return {
+//     props: { initialState: { checkAuth: true } },
+//   }
+// }
+
+export const getServerSideProps = catchAuthServer(async (context) => {
+
+  const userData = context.userData;
+
+  if( userData ){
+    userData.id = userData.id.toString();
+    if( userData.manager ){
+      userData.manager._id = userData.manager._id.toString();
+    }
   }
-}
+
+  return {
+    props: { userData, initialState: { checkAuth: true } }
+  }
+
+})

@@ -51,10 +51,6 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   const guards = await mongoGuardsModel.find({}, null, {sort: {'manager': 1, 'surname': 1, 'firstName': 1,}}).populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
 
-  // guards.sort((a, b) => {
-  //   // a.manager?._id.localeCompare(b.manager?._id) || 
-  //   return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
-  // })
   guards.forEach(value => {
     value._id = value._id.toString();
     if (value.manager) {

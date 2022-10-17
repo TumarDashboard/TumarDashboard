@@ -28,7 +28,7 @@ const inputs = {
 };
 
 const constTableHead = [
-  { value: 'initials', label: 'Инициалы' },
+  { value: 'surname', label: 'Инициалы' },
   { value: 'telephone', label: 'Телефон' },
   { value: 'manager', label: 'НСО' },
   { value: 'control', label: '' },
@@ -41,23 +41,23 @@ const sortingTableCallback = (a, b, rule, invert) => {
   }
 
   // nulls sort after anything else
-  if (a[rule] === null || a[rule] === undefined) {
+  if (a[rule] === null || a[rule] === undefined || a[rule].length === 0 || a[rule]._id === 'EMPTY') {
     return 1 * invert;
   }
-  if (b[rule] === null || b[rule] === undefined) {
+  if (b[rule] === null || b[rule] === undefined || b[rule].length === 0 || b[rule]._id === 'EMPTY') {
     return -1 * invert;
   }
-
+  
   switch (rule) {
 
-    case 'initials':
+    case 'surname':
       return (a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)) * invert;
 
     case 'telephone':
-      return (a.telephone?.localeCompare(b.telephone)) * invert;
+      return (a.telephone[0].localeCompare(b.telephone[0])) * invert;
 
     case 'manager':
-      return (a.manager?.surname.localeCompare(b.manager?.surname) || a.manager?.firstName.localeCompare(b.manager?.firstName)) * invert;
+      return (a.manager.surname.localeCompare(b.manager.surname) || a.manager.firstName.localeCompare(b.manager.firstName)) * invert;
 
     case 'control':
       return false;

@@ -28,7 +28,7 @@ const inputs = {
   },
 };
 
-const FFormProfile = observer(function FFormProfile() {
+const FFormProfile = observer(function FFormProfile({userData}) {
   /*----------------------------------------------------------------------------------------------------------------------------
       Использование глобальных данных
   ----------------------------------------------------------------------------------------------------------------------------*/
@@ -36,6 +36,8 @@ const FFormProfile = observer(function FFormProfile() {
 
   const { MOBXuser, MOBXui } = useStore();
 
+  const [ currentUser, setCurrentUser ] = useState(userData ? userData : {});
+  
   /*----------------------------------------------------------------------------------------------------------------------------
       Данные инпутов
   ----------------------------------------------------------------------------------------------------------------------------*/
@@ -45,40 +47,40 @@ const FFormProfile = observer(function FFormProfile() {
   const [uriAvatar, setUriAvatar] = useState(null);
 
   // Фамилия
-  const [inputSurname, setInputSurname] = useState('');
+  const [inputSurname, setInputSurname] = useState(userData.surname);
 
   const [isInputValidateSurname, setInputValidateSurname] = useState(false);
 
   const surnameChange = (surname, validate) => {
     setInputSurname(surname);
-    setInputValidateSurname(validate && surname != MOBXuser?.user?.surname);
+    setInputValidateSurname(validate && surname != currentUser?.surname);
     setOnError('');
   }
 
   // Имя
-  const [inputFirstName, setInputFirstName] = useState('');
+  const [inputFirstName, setInputFirstName] = useState(userData.firstName);
 
   const [isInputValidateFirstName, setInputValidateFirstName] = useState(false);
 
   const firstNameChange = (firstName, validate) => {
     setInputFirstName(firstName);
-    setInputValidateFirstName(validate && firstName != MOBXuser?.user?.firstName);
+    setInputValidateFirstName(validate && firstName != currentUser?.firstName);
     setOnError('');
   }
 
   // Отчество
-  const [inputPatronymic, setInputPatronymic] = useState('');
+  const [inputPatronymic, setInputPatronymic] = useState(userData.patronymic);
 
   const [isInputValidatePatronymic, setInputValidatePatronymic] = useState(false);
 
   const patronymicChange = (patronymic, validate) => {
     setInputPatronymic(patronymic);
-    setInputValidatePatronymic(validate && patronymic != MOBXuser?.user?.patronymic);
+    setInputValidatePatronymic(validate && patronymic != currentUser?.patronymic);
     setOnError('');
   }
 
   //Должность
-  const [inputPositions, setInputPositions] = useState(MOBXuser?.user?.positions || []);
+  const [inputPositions, setInputPositions] = useState(userData.positions || []);
 
   const [isInputValidatePositions, setInputValidatePositions] = useState(false);
 
@@ -96,9 +98,9 @@ const FFormProfile = observer(function FFormProfile() {
     setInputPositions(positions);
 
     if (positions.length == 0) {
-      setInputValidatePositions(MOBXuser.user.positions?.length > 0);
+      setInputValidatePositions(currentUser?.length > 0);
     } else {
-      setInputValidatePositions(JSON.stringify(positions.sort()) != JSON.stringify(MOBXuser.user.positions?.sort()));
+      setInputValidatePositions(JSON.stringify(positions.sort()) != JSON.stringify(currentUser?.sort()));
     }
 
     setOnError('');
@@ -117,9 +119,8 @@ const FFormProfile = observer(function FFormProfile() {
     MOBXui.setLoading();
 
     try {
-
-      if (MOBXuser.user && MOBXuser.user.id) {
-        const responce = await changeUser(MOBXuser.user.id, uriAvatar, inputSurname, inputFirstName, inputPatronymic, inputPositions);
+      if (currentUser && currentUser?.id) {
+        const responce = await changeUser(currentUser.id, uriAvatar, inputSurname, inputFirstName, inputPatronymic, inputPositions);
 
         setUriAvatar(null);
         setInputValidateFirstName(false);
@@ -128,6 +129,8 @@ const FFormProfile = observer(function FFormProfile() {
         setInputValidatePositions(false);
 
         MOBXuser.setUser(responce.user);
+
+        setCurrentUser(responce.user)
 
       }
 
@@ -184,9 +187,9 @@ const FFormProfile = observer(function FFormProfile() {
 
     try {
 
-      if (MOBXuser.user && MOBXuser.user.id) {
+      if (currentUser && currentUser?.id) {
 
-        await deleteUser(MOBXuser.user.id, reason);
+        await deleteUser(currentUser?.id, reason);
 
         MOBXuser.setAuth(false);
         MOBXuser.setUser({});
@@ -247,7 +250,7 @@ const FFormProfile = observer(function FFormProfile() {
               className="object-cover w-44 h-44 rounded-full"
               width={176}
               height={176}
-              src={uriAvatar ? uriAvatar : MOBXuser?.avatar}
+              src={uriAvatar ? uriAvatar : (currentUser?.avatar ? currentUser?.avatar : MOBXuser?.avatar) }
               alt=""
             />
           </div>
@@ -256,7 +259,7 @@ const FFormProfile = observer(function FFormProfile() {
           <span
             className="flex-none font-bold p-4 bg-white text-center rounded-b-md"
           >
-            {MOBXuser?.user?.email}
+            {currentUser?.email}
           </span>
 
           {/* {Кнопки управления для компьютера} */}
@@ -277,7 +280,7 @@ const FFormProfile = observer(function FFormProfile() {
               className="hidden md:inline-flex m-4"
               onClick={() => setUserDeleteForm({
                 isOpen: true,
-                email: MOBXuser.user.email
+                email: currentUser?.email
               })}
             >
               Удалить
@@ -306,7 +309,7 @@ const FFormProfile = observer(function FFormProfile() {
             <FInputInitials
               id='family-name'
               placeholder='Фамилия'
-              value={inputSurname ? inputSurname : MOBXuser?.user?.surname}
+              value={inputSurname}
               onChange={surnameChange}
             />
           </div>
@@ -317,7 +320,7 @@ const FFormProfile = observer(function FFormProfile() {
             <FInputInitials
               id='FullName'
               placeholder='Имя'
-              value={inputFirstName ? inputFirstName : MOBXuser?.user?.firstName}
+              value={inputFirstName}
               onChange={firstNameChange}
             />
           </div>
@@ -328,7 +331,7 @@ const FFormProfile = observer(function FFormProfile() {
             <FInputInitials
               id='additional-name'
               placeholder='Отчество'
-              value={inputPatronymic ? inputPatronymic : MOBXuser?.user?.patronymic}
+              value={inputPatronymic}
               onChange={patronymicChange}
             />
           </div>
@@ -341,12 +344,12 @@ const FFormProfile = observer(function FFormProfile() {
                 options={FPositionItemList}
                 onChange={positionsChange}
                 value={inputPositions}
-                defaultValue={MOBXuser?.user?.positions}
+                defaultValue={user.positions}
                 multiple
               />
             </div>}
 
-          {!MOBXuser.accessRules.includes('changeUser') && (MOBXuser?.user?.positions.length > 0) &&
+          {!MOBXuser.accessRules.includes('changeUser') && (currentUser?.positions.length > 0) &&
             <div className="form-item select-none">
               <label className="text-xl">Должность</label>
               <ul
@@ -356,7 +359,7 @@ const FFormProfile = observer(function FFormProfile() {
                   rounded-md shadow-sm'
               >
                   {FPositionItemList?.reduce((result, value) => {
-                    if( MOBXuser?.user?.positions.includes(value.value) ){
+                    if( currentUser?.positions.includes(value.value) ){
                       result.push(
                         <li
                           key={value.label + value.value}
@@ -394,7 +397,7 @@ const FFormProfile = observer(function FFormProfile() {
             <FButtonRed
               onClick={() => setUserDeleteForm({
                 isOpen: true,
-                email: MOBXuser.user.email
+                email: currentUser?.email
               })}
             >
               Удалить

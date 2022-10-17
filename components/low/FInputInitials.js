@@ -9,7 +9,7 @@ export function FInputInitials({ id, className, onChange, placeholder, ...props 
 
     const handleChange = (e) => {
 
-        let value = e.target.value;
+        let value = e.target.value.trim();
 
         let isValid = (value.length >= minlength)
             && (value.length <= maxlength)

@@ -25,7 +25,7 @@ export default function catchAuthServer(handler) {
     return async (context) => {
 
         const { req, res, resolvedUrl } = context;
-
+        
         try {
 
             removeCookies( "redirectAuth", {req, res, path: '/'});
@@ -37,6 +37,8 @@ export default function catchAuthServer(handler) {
             if (!dtoUser?.isActivated) {
                 return redirect('/authorization/activatelink', resolvedUrl, req, res);
             }
+
+            context.userData = JSON.parse(JSON.stringify(dtoUser));
 
             return handler(context);
 
