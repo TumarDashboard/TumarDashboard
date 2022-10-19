@@ -42,12 +42,6 @@ export default function Profile({ userData, isFirstMount }) {
 
 Profile.onSidebar = true;
 
-// export async function getStaticProps(context) {
-//   return {
-//     props: { initialState: { checkAuth: true } },
-//   }
-// }
-
 export const getServerSideProps = catchAuthServer(async (context) => {
 
   const userData = context.userData;

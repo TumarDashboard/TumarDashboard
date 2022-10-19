@@ -32,7 +32,7 @@ const tableHeader = {
 const smallFontSize = 10;
 const defaultFontSize = 14;
 const maxRowCount = 30;
-const companyName = 'Тұмар Гарант Астана';
+const companyName = 'Тұмар Грант Секьюрити';
 
 const Style = {
   AlignmentMiddleCenter: { vertical: 'middle', horizontal: 'center' },

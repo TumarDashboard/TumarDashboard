@@ -444,7 +444,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
       setTimesheetTableFooter(array => {
 
-        deletedGuard.guard.timesheetDays?.forEach(day => {
+        deletedGuard.timesheetDays?.forEach(day => {
           array[day] -= deletedGuard.timesheetShifts[day];
         });
 
@@ -1363,7 +1363,16 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
         submitAdd={guardRowAdd}
         submitEdit={guardRowEdit}
         optionGuards={optionGuards}
-        setGuards={setGuards}
+        setGuards={(guard)=>{
+          setGuards(array => {
+            array.unshift(guard);
+            return array;
+          });
+          setOptionGuards(array => {
+            array.unshift(guard);
+            return array;
+          });
+        }}
         users={users}
         guardPosts={guardPosts}
         MOBXui={MOBXui}

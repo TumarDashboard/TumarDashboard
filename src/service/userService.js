@@ -102,6 +102,7 @@ class UserService {
         }
 
         mongoUser.isActivated = true;
+        mongoUser.activationLink = undefined;
 
         await mongoUser.save();
 
@@ -239,6 +240,81 @@ class UserService {
             // console.log(error, refreshToken);
             throw error
         }
+    }
+
+    async createUser(surname, firstName, patronymic, email, password) {
+
+        try {
+
+            await validateYup({ surname, firstName, patronymic, email, password }).catch((e) => {
+
+                throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
+
+            });
+
+            await mongoConnect();
+
+            const candidate = await mongoUserModel.findOne({ email }).lean();
+
+            if (candidate) {
+                throw ApiError.BadRequest(`Пользователь с почтовым адресом ${email} уже существует`);
+            }            
+            
+            const candidateDeleted = await mongoUserArchiveModel.findOne({ email }).lean();
+
+            if (candidateDeleted) {
+                throw ApiError.BadRequest(`Почтовый адрес ${email} использовался для регистрации, после чего был деактивирован`);
+            }
+
+            const hashPassword = await bcrypt.hash(password, parseInt(process.env.NEXT_PRIVATE_PASSWORD_SALT))
+
+            const activationLink = v4();
+
+            const mongoUser = await mongoUserModel.create({
+                surname: surname,
+                firstName: firstName,
+                patronymic: patronymic,
+                email: email,
+                password: hashPassword,
+                activationLink: activationLink,
+                uiAvatarsSrc: `https://ui-avatars.com/api/?name=${surname}+${firstName}&size=256&font-size=0.33&length=2&background=random`,
+                avatarInitials: {
+                    data: "",
+                    contentType: 'image/png'
+                }
+            });
+
+            await mailService.sendActivationMail(email, `${process.env.NEXT_PUBLIC_API_URL}/api/authorization/activate/${activationLink}`).catch((e) => {
+
+                throw ApiError.BadRequest(`Произошла ошибка отправки письма для активации на почту ${email}( ${e.response} )`);
+
+            });
+
+            const dtoUser = new DTOUser(mongoUser);
+
+            const tokens = await tokenService.generateTokens({ ...dtoUser });
+
+            await tokenService.saveToken(dtoUser.id, tokens.refreshToken);
+
+            return { ...tokens, user: dtoUser }
+
+        } catch (error) {
+
+            try {
+
+                await mongoUserModel.deleteOne({
+                    email: email
+                }).lean()
+
+            } catch (error) {
+
+                throw error;
+
+            }
+
+            throw error;
+        }
+
     }
 
     async changeUser(inputUserData) {

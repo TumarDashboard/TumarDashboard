@@ -15,6 +15,10 @@ import { FInputText } from '../low/FInputText';
 import { array } from 'yup';
 import { FGuardEditForm } from './FGuardEditForm';
 import { createGuard } from '../../src/dtos/dtoGuard';
+import { FFilterText } from '../low/FFilterText';
+import { motion } from "framer-motion";
+
+var filterringTimeout = null;
 
 export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit, optionGuards, setGuards, users, guardPosts, MOBXui, errorCallback }) {
 
@@ -38,9 +42,8 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
 
   const [inputFilterText, setInputFilterText] = useState([]);
 
-  const filterChange = (e) => {
-    var text = e.target.value.toLowerCase();
-    setInputFilterText(e.target.value);
+  const filterChange = (text) => {
+    var text = text.toLowerCase();
     if (text) {
       setInputFilter(optionsForWork.filter((value) => { return value.lower?.includes(text) }))
     } else {
@@ -117,7 +120,7 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
     inputGuardTelephone,
     inputGuardManager,
     inputGuardGuardPosts) => {
-
+      
     event.preventDefault();
 
     MOBXui.setLoading();
@@ -134,18 +137,17 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
         inputGuardGuardPosts
       );
 
-      setGuards(array => {
-        array.unshift(responce.guard);
-        return array;
-      });
-
       const text = [responce.guard.surname, responce.guard.firstName].join(' ');
 
-      selectOption({
+      const guard = {
         label: text,
         value: responce.guard._id,
         lower: text.toLowerCase()
-      });
+      }
+
+      setGuards(guard);
+
+      selectOption(guard);
 
       setGuardEditForm({ isOpen: false });
 
@@ -220,36 +222,23 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
       <div className="flex w-full space-x-2">
 
         {/* Фильтр */}
-        <div className="flex-1 form-item">
-          <input
-            type="text"
-            key={form.key}
-            placeholder="Фильтр"
+        <div className="flex-1 form-item flex">
+          {/* Фильтр */}
+          <FFilterText
             value={inputFilterText}
-            onChange={filterChange}
-            className="w-full p-1
-            border border-gray-300 rounded-md"
-          />
-        </div>
-
-        {/* Кнопка чистки фильтра */}
-        <div
-            className='form-item'
-        >
-          <button
-            className="bg-color_B h-8 w-8 flex justify-center items-center rounded-md
-            hover:bg-color_C active:bg-color_B disabled:opacity-25"
-            onClick={() => {
+            onChange={(e)=>{
+              setInputFilterText(e.target.value);
+              if( filterringTimeout ){
+                clearTimeout( filterringTimeout );
+                filterringTimeout = null;
+              }
+              filterringTimeout = setTimeout(()=>filterChange(e.target.value), 500);
+            }}
+            onClear={() => {
               setInputFilterText('');
               setInputFilter(optionsForWork)
             }}
-            disabled={inputFilterText.length==0}
-          >
-            <XIcon
-              className="h-8 w-8 fill-color_F
-              hover:fill-color_G"
-            />
-          </button>
+          />
         </div>
 
         {/* Кнопка вызова Формы добавления охранника */}
@@ -277,7 +266,7 @@ export function FGuardRowSelectGuardForm({ form, setForm, submitAdd, submitEdit,
 
       </div>
 
-      {/* Охранник */}
+      {/* Охранники */}
       <div
         className="form-item w-full mt-2 flex flex-col items-center min-h-[48px] overflow-y-auto border rounded-md"
       >

@@ -1,7 +1,14 @@
 import { motion } from "framer-motion";
 import Image from 'next/image';
 import { useState } from "react";
-import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon } from '@heroicons/react/solid';
+import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
+import { FFilterText } from "../low/FFilterText";
+import { FButtonRed } from "../low/FButtonRed";
+import { FButtonWhite } from "../low/FButtonWhite";
+import { FUserEditForm } from "../modal/FUserEditForm";
+import { FUserDeleteForm } from "../modal/FUserDeleteForm";
+import { ApiError } from "../../middleware/exceptions";
+import { createUserHard, changeUserHard, deleteUserHard } from "../../src/dtos/dtoUser";
 
 const inputs = {
   initial: {
@@ -91,7 +98,7 @@ export default function FFormUsers({ users }) {
   const [inputFilterText, setInputFilterText] = useState([]);
 
   const filteringTable = (text) => {
-    
+
     const filtersArray = text.toLowerCase().split(' ');
 
     setRenderTableUsers(
@@ -124,6 +131,199 @@ export default function FFormUsers({ users }) {
     setSortingRule(null);
 
   }
+  
+  /*-------------------------------------------------------------------------------------------------------
+      Модальное окно Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const [userEditForm, setUserEditForm] = useState({
+    isOpen: false
+  });
+
+  /*-------------------------------------------------------------------------------------------------------
+      Создание физ. поста Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const userAdd = async (event,
+    inputUserAvatarSrc,
+    inputUserSurname,
+    inputUserFirstName,
+    inputUserPatronymic,
+    inputUserPositions,
+    ) => {
+
+    event.preventDefault();
+
+    MOBXui.setLoading();
+
+    try {
+
+      // Отправляем запрос на сервер
+      const responce = await createUserHard(
+        inputUserAvatarSrc,
+        inputUserSurname,
+        inputUserFirstName,
+        inputUserPatronymic,
+        inputUserPositions,
+      );
+
+      // Обновляем таблицу в памяти
+      tableUsers.unshift(responce.guardPost);
+
+      // Обновляем отображаемую таблицу
+      setRenderTableUsers(array => {
+        array.unshift(responce.guardPost);
+        return array;
+      });
+
+      // Закрываем модальное окно
+      setUserEditForm({ isOpen: false });
+
+    } catch (error) {
+
+      errorCallback(error, setUserEditForm);
+
+    } finally {
+
+      MOBXui.setLoading();
+
+    }
+  }
+
+  /*-------------------------------------------------------------------------------------------------------
+      Изменение физ. поста Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const userEdit = async (event,
+    inputUserAvatarSrc,
+    inputUserSurname,
+    inputUserFirstName,
+    inputUserPatronymic,
+    inputUserPositions,
+    ) => {
+
+    event.preventDefault();
+
+    MOBXui.setLoading();
+
+    try {
+
+      // Отправляем запрос на сервер
+      const responce = await changeUserHard(
+        userEditForm.user._id,
+        inputUserAvatarSrc,
+        inputUserSurname,
+        inputUserFirstName,
+        inputUserPatronymic,
+        inputUserPositions,
+      );
+
+      // Обновляем таблицу в памяти
+      const index = tableUsers.findIndex(element =>{
+        return element._id == responce.user._id
+      });
+
+      if( index )
+        tableUsers[index] = responce.user;
+
+      // Обновляем отображаемую таблицу
+      setRenderTableUsers(array => {
+        array[userEditForm.index] = responce.user;
+        return array;
+      });
+
+      // Закрываем модальное окно
+      setUserEditForm({ isOpen: false });
+
+    } catch (error) {
+
+      errorCallback(error, setUserEditForm);
+
+    } finally {
+
+      MOBXui.setLoading();
+
+    }
+  }
+
+  /*-------------------------------------------------------------------------------------------------------
+      Модальное окно Формы удаления
+  -------------------------------------------------------------------------------------------------------*/
+  const [userDeleteForm, setUserDeleteForm] = useState({
+    isOpen: false
+  });
+
+  /*-------------------------------------------------------------------------------------------------------
+      Функция удаления поста Формы удаления
+  -------------------------------------------------------------------------------------------------------*/
+  const userDeleteFormSubmit = async (event, reason) => {
+
+    event.preventDefault();
+
+    MOBXui.setLoading();
+
+    try {
+
+      if (MOBXuser.user && MOBXuser.user.id) {
+
+        // Отправляем запрос на сервер
+        const responce = await deleteUserHard(
+          userDeleteForm.userID,
+          MOBXuser.user.id,
+          reason
+        );
+
+        // Обновляем таблицу в памяти
+        tableUsers = tableUsers.filter(value => {
+            return responce.user._id != value._id;
+          });
+
+        // Обновляем отображаемую таблицу
+        setRenderTableUsers(array => {
+          const result = array.filter(value => {
+            return responce.user._id != value._id;
+          })
+          return result
+        });
+
+        // Закрываем модальное окно
+        setUserDeleteForm({isOpen: false});
+      }
+
+    } catch (error) {
+
+      errorCallback(error, setUserDeleteForm);
+
+    } finally {
+
+      MOBXui.setLoading();
+
+    }
+  }
+
+  /*----------------------------------------------------------------------------------------------------------------------------
+    Переиспользование функции обработок ошибок
+  ----------------------------------------------------------------------------------------------------------------------------*/
+  const errorCallback = (error, callback) => {
+    if (error instanceof ApiError) {
+
+      if (error.statusCode == 520) {
+
+        callback({ isOpen: false });
+        
+        const message = JSON.parse(error.message);
+
+        MOBXui.openGoogleAuthError(message.email, message.authorizeUrl);
+
+      } else {
+        callback(form => {
+          let formNew = { ...form };
+          formNew.error = error.message;
+          return formNew;
+        });
+      }
+
+    } else {
+      throw error
+    }
+  }
 
   /*----------------------------------------------------------------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------*/
@@ -149,7 +349,13 @@ export default function FFormUsers({ users }) {
           <button
             className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
           hover:bg-color_C active:bg-color_B"
-            onClick={() => { }}
+            onClick={() => {
+              setUserEditForm({
+                isOpen: true,
+                operation: 'Добавить',
+                key: Math.random().toString(36)
+              })
+            }}
           >
             <PlusIcon
               className="h-8 w-8 fill-color_C
@@ -161,40 +367,24 @@ export default function FFormUsers({ users }) {
 
         {/* Фильтр, кнопка чистки фильтра */}
         <div
-          className='flex-0 w-full flex space-x-2'
+          className='flex-0 w-full flex'
         >
           {/* Фильтр */}
-          <input
-            type="text"
-            placeholder="Фильтр"
+          <FFilterText
             value={inputFilterText}
-            onChange={(e)=>{
+            onChange={(e) => {
               setInputFilterText(e.target.value);
-              if( filterringTimeout ){
-                clearTimeout( filterringTimeout );
+              if (filterringTimeout) {
+                clearTimeout(filterringTimeout);
                 filterringTimeout = null;
               }
-              filterringTimeout = setTimeout(()=>filteringTable(e.target.value), 500);
+              filterringTimeout = setTimeout(() => filteringTable(e.target.value), 500);
             }}
-            className="flex-1 w-full p-1
-          border border-gray-300 rounded-md"
-          />
-
-          {/* Кнопка чистки фильтра */}
-          <button
-            className="bg-color_B h-8 w-8 flex justify-center items-center rounded-md
-          hover:bg-color_C active:bg-color_B disabled:opacity-25"
-            onClick={() => {
+            onClear={() => {
               setInputFilterText('');
               setRenderTableUsers(tableUsers);
             }}
-            disabled={inputFilterText.length == 0}
-          >
-            <XIcon
-              className="h-8 w-8 fill-color_F
-            hover:fill-color_G"
-            />
-          </button>
+          />
 
         </div>
 
@@ -206,9 +396,10 @@ export default function FFormUsers({ users }) {
         {/* {Заголовок таблицы} */}
         <thead className="block md:table-header-group select-none">
 
-          <tr 
+          <tr
             className="border md:border-none block md:table-row absolute -top-full md:top-auto -left-full md:left-auto md:relative"
           >
+            {/* Сортируемые заголовки */}
             {constTableHead.map((value, index) => {
               return <th
                 key={value.value + value.label}
@@ -229,6 +420,10 @@ export default function FFormUsers({ users }) {
                 </div>
               </th>
             })}
+
+            {/* Заголовок управления*/}
+            <th className="block md:table-cell md:border bg-color_B p-2" />
+
           </tr>
 
         </thead>
@@ -236,16 +431,55 @@ export default function FFormUsers({ users }) {
         {/* {Тело таблицы} */}
         <tbody className="block md:table-row-group">
 
-          {renderTableUsers.length > 0 && renderTableUsers.map((user) => {
+          {renderTableUsers.length > 0 && renderTableUsers.map((user, index) => {
             return (
 
-              <tr 
-                className="rounded-md md:border-none block md:table-row bg-color_G mb-2 cursor-pointer" 
+              <tr
+                className="rounded-md md:border-none block md:table-row bg-color_G mb-2 cursor-pointer"
                 key={user._id}
               >
 
-                {/* {Аватар, инициалы} */}
+                {/* {Аватар, инициалы, Кнопки управления мобильного устройства} */}
                 <td className="p-2 md:border text-left block md:table-cell">
+
+                  {/* {Кнопки управления мобильного устройства} */}
+                  <div className='flex md:hidden justify-end'>
+                    <FButtonRed
+                      className="mr-2 flex"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setUserEditForm({
+                          isOpen: true,
+                          index: index,
+                          operation: 'Изменить',
+                          key: Math.random().toString(36),
+                          user: user
+                        })
+                      }}
+                    >
+                      <PencilAltIcon
+                        className="h-4 w-4"
+                      />
+                    </FButtonRed>
+                    <FButtonWhite
+                      className="flex"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setUserDeleteForm({
+                          isOpen: true,
+                          key: Math.random().toString(36),
+                          userEmail: user.email,
+                          userID: user._id,
+                        })
+                      }}
+                    >
+                      <TrashIcon
+                        className="h-4 w-4"
+                      />
+                    </FButtonWhite>
+                  </div>
+
+                  {/* {Аватар, инициалы */}
                   <div
                     className=" flex flex-row items-center"
                   >
@@ -287,6 +521,50 @@ export default function FFormUsers({ users }) {
                   </span>
                 </td>
 
+                {/* {Кнопки управления компьютера} */}
+                <td className="p-2 md:border text-left hidden md:table-cell w-1">
+                  <div className='flex'>
+
+                    <FButtonRed
+                      className="mr-2 flex"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setUserEditForm({
+                          isOpen: true,
+                          index: index,
+                          operation: 'Изменить',
+                          key: Math.random().toString(36),
+                          user: user
+                        })
+                      }}
+                    >
+                      <PencilAltIcon
+                        className="h-4 w-4"
+                      />
+                      <span className='hidden xl:block'>Изменить</span>
+                    </FButtonRed>
+
+                    <FButtonWhite
+                      className="flex"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setUserDeleteForm({
+                          isOpen: true,
+                          key: Math.random().toString(36),
+                          userEmail: user.email,
+                          userID: user._id,
+                        })
+                      }}
+                    >
+                      <TrashIcon
+                        className="h-4 w-4"
+                      />
+                      <span className='hidden xl:block'>Удалить</span>
+                    </FButtonWhite>
+
+                  </div>
+                </td>
+
               </tr>
 
             )
@@ -295,6 +573,21 @@ export default function FFormUsers({ users }) {
         </tbody>
 
       </table>
+
+      {/* {Форма добавления/редактирования физ. поста} */}
+      <FUserEditForm
+        form={userEditForm}
+        setForm={setUserEditForm}
+        submitAdd={userAdd}
+        submitEdit={userEdit}
+      />
+
+      {/* {Форма удаления физ. поста} */}
+      <FUserDeleteForm
+        form={userDeleteForm}
+        setForm={setUserDeleteForm}
+        submit={userDeleteFormSubmit}
+      />
 
     </motion.div>
   );

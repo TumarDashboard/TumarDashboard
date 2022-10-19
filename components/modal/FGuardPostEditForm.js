@@ -15,7 +15,7 @@ import { FInputText } from '../low/FInputText';
 export function FGuardPostEditForm({ form, setForm, submitAdd, submitEdit, users }) {
 
   /*-------------------------------------------------------------------------------------------------------
-      Операция
+      Использование глобальных данных
   -------------------------------------------------------------------------------------------------------*/
   const [operation, setOperation] = useState('');
   const [error, setError] = useState('');

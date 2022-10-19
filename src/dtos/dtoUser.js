@@ -121,3 +121,15 @@ export const changeUser = async (id, uiAvatarsSrc, surname, firstName, patronymi
 export const deleteUser = async (id, reason) => {
     return await fetchAuthMethod('/method/deleteUser', { id, reason });
 }
+
+export const createUserHard = async ( uiAvatarsSrc, surname, firstName, patronymic, positions ) => {
+    return await fetchAuthMethod('/method/createUserHard', { uiAvatarsSrc, surname, firstName, patronymic, positions, email });
+}
+
+export const changeUserHard = async ( uiAvatarsSrc, surname, firstName, patronymic, positions ) => {
+    return await fetchAuthMethod('/method/createUserHard', { uiAvatarsSrc, surname, firstName, patronymic, positions, email });
+}
+
+export const deleteUserHard = async (id, reason) => {
+    return await fetchAuthMethod('/method/deleteUserHard', { id, idHard, reason });
+}

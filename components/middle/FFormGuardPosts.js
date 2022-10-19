@@ -13,6 +13,7 @@ import { createGuardPost, editGuardPost, deleteGuardPost } from '../../src/dtos/
 import { FGuardPostDeleteForm } from '../modal/FGuardPostDeleteForm';
 import { FGuardPostEditForm } from '../modal/FGuardPostEditForm';
 import { FTimesheetPrintForm } from '../modal/FTimesheetPrintForm';
+import { FFilterText } from '../low/FFilterText';
 
 const inputs = {
   initial: {
@@ -423,13 +424,11 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
         {/* Фильтр, кнопка чистки фильтра */}
         <div
-          className='flex-0 w-full flex space-x-2'
+          className='flex-0 w-full flex'
         >
 
           {/* Фильтр */}
-          <input
-            type="text"
-            placeholder="Фильтр"
+          <FFilterText
             value={inputFilterText}
             onChange={(e)=>{
               setInputFilterText(e.target.value);
@@ -439,25 +438,11 @@ export default function FFormGuardPosts({ guardPosts, users }) {
               }
               filterringTimeout = setTimeout(()=>filteringTable(e.target.value), 500);
             }}
-            className="flex-1 w-full p-1
-            border border-gray-300 rounded-md"
-          />
-
-          {/* Кнопка чистки фильтра */}
-          <button
-            className="bg-color_B h-8 w-8 flex justify-center items-center rounded-md
-            hover:bg-color_C active:bg-color_B disabled:opacity-25"
-            onClick={() => {
+            onClear={() => {
               setInputFilterText('');
               setRenderTableGuardPosts(tableGuardPosts);
             }}
-            disabled={inputFilterText.length==0}
-          >
-            <XIcon
-              className="h-8 w-8 fill-color_F
-              hover:fill-color_G"
-            />
-          </button>
+          />
 
         </div>
 
@@ -577,12 +562,12 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
                 {/* {Наименование} */}
                 <td className="px-1 md:p-2 md:border text-left block md:table-cell">
-                  {guardPost.name && <span className="break-all md:break-words">{guardPost.name}</span>}
+                  {guardPost.name && <span>{guardPost.name}</span>}
                 </td>
 
                 {/* {Адрес} */}
                 <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
-                  {guardPost.address && <span className="break-all md:break-normal"><b className='md:hidden'>Адрес</b> {guardPost.address}</span>}
+                  {guardPost.address && <span><b className='md:hidden'>Адрес</b> {guardPost.address}</span>}
                 </td>
 
                 {/* {НСО} */}

@@ -34,8 +34,7 @@ export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, childre
           className="w-full h-full flex items-center justify-center"
         >
 
-          <motion.div
-            layout
+          <div
             className="flex-initial bg-color_G rounded-lg md:w-1/2 max-h-full"
           >
 
@@ -55,7 +54,7 @@ export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, childre
             <div className={className}>
               {children}
             </div>
-          </motion.div>
+          </div>
 
         </div>
 

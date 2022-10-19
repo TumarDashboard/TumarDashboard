@@ -11,6 +11,7 @@ import { FButtonWhite } from "../low/FButtonWhite";
 import { createGuard, editGuard, deleteGuard } from '../../src/dtos/dtoGuard';
 import { FGuardDeleteForm } from '../modal/FGuardDeleteForm';
 import { FGuardEditForm } from '../modal/FGuardEditForm';
+import { FFilterText } from '../low/FFilterText';
 
 const inputs = {
   initial: {
@@ -379,13 +380,11 @@ export default function FFormGuards({ guards, guardPosts, users }) {
 
         {/* Фильтр, кнопка чистки фильтра */}
         <div
-          className='flex-0 w-full flex space-x-2'
+          className='flex-0 w-full flex'
         >
 
           {/* Фильтр */}
-          <input
-            type="text"
-            placeholder="Фильтр"
+          <FFilterText
             value={inputFilterText}
             onChange={(e)=>{
               setInputFilterText(e.target.value);
@@ -395,25 +394,11 @@ export default function FFormGuards({ guards, guardPosts, users }) {
               }
               filterringTimeout = setTimeout(()=>filteringTable(e.target.value), 500);
             }}
-            className="flex-1 w-full p-1
-            border border-gray-300 rounded-md"
-          />
-
-          {/* Кнопка чистки фильтра */}
-          <button
-            className="bg-color_B h-8 w-8 flex justify-center items-center rounded-md
-            hover:bg-color_C active:bg-color_B disabled:opacity-25"
-            onClick={() => {
+            onClear={() => {
               setInputFilterText('');
-              setRenderTableGuards(tableGuardPosts);
+              setRenderTableGuards(tableGuards);
             }}
-            disabled={inputFilterText.length == 0}
-          >
-            <XIcon
-              className="h-8 w-8 fill-color_F
-              hover:fill-color_G"
-            />
-          </button>
+          />
 
         </div>
 

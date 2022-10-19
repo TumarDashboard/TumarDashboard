@@ -42,7 +42,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
       Данные инпутов
   ----------------------------------------------------------------------------------------------------------------------------*/
 
-  const [onError, setOnError] = useState('');
+  const [onError, setError] = useState('');
 
   const [uriAvatar, setUriAvatar] = useState(null);
 
@@ -54,7 +54,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
   const surnameChange = (surname, validate) => {
     setInputSurname(surname);
     setInputValidateSurname(validate && surname != currentUser?.surname);
-    setOnError('');
+    setError('');
   }
 
   // Имя
@@ -65,7 +65,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
   const firstNameChange = (firstName, validate) => {
     setInputFirstName(firstName);
     setInputValidateFirstName(validate && firstName != currentUser?.firstName);
-    setOnError('');
+    setError('');
   }
 
   // Отчество
@@ -76,7 +76,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
   const patronymicChange = (patronymic, validate) => {
     setInputPatronymic(patronymic);
     setInputValidatePatronymic(validate && patronymic != currentUser?.patronymic);
-    setOnError('');
+    setError('');
   }
 
   //Должность
@@ -103,7 +103,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
       setInputValidatePositions(JSON.stringify(positions.sort()) != JSON.stringify(currentUser?.sort()));
     }
 
-    setOnError('');
+    setError('');
   }
 
   /*----------------------------------------------------------------------------------------------------------------------------
@@ -114,7 +114,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
 
     event.preventDefault();
 
-    setOnError('');
+    setError('');
 
     MOBXui.setLoading();
 
@@ -142,13 +142,13 @@ const FFormProfile = observer(function FFormProfile({userData}) {
 
           const message = JSON.parse(error.message)
 
-          setOnError(message.message);
+          setError(message.message);
 
           MOBXui.openGoogleAuthError(message.email, message.authorizeUrl);
 
         } else {
 
-          setOnError(error.message);
+          setError(error.message);
 
         }
 
@@ -181,7 +181,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
       isOpen: false
     });
 
-    setOnError('');
+    setError('');
 
     MOBXui.setLoading();
 
@@ -206,13 +206,13 @@ const FFormProfile = observer(function FFormProfile({userData}) {
 
           const message = JSON.parse(error.message)
 
-          setOnError(message.message);
+          setError(message.message);
 
           MOBXui.openGoogleAuthError(message.email, message.authorizeUrl);
 
         } else {
 
-          setOnError(error.message);
+          setError(error.message);
 
         }
 
@@ -344,7 +344,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
                 options={FPositionItemList}
                 onChange={positionsChange}
                 value={inputPositions}
-                defaultValue={user.positions}
+                defaultValue={currentUser.positions}
                 multiple
               />
             </div>}
