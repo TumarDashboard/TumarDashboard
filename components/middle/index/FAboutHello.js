@@ -57,7 +57,7 @@ export default function FAboutHello() {
 
             <motion.img
                 key='FHeadSelf'
-                className="mx-auto w-40"
+                className="mx-auto w-40 select-none"
                 src='/imageSelf.png'
                 alt="Self image"
                 initial='initial'
@@ -67,7 +67,7 @@ export default function FAboutHello() {
             />
 
             <div
-                className="flex flex-wrap justify-center p-5 lg:p-10 mm:space-x-8"
+                className="flex flex-wrap justify-center p-5 lg:p-10 mm:space-x-8 select-none"
             >
                 {info.map((value) => {
                     return <div key={value.text}>

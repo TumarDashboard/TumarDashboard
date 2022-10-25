@@ -153,6 +153,7 @@ export default function FFormRegistration() {
             className="mx-auto w-full md:w-2/3 lg:w-1/3 text-color_A px-5 flex flex-col justify-center items-center"
         >
 
+            {/* {Заголовок} */}
             <motion.div
                 variants={inputs}
                 className="mb-4 text-center"
@@ -162,6 +163,7 @@ export default function FFormRegistration() {
                 </h1>
             </motion.div>
 
+            {/* {Фамилия} */}
             <motion.div
                 className="mb-4 w-full"
                 variants={inputs}
@@ -173,6 +175,7 @@ export default function FFormRegistration() {
                 />
             </motion.div>
 
+            {/* {Имя} */}
             <motion.div
                 className="mb-4 w-full"
                 variants={inputs}
@@ -184,6 +187,7 @@ export default function FFormRegistration() {
                 />
             </motion.div>
 
+            {/* {Отчество} */}
             <motion.div
                 className="mb-4 w-full"
                 variants={inputs}
@@ -195,6 +199,7 @@ export default function FFormRegistration() {
                 />
             </motion.div>
 
+            {/* {separator} */}
             <motion.div
                 className="mb-4 w-full"
                 variants={separator}
@@ -204,6 +209,7 @@ export default function FFormRegistration() {
 
             </motion.div>
 
+            {/* {Email} */}
             <motion.div
                 className="mb-4 w-full"
                 variants={inputs}
@@ -213,6 +219,7 @@ export default function FFormRegistration() {
                 />
             </motion.div>
 
+            {/* {Password} */}
             <motion.div
                 className="mb-4 w-full"
                 variants={inputs}
@@ -222,6 +229,7 @@ export default function FFormRegistration() {
                 />
             </motion.div>
 
+            {/* {Кнопки управления} */}
             <motion.div
                 className="flex flex-wrap justify-between items-center mb-4 w-full"
                 variants={inputs}
@@ -250,6 +258,7 @@ export default function FFormRegistration() {
                 </Link>
             </motion.div>
 
+            {/* {Ошибка} */}
             <motion.div
                 animate={onError ? 'animate' : 'initial'}
                 variants={inputs}

@@ -5,7 +5,7 @@ import checkCors from "../../../middleware/cors";
 
 export default catchErrorsApi( async (req, res) => {
 
-    checkCors(req,res,{
+    await checkCors(req,res,{
         methods: ['POST']
       })
 

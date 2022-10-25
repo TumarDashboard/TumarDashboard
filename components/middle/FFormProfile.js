@@ -12,6 +12,7 @@ import { FInputFile } from "../low/FInputFile";
 import { FButtonRed } from "../low/FButtonRed";
 import { FSelect } from "../low/FSelect";
 import FPositionItemList from "../variable/FPositionItemList";
+import { equalArrays } from "../../src/utils/arrayUtils";
 
 const inputs = {
   initial: {
@@ -28,7 +29,7 @@ const inputs = {
   },
 };
 
-const FFormProfile = observer(function FFormProfile({userData}) {
+const FFormProfile = observer(function FFormProfile({userData, accessRules}) {
   /*----------------------------------------------------------------------------------------------------------------------------
       Использование глобальных данных
   ----------------------------------------------------------------------------------------------------------------------------*/
@@ -98,9 +99,9 @@ const FFormProfile = observer(function FFormProfile({userData}) {
     setInputPositions(positions);
 
     if (positions.length == 0) {
-      setInputValidatePositions(currentUser?.length > 0);
+      setInputValidatePositions(currentUser?.positions?.length > 0);
     } else {
-      setInputValidatePositions(JSON.stringify(positions.sort()) != JSON.stringify(currentUser?.sort()));
+      setInputValidatePositions(JSON.stringify(positions.sort()) != JSON.stringify(currentUser?.positions?.sort()));
     }
 
     setError('');
@@ -120,6 +121,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
 
     try {
       if (currentUser && currentUser?.id) {
+
         const responce = await changeUser(currentUser.id, uriAvatar, inputSurname, inputFirstName, inputPatronymic, inputPositions);
 
         setUriAvatar(null);
@@ -131,6 +133,10 @@ const FFormProfile = observer(function FFormProfile({userData}) {
         MOBXuser.setUser(responce.user);
 
         setCurrentUser(responce.user)
+
+        if(!equalArrays(inputPositions, currentUser.positions)){
+          router.reload(window.location.pathname);
+        }
 
       }
 
@@ -266,7 +272,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
           <div
             className="flex-1 p-4 hidden md:inline-flex items-center justify-center flex-col select-none"
           >
-            {MOBXuser.accessRules.includes('changeUser/self') &&
+            {accessRules.includes('changeUser/self') &&
               <FButtonRed
                 className="hidden md:inline-flex m-4"
                 onClick={saveChanges}
@@ -275,7 +281,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
                 Сохранить
               </FButtonRed>}
 
-            {MOBXuser.accessRules.includes('deleteUser') &&
+            {accessRules.includes('deleteUser') &&
             <FButtonRed
               className="hidden md:inline-flex m-4"
               onClick={() => setUserDeleteForm({
@@ -337,7 +343,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
           </div>
 
           {/* {Должность} */}
-          {MOBXuser.accessRules.includes('changeUser') &&
+          {accessRules.includes('changeUser') &&
             <div className="form-item">
               <label className="text-xl select-noneselect-none">Должность</label>
               <FSelect
@@ -349,7 +355,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
               />
             </div>}
 
-          {!MOBXuser.accessRules.includes('changeUser') && (currentUser?.positions.length > 0) &&
+          {!accessRules.includes('changeUser') && (currentUser?.positions.length > 0) &&
             <div className="form-item select-none">
               <label className="text-xl">Должность</label>
               <ul
@@ -373,6 +379,15 @@ const FFormProfile = observer(function FFormProfile({userData}) {
               </ul>
             </div>}
 
+          {!accessRules.includes('changeUser') && (currentUser?.positions.length == 0) &&
+            <div className="form-item select-none">
+              <span className="text-color_C italic break-words">
+                <p>Ваш профиль находится на рассмотрении администрации.</p>
+                <p>Ожидайте, в ближайшее время Вам будет предоставлен доступ к функционалу платформы.</p>
+                <p>(потребуется повторная авторизация)</p>
+              </span>
+            </div>}
+
           {/* {Ошибки} */}
           <div className="form-item">
             <span className="text-color_C italic break-words">
@@ -385,7 +400,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
             className="form-item md:hidden self-end flex flex-col space-y-4 select-none"
           >
 
-            {MOBXuser.accessRules.includes('changeUser/self') &&
+            {accessRules.includes('changeUser/self') &&
             <FButtonRed
               onClick={saveChanges}
               disabled={!(uriAvatar || isInputValidateSurname || isInputValidateFirstName || isInputValidatePatronymic || isInputValidatePositions)}
@@ -393,7 +408,7 @@ const FFormProfile = observer(function FFormProfile({userData}) {
               Сохранить
             </FButtonRed>}
 
-            {MOBXuser.accessRules.includes('deleteUser') &&
+            {accessRules.includes('deleteUser') &&
             <FButtonRed
               onClick={() => setUserDeleteForm({
                 isOpen: true,
@@ -419,6 +434,5 @@ const FFormProfile = observer(function FFormProfile({userData}) {
   else return null;
 
 });
-
 
 export default FFormProfile;

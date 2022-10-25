@@ -7,7 +7,7 @@ import OAUTH2Client from '../../../src/google/googleConnect'
 
 export default catchErrorsApi( async (req, res) => {
 
-    checkCors(req,res,{
+    await checkCors(req,res,{
         methods: ['POST']
       })
 

@@ -4,7 +4,7 @@ import userService from '../../../src/service/userService';
 
 export default catchErrorsApi( async (req, res) => {
 
-    checkCors(req,res,{
+    await checkCors(req,res,{
         methods: ['POST']
       });
 

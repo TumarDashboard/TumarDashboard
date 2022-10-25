@@ -14,6 +14,7 @@ import { equalArrays } from '../../src/utils/arrayUtils';
 import { FInputText } from '../low/FInputText';
 import { FInputInitials } from '../low/FInputInitials';
 import FPositionItemList from '../variable/FPositionItemList';
+import { FInputEmail } from '../low/FInputEmail';
 
 export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
 
@@ -31,6 +32,26 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
   const [uriAvatar, setUriAvatar] = useState(null);
 
   /*-------------------------------------------------------------------------------------------------------
+      Email Формы редактирования
+  -------------------------------------------------------------------------------------------------------*/
+  const [inputEmail, setInputEmail] = useState('');
+
+  const [isInputValidateEmail, setInputValidateEmail] = useState(false);
+
+  const emailChange = (value, validate) => {
+    setInputEmail(value);
+    if (operation == 'Добавить') {
+      if (value)
+        setInputValidateEmail(validate);
+      else
+        setInputValidateEmail(false);
+    } else {
+      setInputValidateEmail(validate && value != currentUser?.email);
+    }
+    setError('');
+  }
+
+  /*-------------------------------------------------------------------------------------------------------
       Фамилия Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
   const [inputSurname, setInputSurname] = useState('');
@@ -39,7 +60,14 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
 
   const surnameChange = (surname, validate) => {
     setInputSurname(surname);
-    setInputValidateSurname(validate && surname != currentUser?.surname);
+    if (operation == 'Добавить') {
+      if (surname)
+        setInputValidateSurname(validate);
+      else
+        setInputValidateSurname(false);
+    } else {
+      setInputValidateSurname(validate && surname != currentUser?.surname);
+    }
     setError('');
   }
 
@@ -52,7 +80,14 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
 
   const firstNameChange = (firstName, validate) => {
     setInputFirstName(firstName);
-    setInputValidateFirstName(validate && firstName != currentUser?.firstName);
+    if (operation == 'Добавить') {
+      if (firstName)
+        setInputValidateFirstName(validate);
+      else
+        setInputValidateFirstName(false);
+    } else {
+      setInputValidateFirstName(validate && firstName != currentUser?.firstName);
+    }
     setError('');
   }
 
@@ -65,7 +100,17 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
 
   const patronymicChange = (patronymic, validate) => {
     setInputPatronymic(patronymic);
-    setInputValidatePatronymic(validate && patronymic != currentUser?.patronymic);
+    if (operation == 'Добавить') {
+      if (patronymic)
+        setInputValidatePatronymic(validate);
+      else
+        setInputValidatePatronymic(true);
+    } else {
+      if (patronymic)
+        setInputValidatePatronymic(validate && patronymic != currentUser?.patronymic);
+      else
+        setInputValidatePatronymic(patronymic != currentUser?.patronymic);
+    }
     setError('');
   }
 
@@ -74,7 +119,7 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
   -------------------------------------------------------------------------------------------------------*/
   const [inputPositions, setInputPositions] = useState([]);
 
-  const [isInputValidatePositions, setInputValidatePositions] = useState(false);
+  // const [isInputValidatePositions, setInputValidatePositions] = useState(false);
 
   const positionsChange = (e) => {
 
@@ -88,13 +133,6 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
     }
 
     setInputPositions(positions);
-
-    if (positions.length == 0) {
-      setInputValidatePositions(currentUser?.length > 0);
-    } else {
-      setInputValidatePositions(JSON.stringify(positions.sort()) != JSON.stringify(currentUser?.sort()));
-    }
-
     setError('');
   }
 
@@ -107,6 +145,8 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
     } else if (form.isOpen) {
       setOperation(form.operation);
       setCurrentUser(form.user || {});
+      setInputEmail(form.user?.email || '')
+      setInputValidateEmail(false);
       setInputSurname(form.user?.surname || '')
       setInputValidateSurname(false);
       setInputFirstName(form.user?.firstName || '');
@@ -129,7 +169,7 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
       setIsModalFormOpen={setForm}
       className=" 
       w-full flex flex-col md:flex-row
-      p-4 items-center md:items-end
+      p-4 items-center
       overflow-y-auto max-h-[90vh]"
     >
       {/* {Изображение аватара, емайл, кнопки управления} */}
@@ -151,13 +191,6 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
           />
         </div>}
 
-        {/* {Емайл} */}
-        {currentUser.email && <span
-          className="flex-none font-bold p-4 text-center rounded-b-md"
-        >
-          {currentUser.email}
-        </span>}
-
         {/* {Кнопки управления для компьютера} */}
         <div
           className="flex-1 p-4 hidden md:inline-flex flex-col select-none
@@ -166,8 +199,40 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
 
           <FButtonRed
             className="hidden md:inline-flex m-4"
-            // onClick={saveChanges}
-            // disabled={!(uriAvatar || isInputValidateSurname || isInputValidateFirstName || isInputValidatePatronymic || isInputValidatePositions)}
+            disabled={!(form.isOpen && (operation == 'Добавить' ?
+              (isInputValidateEmail 
+                && isInputValidateSurname
+                && isInputValidateFirstName
+                && isInputValidatePatronymic) :
+              (isInputValidateEmail 
+                || isInputValidateSurname
+                || isInputValidateFirstName
+                || isInputValidatePatronymic
+                || (!equalArrays(inputPositions, currentUser?.positions))
+                || uriAvatar != null
+              )
+            ))}          
+            onClick={(e) => {
+              if (operation == 'Добавить') {
+                submitAdd(e,
+                uriAvatar,
+                inputEmail,
+                inputSurname,
+                inputFirstName,
+                inputPatronymic,
+                inputPositions, 
+              )} else {
+                if(!equalArrays(inputPositions, currentUser?.positions) 
+                && !confirm('После проведения данной операции потребуется повторная авторизация пользователя'))
+                  return;
+                submitEdit(e,
+                uriAvatar,
+                inputEmail,
+                inputSurname,
+                inputFirstName,
+                inputPatronymic,
+                inputPositions,
+              )}}}
           >
             {operation}
           </FButtonRed>
@@ -193,6 +258,15 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
           <label className="text-xl select-none">Фото</label>
           <FInputFile
             setUri={setUriAvatar}
+          />
+        </div>
+
+        {/* {Email} */}
+        <div className="form-item">
+          <label className="text-xl select-none">Email</label>
+          <FInputEmail
+            value={inputEmail}
+            onEmailChange={emailChange}
           />
         </div>
 
@@ -254,8 +328,40 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
         >
 
           <FButtonRed
-            // onClick={saveChanges}
-            // disabled={!(uriAvatar || isInputValidateSurname || isInputValidateFirstName || isInputValidatePatronymic || isInputValidatePositions)}
+            disabled={!(form.isOpen && (operation == 'Добавить' ?
+              (isInputValidateEmail 
+                && isInputValidateSurname
+                && isInputValidateFirstName
+                && isInputValidatePatronymic) :
+              (isInputValidateEmail 
+                || isInputValidateSurname
+                || isInputValidateFirstName
+                || isInputValidatePatronymic
+                || (!equalArrays(inputPositions, currentUser?.positions))
+                || uriAvatar != null
+              )
+            ))}         
+            onClick={(e) => {
+              if (operation == 'Добавить') {
+                submitAdd(e,
+                uriAvatar,
+                inputEmail,
+                inputSurname,
+                inputFirstName,
+                inputPatronymic,
+                inputPositions, 
+              )} else {
+                if(!equalArrays(inputPositions, currentUser?.positions) 
+                && !confirm('После проведения данной операции потребуется повторная авторизация пользователя'))
+                  return;
+                submitEdit(e,
+                uriAvatar,
+                inputEmail,
+                inputSurname,
+                inputFirstName,
+                inputPatronymic,
+                inputPositions,
+              )}}}
           >
             {operation}
           </FButtonRed>

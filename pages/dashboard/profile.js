@@ -11,7 +11,7 @@ const content = (isFirstMount) => ({
   }
 });
 
-export default function Profile({ userData, isFirstMount }) {
+export default function Profile({ userData, accessRules, isFirstMount }) {
 
   return (
     <div
@@ -33,6 +33,7 @@ export default function Profile({ userData, isFirstMount }) {
         >
            <FFormProfile
             userData={userData}
+            accessRules={accessRules}
            />
         </motion.div>
       </motion.section>
@@ -45,7 +46,8 @@ Profile.onSidebar = true;
 export const getServerSideProps = catchAuthServer(async (context) => {
 
   const userData = context.userData;
-
+  const accessRules = context.accessRules;
+  
   if( userData ){
     userData.id = userData.id.toString();
     if( userData.manager ){
@@ -54,7 +56,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   }
 
   return {
-    props: { userData, initialState: { checkAuth: true } }
+    props: { userData, accessRules, initialState: { checkAuth: true } }
   }
 
 })

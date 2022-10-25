@@ -8,7 +8,8 @@ import { FButtonWhite } from "../low/FButtonWhite";
 import { FUserEditForm } from "../modal/FUserEditForm";
 import { FUserDeleteForm } from "../modal/FUserDeleteForm";
 import { ApiError } from "../../middleware/exceptions";
-import { createUserHard, changeUserHard, deleteUserHard } from "../../src/dtos/dtoUser";
+import { useStore } from "../hight/StoreProvider";
+import { createUserHard, editUserHard, deleteUserHard } from "../../src/dtos/dtoUser";
 
 const inputs = {
   initial: {
@@ -66,14 +67,25 @@ const sortingTableCallback = (a, b, rule, invert) => {
 
 var filterringTimeout = null;
 
-export default function FFormUsers({ users }) {
+export default function FFormUsers({ accessRules, users }) {
+  /*-------------------------------------------------------------------------------------------------------
+      Использование глобальных данных
+  -------------------------------------------------------------------------------------------------------*/
+  const { MOBXuser, MOBXui } = useStore();
+
+  /*-------------------------------------------------------------------------------------------------------
+      Определение правил доступа
+  -------------------------------------------------------------------------------------------------------*/
+  const ARcreateUserHard = accessRules.includes('createUserHard');
+  const AReditUserHard = accessRules.includes('editUserHard');
+  const ARdeleteUserHard = accessRules.includes('deleteUserHard');
 
   /*-------------------------------------------------------------------------------------------------------
       Данные таблицы
   -------------------------------------------------------------------------------------------------------*/
-  var tableUsers = users ? users : [];
+  const [tableUsers, setTableUsers] = useState(users ? [...users] : []);
 
-  const [renderTableUsers, setRenderTableUsers] = useState(users ? users : []);
+  const [renderTableUsers, setRenderTableUsers] = useState(users ? [...users] : []);
 
   /*-------------------------------------------------------------------------------------------------------
       Сортировка таблицы
@@ -144,6 +156,7 @@ export default function FFormUsers({ users }) {
   -------------------------------------------------------------------------------------------------------*/
   const userAdd = async (event,
     inputUserAvatarSrc,
+    inputUserEmail,
     inputUserSurname,
     inputUserFirstName,
     inputUserPatronymic,
@@ -155,22 +168,25 @@ export default function FFormUsers({ users }) {
     MOBXui.setLoading();
 
     try {
-
       // Отправляем запрос на сервер
       const responce = await createUserHard(
         inputUserAvatarSrc,
+        inputUserEmail,
         inputUserSurname,
         inputUserFirstName,
         inputUserPatronymic,
         inputUserPositions,
       );
-
+      
       // Обновляем таблицу в памяти
-      tableUsers.unshift(responce.guardPost);
-
+      setTableUsers(array => {
+        array.unshift(responce.user);
+        return array;
+      });
+      
       // Обновляем отображаемую таблицу
       setRenderTableUsers(array => {
-        array.unshift(responce.guardPost);
+        array.unshift(responce.user);
         return array;
       });
 
@@ -193,6 +209,7 @@ export default function FFormUsers({ users }) {
   -------------------------------------------------------------------------------------------------------*/
   const userEdit = async (event,
     inputUserAvatarSrc,
+    inputUserEmail,
     inputUserSurname,
     inputUserFirstName,
     inputUserPatronymic,
@@ -204,11 +221,12 @@ export default function FFormUsers({ users }) {
     MOBXui.setLoading();
 
     try {
-
+      console.log('inputUserPatronymic', inputUserPatronymic);
       // Отправляем запрос на сервер
-      const responce = await changeUserHard(
+      const responce = await editUserHard(
         userEditForm.user._id,
         inputUserAvatarSrc,
+        inputUserEmail,
         inputUserSurname,
         inputUserFirstName,
         inputUserPatronymic,
@@ -216,12 +234,14 @@ export default function FFormUsers({ users }) {
       );
 
       // Обновляем таблицу в памяти
-      const index = tableUsers.findIndex(element =>{
-        return element._id == responce.user._id
+      setTableUsers(array => {
+        const index = array.findIndex(element =>{
+          return element._id == responce.user._id
+        });
+        if( index )
+          array[index] = responce.user;
+        return array;
       });
-
-      if( index )
-        tableUsers[index] = responce.user;
 
       // Обновляем отображаемую таблицу
       setRenderTableUsers(array => {
@@ -265,20 +285,23 @@ export default function FFormUsers({ users }) {
 
         // Отправляем запрос на сервер
         const responce = await deleteUserHard(
-          userDeleteForm.userID,
+          userDeleteForm.userId,
           MOBXuser.user.id,
           reason
         );
 
         // Обновляем таблицу в памяти
-        tableUsers = tableUsers.filter(value => {
-            return responce.user._id != value._id;
-          });
+        setTableUsers(array => {
+          const result = array.filter(value => {
+            return responce.user.id != value._id;
+          })
+          return result
+        });
 
         // Обновляем отображаемую таблицу
         setRenderTableUsers(array => {
           const result = array.filter(value => {
-            return responce.user._id != value._id;
+            return responce.user.id != value._id;
           })
           return result
         });
@@ -306,8 +329,7 @@ export default function FFormUsers({ users }) {
 
       if (error.statusCode == 520) {
 
-        callback({ isOpen: false });
-        
+        // callback({ isOpen: false });
         const message = JSON.parse(error.message);
 
         MOBXui.openGoogleAuthError(message.email, message.authorizeUrl);
@@ -341,6 +363,8 @@ export default function FFormUsers({ users }) {
       >
 
         {/* {Кнопка добавления} */}
+        
+        {ARcreateUserHard &&
         <div
           className='flex-1 md:order-last md:ml-2 w-full flex justify-end'
         >
@@ -363,7 +387,7 @@ export default function FFormUsers({ users }) {
             />
           </button>
 
-        </div>
+        </div>}
 
         {/* Фильтр, кнопка чистки фильтра */}
         <div
@@ -382,7 +406,8 @@ export default function FFormUsers({ users }) {
             }}
             onClear={() => {
               setInputFilterText('');
-              setRenderTableUsers(tableUsers);
+              console.log('чистка фильтра', tableUsers);
+              setRenderTableUsers([...tableUsers]);
             }}
           />
 
@@ -422,7 +447,8 @@ export default function FFormUsers({ users }) {
             })}
 
             {/* Заголовок управления*/}
-            <th className="block md:table-cell md:border bg-color_B p-2" />
+            {(AReditUserHard || ARdeleteUserHard) &&
+            <th className="block md:table-cell md:border bg-color_B p-2" />}
 
           </tr>
 
@@ -444,6 +470,8 @@ export default function FFormUsers({ users }) {
 
                   {/* {Кнопки управления мобильного устройства} */}
                   <div className='flex md:hidden justify-end'>
+                    
+                    {AReditUserHard &&
                     <FButtonRed
                       className="mr-2 flex"
                       onClick={(event) => {
@@ -460,7 +488,9 @@ export default function FFormUsers({ users }) {
                       <PencilAltIcon
                         className="h-4 w-4"
                       />
-                    </FButtonRed>
+                    </FButtonRed>}
+                    
+                    {ARdeleteUserHard &&
                     <FButtonWhite
                       className="flex"
                       onClick={(event) => {
@@ -476,7 +506,7 @@ export default function FFormUsers({ users }) {
                       <TrashIcon
                         className="h-4 w-4"
                       />
-                    </FButtonWhite>
+                    </FButtonWhite>}
                   </div>
 
                   {/* {Аватар, инициалы */}
@@ -485,13 +515,13 @@ export default function FFormUsers({ users }) {
                   >
 
                     {/* {Аватар} */}
-                    <Image
+                    {user.uiAvatarsSrc && <Image
                       className="h-8 w-8 rounded-full"
                       width={32}
                       height={32}
                       src={user.uiAvatarsSrc}
                       alt=""
-                    />
+                    />}
 
                     {/* {инициалы} */}
                     <p className="font-semibold text-black ml-1">{[user.surname, user.firstName, user.patronymic].join(' ')}</p>
@@ -522,9 +552,11 @@ export default function FFormUsers({ users }) {
                 </td>
 
                 {/* {Кнопки управления компьютера} */}
+                {(AReditUserHard || ARdeleteUserHard)  &&
                 <td className="p-2 md:border text-left hidden md:table-cell w-1">
                   <div className='flex'>
 
+                    {AReditUserHard &&
                     <FButtonRed
                       className="mr-2 flex"
                       onClick={(event) => {
@@ -542,8 +574,9 @@ export default function FFormUsers({ users }) {
                         className="h-4 w-4"
                       />
                       <span className='hidden xl:block'>Изменить</span>
-                    </FButtonRed>
+                    </FButtonRed>}
 
+                    {ARdeleteUserHard &&
                     <FButtonWhite
                       className="flex"
                       onClick={(event) => {
@@ -551,8 +584,8 @@ export default function FFormUsers({ users }) {
                         setUserDeleteForm({
                           isOpen: true,
                           key: Math.random().toString(36),
-                          userEmail: user.email,
-                          userID: user._id,
+                          email: user.email,
+                          userId: user._id,
                         })
                       }}
                     >
@@ -560,10 +593,10 @@ export default function FFormUsers({ users }) {
                         className="h-4 w-4"
                       />
                       <span className='hidden xl:block'>Удалить</span>
-                    </FButtonWhite>
+                    </FButtonWhite>}
 
                   </div>
-                </td>
+                </td>}
 
               </tr>
 

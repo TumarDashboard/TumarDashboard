@@ -6,7 +6,7 @@ import service from '../../../src/service/guardService';
 
 export default catchErrorsApi( async (req, res) => {
 
-    checkCors(req,res,{
+    await checkCors(req,res,{
         methods: ['POST']
       });
 

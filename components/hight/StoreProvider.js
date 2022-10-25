@@ -25,11 +25,12 @@ export function useStore() {
 
 export function StoreProvider({ isFirstMount, children, initialState: initialData }) {
 
-  var { MOBXuser, MOBXui, error } = refreshStore(initialData, mobxUser?.isAuth == true);
+  // var { MOBXuser, MOBXui, error } = refreshStore(initialData, mobxUser?.isAuth == true);
+  var { MOBXuser, MOBXui } = refreshStore(initialData, mobxUser?.isAuth == true);
 
   return <StoreContext.Provider value={{MOBXuser, MOBXui}}>
 
-    {initialData?.checkAuth && error &&
+    {/* {initialData?.checkAuth && error &&
       <div
         className="fixed z-[1400] w-full bg-white flex flex-col justify-center"
       >
@@ -74,7 +75,7 @@ export function StoreProvider({ isFirstMount, children, initialState: initialDat
           </FNextLink>
 
         </div>
-      </div>}
+      </div>} */}
 
     {children}
 
@@ -97,11 +98,18 @@ function refreshStore(initialData = null, isAuth) {
 
     if (error) {
       
-      console.log(error);
+      // console.log(error);
 
       localStorage.removeItem('token');
 
+      if (isAuth === 'initialize' && mobxUser) {  
+        // console.log('delete mobxUser data');
+        mobxUser = null;
+      }
+
     } else if (data) {
+
+      // console.log('%s done', isAuth ? 'update' : 'initialize');
 
       localStorage.setItem('token', data.accessToken);
 
@@ -111,6 +119,8 @@ function refreshStore(initialData = null, isAuth) {
         _mobxUser.updateUser(data.user);
       else
         _mobxUser.setUser(data.user);
+
+      console.log('update user auth');
 
       if (initialData?.checkAuth && !data.user?.isActivated) {
 
@@ -125,7 +135,8 @@ function refreshStore(initialData = null, isAuth) {
   // For SSG and SSR always create a new store
   if (typeof window === 'undefined') return {
     MOBXuser: _mobxUser,
-    MOBXui: _mobxUI
+    MOBXui: _mobxUI,
+    // error: error
   }
 
   // Create the store once in the client
@@ -135,7 +146,7 @@ function refreshStore(initialData = null, isAuth) {
   return {
     MOBXuser: _mobxUser,
     MOBXui: _mobxUI,
-    error: error
+    // error: error
   }
 
 }

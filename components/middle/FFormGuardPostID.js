@@ -753,7 +753,7 @@ export default function FFormGuardPostID({ guardPost, guardPosts, guardsData, us
 
       if (error.statusCode == 520) {
 
-        callback({ isOpen: false });
+        // callback({ isOpen: false });
 
         const message = JSON.parse(error.message);
 

@@ -76,9 +76,12 @@ export default function FFormGuards({ guards, guardPosts, users }) {
   -------------------------------------------------------------------------------------------------------*/
   const { MOBXuser, MOBXui } = useStore();
 
-  var tableGuards = guards ? guards : [];
+  /*-------------------------------------------------------------------------------------------------------
+      Данные таблицы
+  -------------------------------------------------------------------------------------------------------*/
+  const [tableGuards, setTableGuards] = useState(guards ? [...guards] : []);
 
-  const [renderTableGuards, setRenderTableGuards] = useState(guards ? guards : []);
+  const [renderTableGuards, setRenderTableGuards] = useState(guards ? [...guards] : []);
 
   /*-------------------------------------------------------------------------------------------------------
       Сортировка таблицы
@@ -175,7 +178,10 @@ export default function FFormGuards({ guards, guardPosts, users }) {
       );
 
       // Обновляем таблицу в памяти
-      tableGuards.unshift(responce.guard);
+      setTableGuards(array => {
+        array.unshift(responce.guard);
+        return array;
+      });
 
       // Обновляем отображаемую таблицу
       setRenderTableGuards(array => {
@@ -215,7 +221,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
     MOBXui.setLoading();
 
     try {
-
+      console.log('inputGuardPatronymic', inputGuardPatronymic);
       // Отправляем запрос на сервер
       const responce = await editGuard(
         guardEditForm.guard._id,
@@ -229,12 +235,15 @@ export default function FFormGuards({ guards, guardPosts, users }) {
       );
 
       // Обновляем таблицу в памяти
-      const index = tableGuards.findIndex(element => {
-        return element._id == responce.guard._id
+      setTableGuards(array => {
+        const index = array.findIndex(element => {
+          return element._id == responce.guard._id
+        });
+  
+        if (index)
+          array[index] = responce.guard;
+        return array;
       });
-
-      if (index)
-        tableGuards[index] = responce.guard;
 
       // Обновляем отображаемую таблицу
       setRenderTableGuards(array => {
@@ -284,8 +293,11 @@ export default function FFormGuards({ guards, guardPosts, users }) {
         );
 
         // Обновляем таблицу в памяти
-        tableGuards = tableGuards.filter(value => {
-          return responce.guard._id != value._id;
+        setTableGuards(array => {
+          const result = array.filter(value => {
+            return responce.guard._id != value._id;
+          })
+          return result
         });
 
         // Обновляем отображаемую таблицу
@@ -319,7 +331,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
     if (error instanceof ApiError) {
       if (error.statusCode == 520) {
 
-        callback({ isOpen: false });
+        // callback({ isOpen: false });
 
         const message = JSON.parse(error.message);
 
@@ -396,7 +408,7 @@ export default function FFormGuards({ guards, guardPosts, users }) {
             }}
             onClear={() => {
               setInputFilterText('');
-              setRenderTableGuards(tableGuards);
+              setRenderTableGuards([...tableGuards]);
             }}
           />
 

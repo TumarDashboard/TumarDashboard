@@ -44,6 +44,7 @@ export default function GuardPosts({ isFirstMount, ...props }) {
 GuardPosts.onSidebar = true;
 
 export const getServerSideProps = catchAuthServer(async (context) => {
+  
   await mongoConnect();
 
   const guardPosts = await mongoGuardPostsModel.find({}, null, {sort: {'manager': 1, 'number': 1}}).populate('manager', 'surname firstName').lean();

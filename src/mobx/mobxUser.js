@@ -10,16 +10,17 @@ enableStaticRendering(typeof window === 'undefined')
 export default class MOBXuser {
     user = {};
     isAuth = false;
-    accessRules = [];
+    // accessRules = [];
 
     constructor() {
         makeObservable(this, {
             user: observable,
             isAuth: observable,
-            accessRules: observable,
+            // accessRules: observable,
             setAuth: action,
             setUser: action,
             updateUser: action,
+            // setAccessRules: action,
             avatar: computed,
             positions: computed,
             login: action,
@@ -34,7 +35,7 @@ export default class MOBXuser {
 
     setUser(user) {
         this.user = user;
-        this.setAccessRules(this.user?.positions);
+        // this.setAccessRules(this.user?.positions);
     }
 
     updateUser(user){
@@ -44,21 +45,21 @@ export default class MOBXuser {
                 this.user[key] = user[key];
         })
 
-        this.setAccessRules(this.user?.positions);
+        // this.setAccessRules(this.user?.positions);
 
     }
 
-    setAccessRules( positions = [] ){
-        this.accessRules = FApiMethodAccessRules.reduce( ( result, value ) => {
-            if( value.accessForUserSelf ){
-                    result.push(value.url.toString().replace('/\\/api\\/method\\/', '') + 'self');
-                }
-            if(intersectArrays( value.access, positions )){
-                result.push( value.url.toString().replace('/\\/api\\/method\\/', '').replace('/', '') );
-            }
-            return result;
-        }, []);
-    }
+    // setAccessRules( positions = [] ){
+    //     this.accessRules = FApiMethodAccessRules.reduce( ( result, value ) => {
+    //         if( value.accessForUserSelf ){
+    //                 result.push(value.url.toString().replace('/\\/api\\/method\\/', '') + 'self');
+    //             }
+    //         if(intersectArrays( value.access, positions )){
+    //             result.push( value.url.toString().replace('/\\/api\\/method\\/', '').replace('/', '') );
+    //         }
+    //         return result;
+    //     }, []);
+    // }
 
     get avatar(){
         return this.user?.uiAvatarsSrc 
@@ -109,6 +110,10 @@ export default class MOBXuser {
         try {
 
             await fetchAuth('/authorization/logout');
+
+            // console.log('logout');
+
+            // this.setAuth(false);
             
             localStorage.removeItem('token');
 
@@ -122,6 +127,7 @@ export default class MOBXuser {
 
             this.setAuth(false);
             this.setUser({});
+            console.log('logout');
 
         }
     }    

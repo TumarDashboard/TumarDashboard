@@ -48,6 +48,10 @@ export const FApiMethodAccessRules = [
         positions.FPositionHRM,
         positions.FPositionNSO,
     ], accessForUserSelf: false },
+    { url: /\/api\/method\/createUserHard/, access:[
+        positions.FPositionZDIR,
+        positions.FPositionHRM,
+    ], accessForUserSelf: false },
     { url: /\/api\/method\/deleteGuard/, access:[
         positions.FPositionZDIR,
         positions.FPositionHRM,
@@ -58,6 +62,9 @@ export const FApiMethodAccessRules = [
     { url: /\/api\/method\/deleteUser/, access:[
         positions.FPositionZDIR,
     ], accessForUserSelf: false },
+    { url: /\/api\/method\/deleteUserHard/, access:[
+        positions.FPositionZDIR,
+    ], accessForUserSelf: false },
     { url: /\/api\/method\/editGuard/, access:[
         positions.FPositionZDIR,
         positions.FPositionHRM,
@@ -65,6 +72,10 @@ export const FApiMethodAccessRules = [
     ], accessForUserSelf: false },
     { url: /\/api\/method\/editGuardPost/, access:[
         positions.FPositionZDIR,
+    ], accessForUserSelf: false },
+    { url: /\/api\/method\/editUserHard/, access:[
+        positions.FPositionZDIR,
+        positions.FPositionHRM,
     ], accessForUserSelf: false },
     { url: /\/api\/method\/getTimesheet/, access:[
         positions.FPositionZDIR,

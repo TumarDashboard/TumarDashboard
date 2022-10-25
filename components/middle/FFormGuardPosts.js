@@ -88,10 +88,12 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
   const { MOBXuser, MOBXui } = useStore();
 
-  var tableGuardPosts = guardPosts ? guardPosts : [];
+  /*-------------------------------------------------------------------------------------------------------
+      Данные таблицы
+  -------------------------------------------------------------------------------------------------------*/
+  const [tableGuardPosts, setTableGuardPosts] = useState(guardPosts ? [...guardPosts] : []);
 
-  const [renderTableGuardPosts, setRenderTableGuardPosts] = useState(guardPosts ? guardPosts : []);
-
+  const [renderTableGuardPosts, setRenderTableGuardPosts] = useState(guardPosts ? [...guardPosts] : []);
 
   /*-------------------------------------------------------------------------------------------------------
       Сортировка таблицы
@@ -192,7 +194,10 @@ export default function FFormGuardPosts({ guardPosts, users }) {
       );
 
       // Обновляем таблицу в памяти
-      tableGuardPosts.unshift(responce.guardPost);
+      setTableGuardPosts(array => {
+        array.unshift(responce.guardPost);
+        return array;
+      });
 
       // Обновляем отображаемую таблицу
       setRenderTableGuardPosts(array => {
@@ -249,12 +254,14 @@ export default function FFormGuardPosts({ guardPosts, users }) {
       );
 
       // Обновляем таблицу в памяти
-      const index = tableGuardPosts.findIndex(element =>{
-        return element._id == responce.guardPost._id
+      setTableGuardPosts(array => {
+        const index = array.findIndex(element =>{
+          return element._id == responce.guardPost._id
+        });
+        if( index )
+          array[index] = responce.guardPost;
+        return array;
       });
-
-      if( index )
-        tableGuardPosts[index] = responce.guardPost;
 
       // Обновляем отображаемую таблицу
       setRenderTableGuardPosts(array => {
@@ -304,9 +311,12 @@ export default function FFormGuardPosts({ guardPosts, users }) {
         );
 
         // Обновляем таблицу в памяти
-        tableGuardPosts = tableGuardPosts.filter(value => {
+        setTableGuardPosts(array => {
+          const result = array.filter(value => {
             return responce.guardPost._id != value._id;
-          });
+          })
+          return result
+        });
 
         // Обновляем отображаемую таблицу
         setRenderTableGuardPosts(array => {
@@ -339,7 +349,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
 
       if (error.statusCode == 520) {
 
-        callback({ isOpen: false });
+        // callback({ isOpen: false });
         
         const message = JSON.parse(error.message);
 
@@ -440,7 +450,7 @@ export default function FFormGuardPosts({ guardPosts, users }) {
             }}
             onClear={() => {
               setInputFilterText('');
-              setRenderTableGuardPosts(tableGuardPosts);
+              setRenderTableGuardPosts([...tableGuardPosts]);
             }}
           />
 

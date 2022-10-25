@@ -184,7 +184,7 @@ class GuardPostService {
         }
 
         if (!idUser) {
-            throw ApiError.BadRequest("Не указан ID Пользователя для проведения операции удаления");
+            throw ApiError.BadRequest("Не указан ID Пользователя, проводящего операцию удаления");
         }
 
         //Google

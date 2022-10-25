@@ -1,8 +1,7 @@
 // import ms from 'ms';
 import checkCors from '../../../middleware/cors';
 import { catchErrorsApi } from '../../../middleware/exceptions';
-import service from '../../../src/service/guardService';
-// import loadGuardsDataFromExcel from '../../../temp/loadGuardsDataFromExcel';
+import service from '../../../src/service/userService';
 // import { setCookies } from '../../../middleware/cookies';
 
 export default catchErrorsApi( async (req, res) => {
@@ -10,7 +9,8 @@ export default catchErrorsApi( async (req, res) => {
     await checkCors(req,res,{
         methods: ['POST']
       });
-    const data = await service.editGuard( req.body );
+
+    const data = await service.createUserHard( req.body );
 
     return res.json(data);
 

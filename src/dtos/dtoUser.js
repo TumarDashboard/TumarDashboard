@@ -52,7 +52,7 @@ export const validateYup = (dtoUser, options) => {
     let validationSchema = lazy(dtoUser => object(
         mapValue(dtoUser, (value, key) => {
 
-            if (options?.deleteEmptyKey && (!dtoUser[key] || dtoUser[key] === '')) {
+            if (options?.deleteEmptyKey && (!dtoUser[key] || dtoUser[key] === '' || dtoUser[key].length === 0)) {
 
                 delete dtoUser[key];
 
@@ -81,7 +81,7 @@ export const validateYup = (dtoUser, options) => {
                         .required('Не указано имя')
                 }
 
-                if (key === 'patronymic') {
+                if (key === 'patronymic' && dtoUser[key]) {
                     return string()
                         .min(minlengthFullName, `Отчество должно содержать от ${minlengthFullName} до ${maxlengthFullName} символов`)
                         .max(maxlengthFullName, `Отчество должно содержать от ${minlengthFullName} до ${maxlengthFullName} символов`)
@@ -114,6 +114,9 @@ export const validateYup = (dtoUser, options) => {
 
 }
 
+/*-------------------------------------------------------------------------------------------------------
+    Self функции
+-------------------------------------------------------------------------------------------------------*/
 export const changeUser = async (id, uiAvatarsSrc, surname, firstName, patronymic, positions) => {
     return await fetchAuthMethod('/method/changeUser', { id, uiAvatarsSrc, surname, firstName, patronymic, positions });
 }
@@ -122,14 +125,17 @@ export const deleteUser = async (id, reason) => {
     return await fetchAuthMethod('/method/deleteUser', { id, reason });
 }
 
-export const createUserHard = async ( uiAvatarsSrc, surname, firstName, patronymic, positions ) => {
-    return await fetchAuthMethod('/method/createUserHard', { uiAvatarsSrc, surname, firstName, patronymic, positions, email });
+/*-------------------------------------------------------------------------------------------------------
+    Hard функции
+-------------------------------------------------------------------------------------------------------*/
+export const createUserHard = async ( uiAvatarsSrc, email, surname, firstName, patronymic, positions ) => {
+    return await fetchAuthMethod('/method/createUserHard', { uiAvatarsSrc, email, surname, firstName, patronymic, positions });
 }
 
-export const changeUserHard = async ( uiAvatarsSrc, surname, firstName, patronymic, positions ) => {
-    return await fetchAuthMethod('/method/createUserHard', { uiAvatarsSrc, surname, firstName, patronymic, positions, email });
+export const editUserHard = async ( id, uiAvatarsSrc, email, surname, firstName, patronymic, positions ) => {
+    return await fetchAuthMethod('/method/editUserHard', { id, uiAvatarsSrc, email, surname, firstName, patronymic, positions });
 }
 
-export const deleteUserHard = async (id, reason) => {
+export const deleteUserHard = async (id, idHard, reason) => {
     return await fetchAuthMethod('/method/deleteUserHard', { id, idHard, reason });
 }

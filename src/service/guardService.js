@@ -123,7 +123,7 @@ class GuardService {
     }
 
     async editGuard(inputData) {
-
+        console.log(inputData);
         //Validate date
         const guardData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
@@ -163,6 +163,7 @@ class GuardService {
         //Mongo
         await mongoConnect();
 
+        //Update model
         var mongoGuard = await mongoGuardsModel.findById(guardData.id);
 
         if (!mongoGuard) {
@@ -211,7 +212,7 @@ class GuardService {
         }
 
         if( !idUser ){
-            throw ApiError.BadRequest("Не указан ID Пользователя для проведения операции удаления");
+            throw ApiError.BadRequest("Не указан ID Пользователя, проводящего операцию удаления");
         }
 
         //Google
@@ -219,9 +220,9 @@ class GuardService {
         await googleDrive.deleteGuardAvatar(idGuard);
 
         //Mongo 
-            
         await mongoConnect();
 
+        //Delete model
         const mongoGuard = await mongoGuardsModel.findById(idGuard);
 
         if(!mongoGuard){

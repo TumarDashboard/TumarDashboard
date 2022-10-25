@@ -10,15 +10,16 @@ export default catchErrorsMiddleware( async (req, ev) => {
 
     if( authorizationToken ){
 
+        const responce = NextResponse.next();
+
         const accesToken = authorizationToken.split(' ')[1];
-        
+
         var verified = await jwtVerify(
             accesToken,
             new TextEncoder().encode( process.env.NEXT_PRIVATE_JWT_ACCESS_SECRET )
             ).catch(error=>{return null})
 
         if( !verified ){
-
             const refreshToken = req.cookies['refreshToken'];
 
             if (refreshToken) {
@@ -27,7 +28,8 @@ export default catchErrorsMiddleware( async (req, ev) => {
                     refreshToken,
                     new TextEncoder().encode(process.env.NEXT_PRIVATE_JWT_REFRESH_SECRET)
                 ).catch(error => { throw ApiError.UnauthorizedError() })
-        
+
+                responce.headers.set('checkrefreshtoken', 'true');
             }
 
         }
@@ -58,7 +60,7 @@ export default catchErrorsMiddleware( async (req, ev) => {
 
                     req.user = userData;
     
-                    return NextResponse.next();
+                    return responce;
 
                 }
             }
@@ -71,7 +73,7 @@ export default catchErrorsMiddleware( async (req, ev) => {
 
                 req.user = userData;
 
-                return NextResponse.next();
+                return responce;
 
             }
 

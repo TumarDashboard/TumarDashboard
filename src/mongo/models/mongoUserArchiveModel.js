@@ -7,6 +7,14 @@ const MongooseSchema = new mongoose.Schema({
   reason: {
     type: String
   },
+  userPerfomed: {
+    type: mongoose.Schema.Types.ObjectId,
+    refPath: 'userPerfomedSheme'
+  },
+  userPerfomedSheme:{
+    type: String,
+    enum: ['User', 'UserArchive']
+  },
   surname: {
     type: String,
     required: [true, 'Пожалуйста, введите имя']

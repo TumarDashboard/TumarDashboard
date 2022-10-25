@@ -14,7 +14,7 @@ const content = (isFirstMount) => ({
   }
 });
 
-export default function Users({ isFirstMount, users }) {
+export default function Users({ isFirstMount, accessRules, users }) {
   return (
     <div
       className="flex-1"
@@ -31,6 +31,7 @@ export default function Users({ isFirstMount, users }) {
           className="flex overflow-hidden"
         >
           <FFormUsers
+            accessRules={accessRules}
             users={users}
           />
         </motion.div>
@@ -42,6 +43,8 @@ export default function Users({ isFirstMount, users }) {
 Users.onSidebar = true;
 
 export const getServerSideProps = catchAuthServer(async (context) => {
+
+  const accessRules = context.accessRules;
 
   await mongoConnect();
 
@@ -55,7 +58,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   })
 
   return {
-    props: { users: users }
+    props: { accessRules, users: users }
   }
 
 })

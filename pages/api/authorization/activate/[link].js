@@ -6,7 +6,7 @@ import { setCookies, getCookie } from '../../../../middleware/cookies';
 
 export default catchErrorsApi(async (req, res) => {
 
-  checkCors(req, res, {
+  await checkCors(req, res, {
     methods: ['GET']
   });
 
