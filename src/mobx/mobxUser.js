@@ -25,6 +25,7 @@ export default class MOBXuser {
             positions: computed,
             login: action,
             registration: action,
+            registrationEnd: action,
             logout: action
         })
     }
@@ -103,6 +104,23 @@ export default class MOBXuser {
 
             throw error;
 
+        }
+    }
+
+    async registrationEnd(activatelink, password) {
+        try {
+
+            const responce = await fetchAuth('/authorization/registrationEnd', { activatelink, password });
+            localStorage.setItem('token', responce.accessToken);
+            this.setAuth(true);
+            this.setUser(responce.user);
+
+        } catch (error) {
+
+            this.setAuth(false);
+            this.setUser({});
+
+            throw error;
         }
     }
 

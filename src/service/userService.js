@@ -458,7 +458,7 @@ class UserService {
             
             //Send activation link
             await mailService.sendActivationMail(mongoUser.email, 
-                `${process.env.NEXT_PUBLIC_API_URL}/api/authorization/activate/${mongoUser.activationLink}`).catch((e) => {
+                `${process.env.NEXT_PUBLIC_API_URL}/authorization/activatelink/${mongoUser.activationLink}`).catch((e) => {
 
                 throw ApiError.BadRequest(`Произошла ошибка отправки письма для активации на почту ${email}( ${e.response} )`);
 
@@ -592,7 +592,7 @@ class UserService {
 
         await mongoUser.delete();
 
-        await mongoUserArchive.delete();
+        // await mongoUserArchive.delete();
         
         // Rewrite sheme for all dependencies
         await mongoUserArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'UserArchive'}).lean();
@@ -619,6 +619,34 @@ class UserService {
 
         //return responce
         return { user: dtoUser };
+    }
+
+    async registrationEnd(activatelink, password ) {
+
+        await mongoConnect();
+
+        const mongoUser = await mongoUserModel.findOne({ activationLink: activatelink });
+
+        if (!mongoUser) {
+            throw ApiError.BadRequest('Неккоректная ссылка активации');
+        }
+        
+        const hashPassword = await bcrypt.hash(password, parseInt(process.env.NEXT_PRIVATE_PASSWORD_SALT));
+
+        mongoUser.password = hashPassword;
+        mongoUser.isActivated = true;
+        mongoUser.activationLink = undefined;
+
+        await mongoUser.save();
+
+        const dtoUser = new DTOUser(mongoUser);
+
+        const tokens = await tokenService.generateTokens({ ...dtoUser });
+
+        await tokenService.saveToken(dtoUser.id, tokens.refreshToken);
+
+        return { ...tokens, user: dtoUser }
+
     }
 }
 

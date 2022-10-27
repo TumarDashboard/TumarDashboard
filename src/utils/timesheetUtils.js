@@ -219,16 +219,19 @@ export function timesheetPrintServer( responce, usersData, date ) {
         var totalRateSummCount = 0;
         var totalRateSummAddressStart = '';
         var totalRateSummAddressFinish = '';
+        const totalDaysHoursCount = new Array(daysCount).fill(0);
+        // var totalDaysHoursCountAddressStart = {col:'', row:''};
+        // var totalDaysHoursCountAddressFinish = {col:'', row:''};
         var rate = guardPost.rate ? guardPost.rate : 0;
         // Тело таблицы
-        guardPost.guardRow.forEach((guard, i) => {
+        guardPost.guardRow.forEach((guard, index) => {
 
           const tableBodyRow = worksheet.addRow();
 
-          const bodyRowFillColor = i & 1 ? Style.FillYellow3 : Style.FillYellow4;
+          const bodyRowFillColor = index & 1 ? Style.FillYellow3 : Style.FillYellow4;
 
           var tableBodyCell = tableBodyRow.getCell(1);
-          tableBodyCell.value = i + 1;
+          tableBodyCell.value = index + 1;
           tableBodyCell.font = Style.FontSmall;
           tableBodyCell.alignment = Style.AlignmentMiddleCenter;
           tableBodyCell.border = Style.BorderThin;
@@ -254,18 +257,34 @@ export function timesheetPrintServer( responce, usersData, date ) {
             }else{
               tableBodyCell.fill = bodyRowFillColor;
             }
-            let index = guard.timesheetDays?.indexOf(i);
+            
+            // if (index == 0) {
+            //   if (i == 0) {
+            //     let address = tableBodyCell.$col$row.split('$');
+            //     totalDaysHoursCountAddressStart = {col:address[1], row:address[2]};
+            //   }
+    
+            //   if (i == (daysCount - 1)) {
+            //     let address = tableBodyCell.$col$row.split('$');
+            //     totalDaysHoursCountAddressFinish = {col:address[1], row:address[2]};
+            //   }
+            // }
 
-            if (index >= 0) {
+            let indexOfDay = guard.timesheetDays?.indexOf(i);
 
-              let shift = parseInt(guard.timesheetShifts[index]);
+            if (indexOfDay >= 0) {
+
+              let shift = parseInt(guard.timesheetShifts[indexOfDay]);
 
               if (shift >= 0) {
                 hoursCount += shift;
                 tableBodyCell.value = shift;
                 tableBodyCell.font = Style.FontSmall;
+
+                totalDaysHoursCount[i] += shift;
+
               } else {
-                tableBodyCell.value = guard.timesheetShifts[index];
+                tableBodyCell.value = guard.timesheetShifts[indexOfDay];
                 tableBodyCell.font = Style.FontSmallBold;
               }
 
@@ -286,11 +305,11 @@ export function timesheetPrintServer( responce, usersData, date ) {
 
           totalHoursCount += hoursCount;
 
-          if (i == 0) {
+          if (index == 0) {
             totalHoursAddressStart = tableBodyCell.address;
           }
 
-          if (i == (guardPost.guardRow.length - 1)) {
+          if (index == (guardPost.guardRow.length - 1)) {
             totalHoursAddressFinish = tableBodyCell.address;
           }
 
@@ -313,11 +332,11 @@ export function timesheetPrintServer( responce, usersData, date ) {
 
           totalRateSummCount += rateSumm;
 
-          if (i == 0) {
+          if (index == 0) {
             totalRateSummAddressStart = tableBodyCell.address;
           }
 
-          if (i == (guardPost.guardRow.length - 1)) {
+          if (index == (guardPost.guardRow.length - 1)) {
             totalRateSummAddressFinish = tableBodyCell.address;
           }
         })
@@ -339,6 +358,8 @@ export function timesheetPrintServer( responce, usersData, date ) {
         tableFooterCell.border = Style.BorderThin;
         tableFooterCell.fill = bodyFooterFillColor;
 
+        // console.log(totalDaysHoursCountAddressStart);
+        // console.log(totalDaysHoursCountAddressFinish);
         for (let i = 0; i < daysCount; i++) {
 
           tableFooterCell = tableFooterRow.getCell(3 + i);
@@ -346,7 +367,9 @@ export function timesheetPrintServer( responce, usersData, date ) {
           tableFooterCell.alignment = Style.AlignmentMiddleCenter;
           tableFooterCell.border = Style.BorderThin;
           tableFooterCell.fill = bodyFooterFillColor;
-
+          if( totalDaysHoursCount[i] > 0)
+            tableFooterCell.value = totalDaysHoursCount[i];
+          // console.log(`SUM(${totalDaysHoursCountAddressStart.col}${i+totalDaysHoursCountAddressStart.row}:${totalDaysHoursCountAddressFinish.col}${i+totalDaysHoursCountAddressFinish.row})`);
         }
         // Итого сумма часов
         tableFooterCell = tableFooterRow.getCell(3 + daysCount);
@@ -355,7 +378,6 @@ export function timesheetPrintServer( responce, usersData, date ) {
         tableFooterCell.alignment = Style.AlignmentMiddleCenter;
         tableFooterCell.border = Style.BorderThin;
         tableFooterCell.fill = bodyFooterFillColor;
-
         // Итого тариф
         tableFooterCell = tableFooterRow.getCell(4 + daysCount);
         tableFooterCell.font = Style.FontSmallBold;
