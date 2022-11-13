@@ -11,7 +11,7 @@ const content = (isFirstMount) => ({
   }
 });
 
-export default function Profile({ userData, accessRules, isFirstMount }) {
+export default function Profile({ accessRules, userData, isFirstMount }) {
 
   return (
     <div
@@ -32,8 +32,8 @@ export default function Profile({ userData, accessRules, isFirstMount }) {
           className="flex overflow-hidden"
         >
            <FFormProfile
-            userData={userData}
             accessRules={accessRules}
+            userData={userData}
            />
         </motion.div>
       </motion.section>

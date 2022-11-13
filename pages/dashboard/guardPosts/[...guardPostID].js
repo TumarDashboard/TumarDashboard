@@ -19,7 +19,7 @@ const content = (isFirstMount) => ({
   }
 });
 
-export default function GuardPostID({ isFirstMount, accessRules, guardPost, guardPosts, guards, users, usersAll }) {
+export default function GuardPostID({ isFirstMount, accessRules, userData, guardPost, guardPosts, guards, users, usersAll }) {
   const pageName = [guardPost?.number, guardPost?.callsign].filter(Boolean).join('-');
   const pageIcon = guardPost?.photo;
   return (
@@ -42,6 +42,7 @@ export default function GuardPostID({ isFirstMount, accessRules, guardPost, guar
         >
           <FFormGuardPostID
             accessRules={accessRules}
+            userData={userData}
             guardPost={guardPost}
             guardPosts={guardPosts}
             guardsData={guards}
@@ -58,6 +59,7 @@ GuardPostID.onSidebar = true;
 
 export const getServerSideProps = catchAuthServer(async (context) => {
 
+  const userData = context.userData;
   const accessRules = context.accessRules;
 
   // Проверка id физ. поста
@@ -132,7 +134,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   // Передача данных
   return {
-    props: { accessRules, guardPost, guardPosts, guards, users, usersAll, initialState: { checkAuth: true } }
+    props: { accessRules, userData, guardPost, guardPosts, guards, users, usersAll, initialState: { checkAuth: true } }
   }
 
 })

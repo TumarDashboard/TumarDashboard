@@ -78,7 +78,7 @@ const sortingTableCallback = (a, b, rule, invert) => {
 
 var filterringTimeout = null;
 
-export default function FFormGuardPosts({ accessRules, guardPosts, users }) {
+export default function FFormGuardPosts({ accessRules, userData, guardPosts, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
   -------------------------------------------------------------------------------------------------------*/
@@ -560,7 +560,8 @@ export default function FFormGuardPosts({ accessRules, guardPosts, users }) {
                     <div className='flex md:hidden'>
 
                       {((AReditGuardPost && AReditGuardPostAll)
-                        || (AReditGuardPost && guardPost.manager._id === MOBXuser.user.id)) &&
+                        || (AReditGuardPost && guardPost.manager._id === MOBXuser.user.id)
+                        || (AReditGuardPost && guardPost.manager._id === userData.id)) &&
                         <FButtonRed
                           className="mr-2 flex"
                           onClick={(event) => {
@@ -630,7 +631,8 @@ export default function FFormGuardPosts({ accessRules, guardPosts, users }) {
                     <div className='flex'>
 
                       {((AReditGuardPost && AReditGuardPostAll)
-                        || (AReditGuardPost && guardPost.manager._id === MOBXuser.user.id)) &&
+                        || (AReditGuardPost && guardPost.manager._id === MOBXuser.user.id)
+                        || (AReditGuardPost && guardPost.manager._id === userData.id)) &&
                         <FButtonRed
                           className="mr-2 flex"
                           onClick={(event) => {

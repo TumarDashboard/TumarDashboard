@@ -1,27 +1,18 @@
-import { ArchiveIcon, StopIcon, PlusIcon, ReplyIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
-import { motion, useDragControls } from "framer-motion";
+import { PencilAltIcon, ReplyIcon, TrashIcon } from '@heroicons/react/solid';
+import { motion } from "framer-motion";
 import Image from 'next/image';
-import { useState, useEffect, useRef } from 'react';
 import { useRouter } from "next/router";
+import { useState } from 'react';
 
-import { useStore } from "../levelA/StoreProvider";
 import { ApiError } from "../../middleware/exceptions";
+import { useStore } from "../levelA/StoreProvider";
 import { FButtonRed } from "../levelE_low/FButtonRed";
 import { FButtonWhite } from "../levelE_low/FButtonWhite";
 
-import { editGuardPost, deleteGuardPost } from '../../src/dtos/dtoGuardPost';
-import { changeTimesheet, getTimesheet } from '../../src/dtos/dtoTimesheet';
+import { deleteGuardPost, editGuardPost } from '../../src/dtos/dtoGuardPost';
+import FTimesheetHorizontal from '../levelC_middle/FTimesheetHorizontal';
 import { FGuardPostDeleteForm } from '../levelD_modal/FGuardPostDeleteForm';
 import { FGuardPostEditForm } from '../levelD_modal/FGuardPostEditForm';
-import { FInputMonth } from '../levelE_low/FInputMonth';
-import { FSelect } from '../levelE_low/FSelect';
-import { array } from 'yup';
-import { getCurrentMonth, getDaysFromMonth } from '../../src/utils/dateUtils';
-import { FGuardRowSelectGuardForm } from '../levelD_modal/FGuardRowSelectGuardForm';
-import { FModalForm } from '../levelD_modal/FModalForm';
-import { FGuardRowSelectShiftForm } from '../levelD_modal/FGuardRowSelectShiftForm';
-import FTimesheetHorizontal from '../levelC_middle/FTimesheetHorizontal';
-import { observer } from 'mobx-react-lite';
 
 const inputs = {
   initial: {
@@ -38,7 +29,7 @@ const inputs = {
   },
 };
 
-export default function FFormGuardPostID({ accessRules, guardPost, guardPosts, guardsData, users, usersAll }) {
+export default function FFormGuardPostID({ accessRules, userData, guardPost, guardPosts, guardsData, users, usersAll }) {
 
   /*-------------------------------------------------------------------------------------------------------
       Определение правил доступа
@@ -183,7 +174,7 @@ export default function FFormGuardPostID({ accessRules, guardPost, guardPosts, g
       throw error
     }
   }
-  
+
   /*----------------------------------------------------------------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------*/
 
@@ -234,49 +225,49 @@ export default function FFormGuardPostID({ accessRules, guardPost, guardPosts, g
           </div>
 
           {/* {Кнопки управления физ. постом} */}
-          {(AReditGuardPost || ARdeleteGuardPost) &&
-            <div className='flex'>
+          <div className='flex'>
 
-              {/* {Кнопка редактирования} */}
-              {((AReditGuardPost && AReditGuardPostAll)
-                || (AReditGuardPost && guardPost.manager._id === MOBXuser.user.id)) &&
-                <FButtonRed
-                  className="mr-2 flex"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setGuardPostEditForm({
-                      isOpen: true,
-                      operation: 'Изменить',
-                      key: Math.random().toString(36),
-                      guardPost: guardPostData
-                    })
-                  }}
-                >
-                  <PencilAltIcon
-                    className="h-4 w-4"
-                  />
-                </FButtonRed>}
+            {/* {Кнопка редактирования} */}
+            {((AReditGuardPost && AReditGuardPostAll)
+              || (AReditGuardPost && guardPost.manager._id === MOBXuser.user.id)
+              || (AReditGuardPost && guardPost.manager._id === userData.id)) &&
+              <FButtonRed
+                className="mr-2 flex"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setGuardPostEditForm({
+                    isOpen: true,
+                    operation: 'Изменить',
+                    key: Math.random().toString(36),
+                    guardPost: guardPostData
+                  })
+                }}
+              >
+                <PencilAltIcon
+                  className="h-4 w-4"
+                />
+              </FButtonRed>}
 
-              {/* {Кнопка удаления} */}
-              {ARdeleteGuardPost &&
-                <FButtonWhite
-                  className="flex"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setGuardPostDeleteForm({
-                      isOpen: true,
-                      key: Math.random().toString(36),
-                      guardPostCallsign: guardPostData.callsign,
-                      guardPostId: guardPostData._id,
-                    })
-                  }}
-                >
-                  <TrashIcon
-                    className="h-4 w-4"
-                  />
-                </FButtonWhite>}
+            {/* {Кнопка удаления} */}
+            {ARdeleteGuardPost &&
+              <FButtonWhite
+                className="flex"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setGuardPostDeleteForm({
+                    isOpen: true,
+                    key: Math.random().toString(36),
+                    guardPostCallsign: guardPostData.callsign,
+                    guardPostId: guardPostData._id,
+                  })
+                }}
+              >
+                <TrashIcon
+                  className="h-4 w-4"
+                />
+              </FButtonWhite>}
 
-            </div>}
+          </div>
 
         </div>
 
@@ -337,22 +328,17 @@ export default function FFormGuardPostID({ accessRules, guardPost, guardPosts, g
               <span className="break-all md:break-normal"><b className='inline-block'>Тариф:</b> {guardPostData.rate}</span>
             </div>}
 
-          {/* Статус ошибки */}
-          {/* {error && <div className="">
-            <span className="text-color_C italic break-words">
-              {error}
-            </span>
-          </div>} */}
-
         </div>
 
       </div>
 
       {/* {Таблица графика} */}
       {((ARgetTimesheet && ARgetTimesheetAll)
-        || (ARgetTimesheet && guardPost.manager._id === MOBXuser.user.id)) &&
+        || (ARgetTimesheet && guardPost.manager._id === MOBXuser.user.id)
+        || (ARgetTimesheet && guardPost.manager._id === userData.id)) &&
         <FTimesheetHorizontal
           accessRules={accessRules}
+          userData={MOBXuser}
           MOBXuser={MOBXuser}
           MOBXui={MOBXui}
           errorCallback={errorCallback}

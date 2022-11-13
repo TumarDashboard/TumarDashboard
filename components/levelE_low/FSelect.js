@@ -2,7 +2,7 @@ export function FSelect({ options, value, className, defaultValue, ...props }) {
     return (
         <select
             className={`border border-gray-300 block w-full 
-            focus:border-orange-300 focus:outline-none focus:ring focus:ring-orange-200 focus:ring-opacity-50 
+            focus:border-orange-300 focus:outline-none focus:ring focus:ring-orange-200 focus:ring-opacity-50 disabled:bg-gray-100
             rounded-md shadow-sm ${className}`}
             value={value}
             {...props}

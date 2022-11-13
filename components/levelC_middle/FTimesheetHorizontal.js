@@ -1,24 +1,16 @@
-import { ArchiveIcon, StopIcon, PlusIcon, ReplyIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
+import { ArchiveIcon, PencilAltIcon, PlusIcon, StopIcon, TrashIcon } from '@heroicons/react/solid';
 import { motion, useDragControls } from "framer-motion";
 import Image from 'next/image';
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from "next/router";
+import { useEffect, useRef, useState } from 'react';
 
-import { useStore } from "../levelA/StoreProvider";
 import { ApiError } from "../../middleware/exceptions";
 import { FButtonRed } from "../levelE_low/FButtonRed";
-import { FButtonWhite } from "../levelE_low/FButtonWhite";
-
-import { editGuardPost, deleteGuardPost } from '../../src/dtos/dtoGuardPost';
 import { changeTimesheet, getTimesheet } from '../../src/dtos/dtoTimesheet';
-import { FGuardPostDeleteForm } from '../levelD_modal/FGuardPostDeleteForm';
-import { FGuardPostEditForm } from '../levelD_modal/FGuardPostEditForm';
-import { FInputMonth } from '../levelE_low/FInputMonth';
-import { FSelect } from '../levelE_low/FSelect';
 import { getCurrentMonth, getDaysFromMonth } from '../../src/utils/dateUtils';
 import { FGuardRowSelectGuardForm } from '../levelD_modal/FGuardRowSelectGuardForm';
-import { FModalForm } from '../levelD_modal/FModalForm';
 import { FGuardRowSelectShiftForm } from '../levelD_modal/FGuardRowSelectShiftForm';
+import { FInputMonth } from '../levelE_low/FInputMonth';
+import { FSelect } from '../levelE_low/FSelect';
 
 var pointTimeout = null;
 
@@ -26,17 +18,21 @@ const defaultDayShift = 8;
 
 const currentMonth = getCurrentMonth();
 
-export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, errorCallback, guardPost, guardPosts, guardsData, users, usersAll }) {
+export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, MOBXui, errorCallback, guardPost, guardPosts, guardsData, users, usersAll }) {
 
   /*-------------------------------------------------------------------------------------------------------
       Определение правил доступа
   -------------------------------------------------------------------------------------------------------*/
-  const AReditGuardPost = accessRules.includes('editGuardPost');
-  const AReditGuardPostRate = !accessRules.includes('editGuardPost/editBlock/rate');
-  const AReditGuardPostAll = !accessRules.includes('editGuardPost/userCompare/manager');
-  const ARdeleteGuardPost = accessRules.includes('deleteGuardPost');
-  const ARgetTimesheet = accessRules.includes('getTimesheet');
-  const ARgetTimesheetAll = !accessRules.includes('getTimesheet/userCompare/manager');
+
+  let letARchangeTimesheet = accessRules.includes('changeTimesheet');
+  let letARchangeTimesheetAll = accessRules.includes('changeTimesheet/userCompare/manager');
+
+  const ARchangeTimesheet = ((letARchangeTimesheet && !letARchangeTimesheetAll)
+    || (letARchangeTimesheet && guardPost.manager._id === MOBXuser.user.id)
+    || (letARchangeTimesheet && guardPost.manager._id === userData.id));
+
+  const ARchangeTimesheetManager = !accessRules.includes('changeTimesheet/editBlock/manager');
+  const ARchangeTimesheetRate = !accessRules.includes('changeTimesheet/editBlock/rate');
 
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
@@ -45,12 +41,12 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
   const [guards, setGuards] = useState(guardsData);
 
   const [error, setError] = useState('');
-  
-  const [summGuardPostShifts, setSummGuardPostShifts] = useState( defaultDayShift );
+
+  const [summGuardPostShifts, setSummGuardPostShifts] = useState(defaultDayShift);
 
   const [guardPostDataShifts, setGuardPostDataShifts] = useState([defaultDayShift]);
 
-  const [guardCellHandelMemory, setGuardCellHandelMemory] = useState( defaultDayShift );
+  const [guardCellHandelMemory, setGuardCellHandelMemory] = useState(defaultDayShift);
 
   const [inputGuardPostManager, setInputGuardPostManager] = useState('EMPTY');
 
@@ -116,10 +112,10 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
 
         if (value == currentMonth) {
           setInputGuardPostManager(guardPost.manager ? guardPost.manager._id : 'EMPTY');
-          setInputGuardPostRate(guardPost.rate ? guardPost.rate : null )
+          setInputGuardPostRate(guardPost.rate ? guardPost.rate : null)
         } else {
           setInputGuardPostManager(manager);
-          setInputGuardPostRate(rate ? rate : ( guardPost.rate ? guardPost.rate : null ) );
+          setInputGuardPostRate(rate ? rate : (guardPost.rate ? guardPost.rate : null));
         }
 
         const tableFooter = new Array(daysFromMonth.length + 2).fill(0);
@@ -200,7 +196,7 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
       setTimesheetTableBody([]);
 
     } catch (error) {
-      
+
       if (error instanceof ApiError) {
         setError(error.message)
       } else {
@@ -572,13 +568,14 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
           }
           return result;
         }, []),
-        inputGuardPostManager, inputGuardPostRate,
+        inputGuardPostManager, 
+        ARchangeTimesheetRate ? inputGuardPostRate : undefined
       );
 
       setTimesheetChanged(true);
 
     } catch (error) {
-      
+
       if (error instanceof ApiError) {
         console.log('error instanceof ApiError');
         setError(error.message)
@@ -608,7 +605,7 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
   ----------------------------------------------------------------------------------------------------------------------------*/
   useEffect(() => {
     setError('');
-    
+
     // setTimesheetChanged(true);
 
     setGuardPostDataShifts(guardPost.shifts?.length > 0 ? [...new Set(guardPost.shifts)].map(String) : ['8']);
@@ -616,7 +613,7 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
     setGuardCellHandelMemory(guardPost.shifts?.length > 0 ? guardPost.shifts[0] : '8');
 
     if (timesheetMonth == currentMonth) {
-      
+
       if (inputGuardPostManager != guardPost.manager?._id) {
         setTimesheetChanged(false);
       }
@@ -638,16 +635,14 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
       updateDate(currentMonth);
     }
 
-    return ()=>{
+    return () => {
 
-        setSummGuardPostShifts( defaultDayShift );
+      setSummGuardPostShifts(defaultDayShift);
 
-        setGuardPostDataShifts([defaultDayShift]);
+      setGuardPostDataShifts([defaultDayShift]);
 
-        setGuardCellHandelMemory( defaultDayShift );
+      setGuardCellHandelMemory(defaultDayShift);
 
-        setInputGuardPostManager('EMPTY');
-        
     }
 
   }, [guardPost]);
@@ -671,12 +666,14 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
             {/* Заголовок таблицы */}
             <thead className="block md:table-header-group z-50 top-0 sticky">
 
+              {/* Заголовки и кнопки управления */}
               <tr
                 className="block md:table-row 
                 absolute -top-full -left-full 
                 md:relative md:top-auto md:left-auto select-none
                 "
               >
+                {/* Охранник */}
                 <th
                   className="bg-color_B p-2 block md:table-cell
                   text-white font-bold text-center 
@@ -685,43 +682,70 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
                   rowSpan="2">
                   Охранник
                 </th>
+
+                {/* Кнопки управления */}
                 <th
                   className="bg-color_B block md:table-cell
                   font-bold text-left
                   border-r-[1px] border-b-[1px] pt-4 pb-1.5"
                   colSpan={timesheetTableHeader.length}
                 >
-                  <div className='flex justify-center'>
+                  <div className='flex justify-center space-x-2'>
                     <FInputMonth
                       onChange={updateDate}
                       value={timesheetMonth}
+                    // className='flex-initial'
                     />
                     {timesheetMonth && timesheetMonth != currentMonth &&
-                      <div
-                        className="ml-4 flex space-x-2"
-                      >
+                      <>
                         {/* НСО */}
-                        <FSelect
-                          options={optionGuardPostManager}
-                          onChange={(e) => { setInputGuardPostManager(e?.target?.value) }}
-                          value={inputGuardPostManager ? inputGuardPostManager : 'EMPTY'}
-                        />
+                        {ARchangeTimesheetManager &&
+                          <FSelect
+                            options={optionGuardPostManager}
+                            onChange={(e) => {
+                              setTimesheetChanged(false);
+                              setInputGuardPostManager(e?.target?.value)
+                            }}
+                            className='w-fit'
+                            value={inputGuardPostManager ? inputGuardPostManager : 'EMPTY'}
+                          />}
+
+                        {!ARchangeTimesheetManager && inputGuardPostManager && inputGuardPostManager != 'EMPTY' &&
+                          <span
+                            className="block w-fit text-white font-bold text-center"
+                          >
+                            НСО {optionGuardPostManager.find(element => element.value == inputGuardPostManager).label}.
+                          </span>}
+
                         {/* Тариф */}
-                        <input
+                        {ARchangeTimesheetRate &&
+                          <input
                             id='guard-post-rate'
                             type="number"
                             name='guard-post-rate'
                             placeholder='Тариф'
                             value={inputGuardPostRate ? inputGuardPostRate : ''}
-                            onChange={(e)=>{setInputGuardPostRate(e.target.value)}}
-                            className="border border-gray-300 block w-full
+                            onChange={(e) => {
+                              setTimesheetChanged(false);
+                              setInputGuardPostRate(e.target.value);
+                            }}
+                            className="border border-gray-300 block w-32
                             focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
-                            rounded-md shadow-sm disabled:bg-gray-100 "
-                        />
-                      </div>
-                    }
+                            rounded-md shadow-sm disabled:bg-gray-100"
+                          />}
+
+                        {!ARchangeTimesheetRate && inputGuardPostRate &&
+                          <span
+                            className="block w-fit text-white font-bold text-center"
+                          >
+                            Тариф {inputGuardPostRate}тг.
+                          </span>}
+
+                      </>}
                   </div>
                 </th>
+
+                {/* Смены */}
                 <th
                   className="bg-color_B p-0 px-2 min-w-[35px] block md:table-cell
                   text-white font-bold text-center text-sm
@@ -734,6 +758,8 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
                   <p>н</p>
                   <p>ы</p>
                 </th>
+
+                {/* Часы */}
                 <th
                   className="bg-color_B p-0 px-2 min-w-[35px] block md:table-cell
                   text-white font-bold text-center text-sm
@@ -747,6 +773,7 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
                 </th>
               </tr>
 
+              {/* Числа месяца*/}
               <tr className="block md:table-row 
               absolute -top-full -left-full 
               md:relative md:left-auto md:top-auto select-none
@@ -868,8 +895,9 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
                           ${currentIndexDrag == index && "drop-shadow-md scale-105 sepia z-40"}
                         `}
                     >
-                      <div className="flex flex-row items-center justify-between w-full">
+                      <div className={`flex flex-row items-center w-full ${ARchangeTimesheet && 'justify-between'}`}>
 
+                        {/* Аватар */}
                         {guard.uiAvatarsSrc && <div className="w-8 h-8 select-none"><Image
                           className="rounded-full"
                           width={32}
@@ -878,35 +906,43 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
                           alt=""
                         /></div>}
 
+                        {/* Инициалы */}
                         <p className="font-semibold text-black ml-1 text-xl font-bold select-none w-max">{[guard.surname, guard.firstName].join(' ')}</p>
 
-                        <div className='flex mx-2'>
-                          <button
-                            className="flex disabled:opacity-25 mr-2"
-                            disabled={optionGuards.length <= 1}
-                            onClick={() => {
-                              setGuardRowSelectGuardForm({
-                                isOpen: true,
-                                index: index,
-                                operation: 'Изменить',
-                                key: Math.random().toString(36),
-                                guard: guard
-                              })
-                            }}
-                          >
-                            <PencilAltIcon
-                              className="h-6 w-6 fill-orange-800"
-                            />
-                          </button>
-                          <button
-                            className="flex"
-                            onClick={(event) => guardRowDelete(event, guard)}
-                          >
-                            <TrashIcon
-                              className="h-6 w-6"
-                            />
-                          </button>
-                        </div>
+                        {/* Кнопки изменения и удаления строки охранников */}
+
+                        {ARchangeTimesheet &&
+                          <div className='flex mx-2'>
+
+                            {/* Кнопка изменения строки охранника */}
+                            <button
+                              className="flex disabled:opacity-25 mr-2"
+                              disabled={optionGuards.length <= 1}
+                              onClick={() => {
+                                setGuardRowSelectGuardForm({
+                                  isOpen: true,
+                                  index: index,
+                                  operation: 'Изменить',
+                                  key: Math.random().toString(36),
+                                  guard: guard
+                                })
+                              }}
+                            >
+                              <PencilAltIcon
+                                className="h-6 w-6 fill-orange-800"
+                              />
+                            </button>
+
+                            {/* Кнопка удаления строки охранника */}
+                            <button
+                              className="flex"
+                              onClick={(event) => guardRowDelete(event, guard)}
+                            >
+                              <TrashIcon
+                                className="h-6 w-6"
+                              />
+                            </button>
+                          </div>}
 
                       </div>
                     </td>
@@ -923,49 +959,61 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
                           hoursCount += shiftHours;
                         }
                       }
-                      return <td
-                        key={i}
-                        className={`text-center block md:table-cell  border-r-[1px] last:border-r-[0px] select-none 
+                      if (ARchangeTimesheet) {
+                        return <td
+                          key={i}
+                          className={`text-center block md:table-cell  border-r-[1px] last:border-r-[0px] select-none 
                         ${value == "сб" || value == "вс" ? "bg-amber-100" : ""}
                         ${(index & 1) ? "border-y-[1px]" : "border-stone-300"}
                         `}
-                        onPointerDown={(event) => {
-                          pointTimeout = setTimeout(() => {
-                            setGuardRowSelectShiftForm({
-                              isOpen: true,
-                              guard: guard,
-                              index: index,
-                              day: i
-                            })
-                            pointTimeout = null;
-                          }, 1000);
-                        }}
-                        onPointerUp={(event) => {
-                          if (pointTimeout) {
-                            clearTimeout(pointTimeout);
-                            guardCellHandle(event, guard, i)
-                            pointTimeout = null;
+                          onPointerDown={(event) => {
+                            pointTimeout = setTimeout(() => {
+                              setGuardRowSelectShiftForm({
+                                isOpen: true,
+                                guard: guard,
+                                index: index,
+                                day: i
+                              })
+                              pointTimeout = null;
+                            }, 1000);
+                          }}
+                          onPointerUp={(event) => {
+                            if (pointTimeout) {
+                              clearTimeout(pointTimeout);
+                              guardCellHandle(event, guard, i)
+                              pointTimeout = null;
+                            }
+                          }}
+                          onPointerLeave={(event) => {
+                            if (pointTimeout) {
+                              clearTimeout(pointTimeout);
+                              pointTimeout = null;
+                            }
+                          }}
+                          onPointerCancel={(event) => {
+                            if (pointTimeout) {
+                              clearTimeout(pointTimeout);
+                              pointTimeout = null;
+                            }
+                          }}
+                          onPointerMove={event => {
+                            setCurrentMove(i);
                           }
-                        }}
-                        onPointerLeave={(event) => {
-                          if (pointTimeout) {
-                            clearTimeout(pointTimeout);
-                            pointTimeout = null;
                           }
-                        }}
-                        onPointerCancel={(event) => {
-                          if (pointTimeout) {
-                            clearTimeout(pointTimeout);
-                            pointTimeout = null;
-                          }
-                        }}
-                        onPointerMove={event => {
-                          setCurrentMove(i);
-                        }
-                        }
-                      >
-                        {shift}
-                      </td>;
+                        >
+                          {shift}
+                        </td>;
+                      }else {
+                        return <td
+                          key={i}
+                          className={`text-center block md:table-cell  border-r-[1px] last:border-r-[0px] select-none 
+                        ${value == "сб" || value == "вс" ? "bg-amber-100" : ""}
+                        ${(index & 1) ? "border-y-[1px]" : "border-stone-300"}
+                        `}
+                        >
+                          {shift}
+                        </td>;
+                      }
                     })}
 
                     {/* Колличество смен */}
@@ -986,28 +1034,32 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
             {timesheetTableHeader.length > 0 &&
               <tfoot className='block md:table-footer-group select-none'>
 
+                {/* Кнопка добавления охранника и строка итогов */}
                 <tr
                   className={`block md:table-row mb-2 group ${(timesheetTableBody.length & 1) ? "bg-stone-50" : "bg-stone-200"}`}
                 >
 
+                  {/* Кнопка добавления охранника*/}
                   <td className="bg-color_B p-2 block md:table-cell left-0 sticky border-r-[1px] z-50" rowSpan="2">
-                    <button
-                      className='flex items-center justify-center align-middle text-white text-center w-full disabled:opacity-25'
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setGuardRowSelectGuardForm({
-                          isOpen: true,
-                          operation: 'Добавить',
-                          key: Math.random().toString(36)
-                        })
-                      }}
-                      disabled={optionGuards.length <= 1}
-                    >
-                      <PlusIcon className='w-4 h-4' />
-                      <span>Добавить</span>
-                    </button>
+                    {ARchangeTimesheet &&
+                      <button
+                        className='flex items-center justify-center align-middle text-white text-center w-full disabled:opacity-25'
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setGuardRowSelectGuardForm({
+                            isOpen: true,
+                            operation: 'Добавить',
+                            key: Math.random().toString(36)
+                          })
+                        }}
+                        disabled={optionGuards.length <= 1}
+                      >
+                        <PlusIcon className='w-4 h-4' />
+                        <span>Добавить</span>
+                      </button>}
                   </td>
 
+                  {/* Cтрока итогов */}
                   {timesheetTableFooter.map((value, i) => {
                     const isDayOff = i < timesheetTableHeader.length && (timesheetTableHeader[i] == "сб" || timesheetTableHeader[i] == "вс")
                     return <td
@@ -1033,44 +1085,48 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
 
                 </tr>
 
+                {/* Информация об ошибках, кнопка очистки и сохранения графика */}
                 <tr className="block md:table-row absolute -top-full md:top-auto -left-full 
               md:left-auto md:relative z-10">
 
+                  {/* Информация об ошибках*/}
                   <td className="bg-color_B p-2 block md:table-cell text-left text-red-700 italic break-words" colSpan={timesheetTableHeader.length - 6}>
-                    {/* <span className=""> */}
                     {error}
-                    {/* </span> */}
                   </td>
 
+                  {/* кнопка очистки и сохранения графика */}
                   <td
                     className="bg-color_B p-2 block md:table-cell right-0 sticky"
                     colSpan={8}
                   >
-                    <div className='flex justify-center'>
+                    {ARchangeTimesheet &&
+                      <div className='flex justify-center'>
 
-                      <FButtonRed
-                        className="flex py-1 mr-2"
-                        onClick={guardCellsClear}
-                        disabled={timesheetTableFooter.length == 0 || timesheetTableFooter[timesheetTableFooter.length - 1] == 0}
-                      >
-                        <StopIcon
-                          className="h-6 w-6"
-                        />
-                        <span className='hidden lg:block'>Очистить</span>
-                      </FButtonRed>
+                        {/* кнопка очистки*/}
+                        <FButtonRed
+                          className="flex py-1 mr-2"
+                          onClick={guardCellsClear}
+                          disabled={timesheetTableFooter.length == 0 || timesheetTableFooter[timesheetTableFooter.length - 1] == 0}
+                        >
+                          <StopIcon
+                            className="h-6 w-6"
+                          />
+                          <span className='hidden lg:block'>Очистить</span>
+                        </FButtonRed>
 
-                      <FButtonRed
-                        className="flex py-1"
-                        onClick={timesheetChangeHandle}
-                        disabled={timesheetChanged}
-                      >
-                        <ArchiveIcon
-                          className="h-6 w-6"
-                        />
-                        Сохранить
-                      </FButtonRed>
+                        {/* кнопка сохранения графика */}
+                        <FButtonRed
+                          className="flex py-1"
+                          onClick={timesheetChangeHandle}
+                          disabled={timesheetChanged}
+                        >
+                          <ArchiveIcon
+                            className="h-6 w-6"
+                          />
+                          Сохранить
+                        </FButtonRed>
 
-                    </div>
+                      </div>}
                   </td>
 
                 </tr>
@@ -1088,7 +1144,7 @@ export default function FTimesheetHorizontal({ accessRules, MOBXuser, MOBXui, er
         submitAdd={guardRowAdd}
         submitEdit={guardRowEdit}
         optionGuards={optionGuards}
-        setGuards={(guard)=>{
+        setGuards={(guard) => {
           setGuards(array => {
             array.unshift(guard);
             return array;

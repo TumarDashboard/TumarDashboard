@@ -15,7 +15,7 @@ const content = (isFirstMount) => ({
   }
 });
 
-export default function GuardPosts({ isFirstMount, accessRules, guardPosts, users }) {
+export default function GuardPosts({ isFirstMount, accessRules, userData, guardPosts, users }) {
   return (
     <div
       className="flex-1"
@@ -33,6 +33,7 @@ export default function GuardPosts({ isFirstMount, accessRules, guardPosts, user
         >
           <FFormGuardPosts
             accessRules={accessRules}
+            userData={userData}
             guardPosts={guardPosts}
             users={users}
           />
@@ -46,6 +47,7 @@ GuardPosts.onSidebar = true;
 
 export const getServerSideProps = catchAuthServer(async (context) => {
 
+  const userData = context.userData;
   const accessRules = context.accessRules;
   
   await mongoConnect();
@@ -74,7 +76,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   })
 
   return {
-    props: { accessRules, guardPosts, users, initialState: { checkAuth: true } }
+    props: { accessRules, userData, guardPosts, users, initialState: { checkAuth: true } }
   }
 
 })

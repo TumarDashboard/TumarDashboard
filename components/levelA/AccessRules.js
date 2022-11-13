@@ -43,8 +43,8 @@ export const FApiMethodAccessRules = [
     {
         url: /^\/api\/method\/changeTimesheet$/, access: [
             { position: positions.FPositionZDIR },
-            { position: positions.FPositionHRM },
-            { position: positions.FPositionNSO }
+            { position: positions.FPositionHRM, editBlock: ['rate', 'manager'] },
+            { position: positions.FPositionNSO, editBlock: ['rate', 'manager'], userCompare: ['manager'] }
         ]
     },
     {
