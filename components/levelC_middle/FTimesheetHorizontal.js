@@ -699,7 +699,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
                     {timesheetMonth && timesheetMonth != currentMonth &&
                       <>
                         {/* НСО */}
-                        {ARchangeTimesheetManager &&
+                        {ARchangeTimesheet && ARchangeTimesheetManager &&
                           <FSelect
                             options={optionGuardPostManager}
                             onChange={(e) => {
@@ -710,7 +710,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
                             value={inputGuardPostManager ? inputGuardPostManager : 'EMPTY'}
                           />}
 
-                        {!ARchangeTimesheetManager && inputGuardPostManager && inputGuardPostManager != 'EMPTY' &&
+                        {!(ARchangeTimesheet && ARchangeTimesheetManager) && inputGuardPostManager && inputGuardPostManager != 'EMPTY' &&
                           <span
                             className="block w-fit text-white font-bold text-center"
                           >
@@ -718,7 +718,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
                           </span>}
 
                         {/* Тариф */}
-                        {ARchangeTimesheetRate &&
+                        {ARchangeTimesheet && ARchangeTimesheetRate &&
                           <input
                             id='guard-post-rate'
                             type="number"
@@ -734,7 +734,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
                             rounded-md shadow-sm disabled:bg-gray-100"
                           />}
 
-                        {!ARchangeTimesheetRate && inputGuardPostRate &&
+                        {!(ARchangeTimesheet && ARchangeTimesheetRate) && inputGuardPostRate &&
                           <span
                             className="block w-fit text-white font-bold text-center"
                           >
