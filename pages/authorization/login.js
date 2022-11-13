@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import FFormLogin from '../../components/middle/FFormLogin';
+import FFormLogin from '../../components/levelB_higth/FFormLogin';
 import { motion } from "framer-motion";
 import { getCookie } from '../../middleware/cookies';
 

@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import FFormActivateLink from '../../components/middle/FFormActivateLink';
+import FFormActivateLink from '../../components/levelB_higth/FFormActivateLink';
 import { motion } from "framer-motion";
 
 const content = (isFirstMount) => ({

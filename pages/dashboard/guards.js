@@ -1,12 +1,12 @@
 import Head from 'next/head'
 import { motion } from "framer-motion";
 import catchAuthServer from '../../middleware/authServer';
-import FFormGuards from '../../components/middle/FFormGuards';
+import FFormGuards from '../../components/levelB_higth/FFormGuards';
 import mongoGuardsModel from "../../src/mongo/models/mongoGuardsModel";
 import mongoGuardPostsModel from "../../src/mongo/models/mongoGuardPostsModel";
 import mongoUserModel from "../../src/mongo/models/mongoUserModel";
 import mongoConnect from "../../src/mongo/mongoConnect";
-import { FPositionNSO } from '../../components/variable/FPositionItemList';
+import { FPositionNSO } from '../../components/levelZ_variable/FPositionItemList';
 
 const content = (isFirstMount) => ({
   animate: {
@@ -16,7 +16,7 @@ const content = (isFirstMount) => ({
   }
 });
 
-export default function Guards({ isFirstMount, ...props }) {
+export default function Guards({ isFirstMount, accessRules, guards, guardPosts, users }) {
   return (
     <div
       className="flex-1"
@@ -33,9 +33,10 @@ export default function Guards({ isFirstMount, ...props }) {
           className="flex overflow-hidden"
         >
           <FFormGuards
-            guards={props.guards}
-            guardPosts={props.guardPosts}
-            users={props.users}
+            accessRules={accessRules}
+            guards={guards}
+            guardPosts={guardPosts}
+            users={users}
           />
         </motion.div>
       </motion.section>
@@ -46,6 +47,8 @@ export default function Guards({ isFirstMount, ...props }) {
 Guards.onSidebar = true;
 
 export const getServerSideProps = catchAuthServer(async (context) => {
+
+  const accessRules = context.accessRules;
 
   await mongoConnect();
 
@@ -83,7 +86,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   })
 
   return {
-    props: { guards, guardPosts, users, initialState: { checkAuth: true } }
+    props: { accessRules, guards, guardPosts, users, initialState: { checkAuth: true } }
   }
 
 })

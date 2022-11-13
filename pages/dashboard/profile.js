@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { motion } from "framer-motion";
-import FFormProfile from '../../components/middle/FFormProfile';
+import FFormProfile from '../../components/levelB_higth/FFormProfile';
 import catchAuthServer from '../../middleware/authServer';
 
 const content = (isFirstMount) => ({
@@ -56,7 +56,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   }
 
   return {
-    props: { userData, accessRules, initialState: { checkAuth: true } }
+    props: { accessRules, userData, initialState: { checkAuth: true } }
   }
 
 })

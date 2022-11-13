@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { motion } from "framer-motion";
 import { validate } from "uuid";
-import FFormActivation from "../../../components/middle/FFormActivation";
+import FFormActivation from "../../../components/levelB_higth/FFormActivation";
 import { ApiError } from "../../../middleware/exceptions";
 import mongoConnect from "../../../src/mongo/mongoConnect";
 import mongoUserModel from "../../../src/mongo/models/mongoUserModel";

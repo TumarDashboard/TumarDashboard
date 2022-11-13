@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import FFormRegistration from '../../components/middle/FFormRegistration';
+import FFormRegistration from '../../components/levelB_higth/FFormRegistration';
 import { motion } from "framer-motion";
 
 const content = (isFirstMount) => ({

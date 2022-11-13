@@ -14,7 +14,7 @@ import { ApiError } from "../../middleware/exceptions";
 import googleDrive from "../google/api/googleDrive";
 import mongoTimesheetsGuardPostModel from "../mongo/models/mongoTimesheetsGuardPostModel";
 import { getCurrentDateStamp } from "../utils/dateUtils";
-import { getPositionWithCodeList } from "../../components/variable/FPositionItemList";
+import { getPositionWithCodeList } from "../../components/levelZ_variable/FPositionItemList";
 import mongoose from "mongoose";
 import { equalArrays } from "../utils/arrayUtils";
 

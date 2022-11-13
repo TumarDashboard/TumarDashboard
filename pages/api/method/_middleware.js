@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ApiError, catchErrorsMiddleware } from '../../../middleware/exceptions';
 import { jwtVerify } from 'jose';
-import { FApiMethodAccessRules } from '../../../components/hight/AccessRules';
+import { FApiMethodAccessRules, getApiMethodAccess } from '../../../components/levelA/AccessRules';
 import { equalArrays, intersectArrays } from '../../../src/utils/arrayUtils';
 
 export default catchErrorsMiddleware( async (req, ev) => {
@@ -44,40 +44,15 @@ export default catchErrorsMiddleware( async (req, ev) => {
 
             }
 
-            const findedRule = FApiMethodAccessRules.find( (rule) => req.nextUrl.pathname.search(rule.url) > -1 );
+            const apiMethodAccessBlock = await getApiMethodAccess( req, userData );
 
-            if( !findedRule ){
-                throw ApiError.BadRequest('Отсутствует право доступа');
-            }
+            if ( apiMethodAccessBlock ){
 
-            if( findedRule.accessForUserSelf ){
-
-                const requestJson = await req.json();
-
-                if( requestJson.id == userData.id 
-                    && equalArrays(requestJson.positions, userData.positions)
-                ){
-
-                    req.user = userData;
-    
-                    return responce;
-
-                }
-            }
-
-            if( findedRule.access.length > 0 
-                        && userData.positions 
-                        && userData.positions.length > 0
-                        && intersectArrays( findedRule.access, userData.positions ) 
-            ){
-
-                req.user = userData;
-
-                return responce;
+                throw ApiError.BadRequest( apiMethodAccessBlock );
 
             }
 
-            throw ApiError.BadRequest('Отсутствует право доступа');
+            return responce;
 
         }
 

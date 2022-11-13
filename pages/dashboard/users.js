@@ -1,10 +1,10 @@
 import Head from 'next/head'
 import { motion } from "framer-motion";
 import catchAuthServer from '../../middleware/authServer';
-import FFormUsers from '../../components/middle/FFormUsers';
+import FFormUsers from '../../components/levelB_higth/FFormUsers';
 import mongoUserModel from "../../src/mongo/models/mongoUserModel";
 import mongoConnect from "../../src/mongo/mongoConnect";
-import { getPositionWithCodeList } from '../../components/variable/FPositionItemList';
+import { getPositionWithCodeList } from '../../components/levelZ_variable/FPositionItemList';
 
 const content = (isFirstMount) => ({
   animate: {

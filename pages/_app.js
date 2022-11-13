@@ -1,11 +1,11 @@
 import '../styles/globals.css';
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from "framer-motion";
-import AppLayout from "../components/hight/AppLayout";
-import FLoadingScreen from "../components/hight/LoadingScreen";
-import FGoogleAuthError from "../components/hight/GoogleAuthError";
-import { StoreProvider } from '../components/hight/StoreProvider';
-import LoadingScreenData from '../components/hight/LoadingScreenData';
+import AppLayout from "../components/levelA/AppLayout";
+import FLoadingScreen from "../components/levelA/LoadingScreen";
+import FGoogleAuthError from "../components/levelA/GoogleAuthError";
+import { StoreProvider } from '../components/levelA/StoreProvider';
+import LoadingScreenData from '../components/levelA/LoadingScreenData';
 
 export default function App({ Component, pageProps, router }) {
 

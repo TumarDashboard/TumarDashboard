@@ -1,14 +1,14 @@
 import Head from 'next/head';
-import InitialTransition from '../components/hight/InitialTransition';
+import InitialTransition from '../components/levelA/InitialTransition';
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import FAboutHello from '../components/middle/index/FAboutHello';
-import FAboutPageProofs from '../components/middle/index/FAboutPageProofs';
-import FAboutFrontend from '../components/middle/index/FAboutFrontend';
-import FAboutBackend from '../components/middle/index/FAboutBackend';
-import FAboutBPMN from '../components/middle/index/FAboutBPMN';
-import FAboutDevelopment from '../components/middle/index/FAboutDevelopment';
-import FAboutMe from '../components/middle/index/FAboutMe';
+import FAboutHello from '../components/levelB_higth/index/FAboutHello';
+import FAboutPageProofs from '../components/levelB_higth/index/FAboutPageProofs';
+import FAboutFrontend from '../components/levelB_higth/index/FAboutFrontend';
+import FAboutBackend from '../components/levelB_higth/index/FAboutBackend';
+import FAboutBPMN from '../components/levelB_higth/index/FAboutBPMN';
+import FAboutDevelopment from '../components/levelB_higth/index/FAboutDevelopment';
+import FAboutMe from '../components/levelB_higth/index/FAboutMe';
 
 const tabs = [
   { label: "Привет", component: <FAboutHello key='FAboutHello' /> },
@@ -29,7 +29,7 @@ export default function Index({ isFirstMount }) {
       className='flex-1 flex'
     >
       <Head>
-        <title>Портфолио</title>
+        <title>ТҰМАР</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 

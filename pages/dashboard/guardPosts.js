@@ -1,11 +1,11 @@
 import Head from 'next/head'
 import { motion } from "framer-motion";
 import catchAuthServer from '../../middleware/authServer';
-import FFormGuardPosts from '../../components/middle/FFormGuardPosts';
+import FFormGuardPosts from '../../components/levelB_higth/FFormGuardPosts';
 import mongoGuardPostsModel from "../../src/mongo/models/mongoGuardPostsModel";
 import mongoUserModel from "../../src/mongo/models/mongoUserModel";
 import mongoConnect from "../../src/mongo/mongoConnect";
-import { FPositionNSO } from '../../components/variable/FPositionItemList';
+import { FPositionNSO } from '../../components/levelZ_variable/FPositionItemList';
 
 const content = (isFirstMount) => ({
   animate: {
@@ -15,7 +15,7 @@ const content = (isFirstMount) => ({
   }
 });
 
-export default function GuardPosts({ isFirstMount, ...props }) {
+export default function GuardPosts({ isFirstMount, accessRules, guardPosts, users }) {
   return (
     <div
       className="flex-1"
@@ -32,8 +32,9 @@ export default function GuardPosts({ isFirstMount, ...props }) {
           className="flex overflow-hidden"
         >
           <FFormGuardPosts
-            guardPosts={props.guardPosts}
-            users={props.users}
+            accessRules={accessRules}
+            guardPosts={guardPosts}
+            users={users}
           />
         </motion.div>
       </motion.section>
@@ -44,6 +45,8 @@ export default function GuardPosts({ isFirstMount, ...props }) {
 GuardPosts.onSidebar = true;
 
 export const getServerSideProps = catchAuthServer(async (context) => {
+
+  const accessRules = context.accessRules;
   
   await mongoConnect();
 
@@ -71,7 +74,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   })
 
   return {
-    props: { guardPosts, users, initialState: { checkAuth: true } }
+    props: { accessRules, guardPosts, users, initialState: { checkAuth: true } }
   }
 
 })

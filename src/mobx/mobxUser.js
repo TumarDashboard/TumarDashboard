@@ -1,26 +1,23 @@
 import { action, observable, runInAction, makeObservable, computed } from 'mobx';
 import { enableStaticRendering } from 'mobx-react-lite';
-import { FApiMethodAccessRules } from '../../components/hight/AccessRules';
 import { removeCookies } from '../../middleware/cookies';
 import {fetchAuth} from "../../middleware/requests";
-import { intersectArrays } from '../utils/arrayUtils';
 
 enableStaticRendering(typeof window === 'undefined')
 
 export default class MOBXuser {
     user = {};
     isAuth = false;
-    // accessRules = [];
+    isLogout = false;
 
     constructor() {
         makeObservable(this, {
             user: observable,
             isAuth: observable,
-            // accessRules: observable,
+            isLogout: false,
             setAuth: action,
             setUser: action,
             updateUser: action,
-            // setAccessRules: action,
             avatar: computed,
             positions: computed,
             login: action,
@@ -40,27 +37,12 @@ export default class MOBXuser {
     }
 
     updateUser(user){
-
         Object.keys(user).forEach((key) => {
-            if(user[key] && user[key] != '')
+            if((user[key] && user[key] != '')||(key==='positions')){
                 this.user[key] = user[key];
+            }
         })
-
-        // this.setAccessRules(this.user?.positions);
-
     }
-
-    // setAccessRules( positions = [] ){
-    //     this.accessRules = FApiMethodAccessRules.reduce( ( result, value ) => {
-    //         if( value.accessForUserSelf ){
-    //                 result.push(value.url.toString().replace('/\\/api\\/method\\/', '') + 'self');
-    //             }
-    //         if(intersectArrays( value.access, positions )){
-    //             result.push( value.url.toString().replace('/\\/api\\/method\\/', '').replace('/', '') );
-    //         }
-    //         return result;
-    //     }, []);
-    // }
 
     get avatar(){
         return this.user?.uiAvatarsSrc 
@@ -79,6 +61,7 @@ export default class MOBXuser {
             localStorage.setItem('token', responce.accessToken);
             this.setAuth(true);
             this.setUser(responce.user);
+            this.isLogout = false;
 
         } catch (error) {
 
@@ -128,10 +111,6 @@ export default class MOBXuser {
         try {
 
             await fetchAuth('/authorization/logout');
-
-            // console.log('logout');
-
-            // this.setAuth(false);
             
             localStorage.removeItem('token');
 
@@ -145,6 +124,7 @@ export default class MOBXuser {
 
             this.setAuth(false);
             this.setUser({});
+            this.isLogout = true;
             console.log('logout');
 
         }

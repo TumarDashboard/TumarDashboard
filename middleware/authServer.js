@@ -1,5 +1,5 @@
 import ms from 'ms';
-import { FApiMethodAccessRules } from '../components/hight/AccessRules';
+import { FApiMethodAccessRules, getApiMethodAccesRules } from '../components/levelA/AccessRules';
 import userService from "../src/service/userService";
 import { intersectArrays } from '../src/utils/arrayUtils';
 import { setCookies, removeCookies } from "./cookies";
@@ -42,15 +42,16 @@ export default function catchAuthServer(handler) {
 
             context.userData = JSON.parse(JSON.stringify(dtoUser));
 
-            context.accessRules = FApiMethodAccessRules.reduce( ( result, value ) => {
-                if( value.accessForUserSelf ){
-                        result.push(value.url.toString().replace('/\\/api\\/method\\/', '') + 'self');
-                    }
-                if(intersectArrays( value.access, context.userData.positions )){
-                    result.push( value.url.toString().replace('/\\/api\\/method\\/', '').replace('/', '') );
-                }
-                return result;
-            }, []);
+            context.accessRules = getApiMethodAccesRules( context.userData.positions );
+            // context.accessRules = FApiMethodAccessRules.reduce( ( result, value ) => {
+            //     if( value.accessForUserSelf ){
+            //             result.push(value.url.toString().replace('/\\/api\\/method\\/', '') + 'self');
+            //         }
+            //     if(intersectArrays( value.access, context.userData.positions )){
+            //         result.push( value.url.toString().replace('/\\/api\\/method\\/', '').replace('/', '') );
+            //     }
+            //     return result;
+            // }, []);
 
             return handler(context);
 

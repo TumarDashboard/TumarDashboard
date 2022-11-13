@@ -1,7 +1,7 @@
 
 import ExcelJS from "exceljs";
 import { getDaysFromMonth } from "./dateUtils";
-import { FPositionBUH, FPositionHRM, FPositionZDIR } from "../../components/variable/FPositionItemList";
+import { FPositionBUH, FPositionHRM, FPositionZDIR } from "../../components/levelZ_variable/FPositionItemList";
 
 const tableHeader = {
   Index: {
@@ -220,8 +220,8 @@ export function timesheetPrintServer( responce, usersData, date ) {
         var totalRateSummAddressStart = '';
         var totalRateSummAddressFinish = '';
         const totalDaysHoursCount = new Array(daysCount).fill(0);
-        // var totalDaysHoursCountAddressStart = {col:'', row:''};
-        // var totalDaysHoursCountAddressFinish = {col:'', row:''};
+        const totalDaysHoursCountAddressStart = new Array(daysCount).fill('');
+        const totalDaysHoursCountAddressFinish = new Array(daysCount).fill('');
         var rate = guardPost.rate ? guardPost.rate : 0;
         // Тело таблицы
         guardPost.guardRow.forEach((guard, index) => {
@@ -258,17 +258,12 @@ export function timesheetPrintServer( responce, usersData, date ) {
               tableBodyCell.fill = bodyRowFillColor;
             }
             
-            // if (index == 0) {
-            //   if (i == 0) {
-            //     let address = tableBodyCell.$col$row.split('$');
-            //     totalDaysHoursCountAddressStart = {col:address[1], row:address[2]};
-            //   }
-    
-            //   if (i == (daysCount - 1)) {
-            //     let address = tableBodyCell.$col$row.split('$');
-            //     totalDaysHoursCountAddressFinish = {col:address[1], row:address[2]};
-            //   }
-            // }
+            if (index == 0) {
+              totalDaysHoursCountAddressStart[i] = tableBodyCell.address;
+            }
+            if (index == (guardPost.guardRow.length - 1)) {
+              totalDaysHoursCountAddressFinish[i] = tableBodyCell.address;
+            }
 
             let indexOfDay = guard.timesheetDays?.indexOf(i);
 
@@ -367,8 +362,12 @@ export function timesheetPrintServer( responce, usersData, date ) {
           tableFooterCell.alignment = Style.AlignmentMiddleCenter;
           tableFooterCell.border = Style.BorderThin;
           tableFooterCell.fill = bodyFooterFillColor;
-          if( totalDaysHoursCount[i] > 0)
-            tableFooterCell.value = totalDaysHoursCount[i];
+          tableFooterCell.value = { 
+            formula: `SUM(${totalDaysHoursCountAddressStart[i]}:${totalDaysHoursCountAddressFinish[i]})`, 
+            result: totalDaysHoursCount[i] > 0 ? totalDaysHoursCount[i] : '', 
+          };
+          // if( totalDaysHoursCount[i] > 0)
+          //   tableFooterCell.value = totalDaysHoursCount[i];
           // console.log(`SUM(${totalDaysHoursCountAddressStart.col}${i+totalDaysHoursCountAddressStart.row}:${totalDaysHoursCountAddressFinish.col}${i+totalDaysHoursCountAddressFinish.row})`);
         }
         // Итого сумма часов

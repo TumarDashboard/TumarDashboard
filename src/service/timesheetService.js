@@ -12,7 +12,7 @@ import mongoose from "mongoose";
 import DTOGuard from "../dtos/dtoGuard";
 import mongoTimesheetsGuardPostModel from "../mongo/models/mongoTimesheetsGuardPostModel";
 import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
-import { FPositionBUH, FPositionHRM, FPositionZDIR } from "../../components/variable/FPositionItemList";
+import { FPositionBUH, FPositionHRM, FPositionZDIR } from "../../components/levelZ_variable/FPositionItemList";
 import { timesheetPrintServer } from "../utils/timesheetUtils";
 import userService from "./userService";
 

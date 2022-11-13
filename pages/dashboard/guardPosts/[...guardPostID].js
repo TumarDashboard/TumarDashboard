@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import { motion } from "framer-motion";
 import catchAuthServer from '../../../middleware/authServer';
-import FFormGuardPostID from '../../../components/middle/FFormGuardPostID';
+import FFormGuardPostID from '../../../components/levelB_higth/FFormGuardPostID';
 import mongoGuardPostsModel from "../../../src/mongo/models/mongoGuardPostsModel";
 import mongoGuardsModel from "../../../src/mongo/models/mongoGuardsModel";
 import mongoUserModel from "../../../src/mongo/models/mongoUserModel";
@@ -9,7 +9,7 @@ import mongoUserArchiveModel from "../../../src/mongo/models/mongoUserArchiveMod
 import mongoConnect from "../../../src/mongo/mongoConnect";
 import { ApiError } from '../../../middleware/exceptions';
 import mongoose from 'mongoose'
-import { FPositionNSO } from '../../../components/variable/FPositionItemList';
+import { FPositionNSO } from '../../../components/levelZ_variable/FPositionItemList';
 
 const content = (isFirstMount) => ({
   animate: {
@@ -19,9 +19,9 @@ const content = (isFirstMount) => ({
   }
 });
 
-export default function GuardPostID({ isFirstMount, ...props }) {
-  const pageName = [props.guardPost?.number, props.guardPost?.callsign].filter(Boolean).join('-');
-  const pageIcon = props.guardPost?.photo;
+export default function GuardPostID({ isFirstMount, accessRules, guardPost, guardPosts, guards, users, usersAll }) {
+  const pageName = [guardPost?.number, guardPost?.callsign].filter(Boolean).join('-');
+  const pageIcon = guardPost?.photo;
   return (
     <div
       className="flex-1 flex w-full"
@@ -41,11 +41,12 @@ export default function GuardPostID({ isFirstMount, ...props }) {
           className="flex w-full overflow-hidden"
         >
           <FFormGuardPostID
-            guardPost={props.guardPost}
-            guardPosts={props.guardPosts}
-            guardsData={props.guards}
-            users={props.users}
-            usersAll={props.usersAll}
+            accessRules={accessRules}
+            guardPost={guardPost}
+            guardPosts={guardPosts}
+            guardsData={guards}
+            users={users}
+            usersAll={usersAll}
           />
         </motion.div>
       </motion.section>
@@ -56,6 +57,8 @@ export default function GuardPostID({ isFirstMount, ...props }) {
 GuardPostID.onSidebar = true;
 
 export const getServerSideProps = catchAuthServer(async (context) => {
+
+  const accessRules = context.accessRules;
 
   // Проверка id физ. поста
   const queryPath = context?.query?.guardPostID;
@@ -129,7 +132,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   // Передача данных
   return {
-    props: { guardPost, guardPosts, guards, users, usersAll, initialState: { checkAuth: true } }
+    props: { accessRules, guardPost, guardPosts, guards, users, usersAll, initialState: { checkAuth: true } }
   }
 
 })

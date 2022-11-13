@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { catchErrorsMiddleware } from '../../middleware/exceptions';
 import { jwtVerify } from 'jose';
 import ms from 'ms';
-import { FDashboardAccessRules } from '../../components/hight/AccessRules';
+import { FDashboardAccessRules } from '../../components/levelA/AccessRules';
 import { intersectArrays } from '../../src/utils/arrayUtils';
 
 function redirect( to, from ){
