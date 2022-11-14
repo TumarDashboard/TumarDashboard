@@ -45,10 +45,10 @@ const FFormProfile = observer(function FFormProfile({userData, accessRules}) {
   const ARchangeUserPositions = !accessRules.includes('changeUser/editBlock/positions');
   const ARdeleteUser = accessRules.includes('deleteUser');
   const ARchangeUser = accessRules.includes('changeUser');
+
   /*----------------------------------------------------------------------------------------------------------------------------
       Данные инпутов
   ----------------------------------------------------------------------------------------------------------------------------*/
-
   const [onError, setError] = useState('');
 
   const [uriAvatar, setUriAvatar] = useState(null);

@@ -97,8 +97,7 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, use
   const ARdeleteGuardPost = accessRules.includes('deleteGuardPost');
   const ARgetTimesheetPrint = accessRules.includes('getTimesheetPrint');
 
-  // console.log('accessRules %o %o',accessRules, AReditGuardPost && AReditGuardPostAll);
-  // console.log(AReditGuardPost && AReditGuardPostAll);
+  // console.log('accessRules %o',accessRules);
   /*-------------------------------------------------------------------------------------------------------
       Данные таблицы
   -------------------------------------------------------------------------------------------------------*/

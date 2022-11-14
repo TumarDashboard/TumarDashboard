@@ -655,27 +655,26 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
 
       {/* {Таблица графика} */}
       <div
-        className='flex-initial flex z-30 min-h-max max-h-screen overflow-x-auto '
+        className='flex-initial flex z-30 min-h-max max-h-screen overflow-x-auto'
         ref={constraintsRef}
       >
         <div
           className='flex-1 w-0'
         >
-          <table className="w-full block md:table table-auto border-separate [border-spacing:0]">
+          <table className="w-full table table-auto border-separate [border-spacing:0]">
 
             {/* Заголовок таблицы */}
-            <thead className="block md:table-header-group z-50 top-0 sticky">
+            <thead className="table-header-group z-50 top-0 sticky">
 
               {/* Заголовки и кнопки управления */}
               <tr
-                className="block md:table-row 
-                absolute -top-full -left-full 
-                md:relative md:top-auto md:left-auto select-none
+                className="table-row
+                relative top-auto left-auto select-none
                 "
               >
                 {/* Охранник */}
                 <th
-                  className="bg-color_B p-2 block md:table-cell
+                  className="bg-color_B p-2 table-cell
                   text-white font-bold text-center 
                   border-r-[1px] border-b-[1px] 
                   left-0 sticky z-50"
@@ -685,7 +684,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
 
                 {/* Кнопки управления */}
                 <th
-                  className="bg-color_B block md:table-cell
+                  className="bg-color_B table-cell
                   font-bold text-left
                   border-r-[1px] border-b-[1px] pt-4 pb-1.5"
                   colSpan={timesheetTableHeader.length}
@@ -747,7 +746,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
 
                 {/* Смены */}
                 <th
-                  className="bg-color_B p-0 px-2 min-w-[35px] block md:table-cell
+                  className="bg-color_B p-0 px-2 min-w-[35px] table-cell
                   text-white font-bold text-center text-sm
                   border-r-[1px] border-b-[1px] 
                   left-0 sticky z-50"
@@ -761,7 +760,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
 
                 {/* Часы */}
                 <th
-                  className="bg-color_B p-0 px-2 min-w-[35px] block md:table-cell
+                  className="bg-color_B p-0 px-2 min-w-[35px] table-cell
                   text-white font-bold text-center text-sm
                   border-b-[1px] 
                   left-0 sticky z-50"
@@ -774,15 +773,14 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
               </tr>
 
               {/* Числа месяца*/}
-              <tr className="block md:table-row 
-              absolute -top-full -left-full 
-              md:relative md:left-auto md:top-auto select-none
+              <tr className="table-row
+              relative left-auto top-auto select-none
               ">
 
                 {timesheetTableHeader.map((value, i) => {
                   return <th
                     key={i}
-                    className={`p-2 font-bold text-center block md:table-cell min-w-[35px]
+                    className={`p-2 font-bold text-center table-cell min-w-[35px]
                     border-b-[1px] border-r-[1px] ${value == "сб" || value == "вс" ? "bg-amber-100 text-orange-900" : "bg-stone-50 text-orange-700"}
                     ${currentMove == i ? 'saturate-200 drop-shadow-lg ring-1 rounded-sm ring-offset-2' : ''}
                     `}>
@@ -798,7 +796,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
             {/* Тело таблицы */}
             {timesheetTableBody.length > 0 &&
               <tbody
-                className="block md:table-row-group z-10"
+                className="table-row-group z-10"
                 onPointerLeave={event => {
                   setCurrentMove(-1);
                 }}
@@ -869,7 +867,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
                   var hoursCount = 0;
                   return <tr
                     key={guard._id}
-                    className={`block md:table-row mb-2 group ${(index & 1) ? "bg-stone-50" : "bg-stone-200"}`}
+                    className={`table-row mb-2 group ${(index & 1) ? "bg-stone-50" : "bg-stone-200"}`}
                   >
                     {/* Инициалы */}
                     <td
@@ -889,7 +887,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
                         setCurrentIndexDrag(-1);
                         setCurrentOffset(0);
                       }}
-                      className={`text-center block md:table-cell border-b-[1px] border-r-[1px] left-0 sticky 
+                      className={`text-center table-cell border-b-[1px] border-r-[1px] left-0 sticky 
                           group-hover:z-40 group-hover:ring-1 group-hover:rounded-sm group-hover:drop-shadow-lg ring-offset-2 
                           ${(index & 1) ? "bg-stone-50" : "bg-stone-200"}
                           ${currentIndexDrag == index && "drop-shadow-md scale-105 sepia z-40"}
@@ -962,7 +960,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
                       if (ARchangeTimesheet) {
                         return <td
                           key={i}
-                          className={`text-center block md:table-cell  border-r-[1px] last:border-r-[0px] select-none 
+                          className={`text-center table-cell  border-r-[1px] last:border-r-[0px] select-none 
                         ${value == "сб" || value == "вс" ? "bg-amber-100" : ""}
                         ${(index & 1) ? "border-y-[1px]" : "border-stone-300"}
                         `}
@@ -1006,7 +1004,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
                       }else {
                         return <td
                           key={i}
-                          className={`text-center block md:table-cell  border-r-[1px] last:border-r-[0px] select-none 
+                          className={`text-center table-cell  border-r-[1px] last:border-r-[0px] select-none 
                         ${value == "сб" || value == "вс" ? "bg-amber-100" : ""}
                         ${(index & 1) ? "border-y-[1px]" : "border-stone-300"}
                         `}
@@ -1017,12 +1015,12 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
                     })}
 
                     {/* Колличество смен */}
-                    <td className="text-center font-bold block md:table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none">
+                    <td className="text-center font-bold table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none">
                       {shiftsCount > 0 ? shiftsCount : null}
                     </td>
 
                     {/* Колличество часов */}
-                    <td className="text-center font-bold block md:table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none">
+                    <td className="text-center font-bold table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none">
                       {hoursCount > 0 ? hoursCount : null}
                     </td>
                   </tr>
@@ -1032,15 +1030,15 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
 
             {/* Итоги таблицы */}
             {timesheetTableHeader.length > 0 &&
-              <tfoot className='block md:table-footer-group select-none'>
+              <tfoot className='table-footer-group select-none'>
 
                 {/* Кнопка добавления охранника и строка итогов */}
                 <tr
-                  className={`block md:table-row mb-2 group ${(timesheetTableBody.length & 1) ? "bg-stone-50" : "bg-stone-200"}`}
+                  className={`table-row mb-2 group ${(timesheetTableBody.length & 1) ? "bg-stone-50" : "bg-stone-200"}`}
                 >
 
                   {/* Кнопка добавления охранника*/}
-                  <td className="bg-color_B p-2 block md:table-cell left-0 sticky border-r-[1px] z-50" rowSpan="2">
+                  <td className="bg-color_B p-2 table-cell left-0 sticky border-r-[1px] z-50" rowSpan="2">
                     {ARchangeTimesheet &&
                       <button
                         className='flex items-center justify-center align-middle text-white text-center w-full disabled:opacity-25'
@@ -1064,7 +1062,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
                     const isDayOff = i < timesheetTableHeader.length && (timesheetTableHeader[i] == "сб" || timesheetTableHeader[i] == "вс")
                     return <td
                       key={i}
-                      className={`text-center text-sm block md:table-cell min-w-[35px]
+                      className={`text-center text-sm table-cell min-w-[35px]
                     border-b-[1px] border-r-[1px] 
                     ${i >= timesheetTableHeader.length ? "font-bold" : ""}
                     ${value > 0 && i < timesheetTableHeader.length ? (
@@ -1086,17 +1084,16 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
                 </tr>
 
                 {/* Информация об ошибках, кнопка очистки и сохранения графика */}
-                <tr className="block md:table-row absolute -top-full md:top-auto -left-full 
-              md:left-auto md:relative z-10">
+                <tr className="table-row top-auto left-auto relative z-10">
 
                   {/* Информация об ошибках*/}
-                  <td className="bg-color_B p-2 block md:table-cell text-left text-red-700 italic break-words" colSpan={timesheetTableHeader.length - 6}>
+                  <td className="bg-color_B p-2 table-cell text-left text-red-700 italic break-words" colSpan={timesheetTableHeader.length - 6}>
                     {error}
                   </td>
 
                   {/* кнопка очистки и сохранения графика */}
                   <td
-                    className="bg-color_B p-2 block md:table-cell right-0 sticky"
+                    className="bg-color_B p-2 table-cell right-0 sticky"
                     colSpan={8}
                   >
                     {ARchangeTimesheet &&
