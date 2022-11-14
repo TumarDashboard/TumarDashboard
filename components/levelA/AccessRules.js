@@ -190,7 +190,7 @@ export function getApiMethodAccesRules(positions) {
     return [...new Set(FApiMethodAccessRules.reduce((result, value) => {
         try {
             console.log(value.url.toString());
-            let accessName = value.url.toString().replaceAll(/\/\^\\\/api\\\/method\\\/|\$\//ig, '');
+            let accessName = value.url.toString().replace(/\/\^\\\/api\\\/method\\\/|\$\//ig, '');
 
             for (const access of value.access ) {
 
