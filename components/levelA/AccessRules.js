@@ -188,31 +188,36 @@ export async function getApiMethodAccess(req, userData) {
 
 export function getApiMethodAccesRules(positions) {
     return [...new Set(FApiMethodAccessRules.reduce((result, value) => {
+        try {
+            
+            let accessName = value.url.toString().replaceAll(/\/\^\\\/api\\\/method\\\/|\$\//ig, '');
 
-        for (const access of value.access ) {
+            for (const access of value.access ) {
 
-            if(!access.position || positions?.includes( access.position ) ){
+                if(!access.position || positions?.includes( access.position ) ){
 
-                let accessName = value.url.toString().replaceAll(/\/\^\\\/api\\\/method\\\/|\$\//ig, '');
+                    Object.keys(access).forEach((key) => {
+                        
+                        if(key != 'position'){
 
-                Object.keys(access).forEach((key) => {
-                    
-                    if(key != 'position'){
+                            for (const rule of access[key]) {
+                                result.push(
+                                    accessName + '/' + key + '/' + rule
+                                );
+                                
+                            }
 
-                        for (const rule of access[key]) {
-                            result.push(
-                                accessName + '/' + key + '/' + rule
-                            );
-                            
                         }
+                    });
 
-                    }
-                });
+                    result.push(accessName);
 
-                result.push(accessName);
+                    break;
+                } 
+            }
 
-                break;
-            } 
+        } catch (error) {
+            console.log('getApiMethodAccesRules error', value);
         }
 
         return result;
