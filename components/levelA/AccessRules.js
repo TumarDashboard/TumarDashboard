@@ -189,7 +189,7 @@ export async function getApiMethodAccess(req, userData) {
 export function getApiMethodAccesRules(positions) {
     return [...new Set(FApiMethodAccessRules.reduce((result, value) => {
         try {
-            
+            console.log(value.url.toString());
             let accessName = value.url.toString().replaceAll(/\/\^\\\/api\\\/method\\\/|\$\//ig, '');
 
             for (const access of value.access ) {
@@ -218,6 +218,7 @@ export function getApiMethodAccesRules(positions) {
 
         } catch (error) {
             console.log('getApiMethodAccesRules error', value);
+            throw error
         }
 
         return result;
