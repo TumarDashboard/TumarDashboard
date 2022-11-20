@@ -3,16 +3,16 @@ import { useState } from 'react';
 import { useRouter } from "next/router";
 import { observer } from 'mobx-react-lite'
 import Image from 'next/image';
-import { useStore } from "../levelA/StoreProvider";
-import { changeUser, deleteUser } from "../../src/dtos/dtoUser";
-import { ApiError } from "../../middleware/exceptions";
-import { FUserDeleteForm } from "../levelD_modal/FUserDeleteForm";
-import { FInputInitials } from "../levelE_low/FInputInitials";
-import { FInputFile } from "../levelE_low/FInputFile";
-import { FButtonRed } from "../levelE_low/FButtonRed";
-import { FSelect } from "../levelE_low/FSelect";
-import FPositionItemList from "../levelZ_variable/FPositionItemList";
-import { equalArrays } from "../../src/utils/arrayUtils";
+import { useStore } from "../../levelA/StoreProvider";
+import { changeUser, deleteUser } from "../../../src/dtos/dtoUser";
+import { ApiError } from "../../../middleware/exceptions";
+import { FUserDeleteForm } from "../../levelD_modal/FUserDeleteForm";
+import { FInputInitials } from "../../levelE_low/FInputInitials";
+import { FInputFile } from "../../levelE_low/FInputFile";
+import { FButtonRed } from "../../levelE_low/FButtonRed";
+import { FSelect } from "../../levelE_low/FSelect";
+import FPositionItemList from "../../levelZ_variable/FPositionItemList";
+import { equalArrays } from "../../../src/utils/arrayUtils";
 
 const inputs = {
   initial: {

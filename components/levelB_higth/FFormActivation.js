@@ -56,11 +56,14 @@ export default function FFormActivation({activatelink}) {
     const passwordChange = (password, validate) => {
         setInputPassword(password);
         setInputValidatePassword(validate)
+        setInputValidatePasswordCheck(password === inputPasswordCheck);
         setOnError('');
     }
     // Проверка Пароля
+    const [inputPasswordCheck, setInputPasswordCheck] = useState('');
     const [isInputValidatePasswordCheck, setInputValidatePasswordCheck] = useState(false);
     const passwordCheckChange = (password, validate) => {
+        setInputPasswordCheck(password);
         setInputValidatePasswordCheck(validate && password === inputPassword)
         setOnError('');
     }

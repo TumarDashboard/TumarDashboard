@@ -59,10 +59,6 @@ class UserService {
                 password: hashPassword,
                 activationLink: activationLink,
                 uiAvatarsSrc: `https://ui-avatars.com/api/?name=${surname}+${firstName}&size=256&font-size=0.33&length=2&background=random`,
-                // avatarInitials: {
-                //     data: "",
-                //     contentType: 'image/png'
-                // }
             });
 
             await mailService.sendActivationMail(email, `${process.env.NEXT_PUBLIC_API_URL}/api/authorization/activate/${activationLink}`).catch((e) => {
@@ -299,6 +295,39 @@ class UserService {
 
     }
 
+    async changeUserPassword(inputUserData) {
+        //Validate date
+
+        const userData = await validateYup(inputUserData, { deleteEmptyKey: false }).catch((e) => {
+
+            throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
+
+        });
+
+        await mongoConnect();
+
+        const mongoUser = await mongoUserModel.findById(userData.id);
+
+        if (!mongoUser) {
+            throw ApiError.BadRequest(`Пользователь с указанным id не найден`);
+        }
+        console.log(mongoUser.password);
+        const isPassEquals = await bcrypt.compare(userData.password, mongoUser.password)
+
+        if (!isPassEquals) {
+            throw ApiError.BadRequest(`Старый пароль указан некорректно`);
+        }
+
+        const hashPassword = await bcrypt.hash(userData.passwordNew, parseInt(process.env.NEXT_PRIVATE_PASSWORD_SALT))
+
+        mongoUser.password = hashPassword;
+
+        await mongoUser.save();
+
+        return {}
+
+    }
+
     async deleteUser(requestData) {
 
         const { id, reason } = requestData;
@@ -500,7 +529,6 @@ class UserService {
 
     async editUserHard(inputData) {
 
-        console.log(inputData);
         //Validate date
         const userData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
             throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);

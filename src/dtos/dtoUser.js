@@ -1,5 +1,5 @@
 import { object, lazy, string } from "yup";
-import { fetchAuthMethod } from "../../middleware/requests";
+import { fetchAuth, fetchAuthMethod } from "../../middleware/requests";
 import { mapValue } from "../utils/arrayUtils";
 
 const minlengthFullName = process.env.NEXT_PUBLIC_MIN_LENGTH_INITIALS;
@@ -106,6 +106,14 @@ export const validateYup = (dtoUser, options) => {
                         .required('Не указан пароль')
                 }
 
+                if (key === 'passwordNew') {
+                    return string()
+                        .min(minlengthPassword, `Новый пароль должен содержать от ${minlengthPassword} до ${maxlengthPassword} символов`)
+                        .max(maxlengthPassword, `Новый пароль должен содержать от ${minlengthPassword} до ${maxlengthPassword} символов`)
+                        .matches(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Пароль должен содержать как минимум одну строчную букву, одну заглавную букву и одну цифру')
+                        .required('Не указан пароль')
+                }
+
             }
         })
     ));
@@ -119,6 +127,10 @@ export const validateYup = (dtoUser, options) => {
 -------------------------------------------------------------------------------------------------------*/
 export const changeUser = async (id, uiAvatarsSrc, surname, firstName, patronymic, positions) => {
     return await fetchAuthMethod('/method/changeUser', { id, uiAvatarsSrc, surname, firstName, patronymic, positions });
+}
+
+export const changeUserPassword = async (id, password, passwordNew) => {
+    return await fetchAuth('/method/changeUserPassword', { id, password, passwordNew });
 }
 
 export const deleteUser = async (id, reason) => {

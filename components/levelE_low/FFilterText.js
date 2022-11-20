@@ -3,7 +3,7 @@ import { XIcon } from '@heroicons/react/solid';
 export function FFilterText({ value, onChange, onClear, ...props }) {
 
     return (
-        <>
+      <div className='relative w-full'>
           {/* Фильтр */}
           <input
             type="text"
@@ -16,18 +16,22 @@ export function FFilterText({ value, onChange, onClear, ...props }) {
 
           {/* Кнопка чистки фильтра */}
           <button
-            className="bg-color_B h-8 w-8 flex justify-center items-center rounded-md
+            className="bg-color_B h-5 w-5 
+            flex justify-center items-center rounded-md
+            absolute indent-5
+            right-5 top-1/2 translate-x-1/2 -translate-y-1/2 rounded-full
+            fill-color_D hover:fill-color_C hover:ring hover:ring-red-200 disabled:opacity-25
             hover:bg-color_C active:bg-color_B disabled:opacity-25"
             onClick={onClear}
             disabled={value.length === 0}
           >
             <XIcon
-              className="h-8 w-8 fill-color_F
+              className="h-5 w-5 fill-color_F
             hover:fill-color_G"
             />
           </button>
 
-        </>
+      </div>
     )
 
 }

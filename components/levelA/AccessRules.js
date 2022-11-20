@@ -55,6 +55,11 @@ export const FApiMethodAccessRules = [
         ]
     },
     {
+        url: /^\/api\/method\/changeUserPassword$/, access: [
+            { position: '', userCompare: ['id'] }
+        ]
+    },
+    {
         url: /^\/api\/method\/createGuard$/, access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
@@ -174,7 +179,6 @@ export async function getApiMethodAccess(req, userData) {
 
                 }
 
-                console.log('access.userCompare %O',access, findedRule);
                 return null;
 
             } 

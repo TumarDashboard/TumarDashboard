@@ -220,7 +220,7 @@ export default function FFormUsers({ accessRules, users }) {
     MOBXui.setLoading();
 
     try {
-      console.log('inputUserPatronymic', inputUserPatronymic);
+
       // Отправляем запрос на сервер
       const responce = await editUserHard(
         userEditForm.user._id,
@@ -401,7 +401,6 @@ export default function FFormUsers({ accessRules, users }) {
             }}
             onClear={() => {
               setInputFilterText('');
-              console.log('чистка фильтра', tableUsers);
               setRenderTableUsers([...tableUsers]);
             }}
           />

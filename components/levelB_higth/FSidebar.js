@@ -60,7 +60,7 @@ const FSidebar = observer( function FSidebar() {
                 exit="exit"
                 key='FSidebar'
                 variants={background}
-                className="flex flex-col w-64 bg-color_A min-h-full"
+                className="flex flex-col w-64 bg-color_A min-h-full pt-2"
             >
                 {getDashboardItemList( user?.positions ).map((item) => {
                     return (

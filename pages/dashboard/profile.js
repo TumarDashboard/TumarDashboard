@@ -1,7 +1,9 @@
 import Head from 'next/head'
-import { motion } from "framer-motion";
-import FFormProfile from '../../components/levelB_higth/FFormProfile';
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import FFormProfile from '../../components/levelB_higth/profile/FFormProfile';
 import catchAuthServer from '../../middleware/authServer';
+import FFormProfileСonfidential from '../../components/levelB_higth/profile/FFormСonfidential';
 
 const content = (isFirstMount) => ({
   animate: {
@@ -12,6 +14,27 @@ const content = (isFirstMount) => ({
 });
 
 export default function Profile({ accessRules, userData, isFirstMount }) {
+
+  const tabs = [
+    {
+      label: "Общие", component:
+        <FFormProfile
+          key='FFormProfile'
+          accessRules={accessRules}
+          userData={userData}
+        />
+    },
+    {
+      label: "Безопасность", component:
+        <FFormProfileСonfidential
+          key='FFormProfileСonfidential'
+          accessRules={accessRules}
+          userData={userData}
+        />
+    },
+  ];
+
+  const [selectedTab, setSelectedTab] = useState(tabs[0]);
 
   return (
     <div
@@ -25,17 +48,40 @@ export default function Profile({ accessRules, userData, isFirstMount }) {
         exit={{ opacity: 0 }}
         className="grow"
       >
-        <motion.div
-          initial="initial"
-          animate="animate"
-          variants={content(isFirstMount)}
-          className="flex overflow-hidden"
-        >
-           <FFormProfile
-            accessRules={accessRules}
-            userData={userData}
-           />
-        </motion.div>
+        <nav>
+          <ul className='flex flex-row space-x-1'>
+            {tabs.map((item) => {
+              return <li
+                key={item.label}
+                className={`relative cursor-pointer px-1
+                text-sm md:text-base text-color_G font-font_B 
+                ${item.label === selectedTab.label ? "selected bg-color_A" : ""}`}
+                onClick={() => setSelectedTab(item)}
+              >
+                {item.label}
+                {item.label === selectedTab.label ? (
+                  <motion.div
+                    className="underline absolute -bottom-[2px] left-0 right-0 h-[3px] bg-color_G rounded"
+                    layoutId="underline"
+                  />
+                ) : null}
+              </li>
+            })}
+          </ul>
+        </nav>
+
+        <AnimatePresence exitBeforeEnter>
+          <motion.div
+            initial="initial"
+            animate="animate"
+            variants={content(isFirstMount)}
+            className="flex overflow-hidden"
+          >
+            {selectedTab.component}
+          </motion.div>
+        </AnimatePresence>
+
+
       </motion.section>
     </div>
   )
@@ -47,10 +93,10 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   const userData = context.userData;
   const accessRules = context.accessRules;
-  
-  if( userData ){
+
+  if (userData) {
     userData.id = userData.id.toString();
-    if( userData.manager ){
+    if (userData.manager) {
       userData.manager._id = userData.manager._id.toString();
     }
   }
