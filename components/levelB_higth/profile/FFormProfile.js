@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useStore } from "../../levelA/StoreProvider";
 import { changeUser, deleteUser } from "../../../src/dtos/dtoUser";
 import { ApiError } from "../../../middleware/exceptions";
-import { FUserDeleteForm } from "../../levelD_modal/FUserDeleteForm";
+import { FUserDeleteForm } from "../../levelD_modal/userHard/FUserDeleteForm";
 import { FInputInitials } from "../../levelE_low/FInputInitials";
 import { FInputFile } from "../../levelE_low/FInputFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
@@ -319,6 +319,7 @@ const FFormProfile = observer(function FFormProfile({userData, accessRules}) {
             <label className="text-xl select-none">Фото</label>
             <FInputFile
               setUri={setUriAvatar}
+              disabled={!ARchangeUser}
             />
           </div>
 
@@ -330,6 +331,7 @@ const FFormProfile = observer(function FFormProfile({userData, accessRules}) {
               placeholder='Фамилия'
               value={inputSurname}
               onChange={surnameChange}
+              disabled={!ARchangeUser}
             />
           </div>
 
@@ -341,6 +343,7 @@ const FFormProfile = observer(function FFormProfile({userData, accessRules}) {
               placeholder='Имя'
               value={inputFirstName}
               onChange={firstNameChange}
+              disabled={!ARchangeUser}
             />
           </div>
 
@@ -352,6 +355,7 @@ const FFormProfile = observer(function FFormProfile({userData, accessRules}) {
               placeholder='Отчество'
               value={inputPatronymic}
               onChange={patronymicChange}
+              disabled={!ARchangeUser}
             />
           </div>
 

@@ -9,8 +9,8 @@ import { FButtonRed } from "../levelE_low/FButtonRed";
 import { FButtonWhite } from "../levelE_low/FButtonWhite";
 
 import { createGuard, editGuard, deleteGuard } from '../../src/dtos/dtoGuard';
-import { FGuardDeleteForm } from '../levelD_modal/FGuardDeleteForm';
-import { FGuardEditForm } from '../levelD_modal/FGuardEditForm';
+import { FGuardDeleteForm } from '../levelD_modal/guard/FGuardDeleteForm';
+import { FGuardEditForm } from '../levelD_modal/guard/FGuardEditForm';
 import { FFilterText } from '../levelE_low/FFilterText';
 
 const inputs = {

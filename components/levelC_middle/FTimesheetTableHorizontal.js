@@ -7,8 +7,8 @@ import { ApiError } from "../../middleware/exceptions";
 import { FButtonRed } from "../levelE_low/FButtonRed";
 import { changeTimesheet, getTimesheet } from '../../src/dtos/dtoTimesheet';
 import { getCurrentMonth, getDaysFromMonth } from '../../src/utils/dateUtils';
-import { FGuardRowSelectGuardForm } from '../levelD_modal/FGuardRowSelectGuardForm';
-import { FGuardRowSelectShiftForm } from '../levelD_modal/FGuardRowSelectShiftForm';
+import { FTimesheetTableSelectGuardForm } from '../levelD_modal/timesheetTable/FTimesheetTableSelectGuardForm';
+import { FTimesheetTableSelectShiftForm } from '../levelD_modal/timesheetTable/FTimesheetTableSelectShiftForm';
 import { FInputMonth } from '../levelE_low/FInputMonth';
 import { FSelect } from '../levelE_low/FSelect';
 
@@ -18,7 +18,7 @@ const defaultDayShift = 8;
 
 const currentMonth = getCurrentMonth();
 
-export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, MOBXui, errorCallback, guardPost, guardPosts, guardsData, users, usersAll }) {
+export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXuser, MOBXui, errorCallback, guardPost, guardPosts, guardsData, users, usersAll }) {
 
   /*-------------------------------------------------------------------------------------------------------
       Определение правил доступа
@@ -1135,7 +1135,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
       </div>
 
       {/* {Форма добавления/редактирования строки охранника} */}
-      <FGuardRowSelectGuardForm
+      <FTimesheetTableSelectGuardForm
         form={guardRowSelectGuardForm}
         setForm={setGuardRowSelectGuardForm}
         submitAdd={guardRowAdd}
@@ -1158,7 +1158,7 @@ export default function FTimesheetHorizontal({ accessRules, userData, MOBXuser, 
       />
 
       {/* {Форма редактирования ячейки} */}
-      <FGuardRowSelectShiftForm
+      <FTimesheetTableSelectShiftForm
         form={guardRowSelectShiftForm}
         setForm={setGuardRowSelectShiftForm}
         submitHandle={guardCellSelectShift}

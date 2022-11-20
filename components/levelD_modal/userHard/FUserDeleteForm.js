@@ -1,10 +1,10 @@
 import React from "react";
-import { FModalForm } from './FModalForm';
+import { FModalForm } from '../FModalForm';
 import { useState, useEffect } from 'react';
 
-import { FTextArea } from "../levelE_low/FTextArea";
-import { FButtonRed } from "../levelE_low/FButtonRed";
-import { FButtonWhite } from "../levelE_low/FButtonWhite";
+import { FTextArea } from "../../levelE_low/FTextArea";
+import { FButtonRed } from "../../levelE_low/FButtonRed";
+import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 
 export function FUserDeleteForm({ form, setForm, submit }) {
 

@@ -10,9 +10,9 @@ import { FButtonRed } from "../levelE_low/FButtonRed";
 import { FButtonWhite } from "../levelE_low/FButtonWhite";
 
 import { createGuardPost, editGuardPost, deleteGuardPost } from '../../src/dtos/dtoGuardPost';
-import { FGuardPostDeleteForm } from '../levelD_modal/FGuardPostDeleteForm';
-import { FGuardPostEditForm } from '../levelD_modal/FGuardPostEditForm';
-import { FTimesheetPrintForm } from '../levelD_modal/FTimesheetPrintForm';
+import { FGuardPostDeleteForm } from '../levelD_modal/guardPost/FGuardPostDeleteForm';
+import { FGuardPostEditForm } from '../levelD_modal/guardPost/FGuardPostEditForm';
+import { FTimesheetPrintForm } from '../levelD_modal/timesheet/FTimesheetPrintForm';
 import { FFilterText } from '../levelE_low/FFilterText';
 
 const inputs = {

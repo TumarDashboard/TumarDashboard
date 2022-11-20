@@ -40,88 +40,58 @@ export const FDashboardAccessRules = [
 ];
 
 export const FApiMethodAccessRules = [
+    
+    // Guard methods
     {
-        url: /^\/api\/method\/changeTimesheet$/, access: [
+        url: '/api/method/guard/createGuard', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionNSO }
+        ]
+    },
+    {
+        url: '/api/method/guard/editGuard', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionNSO }
+        ]
+    },
+    {
+        url: '/api/method/guard/deleteGuard', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionNSO }
+        ]
+    },
+
+    // GuardPost methods
+    {
+        url: '/api/method/guardPost/createGuardPost', access: [
+            { position: positions.FPositionZDIR },
+        ]
+    },
+    {
+        url: '/api/method/guardPost/editGuardPost', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionNSO, editBlock: ['rate', 'manager'], userCompare: ['manager']  }
+        ]
+    },
+    {
+        url: '/api/method/guardPost/deleteGuardPost', access: [
+            { position: positions.FPositionZDIR }
+        ]
+    },
+
+    // Timesheet methods
+    {
+        url: '/api/method/timesheet/changeTimesheet', access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM, editBlock: ['rate', 'manager'] },
             { position: positions.FPositionNSO, editBlock: ['rate', 'manager'], userCompare: ['manager'] }
         ]
     },
     {
-        url: /^\/api\/method\/changeUser$/, access: [
-            { position: positions.FPositionZDIR },
-            { position: positions.FPositionHRM },
-            { position: '', editBlock: ['positions'], userCompare: ['id'] }
-        ]
-    },
-    {
-        url: /^\/api\/method\/changeUserPassword$/, access: [
-            { position: '', userCompare: ['id'] }
-        ]
-    },
-    {
-        url: /^\/api\/method\/createGuard$/, access: [
-            { position: positions.FPositionZDIR },
-            { position: positions.FPositionHRM },
-            { position: positions.FPositionNSO }
-        ]
-    },
-    {
-        url: /^\/api\/method\/createGuardPost$/, access: [
-            { position: positions.FPositionZDIR },
-            // { position: positions.FPositionHRM, editBlock: ['rate'] },
-            // { position: positions.FPositionNSO, editBlock: ['rate'] }
-        ]
-    },
-    {
-        url: /^\/api\/method\/createUserHard$/, access: [
-            { position: positions.FPositionZDIR },
-            { position: positions.FPositionHRM }
-        ]
-    },
-    {
-        url: /^\/api\/method\/deleteGuard$/, access: [
-            { position: positions.FPositionZDIR },
-            { position: positions.FPositionHRM },
-            { position: positions.FPositionNSO }
-        ]
-    },
-    {
-        url: /^\/api\/method\/deleteGuardPost$/, access: [
-            { position: positions.FPositionZDIR }
-        ]
-    },
-    {
-        url: /^\/api\/method\/deleteUser$/, access: [
-            { position: positions.FPositionZDIR }
-        ]
-    },
-    {
-        url: /^\/api\/method\/deleteUserHard$/, access: [
-            { position: positions.FPositionZDIR }
-        ]
-    },
-    {
-        url: /^\/api\/method\/editGuard$/, access: [
-            { position: positions.FPositionZDIR },
-            { position: positions.FPositionHRM },
-            { position: positions.FPositionNSO }
-        ]
-    },
-    {
-        url: /^\/api\/method\/editGuardPost$/, access: [
-            { position: positions.FPositionZDIR },
-            { position: positions.FPositionNSO, editBlock: ['rate', 'manager'], userCompare: ['manager']  }
-        ]
-    },
-    {
-        url: /^\/api\/method\/editUserHard$/, access: [
-            { position: positions.FPositionZDIR },
-            { position: positions.FPositionHRM }
-        ]
-    },
-    {
-        url: /^\/api\/method\/getTimesheet$/, access: [
+        url: '/api/method/timesheet/getTimesheet', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
@@ -130,12 +100,62 @@ export const FApiMethodAccessRules = [
         ]
     },
     {
-        url: /^\/api\/method\/getTimesheetPrint$/, access: [
+        url: '/api/method/timesheet/getTimesheetPrint', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
             { position: positions.FPositionNSO },
             { position: positions.FPositionBUH }
+        ]
+    },
+
+    // User methods
+    {
+        url: '/api/method/user/changeUser', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: '', editBlock: ['positions'], userCompare: ['id'] }
+        ]
+    },
+    {
+        url: '/api/method/user/changeUserPassword', access: [
+            { position: '', userCompare: ['id'] }
+        ]
+    },
+    {
+        url: '/api/method/user/deleteUser', access: [
+            { position: positions.FPositionZDIR }
+        ]
+    },
+    
+    // UserHard methods
+    {
+        url: '/api/method/userHard/createUserHard', access: [
+            { position: positions.FPositionZDIR, userCompare: ['idHard'] },
+            { position: positions.FPositionHRM, userCompare: ['idHard'] }
+        ]
+    },
+    {
+        url: '/api/method/userHard/editUserHard', access: [
+            { position: positions.FPositionZDIR, userCompare: ['idHard'] },
+            { position: positions.FPositionHRM, userCompare: ['idHard'] }
+        ]
+    },
+    {
+        url: '/api/method/userHard/deleteUserHard', access: [
+            { position: positions.FPositionZDIR, userCompare: ['idHard'] }
+        ]
+    },
+    {
+        url: '/api/method/userHard/activateUserHard', access: [
+            { position: positions.FPositionZDIR, userCompare: ['idHard'] },
+            { position: positions.FPositionHRM, userCompare: ['idHard'] }
+        ]
+    },
+    {
+        url: '/api/method/userHard/resetUserPasswordHard', access: [
+            { position: positions.FPositionZDIR, userCompare: ['idHard'] },
+            { position: positions.FPositionHRM, userCompare: ['idHard'] }
         ]
     },
 ];
@@ -160,7 +180,7 @@ export async function getApiMethodAccess(req, userData) {
                     if( access.userCompare ){
                         for (const userIdKey of access.userCompare) {
                             if(requestJson[userIdKey] != userData.id){
-                                return 'Вы не являетесь правообладателем данных для редактирования';
+                                return 'Вам отказано в доступе к выполняемой операции';
                             }else{
                                 delete requestJson[userIdKey];
                             }
@@ -191,9 +211,18 @@ export async function getApiMethodAccess(req, userData) {
 }
 
 export function getApiMethodAccesRules(positions) {
+    
+    const regExp = RegExp([
+        '/api/method/guard/',
+        '/api/method/guardPost/',
+        '/api/method/timesheet/',
+        '/api/method/user/',
+        '/api/method/userHard/',
+    ].join('|'), 'ig');
+
     return [...new Set(FApiMethodAccessRules.reduce((result, value) => {
-        
-        let accessName = value.url.toString().replace(/\/\^\\\/api\\\/method\\\/|\$\//ig, '');
+
+        let accessName = value.url.toString().replace(regExp, '');
 
         for (const access of value.access ) {
 

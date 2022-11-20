@@ -1,20 +1,20 @@
-import { FModalForm } from './FModalForm';
+import { FModalForm } from '../FModalForm';
 import { useState, useEffect } from 'react';
 import { ShareIcon } from '@heroicons/react/solid';
 
-import { FInputNumber } from "../levelE_low/FInputNumber";
-import { FTextArea } from "../levelE_low/FTextArea";
-import { FInputFile } from "../levelE_low/FInputFile";
-import { FButtonRed } from "../levelE_low/FButtonRed";
-import { FButtonWhite } from "../levelE_low/FButtonWhite";
-import { FSelect } from "../levelE_low/FSelect";
-import { FSelectShifts } from "../levelE_low/FSelectShifts";
+import { FInputNumber } from "../../levelE_low/FInputNumber";
+import { FTextArea } from "../../levelE_low/FTextArea";
+import { FInputFile } from "../../levelE_low/FInputFile";
+import { FButtonRed } from "../../levelE_low/FButtonRed";
+import { FButtonWhite } from "../../levelE_low/FButtonWhite";
+import { FSelect } from "../../levelE_low/FSelect";
+import { FSelectShifts } from "../../levelE_low/FSelectShifts";
 
-import { equalArrays } from '../../src/utils/arrayUtils';
-import { getCurrentMonth } from '../../src/utils/dateUtils';
-import { FInputMonth } from '../levelE_low/FInputMonth';
-import { getTimesheetPrint } from '../../src/dtos/dtoTimesheet';
-import { ApiError } from '../../middleware/exceptions';
+import { equalArrays } from '../../../src/utils/arrayUtils';
+import { getCurrentMonth } from '../../../src/utils/dateUtils';
+import { FInputMonth } from '../../levelE_low/FInputMonth';
+import { getTimesheetPrint } from '../../../src/dtos/dtoTimesheet';
+import { ApiError } from '../../../middleware/exceptions';
 
 export function FTimesheetPrintForm({ form, setForm, MOBXui, errorCallback, guardPosts }) {
 

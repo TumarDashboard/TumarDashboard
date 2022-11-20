@@ -1,6 +1,6 @@
-import checkCors from '../../../middleware/cors';
-import { catchErrorsApi } from '../../../middleware/exceptions';
-import userService from '../../../src/service/userService';
+import checkCors from '../../../../middleware/cors';
+import { catchErrorsApi } from '../../../../middleware/exceptions';
+import userService from '../../../../src/service/userService';
 
 export default catchErrorsApi( async (req, res) => {
 

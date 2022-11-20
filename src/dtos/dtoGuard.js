@@ -83,13 +83,13 @@ export const validateYup = (dtoGuardPost, options) => {
 }
 
 export const createGuard = async (surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts) => {
-    return await fetchAuthMethod('/method/createGuard', { surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts });
+    return await fetchAuthMethod('/method/guard/createGuard', { surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts });
 }
 
 export const editGuard = async (id, surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts) => {
-    return await fetchAuthMethod('/method/editGuard', { id, surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts });
+    return await fetchAuthMethod('/method/guard/editGuard', { id, surname, firstName, patronymic, uiAvatarsSrc, telephone, manager, guardPosts });
 }
 
 export const deleteGuard = async (idGuard, idUser, reason) => {
-    return await fetchAuthMethod('/method/deleteGuard', { idGuard, idUser, reason });
+    return await fetchAuthMethod('/method/guard/deleteGuard', { idGuard, idUser, reason });
 }

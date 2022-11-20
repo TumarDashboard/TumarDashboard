@@ -1,16 +1,16 @@
-import { FModalForm } from '../levelD_modal/FModalForm';
+import { FModalForm } from '../FModalForm';
 import { useState, useEffect } from 'react';
 
-import { FInputNumber } from "../levelE_low/FInputNumber";
-import { FTextArea } from "../levelE_low/FTextArea";
-import { FInputFile } from "../levelE_low/FInputFile";
-import { FButtonRed } from "../levelE_low/FButtonRed";
-import { FButtonWhite } from "../levelE_low/FButtonWhite";
-import { FSelect } from "../levelE_low/FSelect";
-import { FSelectShifts } from "../levelE_low/FSelectShifts";
+import { FInputNumber } from "../../levelE_low/FInputNumber";
+import { FTextArea } from "../../levelE_low/FTextArea";
+import { FInputFile } from "../../levelE_low/FInputFile";
+import { FButtonRed } from "../../levelE_low/FButtonRed";
+import { FButtonWhite } from "../../levelE_low/FButtonWhite";
+import { FSelect } from "../../levelE_low/FSelect";
+import { FSelectShifts } from "../../levelE_low/FSelectShifts";
 
-import { equalArrays } from '../../src/utils/arrayUtils';
-import { FInputText } from '../levelE_low/FInputText';
+import { equalArrays } from '../../../src/utils/arrayUtils';
+import { FInputText } from '../../levelE_low/FInputText';
 
 export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, submitEdit, users }) {
 

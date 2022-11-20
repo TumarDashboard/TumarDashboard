@@ -96,6 +96,12 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   if (userData) {
     userData.id = userData.id.toString();
+    if(userData.createdAt){
+      userData.createdAt = userData.createdAt.toString();
+    }
+    if(userData.updatedAt){
+      userData.updatedAt = userData.updatedAt.toString();
+    }
     if (userData.manager) {
       userData.manager._id = userData.manager._id.toString();
     }

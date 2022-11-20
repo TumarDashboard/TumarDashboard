@@ -11,15 +11,15 @@ import { FButtonWhite } from "../levelE_low/FButtonWhite";
 
 import { editGuardPost, deleteGuardPost } from '../../src/dtos/dtoGuardPost';
 import { changeTimesheet, getTimesheet } from '../../src/dtos/dtoTimesheet';
-import { FGuardPostDeleteForm } from '../levelD_modal/FGuardPostDeleteForm';
-import { FGuardPostEditForm } from '../levelD_modal/FGuardPostEditForm';
+import { FGuardPostDeleteForm } from '../levelD_modal/guardPost/FGuardPostDeleteForm';
+import { FGuardPostEditForm } from '../levelD_modal/guardPost/FGuardPostEditForm';
 import { FInputMonth } from '../levelE_low/FInputMonth';
 import { FSelect } from '../levelE_low/FSelect';
 import { array } from 'yup';
 import { getCurrentMonth, getDaysFromMonth } from '../../src/utils/dateUtils';
-import { FGuardRowSelectGuardForm } from '../levelD_modal/FGuardRowSelectGuardForm';
+import { FGuardRowSelectGuardForm } from '../levelD_modal/timesheetTable/FTimesheetTableSelectGuardForm';
 import { FModalForm } from '../levelD_modal/FModalForm';
-import { FGuardRowSelectShiftForm } from '../levelD_modal/FGuardRowSelectShiftForm';
+import { FGuardRowSelectShiftForm } from '../levelD_modal/timesheetTable/FTimesheetTableSelectShiftForm';
 
 const inputs = {
   initial: {

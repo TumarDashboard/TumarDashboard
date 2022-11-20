@@ -50,10 +50,13 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   await mongoConnect();
 
-  const users = await mongoUserModel.find({},'-password -activationLink -__v').lean();
-
+  const users = await mongoUserModel.find({},'-password -activationLink -__v -updatedAt').lean();
   users.forEach(value=>{
     value._id = value._id.toString();
+    
+    if(value.createdAt){
+      value.createdAt = value.createdAt.toString();
+    }
     if(value.positions){
       value.positionsText = getPositionWithCodeList(value.positions);
     }

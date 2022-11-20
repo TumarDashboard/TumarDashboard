@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useStore } from "../../levelA/StoreProvider";
 import { changeUser, changeUserPassword, deleteUser } from "../../../src/dtos/dtoUser";
 import { ApiError } from "../../../middleware/exceptions";
-import { FUserDeleteForm } from "../../levelD_modal/FUserDeleteForm";
+import { FUserDeleteForm } from "../../levelD_modal/userHard/FUserDeleteForm";
 import { FInputInitials } from "../../levelE_low/FInputInitials";
 import { FInputFile } from "../../levelE_low/FInputFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
@@ -30,7 +30,7 @@ const inputs = {
   },
 };
 
-const FFormProfileСonfidential = observer(function FFormProfileСonfidential({userData, accessRules}) {
+const FFormProfileСonfidential = observer(function FFormProfileСonfidential({ userData, accessRules }) {
   /*----------------------------------------------------------------------------------------------------------------------------
       Использование глобальных данных
   ----------------------------------------------------------------------------------------------------------------------------*/
@@ -38,16 +38,14 @@ const FFormProfileСonfidential = observer(function FFormProfileСonfidential({u
 
   const { MOBXuser, MOBXui } = useStore();
 
-  const [ currentUser, setCurrentUser ] = useState(userData ? userData : {});
+  const [currentUser, setCurrentUser] = useState(userData ? userData : {});
 
   const [onError, setError] = useState('');
 
   /*-------------------------------------------------------------------------------------------------------
       Определение правил доступа
   -------------------------------------------------------------------------------------------------------*/
-  const ARchangeUserPositions = !accessRules.includes('changeUser/editBlock/positions');
-  const ARdeleteUser = accessRules.includes('deleteUser');
-  const ARchangeUser = accessRules.includes('changeUser');
+  const ARchangeUserPassword = accessRules.includes('changeUserPassword');
 
   /*-------------------------------------------------------------------------------------------------------
       Данные инпутов
@@ -57,28 +55,28 @@ const FFormProfileСonfidential = observer(function FFormProfileСonfidential({u
   const [inputPasswordOld, setInputPasswordOld] = useState('');
   const [isInputValidatePasswordOld, setInputValidatePasswordOld] = useState(false);
   const passwordOldChange = (password, validate) => {
-      setInputPasswordOld(password);
-      setInputValidatePasswordOld(validate)
-      setInputValidatePasswordNew(password !== inputPasswordNew);
-      setError('');
+    setInputPasswordOld(password);
+    setInputValidatePasswordOld(validate)
+    setInputValidatePasswordNew(password !== inputPasswordNew);
+    setError('');
   }
 
   // Новый Пароль
   const [inputPasswordNew, setInputPasswordNew] = useState('');
   const [isInputValidatePasswordNew, setInputValidatePasswordNew] = useState(false);
   const passwordNewChange = (password, validate) => {
-      setInputPasswordNew(password);
-      setInputValidatePasswordNew(validate && password !== inputPasswordOld);
-      setInputValidatePasswordNewCheck(password === setInputPasswordNewCheck);
-      setError('');
+    setInputPasswordNew(password);
+    setInputValidatePasswordNew(validate && password !== inputPasswordOld);
+    setInputValidatePasswordNewCheck(password === setInputPasswordNewCheck);
+    setError('');
   }
   // Проверка нового Пароля
   const [inputPasswordNewCheck, setInputPasswordNewCheck] = useState('');
   const [isInputValidatePasswordNewCheck, setInputValidatePasswordNewCheck] = useState(false);
   const passwordNewCheckChange = (password, validate) => {
-      setInputPasswordNewCheck(password)
-      setInputValidatePasswordNewCheck(validate && password === inputPasswordNew)
-      setError('');
+    setInputPasswordNewCheck(password)
+    setInputValidatePasswordNewCheck(validate && password === inputPasswordNew)
+    setError('');
   }
 
   /*----------------------------------------------------------------------------------------------------------------------------
@@ -97,7 +95,7 @@ const FFormProfileСonfidential = observer(function FFormProfileСonfidential({u
       if (currentUser && currentUser?.id) {
 
         const responce = await changeUserPassword(
-          currentUser.id, 
+          currentUser.id,
           inputPasswordOld,
           inputPasswordNew
         );
@@ -160,13 +158,14 @@ const FFormProfileСonfidential = observer(function FFormProfileСonfidential({u
           <div className="form-item">
             <label className="text-xl select-none">Старый пароль</label>
             <FInputPassword
-                value={inputPasswordOld}
-                onPasswordChange={passwordOldChange}
-                placeholder="Введите Старый пароль"
-                id="password-old"
+              value={inputPasswordOld}
+              onPasswordChange={passwordOldChange}
+              placeholder="Введите Старый пароль"
+              id="password-old"
+              disabled={!ARchangeUserPassword}
             />
           </div>
-
+          
           {/* {Новый пароль} */}
           <div className="form-item">
             <label className="text-xl select-none">Новый пароль</label>
@@ -174,13 +173,15 @@ const FFormProfileСonfidential = observer(function FFormProfileСonfidential({u
               value={inputPasswordNew}
               onPasswordChange={passwordNewChange}
               placeholder="Введите новый пароль"
+              disabled={!ARchangeUserPassword}
             />
             <FInputPassword
-                value={inputPasswordNewCheck}
-                onPasswordChange={passwordNewCheckChange}
-                placeholder="Введите повторно новый пароль"
-                id="password-check"
-                className='mt-2'
+              value={inputPasswordNewCheck}
+              onPasswordChange={passwordNewCheckChange}
+              placeholder="Введите повторно новый пароль"
+              id="password-check"
+              className='mt-2'
+              disabled={!ARchangeUserPassword}
             />
           </div>
 
@@ -195,13 +196,13 @@ const FFormProfileСonfidential = observer(function FFormProfileСonfidential({u
           <div
             className="form-item self-end flex flex-col space-y-4 select-none"
           >
-
-            <FButtonRed
-              onClick={saveChanges}
-              disabled={!(isInputValidatePasswordOld && isInputValidatePasswordNew && isInputValidatePasswordNewCheck)}
-            >
-              Сохранить
-            </FButtonRed>
+            {ARchangeUserPassword &&
+              <FButtonRed
+                onClick={saveChanges}
+                disabled={!(isInputValidatePasswordOld && isInputValidatePasswordNew && isInputValidatePasswordNewCheck)}
+              >
+                Сохранить
+              </FButtonRed>}
 
           </div>
 

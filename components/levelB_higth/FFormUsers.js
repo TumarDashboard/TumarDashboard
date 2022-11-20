@@ -1,15 +1,17 @@
 import { motion } from "framer-motion";
 import Image from 'next/image';
 import { useState } from "react";
-import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
+import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon, PencilAltIcon, TrashIcon, ShieldCheckIcon } from '@heroicons/react/solid';
 import { FFilterText } from "../levelE_low/FFilterText";
 import { FButtonRed } from "../levelE_low/FButtonRed";
 import { FButtonWhite } from "../levelE_low/FButtonWhite";
-import { FUserEditForm } from "../levelD_modal/FUserEditForm";
-import { FUserDeleteForm } from "../levelD_modal/FUserDeleteForm";
+import { FUserEditForm } from "../levelD_modal/userHard/FUserEditForm";
+import { FUserDeleteForm } from "../levelD_modal/userHard/FUserDeleteForm";
 import { ApiError } from "../../middleware/exceptions";
 import { useStore } from "../levelA/StoreProvider";
-import { createUserHard, editUserHard, deleteUserHard } from "../../src/dtos/dtoUser";
+import { createUserHard, editUserHard, deleteUserHard, activateUserHard } from "../../src/dtos/dtoUser";
+import { FButtonYellow } from "../levelE_low/FButtonYellow";
+import { FUserActivationForm } from "../levelD_modal/userHard/FUserActivationForm";
 
 const inputs = {
   initial: {
@@ -30,7 +32,7 @@ const constTableHead = [
   { value: 'login', label: 'Логин' },
   { value: 'positions', label: 'Должность' },
   { value: 'email', label: 'Почта' },
-  { value: 'status', label: 'Статус' },
+  // { value: 'status', label: 'Статус' },
 ];
 
 const sortingTableCallback = (a, b, rule, invert) => {
@@ -57,8 +59,8 @@ const sortingTableCallback = (a, b, rule, invert) => {
     case 'email':
       return (a.email.localeCompare(b.email)) * invert;
 
-    case 'status':
-      return (a.isActivated == b.isActivated) * invert;
+    // case 'status':
+    //   return (a.isActivated == b.isActivated) * invert;
 
     default:
       break;
@@ -79,6 +81,7 @@ export default function FFormUsers({ accessRules, users }) {
   const ARcreateUserHard = accessRules.includes('createUserHard');
   const AReditUserHard = accessRules.includes('editUserHard');
   const ARdeleteUserHard = accessRules.includes('deleteUserHard');
+  const ARactivateUserHard = accessRules.includes('activateUserHard');
   /*-------------------------------------------------------------------------------------------------------
       Данные таблицы
   -------------------------------------------------------------------------------------------------------*/
@@ -168,30 +171,33 @@ export default function FFormUsers({ accessRules, users }) {
 
     try {
       // Отправляем запрос на сервер
-      const responce = await createUserHard(
-        inputUserAvatarSrc,
-        inputUserEmail,
-        inputUserSurname,
-        inputUserFirstName,
-        inputUserPatronymic,
-        inputUserPositions,
-      );
 
-      // Обновляем таблицу в памяти
-      setTableUsers(array => {
-        array.unshift(responce.user);
-        return array;
-      });
+      if (MOBXuser.user && MOBXuser.user.id) {
+        const responce = await createUserHard(
+          MOBXuser.user.id,
+          inputUserAvatarSrc,
+          inputUserEmail,
+          inputUserSurname,
+          inputUserFirstName,
+          inputUserPatronymic,
+          inputUserPositions,
+        );
+        console.log(responce.user);
+        // Обновляем таблицу в памяти
+        setTableUsers(array => {
+          array.unshift(responce.user);
+          return array;
+        });
 
-      // Обновляем отображаемую таблицу
-      setRenderTableUsers(array => {
-        array.unshift(responce.user);
-        return array;
-      });
+        // Обновляем отображаемую таблицу
+        setRenderTableUsers(array => {
+          array.unshift(responce.user);
+          return array;
+        });
 
-      // Закрываем модальное окно
-      setUserEditForm({ isOpen: false });
-
+        // Закрываем модальное окно
+        setUserEditForm({ isOpen: false });
+      }
     } catch (error) {
 
       errorCallback(error, setUserEditForm);
@@ -221,36 +227,38 @@ export default function FFormUsers({ accessRules, users }) {
 
     try {
 
-      // Отправляем запрос на сервер
-      const responce = await editUserHard(
-        userEditForm.user._id,
-        inputUserAvatarSrc,
-        inputUserEmail,
-        inputUserSurname,
-        inputUserFirstName,
-        inputUserPatronymic,
-        inputUserPositions,
-      );
+      if (MOBXuser.user && MOBXuser.user.id) {
+        // Отправляем запрос на сервер
+        const responce = await editUserHard(
+          MOBXuser.user.id,
+          userEditForm.user._id,
+          inputUserAvatarSrc,
+          inputUserEmail,
+          inputUserSurname,
+          inputUserFirstName,
+          inputUserPatronymic,
+          inputUserPositions,
+        );
 
-      // Обновляем таблицу в памяти
-      setTableUsers(array => {
-        const index = array.findIndex(element => {
-          return element._id == responce.user._id
+        // Обновляем таблицу в памяти
+        setTableUsers(array => {
+          const index = array.findIndex(element => {
+            return element._id == responce.user._id
+          });
+          if (index)
+            array[index] = responce.user;
+          return array;
         });
-        if (index)
-          array[index] = responce.user;
-        return array;
-      });
 
-      // Обновляем отображаемую таблицу
-      setRenderTableUsers(array => {
-        array[userEditForm.index] = responce.user;
-        return array;
-      });
+        // Обновляем отображаемую таблицу
+        setRenderTableUsers(array => {
+          array[userEditForm.index] = responce.user;
+          return array;
+        });
 
-      // Закрываем модальное окно
-      setUserEditForm({ isOpen: false });
-
+        // Закрываем модальное окно
+        setUserEditForm({ isOpen: false });
+      }
     } catch (error) {
 
       errorCallback(error, setUserEditForm);
@@ -284,8 +292,8 @@ export default function FFormUsers({ accessRules, users }) {
 
         // Отправляем запрос на сервер
         const responce = await deleteUserHard(
-          userDeleteForm.userId,
           MOBXuser.user.id,
+          userDeleteForm.userId,
           reason
         );
 
@@ -312,6 +320,63 @@ export default function FFormUsers({ accessRules, users }) {
     } catch (error) {
 
       errorCallback(error, setUserDeleteForm);
+
+    } finally {
+
+      MOBXui.setLoading();
+
+    }
+  }
+
+  /*-------------------------------------------------------------------------------------------------------
+      Модальное окно Формы удаления
+  -------------------------------------------------------------------------------------------------------*/
+  const [userActivationForm, setUserActivationForm] = useState({
+    isOpen: false
+  });
+
+  /*-------------------------------------------------------------------------------------------------------
+      Функция удаления поста Формы удаления
+  -------------------------------------------------------------------------------------------------------*/
+  const userActivationFormSubmit = async (event) => {
+
+    event.preventDefault();
+
+    MOBXui.setLoading();
+
+    try {
+
+      if (MOBXuser.user && MOBXuser.user.id) {
+
+        // Отправляем запрос на сервер
+        await activateUserHard(
+          MOBXuser.user.id,
+          userActivationForm.userId
+        );
+
+        // Обновляем таблицу в памяти
+        setTableUsers(array => {
+          const index = array.findIndex(element => {
+            return element._id == userActivationForm.userId
+          });
+          if (index)
+            array[index].isActivated = true;
+          return array;
+        });
+
+        // Обновляем отображаемую таблицу
+        setRenderTableUsers(array => {
+          array[userActivationForm.index].isActivated = true;
+          return array;
+        });
+
+        // Закрываем модальное окно
+        setUserActivationForm({ isOpen: false });
+      }
+
+    } catch (error) {
+
+      errorCallback(error, setUserActivationForm);
 
     } finally {
 
@@ -462,6 +527,25 @@ export default function FFormUsers({ accessRules, users }) {
                   {/* {Кнопки управления мобильного устройства} */}
                   <div className='flex md:hidden justify-end'>
 
+                    {ARactivateUserHard && !user.isActivated &&
+                      <FButtonYellow
+                        className="mr-2 flex"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setUserActivationForm({
+                            isOpen: true,
+                            index: index,
+                            email: user.email,
+                            userId: user._id,
+                            createdAt: user.createdAt
+                          })
+                        }}
+                      >
+                        <ShieldCheckIcon
+                          className="h-4 w-4"
+                        />
+                      </FButtonYellow>}
+
                     {AReditUserHard &&
                       <FButtonRed
                         className="mr-2 flex"
@@ -534,18 +618,39 @@ export default function FFormUsers({ accessRules, users }) {
                 </td>
 
                 {/* {Статус} */}
-                <td className="p-2 md:border text-left block md:table-cell">
+                {/* <td className="p-2 md:border text-left block md:table-cell">
                   <span className="inline-block w-1/3 md:hidden font-bold">Статус</span>
                   <span className={`px-2 py-1 font-semibold leading-tight rounded-sm 
                     ${user.isActivated ? 'text-green-700 bg-green-100' : 'text-gray-700 bg-gray-100'}`}>
                     {user.isActivated ? 'Активирован' : 'Не активирован'}
                   </span>
-                </td>
+                </td> */}
 
                 {/* {Кнопки управления компьютера} */}
-                {(AReditUserHard || ARdeleteUserHard) &&
+                {(AReditUserHard || ARdeleteUserHard || ARactivateUserHard) &&
                   <td className="p-2 md:border text-left hidden md:table-cell w-1">
-                    <div className='flex'>
+                    <div className='flex justify-center '>
+
+                      {ARactivateUserHard && !user.isActivated &&
+                        <FButtonYellow
+                          className="mr-2 flex"
+                          onClick={(event) => {
+                            event.stopPropagation();
+
+                            setUserActivationForm({
+                              isOpen: true,
+                              index: index,
+                              email: user.email,
+                              userId: user._id,
+                              createdAt: user.createdAt
+                            })
+                          }}
+                        >
+                          <ShieldCheckIcon
+                            className="h-4 w-4"
+                          />
+                          <span className='hidden 2xl:block text-xs'>Активировать</span>
+                        </FButtonYellow>}
 
                       {AReditUserHard &&
                         <FButtonRed
@@ -564,7 +669,7 @@ export default function FFormUsers({ accessRules, users }) {
                           <PencilAltIcon
                             className="h-4 w-4"
                           />
-                          <span className='hidden xl:block'>Изменить</span>
+                          <span className='hidden 2xl:block'>Изменить</span>
                         </FButtonRed>}
 
                       {ARdeleteUserHard &&
@@ -583,7 +688,7 @@ export default function FFormUsers({ accessRules, users }) {
                           <TrashIcon
                             className="h-4 w-4"
                           />
-                          <span className='hidden xl:block'>Удалить</span>
+                          <span className='hidden 2xl:block'>Удалить</span>
                         </FButtonWhite>}
 
                     </div>
@@ -611,6 +716,13 @@ export default function FFormUsers({ accessRules, users }) {
         form={userDeleteForm}
         setForm={setUserDeleteForm}
         submit={userDeleteFormSubmit}
+      />
+
+      {/* {Форма удаления физ. поста} */}
+      <FUserActivationForm
+        form={userActivationForm}
+        setForm={setUserActivationForm}
+        submit={userActivationFormSubmit}
       />
 
     </motion.div>

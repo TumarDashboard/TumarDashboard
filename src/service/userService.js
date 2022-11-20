@@ -248,15 +248,21 @@ class UserService {
     async changeUser(inputUserData) {
 
         //Validate date
-
         const userData = await validateYup(inputUserData, { deleteEmptyKey: false }).catch((e) => {
 
             throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
 
         });
 
-        //Google
+        if( userData.isActivated ){
+            delete userData['isActivated'];
+        }
 
+        if( userData.activationLink ){
+            delete userData['activationLink'];
+        }
+
+        //Google
         if (userData.uiAvatarsSrc) {
 
             const googleDriveFileID = await googleDrive.uploadUserAvatar(userData.id, userData.uiAvatarsSrc);
@@ -309,13 +315,13 @@ class UserService {
         const mongoUser = await mongoUserModel.findById(userData.id);
 
         if (!mongoUser) {
-            throw ApiError.BadRequest(`Пользователь с указанным id не найден`);
+            throw ApiError.BadRequest('Пользователь с указанным id не найден');
         }
         console.log(mongoUser.password);
         const isPassEquals = await bcrypt.compare(userData.password, mongoUser.password)
 
         if (!isPassEquals) {
-            throw ApiError.BadRequest(`Старый пароль указан некорректно`);
+            throw ApiError.BadRequest('Старый пароль указан некорректно');
         }
 
         const hashPassword = await bcrypt.hash(userData.passwordNew, parseInt(process.env.NEXT_PRIVATE_PASSWORD_SALT))
@@ -323,8 +329,6 @@ class UserService {
         mongoUser.password = hashPassword;
 
         await mongoUser.save();
-
-        return {}
 
     }
 
@@ -495,7 +499,7 @@ class UserService {
 
             //prepare responce
             const dtoUser = new DTOUser(mongoUser);
-
+            console.log(dtoUser,mongoUser);
             dtoUser._id = mongoUser._id.toString();
 
             if(dtoUser.positions){
@@ -675,6 +679,54 @@ class UserService {
 
         return { ...tokens, user: dtoUser }
 
+    }
+
+    async activateUserHard( inputData ) {
+        //Validate date
+        const userData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
+            throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
+        });
+
+        //mongo update
+        await mongoConnect();
+
+        const mongoUser = await mongoUserModel.findByIdAndUpdate(userData.id, { isActivated:true }).lean();
+
+        if (!mongoUser) {
+            throw ApiError.BadRequest('Пользователь с указанным id не найден');
+        }
+
+    }    
+    
+    async resetUserPasswordHard( inputData ) {
+        //Validate date
+        const userData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
+            throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
+        });
+
+        //password create
+        const password = 'State' + getCurrentDateStamp();
+
+        const hashPassword = await bcrypt.hash(password, parseInt(process.env.NEXT_PRIVATE_PASSWORD_SALT))
+
+        const activationLink = v4();
+
+        //mongo update
+        await mongoConnect();
+
+        const mongoUser = await mongoUserModel.findByIdAndUpdate(userData.id, { password: hashPassword, activationLink: activationLink }).lean();
+
+        if (!mongoUser) {
+            throw ApiError.BadRequest('Пользователь с указанным id не найден');
+        }
+
+        //Send activation link
+        await mailService.sendPasswordResetMail(mongoUser.email, 
+            `${process.env.NEXT_PUBLIC_API_URL}/authorization/activatelink/${mongoUser.activationLink}`).catch((e) => {
+
+            throw ApiError.BadRequest(`Произошла ошибка отправки письма для активации на почту ${email}( ${e.response} )`);
+
+        });
     }
 }
 

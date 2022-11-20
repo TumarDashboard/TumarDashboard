@@ -30,6 +30,23 @@ class MailService {
         })
 
     }
+
+    sendPasswordResetMail(to, link) {
+        
+        return this.transport.sendMail({
+            from: process.env.NEXT_PRIVATE_MAIL_ACTIVATE_LINK_SMTP_USER,
+            to: to,
+            subject: "Сброс пароля на " + process.env.NEXT_PUBLIC_API_URL,
+            text: "",
+            html: `
+                <div>
+                    <h1>Для ввода нового пароля перейдите по ссылке ниже</h1>
+                    ${link}
+                </div>
+            `
+        })
+
+    }
 }
 
 export default new MailService();

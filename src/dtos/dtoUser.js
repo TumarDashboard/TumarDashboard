@@ -21,6 +21,8 @@ export default class DTOUser {
     isActivated;
     uiAvatarsSrc;
     positions;
+    createdAt;
+    updatedAt;
 
     constructor(model) {
         this.surname = model.surname;
@@ -32,6 +34,8 @@ export default class DTOUser {
         this.isActivated = model.isActivated;
         this.uiAvatarsSrc = model.uiAvatarsSrc;
         this.positions = model.positions;
+        this.createdAt = model.createdAt;
+        this.updatedAt = model.updatedAt;
     }
 
     equals( dtoUser ){
@@ -126,28 +130,36 @@ export const validateYup = (dtoUser, options) => {
     Self функции
 -------------------------------------------------------------------------------------------------------*/
 export const changeUser = async (id, uiAvatarsSrc, surname, firstName, patronymic, positions) => {
-    return await fetchAuthMethod('/method/changeUser', { id, uiAvatarsSrc, surname, firstName, patronymic, positions });
+    return await fetchAuthMethod('/method/user/changeUser', { id, uiAvatarsSrc, surname, firstName, patronymic, positions });
 }
 
 export const changeUserPassword = async (id, password, passwordNew) => {
-    return await fetchAuth('/method/changeUserPassword', { id, password, passwordNew });
+    return await fetchAuth('/method/user/changeUserPassword', { id, password, passwordNew });
 }
 
 export const deleteUser = async (id, reason) => {
-    return await fetchAuthMethod('/method/deleteUser', { id, reason });
+    return await fetchAuthMethod('/method/user/deleteUser', { id, reason });
 }
 
 /*-------------------------------------------------------------------------------------------------------
     Hard функции
 -------------------------------------------------------------------------------------------------------*/
-export const createUserHard = async ( uiAvatarsSrc, email, surname, firstName, patronymic, positions ) => {
-    return await fetchAuthMethod('/method/createUserHard', { uiAvatarsSrc, email, surname, firstName, patronymic, positions });
+export const createUserHard = async ( idHard, uiAvatarsSrc, email, surname, firstName, patronymic, positions ) => {
+    return await fetchAuthMethod('/method/userHard/createUserHard', { idHard, uiAvatarsSrc, email, surname, firstName, patronymic, positions });
 }
 
-export const editUserHard = async ( id, uiAvatarsSrc, email, surname, firstName, patronymic, positions ) => {
-    return await fetchAuthMethod('/method/editUserHard', { id, uiAvatarsSrc, email, surname, firstName, patronymic, positions });
+export const editUserHard = async ( idHard, id, uiAvatarsSrc, email, surname, firstName, patronymic, positions ) => {
+    return await fetchAuthMethod('/method/userHard/editUserHard', { idHard, id, uiAvatarsSrc, email, surname, firstName, patronymic, positions });
 }
 
-export const deleteUserHard = async (id, idHard, reason) => {
-    return await fetchAuthMethod('/method/deleteUserHard', { id, idHard, reason });
+export const deleteUserHard = async (idHard, id, reason) => {
+    return await fetchAuthMethod('/method/userHard/deleteUserHard', { idHard, id, reason });
+}
+
+export const activateUserHard = async (idHard, id) => {
+    return await fetchAuthMethod('/method/userHard/activateUserHard', { idHard, id });
+}
+
+export const resetUserPasswordHard = async (idHard, id) => {
+    return await fetchAuthMethod('/method/userHard/resetUserPasswordHard', { idHard, id });
 }

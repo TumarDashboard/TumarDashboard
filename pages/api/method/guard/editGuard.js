@@ -1,7 +1,7 @@
 // import ms from 'ms';
-import checkCors from '../../../middleware/cors';
-import { catchErrorsApi } from '../../../middleware/exceptions';
-import service from '../../../src/service/guardService';
+import checkCors from '../../../../middleware/cors';
+import { catchErrorsApi } from '../../../../middleware/exceptions';
+import service from '../../../../src/service/guardService';
 // import loadGuardsDataFromExcel from '../../../temp/loadGuardsDataFromExcel';
 // import { setCookies } from '../../../middleware/cookies';
 

@@ -1,13 +1,13 @@
-import { FModalForm } from './FModalForm';
+import { FModalForm } from '../FModalForm';
 import { useState, useEffect } from 'react';
-import { FInputFile } from "../levelE_low/FInputFile";
-import { FButtonRed } from "../levelE_low/FButtonRed";
-import { FButtonWhite } from "../levelE_low/FButtonWhite";
-import { FSelect } from "../levelE_low/FSelect";
+import { FInputFile } from "../../levelE_low/FInputFile";
+import { FButtonRed } from "../../levelE_low/FButtonRed";
+import { FButtonWhite } from "../../levelE_low/FButtonWhite";
+import { FSelect } from "../../levelE_low/FSelect";
 
-import { equalArrays } from '../../src/utils/arrayUtils';
-import { FInputInitials } from '../levelE_low/FInputInitials';
-import { FInputTelephone } from '../levelE_low/FInputTelephone';
+import { equalArrays } from '../../../src/utils/arrayUtils';
+import { FInputInitials } from '../../levelE_low/FInputInitials';
+import { FInputTelephone } from '../../levelE_low/FInputTelephone';
 
 export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPosts, users }) {
 

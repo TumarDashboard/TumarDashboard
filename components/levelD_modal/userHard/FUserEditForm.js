@@ -1,20 +1,21 @@
-import { FModalForm } from './FModalForm';
+import { FModalForm } from '../FModalForm';
 import { useState, useEffect } from 'react';
 
 import Image from 'next/image';
-import { FInputNumber } from "../levelE_low/FInputNumber";
-import { FTextArea } from "../levelE_low/FTextArea";
-import { FInputFile } from "../levelE_low/FInputFile";
-import { FButtonRed } from "../levelE_low/FButtonRed";
-import { FButtonWhite } from "../levelE_low/FButtonWhite";
-import { FSelect } from "../levelE_low/FSelect";
-import { FSelectShifts } from "../levelE_low/FSelectShifts";
+import { FInputNumber } from "../../levelE_low/FInputNumber";
+import { FTextArea } from "../../levelE_low/FTextArea";
+import { FInputFile } from "../../levelE_low/FInputFile";
+import { FButtonRed } from "../../levelE_low/FButtonRed";
+import { FButtonWhite } from "../../levelE_low/FButtonWhite";
+import { FSelect } from "../../levelE_low/FSelect";
+import { FSelectShifts } from "../../levelE_low/FSelectShifts";
 
-import { equalArrays } from '../../src/utils/arrayUtils';
-import { FInputText } from '../levelE_low/FInputText';
-import { FInputInitials } from '../levelE_low/FInputInitials';
-import FPositionItemList from '../levelZ_variable/FPositionItemList';
-import { FInputEmail } from '../levelE_low/FInputEmail';
+import { equalArrays } from '../../../src/utils/arrayUtils';
+import { FInputText } from '../../levelE_low/FInputText';
+import { FInputInitials } from '../../levelE_low/FInputInitials';
+import FPositionItemList from '../../levelZ_variable/FPositionItemList';
+import { FInputEmail } from '../../levelE_low/FInputEmail';
+import { getCurrentDateStamp } from '../../../src/utils/dateUtils';
 
 export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
 
@@ -200,39 +201,42 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
           <FButtonRed
             className="hidden md:inline-flex m-4"
             disabled={!(form.isOpen && (operation == 'Добавить' ?
-              (isInputValidateEmail 
+              (isInputValidateEmail
                 && isInputValidateSurname
                 && isInputValidateFirstName
                 && isInputValidatePatronymic) :
-              (isInputValidateEmail 
+              (isInputValidateEmail
                 || isInputValidateSurname
                 || isInputValidateFirstName
                 || isInputValidatePatronymic
                 || (!equalArrays(inputPositions, currentUser?.positions))
                 || uriAvatar != null
               )
-            ))}          
+            ))}
             onClick={(e) => {
               if (operation == 'Добавить') {
                 submitAdd(e,
-                uriAvatar,
-                inputEmail,
-                inputSurname,
-                inputFirstName,
-                inputPatronymic,
-                inputPositions, 
-              )} else {
-                if(!equalArrays(inputPositions, currentUser?.positions) 
-                && !confirm('После проведения данной операции потребуется повторная авторизация пользователя'))
+                  uriAvatar,
+                  inputEmail,
+                  inputSurname,
+                  inputFirstName,
+                  inputPatronymic,
+                  inputPositions,
+                )
+              } else {
+                if (!equalArrays(inputPositions, currentUser?.positions)
+                  && !confirm('После проведения данной операции потребуется повторная авторизация пользователя'))
                   return;
                 submitEdit(e,
-                uriAvatar,
-                inputEmail,
-                inputSurname,
-                inputFirstName,
-                inputPatronymic,
-                inputPositions,
-              )}}}
+                  uriAvatar,
+                  inputEmail,
+                  inputSurname,
+                  inputFirstName,
+                  inputPatronymic,
+                  inputPositions,
+                )
+              }
+            }}
           >
             {operation}
           </FButtonRed>
@@ -315,6 +319,13 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
           />
         </div>
 
+        {/* {Информация о пароле} */}
+        {operation == 'Добавить' && <div className="form-item">
+          <span className="text-blue-700 break-words">
+            Пароль нового пользователя: <b>State{getCurrentDateStamp()}</b>
+          </span>
+        </div>}
+
         {/* {Ошибки} */}
         <div className="form-item">
           <span className="text-color_C italic break-words">
@@ -329,39 +340,42 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
 
           <FButtonRed
             disabled={!(form.isOpen && (operation == 'Добавить' ?
-              (isInputValidateEmail 
+              (isInputValidateEmail
                 && isInputValidateSurname
                 && isInputValidateFirstName
                 && isInputValidatePatronymic) :
-              (isInputValidateEmail 
+              (isInputValidateEmail
                 || isInputValidateSurname
                 || isInputValidateFirstName
                 || isInputValidatePatronymic
                 || (!equalArrays(inputPositions, currentUser?.positions))
                 || uriAvatar != null
               )
-            ))}         
+            ))}
             onClick={(e) => {
               if (operation == 'Добавить') {
                 submitAdd(e,
-                uriAvatar,
-                inputEmail,
-                inputSurname,
-                inputFirstName,
-                inputPatronymic,
-                inputPositions, 
-              )} else {
-                if(!equalArrays(inputPositions, currentUser?.positions) 
-                && !confirm('После проведения данной операции потребуется повторная авторизация пользователя'))
+                  uriAvatar,
+                  inputEmail,
+                  inputSurname,
+                  inputFirstName,
+                  inputPatronymic,
+                  inputPositions,
+                )
+              } else {
+                if (!equalArrays(inputPositions, currentUser?.positions)
+                  && !confirm('После проведения данной операции потребуется повторная авторизация пользователя'))
                   return;
                 submitEdit(e,
-                uriAvatar,
-                inputEmail,
-                inputSurname,
-                inputFirstName,
-                inputPatronymic,
-                inputPositions,
-              )}}}
+                  uriAvatar,
+                  inputEmail,
+                  inputSurname,
+                  inputFirstName,
+                  inputPatronymic,
+                  inputPositions,
+                )
+              }
+            }}
           >
             {operation}
           </FButtonRed>
@@ -375,7 +389,6 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
         </div>
 
       </div>
-
     </FModalForm>
   )
 }

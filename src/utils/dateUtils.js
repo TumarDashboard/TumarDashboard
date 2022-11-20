@@ -22,6 +22,14 @@ export function getCurrentDateStamp() {
 
 }
 
+export function getDateStamp(date) {
+    if (!date) {
+        return;
+    }
+    return `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+
+}
+
 const daysOfWeek = ["вс","пн", "вт", "ср", "чт", "пт", "сб" ];
 
 export function getDaysFromMonth(month){
