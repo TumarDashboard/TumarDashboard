@@ -1,10 +1,10 @@
-import Head from "next/head";
 import { motion } from "framer-motion";
+import Head from "next/head";
 import { validate } from "uuid";
-import FFormActivation from "../../../components/levelB_higth/FFormActivation";
+import FFormPasswordReset from "../../../components/levelB_higth/FFormPasswordReset";
 import { ApiError } from "../../../middleware/exceptions";
-import mongoConnect from "../../../src/mongo/mongoConnect";
 import mongoUserModel from "../../../src/mongo/models/mongoUserModel";
+import mongoConnect from "../../../src/mongo/mongoConnect";
 
 const content = (isFirstMount) => ({
   animate: {
@@ -14,13 +14,13 @@ const content = (isFirstMount) => ({
   }
 });
 
-export default function ActivateLink({ isFirstMount, activatelink }) {
+export default function PasswordResetLink({ isFirstMount, activatelink }) {
   return (
     <div
       className="flex-1"
     >
       <Head>
-        <title>Активация аккаунта</title>
+        <title>Восстановление пароля</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <motion.section exit={{ opacity: 0 }}>
@@ -29,7 +29,7 @@ export default function ActivateLink({ isFirstMount, activatelink }) {
           animate="animate"
           variants={content(isFirstMount)}
         >
-          <FFormActivation 
+          <FFormPasswordReset 
             activatelink={activatelink}
           />
         </motion.div>

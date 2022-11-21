@@ -33,7 +33,7 @@ const separator = {
     },
 };
 
-export default function FFormActivation({activatelink}) {
+export default function FFormPasswordReset({activatelink}) {
 
     /*
         Использование глобальных данных
@@ -119,7 +119,7 @@ export default function FFormActivation({activatelink}) {
                 className="mb-4 text-left"
             >
                 <p className="text-base sm:text-sm font-medium text-color_A title-font">
-                    Для активации Вашего аккаунта необходимо завершить регистрацию вводом пароля
+                    Для установки нового пароля Вашему аккаунту заполните поля ниже
                 </p>
             </motion.div>
 
@@ -170,7 +170,7 @@ export default function FFormActivation({activatelink}) {
                         hover:bg-red-700 active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200 
                         disabled:opacity-25 transition"
                 >
-                    Завершить регистрацию
+                    Сохранить
                 </button>
             </motion.div>
 

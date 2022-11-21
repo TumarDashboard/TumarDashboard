@@ -13,7 +13,7 @@ import mongoConnect from "../mongo/mongoConnect";
 import { ApiError } from "../../middleware/exceptions";
 import googleDrive from "../google/api/googleDrive";
 import mongoTimesheetsGuardPostModel from "../mongo/models/mongoTimesheetsGuardPostModel";
-import { getCurrentDateStamp } from "../utils/dateUtils";
+import { getCurrentDateStamp, getDateStamp } from "../utils/dateUtils";
 import { getPositionWithCodeList } from "../../components/levelZ_variable/FPositionItemList";
 import mongoose from "mongoose";
 import { equalArrays } from "../utils/arrayUtils";
@@ -703,22 +703,28 @@ class UserService {
         const userData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
             throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
         });
+        console.log(userData);
+        //mongo update
+        await mongoConnect();
+
+        const mongoUser = await mongoUserModel.findById(userData.id);
+
+        if (!mongoUser) {
+            throw ApiError.BadRequest('Пользователь с указанным id не найден');
+        }
 
         //password create
-        const password = 'State' + getCurrentDateStamp();
+        const password = 'State' + getDateStamp(mongoUser.createdAt);
 
         const hashPassword = await bcrypt.hash(password, parseInt(process.env.NEXT_PRIVATE_PASSWORD_SALT))
 
         const activationLink = v4();
 
-        //mongo update
-        await mongoConnect();
+        mongoUser.password = hashPassword;
 
-        const mongoUser = await mongoUserModel.findByIdAndUpdate(userData.id, { password: hashPassword, activationLink: activationLink }).lean();
+        mongoUser.activationLink = activationLink;
 
-        if (!mongoUser) {
-            throw ApiError.BadRequest('Пользователь с указанным id не найден');
-        }
+        await mongoUser.save();
 
         //Send activation link
         await mailService.sendPasswordResetMail(mongoUser.email, 

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import Image from 'next/image';
 import { useState } from "react";
-import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon, PencilAltIcon, TrashIcon, ShieldCheckIcon } from '@heroicons/react/solid';
+import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon, PencilAltIcon, TrashIcon, ShieldCheckIcon, LockClosedIcon } from '@heroicons/react/solid';
 import { FFilterText } from "../levelE_low/FFilterText";
 import { FButtonRed } from "../levelE_low/FButtonRed";
 import { FButtonWhite } from "../levelE_low/FButtonWhite";
@@ -9,10 +9,12 @@ import { FUserEditForm } from "../levelD_modal/userHard/FUserEditForm";
 import { FUserDeleteForm } from "../levelD_modal/userHard/FUserDeleteForm";
 import { ApiError } from "../../middleware/exceptions";
 import { useStore } from "../levelA/StoreProvider";
-import { createUserHard, editUserHard, deleteUserHard, activateUserHard } from "../../src/dtos/dtoUser";
+import { createUserHard, editUserHard, deleteUserHard, activateUserHard, resetUserPasswordHard } from "../../src/dtos/dtoUser";
 import { FButtonYellow } from "../levelE_low/FButtonYellow";
 import { FUserActivationForm } from "../levelD_modal/userHard/FUserActivationForm";
-
+import ReactTooltip from 'react-tooltip';
+import { FNoSSR } from "../levelC_middle/FNoSSR";
+import { FUserResetPasswordForm } from "../levelD_modal/userHard/FUserResetPasswordForm";
 const inputs = {
   initial: {
     y: -20,
@@ -82,6 +84,7 @@ export default function FFormUsers({ accessRules, users }) {
   const AReditUserHard = accessRules.includes('editUserHard');
   const ARdeleteUserHard = accessRules.includes('deleteUserHard');
   const ARactivateUserHard = accessRules.includes('activateUserHard');
+  const ARresetUserPasswordHard = accessRules.includes('resetUserPasswordHard');
   /*-------------------------------------------------------------------------------------------------------
       Данные таблицы
   -------------------------------------------------------------------------------------------------------*/
@@ -385,6 +388,47 @@ export default function FFormUsers({ accessRules, users }) {
     }
   }
 
+  /*-------------------------------------------------------------------------------------------------------
+      Модальное окно Формы удаления
+  -------------------------------------------------------------------------------------------------------*/
+  const [userResetPasswordForm, setUserResetPasswordForm] = useState({
+    isOpen: false
+  });
+
+  /*-------------------------------------------------------------------------------------------------------
+      Функция удаления поста Формы удаления
+  -------------------------------------------------------------------------------------------------------*/
+  const userResetPasswordFormSubmit = async (event) => {
+
+    event.preventDefault();
+
+    MOBXui.setLoading();
+
+    try {
+
+      if (MOBXuser.user && MOBXuser.user.id) {
+
+        // Отправляем запрос на сервер
+        await resetUserPasswordHard(
+          MOBXuser.user.id,
+          userResetPasswordForm.userId
+        );
+
+        // Закрываем модальное окно
+        setUserResetPasswordForm({ isOpen: false });
+      }
+
+    } catch (error) {
+
+      errorCallback(error, setUserResetPasswordForm);
+
+    } finally {
+
+      MOBXui.setLoading();
+
+    }
+  }
+
   /*----------------------------------------------------------------------------------------------------------------------------
     Переиспользование функции обработок ошибок
   ----------------------------------------------------------------------------------------------------------------------------*/
@@ -419,6 +463,7 @@ export default function FFormUsers({ accessRules, users }) {
       variants={inputs}
       className="w-full m-2"
     >
+      <FNoSSR><ReactTooltip delayShow={500} /></FNoSSR>
 
       {/* {Панель управления} */}
       <div
@@ -521,68 +566,8 @@ export default function FFormUsers({ accessRules, users }) {
                 key={user._id}
               >
 
-                {/* {Аватар, инициалы, Кнопки управления мобильного устройства} */}
+                {/* {Аватар, инициалы} */}
                 <td className="p-2 md:border text-left block md:table-cell">
-
-                  {/* {Кнопки управления мобильного устройства} */}
-                  <div className='flex md:hidden justify-end'>
-
-                    {ARactivateUserHard && !user.isActivated &&
-                      <FButtonYellow
-                        className="mr-2 flex"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setUserActivationForm({
-                            isOpen: true,
-                            index: index,
-                            email: user.email,
-                            userId: user._id,
-                            createdAt: user.createdAt
-                          })
-                        }}
-                      >
-                        <ShieldCheckIcon
-                          className="h-4 w-4"
-                        />
-                      </FButtonYellow>}
-
-                    {AReditUserHard &&
-                      <FButtonRed
-                        className="mr-2 flex"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setUserEditForm({
-                            isOpen: true,
-                            index: index,
-                            operation: 'Изменить',
-                            key: Math.random().toString(36),
-                            user: user
-                          })
-                        }}
-                      >
-                        <PencilAltIcon
-                          className="h-4 w-4"
-                        />
-                      </FButtonRed>}
-
-                    {ARdeleteUserHard &&
-                      <FButtonWhite
-                        className="flex"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setUserDeleteForm({
-                            isOpen: true,
-                            key: Math.random().toString(36),
-                            userEmail: user.email,
-                            userID: user._id,
-                          })
-                        }}
-                      >
-                        <TrashIcon
-                          className="h-4 w-4"
-                        />
-                      </FButtonWhite>}
-                  </div>
 
                   {/* {Аватар, инициалы */}
                   <div
@@ -628,12 +613,13 @@ export default function FFormUsers({ accessRules, users }) {
 
                 {/* {Кнопки управления компьютера} */}
                 {(AReditUserHard || ARdeleteUserHard || ARactivateUserHard) &&
-                  <td className="p-2 md:border text-left hidden md:table-cell w-1">
-                    <div className='flex justify-center '>
+                  <td className="p-2 md:border text-left block md:table-cell md:w-1">
+                    <div className='flex justify-end space-x-2'>
 
                       {ARactivateUserHard && !user.isActivated &&
                         <FButtonYellow
-                          className="mr-2 flex"
+                          className="flex"
+                          data-tip="Активировать"
                           onClick={(event) => {
                             event.stopPropagation();
 
@@ -649,12 +635,13 @@ export default function FFormUsers({ accessRules, users }) {
                           <ShieldCheckIcon
                             className="h-4 w-4"
                           />
-                          <span className='hidden 2xl:block text-xs'>Активировать</span>
+                          {/* <span className='hidden 2xl:block text-xs'>Активировать</span> */}
                         </FButtonYellow>}
 
                       {AReditUserHard &&
                         <FButtonRed
-                          className="mr-2 flex"
+                          className="flex"
+                          data-tip="Изменить"
                           onClick={(event) => {
                             event.stopPropagation();
                             setUserEditForm({
@@ -669,11 +656,13 @@ export default function FFormUsers({ accessRules, users }) {
                           <PencilAltIcon
                             className="h-4 w-4"
                           />
-                          <span className='hidden 2xl:block'>Изменить</span>
+                          {/* <span className='hidden 2xl:block'>Изменить</span> */}
                         </FButtonRed>}
 
                       {ARdeleteUserHard &&
                         <FButtonWhite
+
+                          data-tip="Удалить"
                           className="flex"
                           onClick={(event) => {
                             event.stopPropagation();
@@ -688,8 +677,29 @@ export default function FFormUsers({ accessRules, users }) {
                           <TrashIcon
                             className="h-4 w-4"
                           />
-                          <span className='hidden 2xl:block'>Удалить</span>
+                          {/* <span className='hidden 2xl:block'>Удалить</span> */}
                         </FButtonWhite>}
+
+                      {ARresetUserPasswordHard &&
+                        <FButtonRed
+                          className="flex"
+                          data-tip="Сбросить пароль"
+                          onClick={(event) => {
+                            event.stopPropagation();
+
+                            setUserResetPasswordForm({
+                              isOpen: true,
+                              index: index,
+                              email: user.email,
+                              userId: user._id,
+                              createdAt: user.createdAt
+                            })
+                          }}
+                        >
+                          <LockClosedIcon
+                            className="h-4 w-4"
+                          />
+                        </FButtonRed>}
 
                     </div>
                   </td>}
@@ -703,7 +713,7 @@ export default function FFormUsers({ accessRules, users }) {
 
       </table>
 
-      {/* {Форма добавления/редактирования физ. поста} */}
+      {/* {Форма добавления/редактирования пользователя} */}
       <FUserEditForm
         form={userEditForm}
         setForm={setUserEditForm}
@@ -711,18 +721,25 @@ export default function FFormUsers({ accessRules, users }) {
         submitEdit={userEdit}
       />
 
-      {/* {Форма удаления физ. поста} */}
+      {/* {Форма удаления пользователя} */}
       <FUserDeleteForm
         form={userDeleteForm}
         setForm={setUserDeleteForm}
         submit={userDeleteFormSubmit}
       />
 
-      {/* {Форма удаления физ. поста} */}
+      {/* {Форма активации пользователя} */}
       <FUserActivationForm
         form={userActivationForm}
         setForm={setUserActivationForm}
         submit={userActivationFormSubmit}
+      />
+
+      {/* {Форма активации пользователя} */}
+      <FUserResetPasswordForm
+        form={userResetPasswordForm}
+        setForm={setUserResetPasswordForm}
+        submit={userResetPasswordFormSubmit}
       />
 
     </motion.div>

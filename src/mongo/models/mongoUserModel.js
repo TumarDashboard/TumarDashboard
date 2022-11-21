@@ -39,7 +39,7 @@ export const MongooseUserSchema = new mongoose.Schema({
   },
   positions: {
     type: [String]
-  }
+  },
 }, { timestamps: true })
 
 export default mongoose.models == null ? mongoose.model('User', MongooseUserSchema) : (mongoose.models.User || mongoose.model('User', MongooseUserSchema))
