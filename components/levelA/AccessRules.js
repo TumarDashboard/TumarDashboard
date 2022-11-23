@@ -161,8 +161,10 @@ export const FApiMethodAccessRules = [
 ];
 
 export async function getApiMethodAccess(req, userData) {
-    const findedRule = FApiMethodAccessRules.find((rule) => req.nextUrl.pathname.search(rule.url) > -1);
-
+    
+    const findedRule = FApiMethodAccessRules.find((rule) => {
+        return req.nextUrl.pathname.search(rule.url+'\$') > -1
+    });
     if (findedRule) {
 
         if (!userData.positions || userData.positions.length === 0){
