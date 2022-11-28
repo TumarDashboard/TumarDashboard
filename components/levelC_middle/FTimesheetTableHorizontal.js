@@ -25,7 +25,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
   -------------------------------------------------------------------------------------------------------*/
 
   let letARchangeTimesheet = accessRules.includes('changeTimesheet');
-  let letARchangeTimesheetAll = accessRules.includes('changeTimesheet/userCompare/manager');
+  let letARchangeTimesheetAll = accessRules.includes('changeTimesheet/userCompare/userCompare');
 
   const ARchangeTimesheet = ((letARchangeTimesheet && !letARchangeTimesheetAll)
     || (letARchangeTimesheet && guardPost.manager._id === MOBXuser.user.id)
@@ -108,7 +108,10 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
 
         setTimesheetTableHeader(daysFromMonth);
 
-        const { guardsRow, optionGuards, manager, rate } = await getTimesheet(guardPost._id, value, guardPost.manager._id);
+        const { guardsRow, optionGuards, manager, rate } = await getTimesheet(
+          guardPost._id, 
+          guardPost.manager ? guardPost.manager._id : undefined, 
+          value, );
 
         if (value == currentMonth) {
           setInputGuardPostManager(guardPost.manager ? guardPost.manager._id : 'EMPTY');
@@ -544,7 +547,6 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
   /*----------------------------------------------------------------------------------------------------------------------------
   ----Функция Сохранения данных таблицы в базу----------------------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------*/
-
   const timesheetChangeHandle = async (event) => {
 
     event.preventDefault();
@@ -554,9 +556,9 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
     MOBXui.setLoading();
 
     try {
-
       await changeTimesheet(
         guardPost._id,
+        guardPost.manager ? guardPost.manager._id : undefined, 
         timesheetMonth,
         timesheetTableBody.reduce((result, guardRow) => {
           if (guardRow.timesheetShifts && guardRow.timesheetShifts.length > 0) {
@@ -568,7 +570,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
           }
           return result;
         }, []),
-        inputGuardPostManager, 
+        ARchangeTimesheetManager ? inputGuardPostManager : undefined, 
         ARchangeTimesheetRate ? inputGuardPostRate : undefined
       );
 
@@ -1141,13 +1143,13 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
         submitAdd={guardRowAdd}
         submitEdit={guardRowEdit}
         optionGuards={optionGuards}
-        setGuards={(guard) => {
+        setGuards={(guard, guardOption) => {
           setGuards(array => {
             array.unshift(guard);
             return array;
           });
           setOptionGuards(array => {
-            array.unshift(guard);
+            array.unshift(guardOption);
             return array;
           });
         }}

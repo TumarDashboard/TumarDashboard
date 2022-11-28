@@ -1,4 +1,4 @@
-import { CalendarIcon, PlusIcon, PencilAltIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, XIcon } from '@heroicons/react/solid';
+import { CalendarIcon, PlusIcon, PencilAltIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon } from '@heroicons/react/solid';
 import { motion } from "framer-motion";
 import Image from 'next/image';
 import { useState } from 'react';
@@ -14,6 +14,9 @@ import { FGuardPostDeleteForm } from '../levelD_modal/guardPost/FGuardPostDelete
 import { FGuardPostEditForm } from '../levelD_modal/guardPost/FGuardPostEditForm';
 import { FTimesheetPrintForm } from '../levelD_modal/timesheet/FTimesheetPrintForm';
 import { FFilterText } from '../levelE_low/FFilterText';
+import { FButtonWhiteSmall } from '../levelE_low/FButtonWhiteSmall';
+import { FTimesheetTableSelectGuardForm } from '../levelD_modal/timesheetTable/FTimesheetTableSelectGuardForm';
+import { FGuardPostSelectGuardForm } from '../levelD_modal/guardPost/FGuardPostSelectGuardForm';
 
 const inputs = {
   initial: {
@@ -36,6 +39,7 @@ const constTableHead = [
   { value: 'name', label: 'Наименование' },
   { value: 'address', label: 'Адрес' },
   { value: 'manager', label: 'НСО' },
+  { value: 'guards', label: 'Охранники' },
 ];
 
 const constTableHeadControl = { value: 'control' };
@@ -78,47 +82,47 @@ const sortingTableCallback = (a, b, rule, invert) => {
 
 var filterringTimeout = null;
 
-export default function FFormGuardPosts({ accessRules, userData, guardPosts, users }) {
-  /*-------------------------------------------------------------------------------------------------------
-      Использование глобальных данных
-  -------------------------------------------------------------------------------------------------------*/
+export default function FFormGuardPosts({ accessRules, userData, guardPosts, guardsData, users }) {
+  /*----Использование глобальных данных-------------------------------------------------------------------------------*/
   const router = useRouter();
 
   const { MOBXuser, MOBXui } = useStore();
 
-  /*-------------------------------------------------------------------------------------------------------
-      Определение правил доступа
-  -------------------------------------------------------------------------------------------------------*/
+  const [error, setError] = useState('');
+
+  /*----Определение правил доступа------------------------------------------------------------------------------------*/
   const ARcreateGuardPost = accessRules.includes('createGuardPost');
   const AReditGuardPost = accessRules.includes('editGuardPost');
   const AReditGuardPostRate = !accessRules.includes('editGuardPost/editBlock/rate');
-  // const AReditGuardPostManager = !accessRules.includes('editGuardPost/editBlock/manager');
   const AReditGuardPostAll = !accessRules.includes('editGuardPost/userCompare/manager');
   const ARdeleteGuardPost = accessRules.includes('deleteGuardPost');
   const ARgetTimesheetPrint = accessRules.includes('getTimesheetPrint');
-
+  const ARchangeTimesheetToday = accessRules.includes('changeTimesheetToday');
+  const ARchangeTimesheetTodayAll = !accessRules.includes('changeTimesheetToday/userCompare/guardPostManager');
   // console.log('accessRules %o',accessRules);
-  /*-------------------------------------------------------------------------------------------------------
-      Данные таблицы
-  -------------------------------------------------------------------------------------------------------*/
+  /*----Данные таблицы------------------------------------------------------------------------------------------------*/
   const [tableGuardPosts, setTableGuardPosts] = useState(guardPosts ? [...guardPosts] : []);
 
   const [renderTableGuardPosts, setRenderTableGuardPosts] = useState(guardPosts ? [...guardPosts] : []);
 
-  /*-------------------------------------------------------------------------------------------------------
-      Сортировка таблицы
-  -------------------------------------------------------------------------------------------------------*/
+  const [guards, setGuards] = useState(guardsData.map(guard => {
+    guard.label = [guard.surname, guard.firstName].join(' ');
+    guard.lower = guard.label.toLowerCase();
+    return guard;
+  }));
+
+  /*----Сортировка таблицы--------------------------------------------------------------------------------------------*/
   const [sortingRule, setSortingRule] = useState();
 
   const sortingTable = (rule) => {
 
-    if( rule == constTableHeadControl.value ){
+    if (rule == constTableHeadControl.value) {
       setRenderTableGuardPosts(array => {
-        return [...array.sort((a, b) =>{
-            return ( a.manager._id === MOBXuser.user.id )*-1;
+        return [...array.sort((a, b) => {
+          return (a.manager._id === MOBXuser.user.id) * -1;
         })];
       });
-    }else{
+    } else {
       const invert = rule == sortingRule ? -1 : 1;
       setRenderTableGuardPosts(array => {
         return [...array.sort((a, b) => sortingTableCallback(a, b, rule, invert))];
@@ -129,9 +133,7 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, use
 
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Фильтрация таблицы
-  -------------------------------------------------------------------------------------------------------*/
+  /*----Фильтрация таблицы--------------------------------------------------------------------------------------------*/
   const [inputFilterText, setInputFilterText] = useState([]);
 
   const filteringTable = (text) => {
@@ -170,16 +172,12 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, use
 
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Модальное окно Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*----Модальное окно Формы редактирования---------------------------------------------------------------------------*/
   const [guardPostEditForm, setGuardPostEditForm] = useState({
     isOpen: false
   });
 
-  /*-------------------------------------------------------------------------------------------------------
-      Создание физ. поста Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*----Создание физ. поста Формы редактирования----------------------------------------------------------------------*/
   const guardPostAdd = async (event,
     inputGuardPostNumber,
     inputGuardPostCallsign,
@@ -236,9 +234,7 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, use
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Изменение физ. поста Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*----Изменение физ. поста Формы редактирования---------------------------------------------------------------------*/
   const guardPostEdit = async (event,
     inputGuardPostNumber,
     inputGuardPostCallsign,
@@ -300,16 +296,12 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, use
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Модальное окно Формы удаления
-  -------------------------------------------------------------------------------------------------------*/
+  /*----Модальное окно Формы удаления-------------------------------------------------------------------------------*/
   const [guardPostDeleteForm, setGuardPostDeleteForm] = useState({
     isOpen: false
   });
 
-  /*-------------------------------------------------------------------------------------------------------
-      Функция удаления поста Формы удаления
-  -------------------------------------------------------------------------------------------------------*/
+  /*----Функция удаления поста Формы удаления-------------------------------------------------------------------------*/
   const guardPostDeleteFormSubmit = async (event, reason) => {
 
     event.preventDefault();
@@ -358,9 +350,7 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, use
     }
   }
 
-  /*----------------------------------------------------------------------------------------------------------------------------
-    Переиспользование функции обработок ошибок
-  ----------------------------------------------------------------------------------------------------------------------------*/
+  /*----Переиспользование функции обработок ошибок--------------------------------------------------------------------*/
   const errorCallback = (error, callback) => {
     if (error instanceof ApiError) {
 
@@ -385,15 +375,62 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, use
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Модальное окно Формы выгрузки графика рабочих часов
-  -------------------------------------------------------------------------------------------------------*/
+  /*----Модальное окно Формы выгрузки графика рабочих часов-----------------------------------------------------------*/
   const [timesheetPrintForm, setTimesheetPrintForm] = useState({
     isOpen: false
   });
 
   /*----------------------------------------------------------------------------------------------------------------------------
+  ----Модальное окно Формы редактирования Строки охранника----------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------*/
+  const [guardRowSelectGuardForm, setGuardRowSelectGuardForm] = useState({
+    isOpen: false
+  });
+
+  /*-------------------------------------------------------------------------------------------------------
+      Функция изменения Формы редактирования Строки охранника
+  -------------------------------------------------------------------------------------------------------*/
+  const guardRowEdit = (event,
+    inputGuard) => {
+
+    event.preventDefault();
+
+    setError('');
+
+    MOBXui.setLoading();
+
+    try {
+      // Обновляем таблицу в памяти
+      setTableGuardPosts(array => {
+        const index = array.findIndex(element => {
+          return element._id == guardRowSelectGuardForm.guardPost._id
+        });
+        if (index)
+          array[index].guardsToday = inputGuard;
+        return array;
+      });
+
+      // Обновляем отображаемую таблицу
+      setRenderTableGuardPosts(array => {
+        array[guardRowSelectGuardForm.index].guardsToday = inputGuard;
+        return array;
+      });
+
+      // Закрываем модальное окно
+      setGuardRowSelectGuardForm({ isOpen: false });
+
+    } catch (error) {
+
+      errorCallback(error, setGuardRowSelectGuardForm);
+
+    } finally {
+
+      MOBXui.setLoading();
+
+    }
+  }
+
+  /*------------------------------------------------------------------------------------------------------------------*/
 
   return (
     <motion.div
@@ -503,7 +540,7 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, use
             })}
 
             {/* Заголовок управления*/}
-            {(AReditGuardPost || ARdeleteGuardPost) &&
+            {(AReditGuardPost || ARdeleteGuardPost || ARchangeTimesheetToday) &&
               <th
                 className="block md:table-cell md:border bg-color_B p-2"
                 onClick={(e) => sortingTable(constTableHeadControl.value)}
@@ -540,63 +577,67 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, use
 
                 {/* {Фото, Номер, Кнопки управления мобильного устройства} */}
                 <td className="px-2 md:border text-left block md:table-cell">
-                  <div className="flex flex-row items-center justify-between md:justify-start">
+                  <div className="flex flex-row items-center justify-start">
 
                     {/* {Фото} */}
-                    {guardPost.photo && <Image
-                      className="h-8 w-8 rounded-full"
-                      width={32}
-                      height={32}
-                      src={guardPost.photo}
-                      alt=""
-                    />}
+                    {guardPost.photo && <div
+                      className="h-8 w-8"
+                    >
+                      <Image
+                        className="rounded-full"
+                        width={32}
+                        height={32}
+                        src={guardPost.photo}
+                        alt=""
+                      />
+                    </div>}
 
                     {/* {Номер} */}
                     <p className="text-black ml-1 text-xl font-bold">{guardPost.number}</p>
 
                     {/* {Кнопки управления мобильного устройства} */}
-                    {(AReditGuardPost || ARdeleteGuardPost) &&
-                    <div className='flex md:hidden'>
+                    {/* {(AReditGuardPost || ARdeleteGuardPost) &&
+                      <div className='flex md:hidden'>
 
-                      {((AReditGuardPost && AReditGuardPostAll)
-                        || (AReditGuardPost && guardPost.manager._id === MOBXuser.user.id)
-                        || (AReditGuardPost && guardPost.manager._id === userData.id)) &&
-                        <FButtonRed
-                          className="mr-2 flex"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setGuardPostEditForm({
-                              isOpen: true,
-                              index: index,
-                              operation: 'Изменить',
-                              key: Math.random().toString(36),
-                              guardPost: guardPost
-                            })
-                          }}
-                        >
-                          <PencilAltIcon
-                            className="h-4 w-4"
-                          />
-                        </FButtonRed>}
+                        {((AReditGuardPost && AReditGuardPostAll)
+                          || (AReditGuardPost && guardPost.manager._id === MOBXuser.user.id)
+                          || (AReditGuardPost && guardPost.manager._id === userData.id)) &&
+                          <FButtonRed
+                            className="mr-2 flex"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setGuardPostEditForm({
+                                isOpen: true,
+                                index: index,
+                                operation: 'Изменить',
+                                key: Math.random().toString(36),
+                                guardPost: guardPost
+                              })
+                            }}
+                          >
+                            <PencilAltIcon
+                              className="h-4 w-4"
+                            />
+                          </FButtonRed>}
 
-                      {ARdeleteGuardPost &&
-                        <FButtonWhite
-                          className="flex"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setGuardPostDeleteForm({
-                              isOpen: true,
-                              key: Math.random().toString(36),
-                              guardPostName: guardPost.name,
-                              guardPostId: guardPost._id,
-                            })
-                          }}
-                        >
-                          <TrashIcon
-                            className="h-4 w-4"
-                          />
-                        </FButtonWhite>}
-                    </div>}
+                        {ARdeleteGuardPost &&
+                          <FButtonWhite
+                            className="flex"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setGuardPostDeleteForm({
+                                isOpen: true,
+                                key: Math.random().toString(36),
+                                guardPostName: guardPost.name,
+                                guardPostId: guardPost._id,
+                              })
+                            }}
+                          >
+                            <TrashIcon
+                              className="h-4 w-4"
+                            />
+                          </FButtonWhite>}
+                      </div>} */}
 
                   </div>
                 </td>
@@ -612,28 +653,62 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, use
                 </td>
 
                 {/* {Адрес} */}
-                <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
+                <td className="px-1 md:p-2 md:border text-left block md:table-cell items-center">
                   {guardPost.address && <span><b className='md:hidden'>Адрес</b> {guardPost.address}</span>}
                 </td>
 
                 {/* {НСО} */}
-                <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
+                <td className="px-1 md:p-2 md:border text-left block md:table-cell items-center">
                   {guardPost.manager &&
                     <span className="break-all md:break-normal">
                       <b className='md:hidden'>НСО</b> {[guardPost.manager?.surname, guardPost.manager?.firstName].join(' ')}
                     </span>}
                 </td>
 
-                {/* {Кнопки управления компьютера} */}
-                {(AReditGuardPost || ARdeleteGuardPost) &&
-                  <td className="p-2 md:border text-left hidden md:table-cell w-1">
-                    <div className='flex'>
+                {/* {Охранники} */}
+                <td className="px-1 md:p-2 md:border text-left block md:table-cell items-center">
 
-                      {((AReditGuardPost && AReditGuardPostAll)
-                        || (AReditGuardPost && guardPost.manager._id === MOBXuser.user.id)
-                        || (AReditGuardPost && guardPost.manager._id === userData.id)) &&
+                  {/* {Список охранников} */}
+                  {guardPost.guardsToday && guardPost.guardsToday.length > 0 && guardPost.guardsToday.map(element => {
+                    return <p
+                      key={guardPost._id + element._id}
+                      className="truncate max-w-full md:max-w-[150px]"
+                    >
+                      {element.label}
+                    </p>
+                  })}
+                </td>
+
+                {/* {Кнопки управления компьютера} */}
+                {(AReditGuardPost || ARdeleteGuardPost || ARchangeTimesheetToday) &&
+                  <td className="p-2 md:border text-left block md:table-cell md:w-1">
+                    <div className='flex justify-end space-x-2'>
+
+                      {/* {Кнопка редактирования смены} */}
+                      {ARchangeTimesheetToday &&
+                        (ARchangeTimesheetTodayAll || guardPost.manager?._id === MOBXuser.user.id || guardPost.manager?._id === userData.id) &&
+                        <FButtonWhite
+                          className="flex"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setGuardRowSelectGuardForm({
+                              isOpen: true,
+                              key: Math.random().toString(36),
+                              index: index,
+                              guardPost: guardPost,
+                              guardsToday: guardPost.guardsToday
+                            })
+                          }}
+                        >
+                          <UserGroupIcon
+                            className="h-4 w-4"
+                          />
+                        </FButtonWhite>}
+
+                      {AReditGuardPost &&
+                        (AReditGuardPostAll || guardPost.manager?._id === MOBXuser.user.id || guardPost.manager?._id === userData.id) &&
                         <FButtonRed
-                          className="mr-2 flex"
+                          className="flex"
                           onClick={(event) => {
                             event.stopPropagation();
                             setGuardPostEditForm({
@@ -706,6 +781,25 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, use
         MOBXui={MOBXui}
         errorCallback={errorCallback}
         guardPosts={tableGuardPosts}
+      />
+
+      {/* {Форма добавления/редактирования строки охранника} */}
+      <FGuardPostSelectGuardForm
+        accessRules={accessRules}
+        form={guardRowSelectGuardForm}
+        setForm={setGuardRowSelectGuardForm}
+        submitEdit={guardRowEdit}
+        setGuards={(guard) => {
+          setGuards(array => {
+            array.unshift(guard);
+            return array;
+          });
+        }}
+        optionGuards={guards}
+        users={users}
+        guardPosts={guardPosts}
+        MOBXui={MOBXui}
+        errorCallback={errorCallback}
       />
 
     </motion.div>

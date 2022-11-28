@@ -17,6 +17,7 @@ export const FDashboardAccessRules = [
             positions.FPositionHRM,
             positions.FPositionBUH,
             positions.FPositionNSO,
+            positions.FPositionOPR,
         ]
     },
     {
@@ -87,7 +88,15 @@ export const FApiMethodAccessRules = [
         url: '/api/method/timesheet/changeTimesheet', access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM, editBlock: ['rate', 'manager'] },
-            { position: positions.FPositionNSO, editBlock: ['rate', 'manager'], userCompare: ['manager'] }
+            { position: positions.FPositionNSO, editBlock: ['rate', 'manager'], userCompare: ['guardPostManager'] }
+        ]
+    },
+    {
+        url: '/api/method/timesheet/changeTimesheetToday', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionOPR },
+            { position: positions.FPositionNSO, userCompare: ['guardPostManager'] },
         ]
     },
     {
@@ -96,7 +105,7 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
             { position: positions.FPositionBUH },
-            { position: positions.FPositionNSO, userCompare: ['manager'] }
+            { position: positions.FPositionNSO, userCompare: ['guardPostManager'] }
         ]
     },
     {
@@ -183,8 +192,6 @@ export async function getApiMethodAccess(req, userData) {
                         for (const userIdKey of access.userCompare) {
                             if(requestJson[userIdKey] != userData.id){
                                 return 'Вам отказано в доступе к выполняемой операции';
-                            }else{
-                                delete requestJson[userIdKey];
                             }
                         }
                     }

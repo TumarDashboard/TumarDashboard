@@ -39,7 +39,7 @@ export default function FFormGuardPostID({ accessRules, userData, guardPost, gua
   const AReditGuardPostAll = !accessRules.includes('editGuardPost/userCompare/manager');
   const ARdeleteGuardPost = accessRules.includes('deleteGuardPost');
   const ARgetTimesheet = accessRules.includes('getTimesheet');
-  const ARgetTimesheetAll = !accessRules.includes('getTimesheet/userCompare/manager');
+  const ARgetTimesheetAll = !accessRules.includes('getTimesheet/userCompare/guardPostManager');
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
   -------------------------------------------------------------------------------------------------------*/
@@ -274,13 +274,13 @@ export default function FFormGuardPostID({ accessRules, userData, guardPost, gua
         {/* {Панель информации} */}
         <div className='w-full flex flex-col bg-white p-2 rounded-md'>
 
-          {/* Менеджер и Смены*/}
+          {/* Позывной и Смены*/}
           <div className='flex flex-col md:flex-row w-full flex-wrap'>
 
             {/* Позывной */}
             {guardPostData.callsign &&
               <div className='form-item items-center'>
-                <span className="break-all md:break-normal font-bold">{guardPostData.name}</span>
+                <span className="break-all md:break-normal font-bold">{guardPostData.callsign}</span>
               </div>}
 
             {/* Смены */}

@@ -6,7 +6,7 @@ import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 import { FSelect } from "../../levelE_low/FSelect";
 
 import { equalArrays } from '../../../src/utils/arrayUtils';
-import { FInputInitials } from '../../levelE_low/FInputInitials';
+import { FInputInitials, inputInitialsValidate } from '../../levelE_low/FInputInitials';
 import { FInputTelephone } from '../../levelE_low/FInputTelephone';
 
 export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPosts, users }) {
@@ -150,8 +150,9 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
       setError(form.error);
     } else if (form.isOpen) {
       setOperation(form.operation);
-      setInputGuardSurname(form.guard?.surname);
-      setInputValidateGuardSurname(false);
+      GuardSurnameChange(form.guard?.surname, inputInitialsValidate(form.guard?.surname) );
+      // setInputGuardSurname(form.guard?.surname);
+      // setInputValidateGuardSurname(inputInitialsValidate());
       setInputGuardfirstName(form.guard?.firstName);
       setInputValidateGuardfirstName(false);
       setInputGuardPatronymic(form.guard?.patronymic);

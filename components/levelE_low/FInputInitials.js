@@ -3,6 +3,15 @@ import { useState } from 'react'
 const minlength = process.env.NEXT_PUBLIC_MIN_LENGTH_INITIALS;
 const maxlength = process.env.NEXT_PUBLIC_MAX_LENGTH_INITIALS;
 
+export function inputInitialsValidate(value) {
+    if (value)
+        return (value.length >= minlength)
+            && (value.length <= maxlength)
+            && (/[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ]/.test(value))
+            && (/^[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ]+$/.test(value));
+    return null;
+}
+
 export function FInputInitials({ id, className, onChange, placeholder, ...props }) {
 
     const [isInputValidate, setInputValidate] = useState(true);
@@ -11,10 +20,7 @@ export function FInputInitials({ id, className, onChange, placeholder, ...props 
 
         let value = e.target.value.trim();
 
-        let isValid = (value.length >= minlength)
-            && (value.length <= maxlength)
-            && (/[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ]/.test(value))
-            && (/^[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ]+$/.test(value));
+        let isValid = inputInitialsValidate(value);
 
         setInputValidate(value == "" || isValid);
         onChange(value, isValid);

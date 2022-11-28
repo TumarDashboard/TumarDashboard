@@ -23,6 +23,7 @@ class TimesheetService {
         try {
             //Validate date
 
+            console.log(inputData);
             const timesheetsData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
                 throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);

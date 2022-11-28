@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import Image from 'next/image';
 import { useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon, PencilAltIcon, TrashIcon, ShieldCheckIcon, LockClosedIcon } from '@heroicons/react/solid';
+import { BanIcon } from '@heroicons/react/outline';
 import { FFilterText } from "../levelE_low/FFilterText";
 import { FButtonRed } from "../levelE_low/FButtonRed";
 import { FButtonWhite } from "../levelE_low/FButtonWhite";
@@ -696,6 +697,9 @@ export default function FFormUsers({ accessRules, users }) {
                             })
                           }}
                         >
+                          <BanIcon
+                            className="absolute h-8 w-8 stroke-1"
+                          />
                           <LockClosedIcon
                             className="h-4 w-4"
                           />

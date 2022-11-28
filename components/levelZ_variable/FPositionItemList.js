@@ -8,14 +8,14 @@ export const FPositionBUH = 'FPBUH';
 export const FPositionTHN = 'FPTHN';
 
 const FPositionItemList = [
-    { label: "Отсутствует", value: 'FPEMP' },
-    { label: "Директор", value: 'FPDIR' },
+    { label: "Отсутствует", value: FPositionEMPTY },
+    { label: "Директор", value: FPositionDIR },
     { label: "Зам. директора", value: FPositionZDIR },
     { label: "Начальник службы охраны", value: FPositionNSO },
     { label: "Сотрудник отдела кадров", value: FPositionHRM },
-    { label: "Дежурный оператор", value: 'FPOPR' },
+    { label: "Дежурный оператор", value: FPositionOPR },
     { label: "Бухгалтер", value: FPositionBUH },
-    { label: "Сотрудник технического отдела", value: 'FPTHN' },
+    { label: "Сотрудник технического отдела", value: FPositionTHN },
 ];
 
 export function getPositionWithCode( value ){

@@ -20,12 +20,14 @@ import { motion } from "framer-motion";
 
 var filterringTimeout = null;
 
-export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submitEdit, optionGuards, setGuards, users, guardPosts, MOBXui, errorCallback }) {
+export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEdit, optionGuards, setGuards, users, guardPosts, MOBXui, errorCallback }) {
+
+  /*----Определение правил доступа------------------------------------------------------------------------------------*/
+  const ARcreateGuard = accessRules.includes('createGuard');
 
   /*-------------------------------------------------------------------------------------------------------
       Операция
   -------------------------------------------------------------------------------------------------------*/
-  const [operation, setOperation] = useState('');
   const [error, setError] = useState('');
 
   /*-------------------------------------------------------------------------------------------------------
@@ -58,36 +60,26 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
   const [inputGuard, setInputGuard] = useState([]);
 
   const selectOption = (newValue) => {
-
+    
     setInputFilter(array => {
-      if (operation == "Изменить" && inputGuard) {
-        array.unshift(inputGuard);
-      }
-      return array.filter(element => newValue.value != element.value)
+      return array.filter(element => newValue._id != element._id)
     });
 
     setOptionsForWork(array => {
-      if (operation == "Изменить" && inputGuard) {
-        array.unshift(inputGuard);
-      }
-      return array.filter(element => newValue.value != element.value)
+      return array.filter(element => newValue._id != element._id)
     });
 
-    if (operation == "Изменить") {
-      setInputGuard(newValue);
-    } else {
-      setInputGuard(array => {
-        array.push(newValue);
-        return array;
-      });
-    }
+    setInputGuard(array => {
+      array.push(newValue);
+      return array;
+    });
 
   }
 
   const unSelectOption = (value) => {
-
+    
     setInputGuard(array => {
-      return array.filter(element => value.value != element.value)
+      return array.filter(element => value._id != element._id)
     });
 
     setInputFilter(array => {
@@ -137,17 +129,12 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
         inputGuardGuardPosts
       );
 
-      const text = [responce.guard.surname, responce.guard.firstName].join(' ');
+      responce.guard.label = [responce.guard.surname, responce.guard.firstName].join(' ');
+      responce.guard.lower = responce.guard.label.toLowerCase();
 
-      const guard = {
-        label: text,
-        value: responce.guard._id,
-        lower: text.toLowerCase()
-      }
+      setGuards(responce.guard);
 
-      setGuards(responce.guard, guard);
-
-      selectOption(guard);
+      selectOption(responce.guard);
 
       setGuardEditForm({ isOpen: false });
 
@@ -171,10 +158,15 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
     if (form.error) {
       setError(form.error);
     } else if (form.isOpen) {
-      setOperation(form.operation);
-      setInputGuard(form.guard ? null : []);
-      setOptionsForWork(optionGuards);
-      setInputFilter(optionGuards);
+      setInputGuard(form.guardsToday ? form.guardsToday : []);
+      const guards = (form.guardsToday && form.guardsToday.length > 0) ? optionGuards.filter(guard=>{
+        for (const guardToday of form.guardsToday) {
+          if( guard._id == guardToday._id ) return false
+        }
+        return true;
+      }) : optionGuards ;
+      setOptionsForWork(guards);
+      setInputFilter(guards);
       setInputFilterText('');
       setError(null);
       document.body.classList.add("overscroll-y-contain");
@@ -185,17 +177,17 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
 
   return (
     <FModalForm
-      title={`${operation} охранника${operation == "Изменить" ? ' - ' + [form?.guard?.surname, form?.guard?.firstName].join(' ') : ''}`}
+      title={'Редактирование смены'}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
       className="flex flex-col items-start p-4 w-full max-h-[70vh] overflow-y-auto"
     >
 
       {/* Выбранные охранники - множество*/}
-      {operation == "Добавить" && inputGuard && inputGuard.length > 0 && <div className="form-item w-full flex flex-wrap mb-1">
+      {inputGuard && inputGuard.length > 0 && <div className="form-item w-full flex flex-wrap mb-1">
         {inputGuard.map((value, i) => {
           return <button
-            key={"key" + i + value.value}
+            key={"key" + i + value._id}
             className='flex items-center justify-center 
               border rounded-md px-2 m-1 bg-red-600 text-white 
               hover:bg-red-700 hover:text-color_F active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200'
@@ -210,14 +202,6 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
             />
           </button>
         })}
-      </div>}
-
-      {/* Выбранные охранники - одиночный */}
-      {operation == "Изменить" && inputGuard && inputGuard != form.guard?._id && 
-      <div className="form-item w-full flex mb-1 items-center justify-center">
-        <span className="text-color_G bg-color_C rounded-md px-2">
-          Изменить на {inputGuard.label}
-        </span>
       </div>}
 
       {/* Фильтр и Кнопка вызова Формы добавления охранника */}
@@ -244,6 +228,7 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
         </div>
 
         {/* Кнопка вызова Формы добавления охранника */}
+        {ARcreateGuard &&
         <div className="form-item">
           <button
             className="bg-color_B h-8 w-8 flex justify-center items-center rounded-md
@@ -264,7 +249,7 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
               hover:fill-color_G"
             />
           </button>
-        </div>
+        </div>}
 
       </div>
 
@@ -274,7 +259,7 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
       >
         {inputFilter && inputFilter.length > 0 && inputFilter.map((value, i) => {
           return <button
-            key={"key" + i + value.value}
+            key={"key" + i + value._id}
             className='w-full 
               hover:bg-color_C hover:text-color_G active:bg-color_C'
             onClick={(event) => {
@@ -300,15 +285,10 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
 
         <FButtonRed
           className=""
-          disabled={!(form.isOpen && (operation == 'Добавить' ?
-            (inputGuard && inputGuard.length > 0) :
-            (inputGuard && inputGuard != form.guard?._id)
-          ))}
-          onClick={(e) => operation == 'Добавить'
-            ? submitAdd(e, inputGuard.map(element => element.value))
-            : submitEdit(e, inputGuard.value)}
+          disabled={!(form.isOpen && inputGuard && inputGuard.length > 0)}
+          onClick={(e) => submitEdit(e, inputGuard)}
         >
-          {operation}
+          Изменить
         </FButtonRed>
 
         <FButtonWhite
