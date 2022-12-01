@@ -23,7 +23,6 @@ class TimesheetService {
         try {
             //Validate date
 
-            console.log(inputData);
             const timesheetsData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
                 throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
@@ -60,46 +59,31 @@ class TimesheetService {
             // change mongoTimesheetsGuardsModel
             if( manager && manager != 'EMPTY' ){
 
-                const user = await mongoUserModel.findById(manager);
-                
+                console.log(manager, rate ? rate : null);
+
+                const user = await mongoUserModel.findById(manager) || await mongoUserArchiveModel.findById(manager);
+
                 if( user ){
 
-                    await mongoTimesheetsGuardPostModel.updateOne({
+                    console.log(await mongoTimesheetsGuardPostModel.updateOne({
                         guardPost: guardPost, 
                         month: month
                     }, {
-                        manager: user.id, 
-                        managerSheme: user.constructor.modelName,
-                        rate: rate
+                            manager: user.id, 
+                            managerSheme: user.constructor.modelName,
+                            rate: rate
                     }, {
                         upsert: true
-                    });
+                    }));
 
                 }else{
 
-                    const userArchive = await mongoUserArchiveModel.findById(manager);
+                    throw ApiError.BadRequest(`Неккоректно указан ID менеджера: ${manager}`);
 
-                    if( userArchive ){
-
-                        await mongoTimesheetsGuardPostModel.updateOne({
-                            guardPost: guardPost, 
-                            month: month
-                        }, {
-                            manager: userArchive.id, 
-                            managerSheme: userArchive.constructor.modelName,
-                            rate: rate
-                        }, {
-                            upsert: true
-                        });
-
-                    }else{
-
-                        throw ApiError.BadRequest(`Неккоректно указан ID менеджера: ${manager}`);
-
-                    }
                 }
 
             }else if( rate ){
+
                 await mongoTimesheetsGuardPostModel.updateOne({
                     guardPost: guardPost, 
                     month: month
@@ -110,7 +94,8 @@ class TimesheetService {
                 }, {
                     upsert: true
                 });
-            }else{
+
+            }else if(manager === 'EMPTY'){
                 await mongoTimesheetsGuardPostModel.deleteOne({guardPost: guardPost, month: month});
             }
 
@@ -265,7 +250,7 @@ class TimesheetService {
                 } } },
                 { $sort : { number : 1, callsign: 1 } }
             ]);
-            
+
             // Переводим ObjectID найденных ФИЗ. ПОСТОВ с имеющимися ГРАФИКАМИ СМЕН
             const responceTimesheetsGuardsLean = responceTimesheetsGuards.map((element, index)=>{
                 element._id = element._id.toString();

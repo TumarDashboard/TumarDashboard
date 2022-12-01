@@ -45,9 +45,9 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
   const [inputFilterText, setInputFilterText] = useState([]);
 
   const filterChange = (text) => {
-    var text = text.toLowerCase();
+    var text = text.toLowerCase().replace(/\s/g, '');
     if (text) {
-      setInputFilter(optionsForWork.filter((value) => { return value.lower?.includes(text) }))
+      setInputFilter(optionsForWork.filter((value) => { return value.lower?.includes(text) }));
     } else {
       setInputFilter(optionsForWork)
     }
@@ -77,7 +77,7 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
   }
 
   const unSelectOption = (value) => {
-    
+
     setInputGuard(array => {
       return array.filter(element => value._id != element._id)
     });
@@ -129,8 +129,8 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
         inputGuardGuardPosts
       );
 
-      responce.guard.label = [responce.guard.surname, responce.guard.firstName].join(' ');
-      responce.guard.lower = responce.guard.label.toLowerCase();
+      responce.guard.label = [responce.guard.surname, responce.guard.firstName, responce.guard.telephone].join(' ');
+      responce.guard.lower = responce.guard.label.toLowerCase().replace(/\s/g, '');
 
       setGuards(responce.guard);
 

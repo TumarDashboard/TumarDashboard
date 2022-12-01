@@ -28,6 +28,10 @@ module.exports = async (phase, { defaultConfig }) => {
             NEXT_PUBLIC_MIN_LENGTH_PASSWORD: '4',
             NEXT_PUBLIC_MAX_LENGTH_PASSWORD: '30',
 
+            // #Min and Max data for number rate
+            NEXT_PUBLIC_MIN_LENGTH_RATE_INPUT: '1',
+            NEXT_PUBLIC_MAX_LENGTH_RATE_INPUT: '100000',
+
             // #Max count for shifts
             NEXT_PUBLIC_MAX_COUNT_SHIFTS: '20',
             

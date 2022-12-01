@@ -52,8 +52,6 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   const users = await mongoUserModel.find({},'-password -activationLink -__v -updatedAt').lean();
 
-  console.log(users);
-
   users.forEach(value=>{
     value._id = value._id.toString();
     

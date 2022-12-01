@@ -113,12 +113,14 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
           guardPost.manager ? guardPost.manager._id : undefined, 
           value, );
 
+        console.log('guardPost.rate %o', rate);
+
         if (value == currentMonth) {
           setInputGuardPostManager(guardPost.manager ? guardPost.manager._id : 'EMPTY');
           setInputGuardPostRate(guardPost.rate ? guardPost.rate : null)
         } else {
           setInputGuardPostManager(manager);
-          setInputGuardPostRate(rate ? rate : (guardPost.rate ? guardPost.rate : null));
+          setInputGuardPostRate(rate ? rate : null);
         }
 
         const tableFooter = new Array(daysFromMonth.length + 2).fill(0);
@@ -274,6 +276,8 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
   -------------------------------------------------------------------------------------------------------*/
   const guardCellSelectShift = (event) => {
 
+    setTimesheetChanged(false);
+    
     setGuardPostDataShifts(array => {
       array.push(event.target.id);
       return array;
@@ -556,6 +560,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
     MOBXui.setLoading();
 
     try {
+      console.log(inputGuardPostRate);
       await changeTimesheet(
         guardPost._id,
         guardPost.manager ? guardPost.manager._id : undefined, 
@@ -728,7 +733,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
                             value={inputGuardPostRate ? inputGuardPostRate : ''}
                             onChange={(e) => {
                               setTimesheetChanged(false);
-                              setInputGuardPostRate(e.target.value);
+                              setInputGuardPostRate(parseInt(e.target.value));
                             }}
                             className="border border-gray-300 block w-32
                             focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 

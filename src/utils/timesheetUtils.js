@@ -92,17 +92,18 @@ export function timesheetPrintServer( responce, usersData, date ) {
     });
 
     // Header 
+    let headerCellCenter = Math.trunc(columns/2);
     var customCell = worksheet.getCell(1, 2);
     customCell.font = Style.FontDefaultBold;
     customCell.alignment = Style.AlignmentMiddleLeft;
     customCell.value = `НСО: ${NSOinitials ? NSOinitials : 'не указан'}`;
-    worksheet.getRow(1).height = (defaultFontSize + 5) * 4;
+    worksheet.mergeCells(1, 2, 1, headerCellCenter-1);
 
-    customCell = worksheet.getCell(1, 3);
+    customCell = worksheet.getCell(1, headerCellCenter);
     customCell.font = Style.FontDefaultBold;
     customCell.alignment = Style.AlignmentMiddleRightWrapText;
     customCell.value = `Утверждаю \r\n Директор ТОО \r\n "${companyName}" \r\n _______________Ким А.А.`;
-    worksheet.mergeCells(1, 3, 1, columns);
+    worksheet.mergeCells(1, headerCellCenter, 1, columns);
     worksheet.getRow(1).height = (defaultFontSize + 5) * 4;
 
     customCell = worksheet.getCell(2, 1);

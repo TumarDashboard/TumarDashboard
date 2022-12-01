@@ -1,6 +1,9 @@
-import { object, lazy, string } from "yup";
+import { object, lazy, string, number } from "yup";
 import { fetchAuthFileMethod, fetchAuthMethod } from "../../middleware/requests";
 import { mapValue } from "../utils/arrayUtils";
+
+const minlengthRateNumber = process.env.NEXT_PUBLIC_MIN_LENGTH_RATE_INPUT;
+const maxlengthRateNumber = process.env.NEXT_PUBLIC_MAX_LENGTH_RATE_INPUT;
 
 export default class DTOTimesheet {
 
@@ -38,6 +41,14 @@ export const validateYup = (dtoGuardPost, options) => {
                 if (key === 'id' || key === '_id') {
                     return string()
                         .required('Не указан id пользователя')
+                }
+
+                if (key === 'rate') {
+                    return number()
+                        .nullable()
+                        .integer('Для номера могут использоваться только цифры')
+                        .min(minlengthRateNumber, `Кол-во цифр должно быть в диапозоне от ${minlengthRateNumber} до ${maxlengthRateNumber}`)
+                        .max(maxlengthRateNumber, `Кол-во цифр должно быть в диапозоне от ${minlengthRateNumber} до ${maxlengthRateNumber}`)
                 }
 
             }

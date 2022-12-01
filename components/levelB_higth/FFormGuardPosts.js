@@ -17,6 +17,7 @@ import { FFilterText } from '../levelE_low/FFilterText';
 import { FButtonWhiteSmall } from '../levelE_low/FButtonWhiteSmall';
 import { FTimesheetTableSelectGuardForm } from '../levelD_modal/timesheetTable/FTimesheetTableSelectGuardForm';
 import { FGuardPostSelectGuardForm } from '../levelD_modal/guardPost/FGuardPostSelectGuardForm';
+import { FGuardPostShowGuardForm } from '../levelD_modal/guardPost/FGuardPostShowGuardForm';
 
 const inputs = {
   initial: {
@@ -106,8 +107,8 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
   const [renderTableGuardPosts, setRenderTableGuardPosts] = useState(guardPosts ? [...guardPosts] : []);
 
   const [guards, setGuards] = useState(guardsData.map(guard => {
-    guard.label = [guard.surname, guard.firstName].join(' ');
-    guard.lower = guard.label.toLowerCase();
+    guard.label = [guard.surname, guard.firstName, guard.telephone].join(' ');
+    guard.lower = guard.label.toLowerCase().replace(/\s/g, '');;
     return guard;
   }));
 
@@ -380,16 +381,12 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
     isOpen: false
   });
 
-  /*----------------------------------------------------------------------------------------------------------------------------
-  ----Модальное окно Формы редактирования Строки охранника----------------------------------------------------------------------
-  ----------------------------------------------------------------------------------------------------------------------------*/
-  const [guardRowSelectGuardForm, setGuardRowSelectGuardForm] = useState({
+  /*----Модальное окно Формы редактирования Строки охранника----------------------------------------------------------*/
+  const [guardPostSelectGuardForm, setGuardPostSelectGuardForm] = useState({
     isOpen: false
   });
 
-  /*-------------------------------------------------------------------------------------------------------
-      Функция изменения Формы редактирования Строки охранника
-  -------------------------------------------------------------------------------------------------------*/
+  /*----Функция изменения Формы редактирования Строки охранника-------------------------------------------------------*/
   const guardRowEdit = (event,
     inputGuard) => {
 
@@ -403,7 +400,7 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
       // Обновляем таблицу в памяти
       setTableGuardPosts(array => {
         const index = array.findIndex(element => {
-          return element._id == guardRowSelectGuardForm.guardPost._id
+          return element._id == guardPostSelectGuardForm.guardPost._id
         });
         if (index)
           array[index].guardsToday = inputGuard;
@@ -412,16 +409,16 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
 
       // Обновляем отображаемую таблицу
       setRenderTableGuardPosts(array => {
-        array[guardRowSelectGuardForm.index].guardsToday = inputGuard;
+        array[guardPostSelectGuardForm.index].guardsToday = inputGuard;
         return array;
       });
 
       // Закрываем модальное окно
-      setGuardRowSelectGuardForm({ isOpen: false });
+      setGuardPostSelectGuardForm({ isOpen: false });
 
     } catch (error) {
 
-      errorCallback(error, setGuardRowSelectGuardForm);
+      errorCallback(error, setGuardPostSelectGuardForm);
 
     } finally {
 
@@ -429,6 +426,11 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
 
     }
   }
+
+  /*----Модальное окно Формы просмотра Строки охранника---------------------------------------------------------------*/
+  const [guardPostShowGuardForm, setGuardPostShowGuardForm] = useState({
+    isOpen: false
+  });
 
   /*------------------------------------------------------------------------------------------------------------------*/
 
@@ -666,7 +668,21 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
                 </td>
 
                 {/* {Охранники} */}
-                <td className="px-1 md:p-2 md:border text-left block md:table-cell items-center">
+                <td 
+                  className="px-1 md:p-2 md:border text-left block md:table-cell items-center hover:text-blue-500"
+                  onClick={(event) => {
+                    if(guardPost.guardsToday && guardPost.guardsToday.length > 0){
+                      event.stopPropagation();
+                      setGuardPostShowGuardForm({
+                        isOpen: true,
+                        key: Math.random().toString(36),
+                        index: index,
+                        guardPost: guardPost,
+                        guardsToday: guardPost.guardsToday
+                      })
+                    }
+                  }}
+                >
 
                   {/* {Список охранников} */}
                   {guardPost.guardsToday && guardPost.guardsToday.length > 0 && guardPost.guardsToday.map(element => {
@@ -691,7 +707,7 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
                           className="flex"
                           onClick={(event) => {
                             event.stopPropagation();
-                            setGuardRowSelectGuardForm({
+                            setGuardPostSelectGuardForm({
                               isOpen: true,
                               key: Math.random().toString(36),
                               index: index,
@@ -786,8 +802,8 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
       {/* {Форма добавления/редактирования строки охранника} */}
       <FGuardPostSelectGuardForm
         accessRules={accessRules}
-        form={guardRowSelectGuardForm}
-        setForm={setGuardRowSelectGuardForm}
+        form={guardPostSelectGuardForm}
+        setForm={setGuardPostSelectGuardForm}
         submitEdit={guardRowEdit}
         setGuards={(guard) => {
           setGuards(array => {
@@ -802,6 +818,11 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
         errorCallback={errorCallback}
       />
 
+      {/* {Форма добавления/редактирования строки охранника} */}
+      <FGuardPostShowGuardForm
+        form={guardPostShowGuardForm}
+        setForm={setGuardPostShowGuardForm}
+      />
     </motion.div>
   )
 
