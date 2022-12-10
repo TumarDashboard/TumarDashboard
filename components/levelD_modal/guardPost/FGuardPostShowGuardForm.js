@@ -12,7 +12,7 @@ import { FSelectShifts } from "../../levelE_low/FSelectShifts";
 
 import { equalArrays } from '../../../src/utils/arrayUtils';
 import { FInputText } from '../../levelE_low/FInputText';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 
 export function FGuardPostShowGuardForm({ accessRules, form, setForm, submitAdd, submitEdit, users }) {
 

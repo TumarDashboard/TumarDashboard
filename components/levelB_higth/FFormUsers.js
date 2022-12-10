@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon, PencilAltIcon, TrashIcon, ShieldCheckIcon, LockClosedIcon } from '@heroicons/react/solid';
 import { BanIcon } from '@heroicons/react/outline';

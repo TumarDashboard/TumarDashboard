@@ -1,6 +1,6 @@
 import { PlusIcon, PencilAltIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, XIcon } from '@heroicons/react/solid';
 import { motion } from "framer-motion";
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { useState } from 'react';
 
 import { useStore } from "../levelA/StoreProvider";

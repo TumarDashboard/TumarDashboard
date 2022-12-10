@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useState } from 'react';
 import { useRouter } from "next/router";
 import { observer } from 'mobx-react-lite'
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { useStore } from "../../levelA/StoreProvider";
 import { changeUser, deleteUser } from "../../../src/dtos/dtoUser";
 import { ApiError } from "../../../middleware/exceptions";

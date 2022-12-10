@@ -7,7 +7,7 @@ import FNextLink from '../levelE_low/FNextLink';
 import FMenuToggle from "../levelE_low/FMenuToggle";
 import { motion, useCycle } from "framer-motion";
 import Link from 'next/link';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import getDashboardItemList from "../levelZ_variable/FDashboardItemList";
 
 const blackBox = {

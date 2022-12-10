@@ -1,7 +1,7 @@
 import { FModalForm } from '../FModalForm';
 import { useState, useEffect } from 'react';
 
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { FInputNumber } from "../../levelE_low/FInputNumber";
 import { FTextArea } from "../../levelE_low/FTextArea";
 import { FInputFile } from "../../levelE_low/FInputFile";

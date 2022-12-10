@@ -1,6 +1,6 @@
 import { CalendarIcon, PlusIcon, PencilAltIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon } from '@heroicons/react/solid';
 import { motion } from "framer-motion";
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { useState } from 'react';
 import { useRouter } from "next/router";
 

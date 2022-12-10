@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import FNextLink from '../levelE_low/FNextLink';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')

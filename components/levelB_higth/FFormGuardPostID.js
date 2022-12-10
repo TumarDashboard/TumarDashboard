@@ -1,6 +1,6 @@
 import { PencilAltIcon, ReplyIcon, TrashIcon } from '@heroicons/react/solid';
 import { motion } from "framer-motion";
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { useRouter } from "next/router";
 import { useState } from 'react';
 

@@ -1,6 +1,6 @@
 import { ArchiveIcon, StopIcon, PlusIcon, ReplyIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
 import { motion, useDragControls } from "framer-motion";
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from "next/router";
 

@@ -1,6 +1,6 @@
 import { ArchiveIcon, PencilAltIcon, PlusIcon, StopIcon, TrashIcon } from '@heroicons/react/solid';
 import { motion, useDragControls } from "framer-motion";
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import { useEffect, useRef, useState } from 'react';
 
 import { ApiError } from "../../middleware/exceptions";
