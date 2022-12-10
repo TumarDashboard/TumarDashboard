@@ -63,7 +63,7 @@ class TimesheetService {
 
                 // console.log(manager, rate ? rate : null);
 
-                const user = await mongoUserModel.findById(manager) || await mongoUserArchiveModel.findById(manager);
+                const user = (await mongoUserModel.findById(manager)) || (await mongoUserArchiveModel.findById(manager));
 
                 if (user) {
 

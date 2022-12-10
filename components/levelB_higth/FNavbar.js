@@ -73,9 +73,8 @@ const FNavbar = observer( function FNavbar() {
     }
 
     return (
-
         // ${isSidebar ? 'h-20' : 'h-screen md:h-20'}
-        
+
         <nav
             className="block lg:fixed z-40 w-full"
             id="FNavbar"
@@ -216,12 +215,12 @@ const FNavbar = observer( function FNavbar() {
                                         onClick={toggle}
                                         className={`flex items-center mt-4 py-2 px-4 bg-color_B text-color_F
                                         ${router.pathname.includes(item.url) ? '' : 'bg-opacity-25'}`}
-                                    >
+                                        legacyBehavior>
                                         {item.icon}
                                         <p className="mx-3">{item.text}</p>
                                     </Link>
                                 </motion.div>
-                            )
+                            );
                         }) }
                     </div>
 
@@ -229,7 +228,6 @@ const FNavbar = observer( function FNavbar() {
             ) : null}
 
         </nav>
-
     );
 
 });

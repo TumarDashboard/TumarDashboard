@@ -22,11 +22,11 @@ export function FInputEmail({ onEmailChange, ...props }) {
 
         var error = '';
 
-        const isValid = value && !!await validationSchema.validate({ value }, { abortEarly: false }).catch((e) => {
+        const isValid = value && !!(await validationSchema.validate({ value }, { abortEarly: false }).catch((e) => {
 
             error = `Электронный адрес ${e.errors.join(", и ")}`;
 
-        });
+        }));
 
         setInputError(error);
 

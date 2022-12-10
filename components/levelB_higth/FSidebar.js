@@ -48,7 +48,6 @@ const FSidebar = observer( function FSidebar() {
     const router = useRouter();
 
     return (
-
         <aside
             id="sidebar"
             className="fixed hidden z-20 lg:flex h-full pt-20"
@@ -73,12 +72,12 @@ const FSidebar = observer( function FSidebar() {
                                 key={`navItem${item.id}`}
                                 className={`flex items-center mt-4 py-2 px-4 bg-color_C text-color_F
                                 ${router.pathname.includes(item.url) ? '' : 'bg-opacity-25'}`}
-                            >
+                                legacyBehavior>
                                 {item.icon}
                                 <p className="mx-3">{item.text}</p>
                             </Link>
                         </motion.div>
-                    )
+                    );
                 })}
             </motion.nav>
         </aside>

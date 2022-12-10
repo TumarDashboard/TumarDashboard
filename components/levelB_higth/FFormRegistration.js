@@ -261,7 +261,7 @@ export default function FFormRegistration() {
             <motion.div
                 animate={onError ? 'animate' : 'initial'}
                 variants={inputs}
-                className="flex flex-col w-full text-center w-full"
+                className="flex flex-col w-full text-center"
             >
                 <h1 className="text-color_C italic break-words">
                     {onError}

@@ -73,7 +73,7 @@ export const validateYup = (dtoUser, options) => {
                         .max(maxlengthFullName, `Фамилия должна содержать от ${minlengthFullName} до ${maxlengthFullName} символов`)
                         .matches(/(?=.*[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ])^[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ]+/,
                             'Для фамилии могут использоваться буквы только русского и казахского алфавитов')
-                        .required('Не указана фамилия')
+                        .required('Не указана фамилия');
                 }
 
                 if (key === 'firstName') {
@@ -82,7 +82,7 @@ export const validateYup = (dtoUser, options) => {
                         .max(maxlengthFullName, `Имя должно содержать от ${minlengthFullName} до ${maxlengthFullName} символов`)
                         .matches(/(?=.*[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ])^[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ]+/,
                             'Для имени могут использоваться буквы только русского и казахского алфавитов')
-                        .required('Не указано имя')
+                        .required('Не указано имя');
                 }
 
                 if (key === 'patronymic' && dtoUser[key]) {
@@ -91,7 +91,7 @@ export const validateYup = (dtoUser, options) => {
                         .max(maxlengthFullName, `Отчество должно содержать от ${minlengthFullName} до ${maxlengthFullName} символов`)
                         .matches(/(?=.*[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ])^[аАәӘбБвВгГғҒдДеЕёЁжЖзЗиИйЙкКқҚлЛмМнНңҢоОөӨпПрРсСтТуУұҰүҮфФхХһҺцЦчЧшШщЩъЪыЫіІїЇьЬэЭюЮяЯ]+/,
                             'Для отчества могут использоваться буквы только русского и казахского алфавитов')
-                        .required('Не указано отчество')
+                        .required('Не указано отчество');
                 }
 
                 if (key === 'email') {
@@ -107,7 +107,7 @@ export const validateYup = (dtoUser, options) => {
                         .min(minlengthPassword, `Пароль должен содержать от ${minlengthPassword} до ${maxlengthPassword} символов`)
                         .max(maxlengthPassword, `Пароль должен содержать от ${minlengthPassword} до ${maxlengthPassword} символов`)
                         .matches(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Пароль должен содержать как минимум одну строчную букву, одну заглавную букву и одну цифру')
-                        .required('Не указан пароль')
+                        .required('Не указан пароль');
                 }
 
                 if (key === 'passwordNew') {
@@ -115,7 +115,7 @@ export const validateYup = (dtoUser, options) => {
                         .min(minlengthPassword, `Новый пароль должен содержать от ${minlengthPassword} до ${maxlengthPassword} символов`)
                         .max(maxlengthPassword, `Новый пароль должен содержать от ${minlengthPassword} до ${maxlengthPassword} символов`)
                         .matches(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Пароль должен содержать как минимум одну строчную букву, одну заглавную букву и одну цифру')
-                        .required('Не указан пароль')
+                        .required('Не указан пароль');
                 }
 
             }

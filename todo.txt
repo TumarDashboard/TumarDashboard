@@ -32,3 +32,6 @@ npm i next@latest react@latest react-dom@latest
 
 npm install framer-motion@latest
 npm install react-tooltip@latest
+
+npx @next/codemod@latest new-link
+npx @next/codemod@latest next-image-to-legacy-image
