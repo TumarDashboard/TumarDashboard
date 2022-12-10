@@ -18,6 +18,7 @@ import { FButtonWhiteSmall } from '../levelE_low/FButtonWhiteSmall';
 import { FTimesheetTableSelectGuardForm } from '../levelD_modal/timesheetTable/FTimesheetTableSelectGuardForm';
 import { FGuardPostSelectGuardForm } from '../levelD_modal/guardPost/FGuardPostSelectGuardForm';
 import { FGuardPostShowGuardForm } from '../levelD_modal/guardPost/FGuardPostShowGuardForm';
+import { changeTimesheetToday } from '../../src/dtos/dtoTimesheet';
 
 const inputs = {
   initial: {
@@ -82,6 +83,10 @@ const sortingTableCallback = (a, b, rule, invert) => {
 }
 
 var filterringTimeout = null;
+
+var timesheetTodayUpdateMemory = [];
+var guardPostManagersUpdateMemory = [];
+var guardRowUpdateTimeout = null;
 
 export default function FFormGuardPosts({ accessRules, userData, guardPosts, guardsData, users }) {
   /*----Использование глобальных данных-------------------------------------------------------------------------------*/
@@ -353,7 +358,9 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
 
   /*----Переиспользование функции обработок ошибок--------------------------------------------------------------------*/
   const errorCallback = (error, callback) => {
-    if (error instanceof ApiError) {
+    if (error.statusCode == 404)
+      throw error
+    else if (error instanceof ApiError) {
 
       if (error.statusCode == 520) {
 
@@ -371,9 +378,9 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
         });
       }
 
-    } else {
+    } else
       throw error
-    }
+
   }
 
   /*----Модальное окно Формы выгрузки графика рабочих часов-----------------------------------------------------------*/
@@ -394,7 +401,7 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
 
     setError('');
 
-    MOBXui.setLoading();
+    // MOBXui.setLoading();
 
     try {
       // Обновляем таблицу в памяти
@@ -413,6 +420,8 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
         return array;
       });
 
+      guardRowUpdate(guardPostSelectGuardForm.guardPost, inputGuard);
+
       // Закрываем модальное окно
       setGuardPostSelectGuardForm({ isOpen: false });
 
@@ -422,9 +431,63 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
 
     } finally {
 
-      MOBXui.setLoading();
+      // MOBXui.setLoading();
 
     }
+  }
+
+  /*----Функция загрузки данных об изменениях смен-------------------------------------------------------------------*/
+
+  const guardRowUpdate = (guardPost,
+    inputGuard) => {
+
+    const elementInMemory = timesheetTodayUpdateMemory.find(element => element.guardPost == guardPost._id);
+
+    if (elementInMemory) {
+      elementInMemory.guardsToday = inputGuard.map(element => element._id);
+    } else {
+      timesheetTodayUpdateMemory.push({
+        guardPost: guardPost._id,
+        guardsToday: inputGuard.map(element => element._id)
+      })
+    }
+
+    if (guardPost.manager && !guardPostManagersUpdateMemory.includes(guardPost.manager._id)) {
+      guardPostManagersUpdateMemory.push(guardPost.manager._id)
+    }
+
+    if (guardRowUpdateTimeout) {
+      clearTimeout(guardRowUpdateTimeout);
+      guardRowUpdateTimeout = null;
+    }
+
+    guardRowUpdateTimeout = setTimeout(async () => {
+      MOBXui.setUpdate();
+
+      try {
+
+        const responce = await changeTimesheetToday(guardPostManagersUpdateMemory, timesheetTodayUpdateMemory);
+
+        console.log(responce);
+
+        if( responce.length > 0 ){
+           
+        }
+
+        guardPostManagersUpdateMemory = [];
+        timesheetTodayUpdateMemory = [];
+
+        MOBXui.setUpdate();
+
+      } catch (error) {
+
+        MOBXui.setUpdateError(error.message);
+
+        errorCallback(error, setGuardPostSelectGuardForm);
+
+      }
+
+    }, 3000);
   }
 
   /*----Модальное окно Формы просмотра Строки охранника---------------------------------------------------------------*/
@@ -668,10 +731,10 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
                 </td>
 
                 {/* {Охранники} */}
-                <td 
+                <td
                   className="px-1 md:p-2 md:border text-left block md:table-cell items-center hover:text-blue-500"
                   onClick={(event) => {
-                    if(guardPost.guardsToday && guardPost.guardsToday.length > 0){
+                    if (guardPost.guardsToday && guardPost.guardsToday.length > 0) {
                       event.stopPropagation();
                       setGuardPostShowGuardForm({
                         isOpen: true,

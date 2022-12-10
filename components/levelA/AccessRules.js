@@ -96,7 +96,7 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
             { position: positions.FPositionOPR },
-            { position: positions.FPositionNSO, userCompare: ['guardPostManager'] },
+            { position: positions.FPositionNSO, userCompare: ['guardPostManagers'] },
         ]
     },
     {
@@ -190,9 +190,19 @@ export async function getApiMethodAccess(req, userData) {
 
                     if( access.userCompare ){
                         for (const userIdKey of access.userCompare) {
-                            if(requestJson[userIdKey] != userData.id){
+
+                            if( Array.isArray( requestJson[userIdKey] ) ){
+
+                                if(requestJson[userIdKey].length == 0 )
+                                    return 'Вам отказано в доступе к выполняемой операции';
+
+                                if(requestJson[userIdKey].filter(element => element != userData.id).length > 0 )
+                                    return 'Вам отказано в доступе к выполняемой операции';
+
+                            }else if(requestJson[userIdKey] != userData.id){
                                 return 'Вам отказано в доступе к выполняемой операции';
                             }
+
                         }
                     }
 
@@ -212,6 +222,8 @@ export async function getApiMethodAccess(req, userData) {
 
             } 
         }
+
+        return 'Вашей должности отказано в праве доступа к операции';
 
     }
 

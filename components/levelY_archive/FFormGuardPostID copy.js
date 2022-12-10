@@ -749,7 +749,9 @@ export default function FFormGuardPostID({ accessRules, guardPost, guardPosts, g
   ----Переиспользование функции обработок ошибок--------------------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------*/
   const errorCallback = (error, callback) => {
-    if (error instanceof ApiError) {
+    if (error.statusCode == 404)
+      throw error
+    else if (error instanceof ApiError) {
 
       if (error.statusCode == 520) {
 

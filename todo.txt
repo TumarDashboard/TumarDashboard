@@ -3,3 +3,32 @@
 3.+ Рассмотреть перенос проверки в middleware auth в userService
 4. Сделать высокоуровневую проверку страницы с авторизацией catchAuthPage на основании mobxUser
 5. Рассмотреть лоадинг скрин на уровне AppLayout 
+npm install @headlessui/react@latest
+npm install @heroicons/react@latest
+npm install bcrypt@latest
+npm install cookie@latest
+npm install cors@latest
+npm install exceljs@latest
+npm install flubber@latest
+npm install googleapis@latest
+npm install imtool@latest
+npm install jose@latest
+npm install mobx@latest
+npm install mobx-react-lite@latest
+npm install mongoose@latest
+npm install ms@latest
+npm install nodemailer@latest
+npm install qrcode.react@latest
+npm install react-select@latest
+npm install swr@latest
+npm install uuid@latest
+npm install yup@latest
+
+npm install -D @tailwindcss/forms@latest
+npm install --save @types/sharp@latest
+npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
+
+npm i next@latest react@latest react-dom@latest
+
+npm install framer-motion@latest
+npm install react-tooltip@latest

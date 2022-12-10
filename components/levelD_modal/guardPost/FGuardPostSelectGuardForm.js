@@ -77,7 +77,6 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
   }
 
   const unSelectOption = (value) => {
-
     setInputGuard(array => {
       return array.filter(element => value._id != element._id)
     });
@@ -158,15 +157,15 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
     if (form.error) {
       setError(form.error);
     } else if (form.isOpen) {
-      setInputGuard(form.guardsToday ? form.guardsToday : []);
+      setInputGuard(form.guardsToday ? [...form.guardsToday] : []);
       const guards = (form.guardsToday && form.guardsToday.length > 0) ? optionGuards.filter(guard=>{
         for (const guardToday of form.guardsToday) {
           if( guard._id == guardToday._id ) return false
         }
         return true;
       }) : optionGuards ;
-      setOptionsForWork(guards);
-      setInputFilter(guards);
+      setOptionsForWork([...guards]);
+      setInputFilter([...guards]);
       setInputFilterText('');
       setError(null);
       document.body.classList.add("overscroll-y-contain");
@@ -285,7 +284,7 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
 
         <FButtonRed
           className=""
-          disabled={!(form.isOpen && inputGuard && inputGuard.length > 0)}
+          disabled={!(form.isOpen && !equalArrays( form.guardsToday, inputGuard))}
           onClick={(e) => submitEdit(e, inputGuard)}
         >
           Изменить

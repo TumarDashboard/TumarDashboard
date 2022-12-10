@@ -213,16 +213,12 @@ const FNavbar = observer( function FNavbar() {
                                     <Link
                                         href={item.url}
                                         key={`navItem${item.id}`}
+                                        onClick={toggle}
+                                        className={`flex items-center mt-4 py-2 px-4 bg-color_B text-color_F
+                                        ${router.pathname.includes(item.url) ? '' : 'bg-opacity-25'}`}
                                     >
-                                        <a
-                                            onClick={toggle}
-                                            className={`flex items-center mt-4 py-2 px-4 bg-color_B text-color_F
-                                            ${router.pathname.includes(item.url) ? '' : 'bg-opacity-25'}`}
-                                            key={`navItem${item.id}`}
-                                        >
-                                            {item.icon}
-                                            <p className="mx-3">{item.text}</p>
-                                        </a>
+                                        {item.icon}
+                                        <p className="mx-3">{item.text}</p>
                                     </Link>
                                 </motion.div>
                             )

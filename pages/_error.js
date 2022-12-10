@@ -59,11 +59,11 @@ function Error({ statusCode, message }) {
             {message}
           </motion.h2>
 
-          <Link href="/">
-            <motion.a variants={text} className='text-color_B hover:text-color_E py-2 font-bold font-font_B underline'>
+          <motion.div variants={text}>
+            <Link href="/" className='text-color_B hover:text-color_E py-2 font-bold font-font_B underline'>
               Вернуться на главную
-            </motion.a>
-          </Link>
+            </Link>
+          </motion.div>
 
         </motion.div>
 
@@ -74,7 +74,7 @@ function Error({ statusCode, message }) {
 
 Error.getInitialProps = ({ res, err }) => {
   const message = err && err.message ? err.message : res && res.message ? res.message : "Непредвиденная ошибка"
-  const statusCode = err && err.statusCode ? err.statusCode : res && res.statusCode ? res.statusCode :  404
+  const statusCode = err && err.statusCode ? err.statusCode : res && res.statusCode ? res.statusCode : 404
   return { statusCode, message }
 }
 

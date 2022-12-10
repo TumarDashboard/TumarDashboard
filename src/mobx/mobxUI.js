@@ -5,6 +5,8 @@ enableStaticRendering(typeof window === 'undefined')
 
 export default class MOBXui {
     isLoading = false;
+    isUpdate = false;
+    updateError = null;
     isGoogleAuthError = false;
     googleAuthErrorEmail = '';
     googleAuthAuthorizeUrl = '';
@@ -12,10 +14,14 @@ export default class MOBXui {
     constructor() {
         makeObservable(this, {
             isLoading: observable,
+            isUpdate: observable,
+            updateError: observable,
             isGoogleAuthError: observable,
             googleAuthErrorEmail: false,
             googleAuthAuthorizeUrl: false,
             setLoading: action,
+            setUpdate: action,
+            setUpdateError: action,
             openGoogleAuthError: action,
             closeGoogleAuthError: action
         })
@@ -35,6 +41,27 @@ export default class MOBXui {
 
         }
 
+    }    
+    
+    setUpdate() {
+        if (this.isUpdate) {
+
+            setTimeout(() => runInAction(() => {
+                this.isUpdate = false
+            }), 1000);
+
+        } else {
+
+            this.isUpdate = true;
+            this.updateError = null;
+
+        }
+
+    }
+
+    setUpdateError(error) {
+        this.isUpdate = false
+        this.updateError = error;
     }
 
     openGoogleAuthError(email, authorizeUrl) {

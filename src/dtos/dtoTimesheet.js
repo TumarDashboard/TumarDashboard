@@ -1,4 +1,4 @@
-import { object, lazy, string, number } from "yup";
+import { object, lazy, string, number, array } from "yup";
 import { fetchAuthFileMethod, fetchAuthMethod } from "../../middleware/requests";
 import { mapValue } from "../utils/arrayUtils";
 
@@ -51,6 +51,16 @@ export const validateYup = (dtoGuardPost, options) => {
                         .max(maxlengthRateNumber, `Кол-во цифр должно быть в диапозоне от ${minlengthRateNumber} до ${maxlengthRateNumber}`)
                 }
 
+                if (key === 'timesheetToday') {
+                    return array()
+                        .of(object({
+                            guardPost: string().required('В некоторых данных для смены отсутствует ID физ. поста'),
+                            guardsToday: array()
+                                .of( string().required('В некоторых данных для смены некорректно указан ID охранника') )
+                          }),)
+                        .required('Отсутствуют данные о сменах за сегодня')
+                }
+
             }
         })
     ));
@@ -61,6 +71,10 @@ export const validateYup = (dtoGuardPost, options) => {
 
 export const changeTimesheet = async (guardPost, guardPostManager, month, guardsRow, manager, rate) => {
     return await fetchAuthMethod('/method/timesheet/changeTimesheet', { guardPost, guardPostManager, month, guardsRow, manager, rate});
+}
+
+export const changeTimesheetToday = async (guardPostManagers, timesheetToday) => {
+    return await fetchAuthMethod('/method/timesheet/changeTimesheetToday', { guardPostManagers, timesheetToday});
 }
 
 export const getTimesheet = async (guardPost, guardPostManager, month) => {

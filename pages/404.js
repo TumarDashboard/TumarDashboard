@@ -60,11 +60,12 @@ export default function Custom404() {
             Страница не найдена
           </motion.h2>
 
-          <Link href="/">
-            <motion.a variants={text} className='text-color_B hover:text-color_E py-2 font-bold font-font_B underline'>
+
+          <motion.div variants={text}>
+            <Link href="/" className='text-color_B hover:text-color_E py-2 font-bold font-font_B underline'>
               Вернуться на главную
-            </motion.a>
-          </Link>
+            </Link>
+          </motion.div>
 
         </motion.div>
 

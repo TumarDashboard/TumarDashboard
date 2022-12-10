@@ -334,7 +334,9 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
   ----------------------------------------------------------------------------------------------------------------------------*/
   const errorCallback = (error, callback) => {
 
-    if (error instanceof ApiError) {
+    if (error.statusCode == 404)
+      throw error
+    else if (error instanceof ApiError) {
       if (error.statusCode == 520) {
 
         // callback({ isOpen: false });

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { AnimatePresence } from "framer-motion";
 import AppLayout from "../components/levelA/AppLayout";
 import FLoadingScreen from "../components/levelA/LoadingScreen";
+import FUpdateScreen from "../components/levelA/UpdateScreen";
 import FGoogleAuthError from "../components/levelA/GoogleAuthError";
 import { StoreProvider } from '../components/levelA/StoreProvider';
 import LoadingScreenData from '../components/levelA/LoadingScreenData';
@@ -44,6 +45,10 @@ export default function App({ Component, pageProps, router }) {
 
       <FLoadingScreen
         key="LoadingScreen"
+      />
+
+      <FUpdateScreen
+        key="UpdateScreen"
       />
 
       <FGoogleAuthError

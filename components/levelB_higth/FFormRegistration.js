@@ -246,15 +246,14 @@ export default function FFormRegistration() {
                 >
                     Зарегистрировать
                 </button>
-                <Link href="/authorization/login" >
-                    <a
-                        className="w-full md:w-2/3 lg:w-full xl:w-2/3 
-                        text-center md:text-right lg:text-center xl:text-right
-                        py-2 md:py-0 lg:py-2 xl:py-0
-                        text-color_C underline"
-                    >
-                        Использовать существующий аккаунт
-                    </a>
+                <Link 
+                    href="/authorization/login" 
+                    className="w-full md:w-2/3 lg:w-full xl:w-2/3 
+                    text-center md:text-right lg:text-center xl:text-right
+                    py-2 md:py-0 lg:py-2 xl:py-0
+                    text-color_C underline"
+                >
+                    Использовать существующий аккаунта
                 </Link>
             </motion.div>
 

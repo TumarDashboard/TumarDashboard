@@ -20,7 +20,7 @@ const modal = {
   },
 };
 
-export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, children, className }) {
+export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, children, className, widthForm='md:w-1/2' }) {
   return (
       <motion.div
         className="fixed w-full h-full top-0 left-0 bg-color_F/75 z-50"
@@ -35,7 +35,7 @@ export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, childre
         >
 
           <div
-            className="flex-initial bg-color_G rounded-lg md:w-1/2 max-h-full"
+            className={`flex-initial bg-color_G rounded-lg max-h-full ${widthForm}`}
           >
 
             <div className="flex items-center w-full bg-color_B p-2 rounded-t-lg">
@@ -47,7 +47,6 @@ export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, childre
                 viewBox="0 0 18 18"
                 onClick={() => setIsModalFormOpen({ isOpen: false })}
               />
-
             
             </div>
               

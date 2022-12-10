@@ -19,8 +19,8 @@ export function FFilterText({ value, onChange, onClear, ...props }) {
             className="bg-color_B h-5 w-5 
             flex justify-center items-center rounded-md
             absolute indent-5
-            right-5 top-1/2 translate-x-1/2 -translate-y-1/2 rounded-full
-            fill-color_D hover:fill-color_C hover:ring hover:ring-red-200 disabled:opacity-25
+            right-5 top-1/2 translate-x-1/2 -translate-y-1/2
+            fill-color_D hover:fill-color_C hover:ring hover:ring-red-200
             hover:bg-color_C active:bg-color_B disabled:opacity-25"
             onClick={onClear}
             disabled={value.length === 0}

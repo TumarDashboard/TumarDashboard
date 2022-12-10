@@ -143,15 +143,14 @@ export default function FFormLogin( { redirectAuth } ) {
                 >
                     Войти
                 </button>
-                <Link href="/authorization/registration" >
-                    <a
-                        className="w-full md:w-2/3 lg:w-full xl:w-2/3 
-                        text-center md:text-right lg:text-center xl:text-right
-                        py-2 md:py-0 lg:py-2 xl:py-0
-                        text-color_C underline"
-                    >
-                        Зарегистрируйте аккаунт
-                    </a>
+                <Link 
+                    href="/authorization/registration" 
+                    className="w-full md:w-2/3 lg:w-full xl:w-2/3 
+                    text-center md:text-right lg:text-center xl:text-right
+                    py-2 md:py-0 lg:py-2 xl:py-0
+                    text-color_C underline"
+                >
+                    Зарегистрируйте аккаунт
                 </Link>
             </motion.div>
 
