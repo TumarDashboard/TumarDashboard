@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import FNextLink from '../levelE_low/FNextLink';
+import Link from 'next/link';
 import Image from "next/legacy/image";
 
 function classNames(...classes) {
@@ -37,12 +38,12 @@ export default function FNavbarProfile({ uiAvatarsSrc, logout }) {
             bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-center">
               <Menu.Item>
                 {({ active }) => (
-                  <FNextLink
+                  <Link
                     href="/dashboard/profile"
                     className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
                   >
                     Аккаунт
-                  </FNextLink>
+                  </Link>
                 )}
               </Menu.Item>
               <Menu.Item>

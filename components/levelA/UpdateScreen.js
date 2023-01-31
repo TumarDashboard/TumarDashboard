@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { useStore } from "./StoreProvider";
 import { motion } from "framer-motion";
-import { XIcon } from '@heroicons/react/solid';
+import { XMarkIcon } from '@heroicons/react/20/solid';
 
 const inputs = {
   block: {
@@ -40,15 +40,23 @@ const UpdateScreen = observer(function FUpdateScreen() {
 
       <div className="flex justify-center w-full h-full items-center">
 
-        {mobxUI.isUpdate && <>
-          <svg fill='none' className="w-16 h-16 animate-spin" viewBox="0 0 32 32" xmlns='http://www.w3.org/2000/svg'>
-            <path clipRule='evenodd'
+        {/* {mobxUI.isUpdate && <> */}
+          <svg
+            // fill='none'
+            className="w-8 h-8 animate-spin fill-color_F"
+            viewBox="0 0 32 32"
+            xmlns='http://www.w3.org/2000/svg'
+          >
+            <path
+              // clipRule='evenodd'
               d='M15.165 8.53a.5.5 0 01-.404.58A7 7 0 1023 16a.5.5 0 011 0 8 8 0 11-9.416-7.874.5.5 0 01.58.404z'
-              fill='currentColor' fillRule='evenodd' />
+              // fill='currentColor'
+              // fillRule='evenodd'
+            />
           </svg>
 
-          <span className="text-3xl text-color_F font-font_B">Загрузка ...</span>
-        </>}
+          <span className="text-xl text-color_F font-font_B ml-2">Загрузка ...</span>
+        {/* </>} */}
 
         {mobxUI.updateError && <>
           <span className="text-xl text-red-600 font-font_B mr-2">{mobxUI.updateError}</span>
@@ -60,9 +68,9 @@ const UpdateScreen = observer(function FUpdateScreen() {
             flex justify-center items-center rounded-md
             fill-color_D hover:fill-color_C hover:ring hover:ring-red-200
             hover:bg-color_C active:bg-color_B disabled:opacity-25"
-            onClick={()=>mobxUI.setUpdateError(null)}
+            onClick={() => mobxUI.setUpdateError(null)}
           >
-            <XIcon
+            <XMarkIcon
               className="h-5 w-5 fill-color_F
             hover:fill-color_G"
             />

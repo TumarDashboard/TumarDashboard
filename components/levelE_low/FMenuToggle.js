@@ -1,4 +1,4 @@
-import { MenuIcon, XIcon } from '@heroicons/react/outline'
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 
 export default function FMenuToggle({ toggle, open, ...props }) {
 
@@ -10,11 +10,11 @@ export default function FMenuToggle({ toggle, open, ...props }) {
       onClick={toggle}
     >
       <span className="sr-only">Open main menu</span>
-      {open == 'visible' ? (
-        <XIcon className="block h-8 w-8" aria-hidden="true" />
-      ) : (
-        <MenuIcon className="block h-8 w-8" aria-hidden="true" />
-      )}
+      {open == 'visible' ? 
+        <XMarkIcon className="block h-8 w-8" aria-hidden="true" />
+       : 
+        <Bars3Icon className="block h-8 w-8" aria-hidden="true" />
+      }
     </button>
   </div>
 };

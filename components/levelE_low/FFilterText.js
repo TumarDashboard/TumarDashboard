@@ -1,4 +1,4 @@
-import { XIcon } from '@heroicons/react/solid';
+import { XMarkIcon } from '@heroicons/react/20/solid';
 
 export function FFilterText({ value, onChange, onClear, ...props }) {
 
@@ -25,7 +25,7 @@ export function FFilterText({ value, onChange, onClear, ...props }) {
             onClick={onClear}
             disabled={value.length === 0}
           >
-            <XIcon
+            <XMarkIcon
               className="h-5 w-5 fill-color_F
             hover:fill-color_G"
             />

@@ -40,14 +40,15 @@ export async function fetchAuthMethod( url, data ){
         return await fetchAuth(url, data);
     } catch {
 
-        localStorage.removeItem('token');
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
 
-        const authData = await fetchAuth("/authorization/refresh?store=update");
-
-        localStorage.setItem('token', authData.accessToken);
-
-        return await fetchAuth(url, data);
-
+            const authData = await fetchAuth("/authorization/refresh?store=update");
+    
+            localStorage.setItem('token', authData.accessToken);
+    
+            return await fetchAuth(url, data);
+        }
     }
 }
 

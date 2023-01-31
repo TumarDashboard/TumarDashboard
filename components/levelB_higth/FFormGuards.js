@@ -1,7 +1,7 @@
-import { PlusIcon, PencilAltIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, XIcon } from '@heroicons/react/solid';
+import { PlusIcon, PencilSquareIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
 import { motion } from "framer-motion";
 import Image from "next/legacy/image";
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 import { useStore } from "../levelA/StoreProvider";
 import { ApiError } from "../../middleware/exceptions";
@@ -67,8 +67,6 @@ const sortingTableCallback = (a, b, rule, invert) => {
   }
 }
 
-var filterringTimeout = null;
-
 export default function FFormGuards({ accessRules, guards, guardPosts, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
@@ -93,6 +91,7 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
       Сортировка таблицы
   -------------------------------------------------------------------------------------------------------*/
   const [sortingRule, setSortingRule] = useState();
+  const filterringTimeout = useRef();
 
   const sortingTable = (rule) => {
 
@@ -358,6 +357,13 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
     }
   }
 
+  /*------------------------------------------------------------------------------------------------------------------*/
+  useEffect(()=>{
+    return ()=>{
+      filterringTimeout.current && clearTimeout(filterringTimeout.current);
+    }
+  }, []);
+
   /*----------------------------------------------------------------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------*/
 
@@ -406,11 +412,8 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
             value={inputFilterText}
             onChange={(e) => {
               setInputFilterText(e.target.value);
-              if (filterringTimeout) {
-                clearTimeout(filterringTimeout);
-                filterringTimeout = null;
-              }
-              filterringTimeout = setTimeout(() => filteringTable(e.target.value), 500);
+              filterringTimeout.current && clearTimeout(filterringTimeout.current);
+              filterringTimeout.current = setTimeout(() => filteringTable(e.target.value), 500);
             }}
             onClear={() => {
               setInputFilterText('');
@@ -498,7 +501,7 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
                             })
                           }}
                         >
-                          <PencilAltIcon
+                          <PencilSquareIcon
                             className="h-4 w-4"
                           />
                         </FButtonRed>}
@@ -556,7 +559,7 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
                             })
                           }}
                         >
-                          <PencilAltIcon
+                          <PencilSquareIcon
                             className="h-4 w-4"
                           />
                           <span className='hidden lg:block'>Изменить</span>

@@ -8,12 +8,20 @@ export function equalArrays(a = [], b = []) {
 }
 
 export function intersectArrays(a, b) {
+    console.log(a, b);
     for (var i = 0; i < a.length; ++i) {
         if (b.includes(a[i])) return true;
     }
     return false;
 }
 
+export function intersectArraysPositions(a, b) {
+    for (var i = 0; i < a.length; ++i) {
+        if (b.includes(a[i].position)) return true;
+    }
+    return false;
+}
+  
 export function mapValue(object, iteratee) {
     object = Object(object);
     const result = {}

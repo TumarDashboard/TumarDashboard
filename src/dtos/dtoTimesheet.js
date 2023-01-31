@@ -46,7 +46,7 @@ export const validateYup = (dtoGuardPost, options) => {
                 if (key === 'rate') {
                     return number()
                         .nullable()
-                        .integer('Для номера могут использоваться только цифры')
+                        // .integer('Для тарифа могут использоваться только целые цифры')
                         .min(minlengthRateNumber, `Кол-во цифр должно быть в диапозоне от ${minlengthRateNumber} до ${maxlengthRateNumber}`)
                         .max(maxlengthRateNumber, `Кол-во цифр должно быть в диапозоне от ${minlengthRateNumber} до ${maxlengthRateNumber}`)
                 }
@@ -77,10 +77,27 @@ export const changeTimesheetToday = async (guardPostManagers, timesheetToday) =>
     return await fetchAuthMethod('/method/timesheet/changeTimesheetToday', { guardPostManagers, timesheetToday});
 }
 
+export const getTimesheetToday = async () => {
+    return await fetchAuthMethod('/method/timesheet/getTimesheetToday');
+}
+
 export const getTimesheet = async (guardPost, guardPostManager, month) => {
     return await fetchAuthMethod('/method/timesheet/getTimesheet', { guardPost, guardPostManager, month });
 }
 
 export const getTimesheetPrint = async (guardPost, month) => {
     return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrint', { guardPost, month });
+}
+
+
+export const getTimesheetPrintForDay = async (date) => {
+    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForDay', { date });
+}
+
+export const getTimesheetPrintForMonthPart = async (month) => {
+    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthPart', { month });
+}
+
+export const getTimesheetPrintForMonthFull = async (month) => {
+    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthFull', { month });
 }

@@ -41,10 +41,9 @@ const itemMotion = {
     },
 };
 
-const FSidebar = observer( function FSidebar() {
+const FSidebar = observer(function FSidebar() {
 
     const user = useStore().MOBXuser;
-
     const router = useRouter();
 
     return (
@@ -61,20 +60,20 @@ const FSidebar = observer( function FSidebar() {
                 variants={background}
                 className="flex flex-col w-64 bg-color_A min-h-full pt-2"
             >
-                {getDashboardItemList( user?.positions ).map((item) => {
+                {getDashboardItemList(user?.positions).map((item) => {
                     return (
                         <motion.div
                             variants={itemMotion}
                             key={`navItem${item.id}`}
                         >
-                            <Link
-                                href={item.url}
-                                key={`navItem${item.id}`}
-                                className={`flex items-center mt-4 py-2 px-4 bg-color_C text-color_F
-                                ${router.pathname.includes(item.url) ? '' : 'bg-opacity-25'}`}
-                                legacyBehavior>
-                                {item.icon}
-                                <p className="mx-3">{item.text}</p>
+                            <Link href={item.url}>
+                                <div
+                                    className={`flex items-center mt-4 py-2 px-4 bg-color_C text-color_F cursor-pointer
+                                    ${router.pathname.includes(item.url) ? '' : 'bg-opacity-25'}`}
+                                >
+                                    {item.icon}
+                                    <p className="mx-3">{item.text}</p>
+                                </div>
                             </Link>
                         </motion.div>
                     );

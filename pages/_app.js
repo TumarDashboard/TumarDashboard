@@ -7,6 +7,7 @@ import FUpdateScreen from "../components/levelA/UpdateScreen";
 import FGoogleAuthError from "../components/levelA/GoogleAuthError";
 import { StoreProvider } from '../components/levelA/StoreProvider';
 import LoadingScreenData from '../components/levelA/LoadingScreenData';
+// import { TooltipProvider } from 'react-tooltip';
 
 export default function App({ Component, pageProps, router }) {
 
@@ -36,7 +37,7 @@ export default function App({ Component, pageProps, router }) {
     };
 
   }, []);
-  
+
   return (
     <StoreProvider
       isFirstMount={isFirstMount}
@@ -61,14 +62,17 @@ export default function App({ Component, pageProps, router }) {
         isLoading={setIsLoading}
       >
 
-        <AnimatePresence exitBeforeEnter>
-          {isLoading ? 
-          <Component
-            isFirstMount={isFirstMount}
-            key={router.route}
-            {...pageProps}
-          /> : 
-          <LoadingScreenData/>}
+        <AnimatePresence mode="wait">
+          {isLoading ?
+            // <TooltipProvider>
+              <Component
+                isFirstMount={isFirstMount}
+                key={router.route}
+                {...pageProps}
+              />
+            // </TooltipProvider>
+            :
+            <LoadingScreenData />}
         </AnimatePresence>
       </AppLayout>
 

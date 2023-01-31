@@ -4,6 +4,8 @@ import { mapValue } from "../utils/arrayUtils";
 
 const minlengthNumber = process.env.NEXT_PUBLIC_MIN_LENGTH_NUMBER_INPUT;
 const maxlengthNumber = process.env.NEXT_PUBLIC_MAX_LENGTH_NUMBER_INPUT;
+const minlengthRateNumber = process.env.NEXT_PUBLIC_MIN_LENGTH_RATE_INPUT;
+const maxlengthRateNumber = process.env.NEXT_PUBLIC_MAX_LENGTH_RATE_INPUT;
 
 export default class DTOGuardPost {
 
@@ -62,6 +64,13 @@ export const validateYup = (dtoGuardPost, options) => {
                         .required('Не указано краткое наименование')
                 }
 
+                if (key === 'rate') {
+                    return number()
+                        .nullable()
+                        // .integer('Для тарифа могут использоваться только целые цифры')
+                        .min(minlengthRateNumber, `Кол-во цифр должно быть в диапозоне от ${minlengthRateNumber} до ${maxlengthRateNumber}`)
+                        .max(maxlengthRateNumber, `Кол-во цифр должно быть в диапозоне от ${minlengthRateNumber} до ${maxlengthRateNumber}`)
+                }
                 // if (key === 'name') {
                 //     return string()
                 //         .required('Не указано наименование')

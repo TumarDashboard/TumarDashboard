@@ -47,7 +47,7 @@ export default function Index({ isFirstMount }) {
 
           <div className='row-span-3'>
 
-            <AnimatePresence exitBeforeEnter>
+            <AnimatePresence mode="wait">
 
               {selectedTab.component}
 

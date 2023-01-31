@@ -1,7 +1,7 @@
 import { useStore } from "../levelA/StoreProvider";
 import { observer } from 'mobx-react-lite';
 import { useRouter } from 'next/router';
-import { HomeIcon, UserCircleIcon } from '@heroicons/react/solid';
+import { HomeIcon, UserCircleIcon } from '@heroicons/react/24/solid';
 import FNavbarProfile from '../levelE_low/FNavbarProfile';
 import FNextLink from '../levelE_low/FNextLink';
 import FMenuToggle from "../levelE_low/FMenuToggle";
@@ -50,12 +50,12 @@ const itemMotion = {
     },
 };
 
-const FNavbar = observer( function FNavbar() {
+const FNavbar = observer(function FNavbar() {
 
     const router = useRouter();
 
     const user = useStore().MOBXuser;
-    
+
     const [isSidebar, setSidebar] = useCycle('hidden', 'visible');
 
     const toggle = () => {
@@ -82,18 +82,18 @@ const FNavbar = observer( function FNavbar() {
             variants={blackBox}
         >
             {/* Кнопка меню */}
-            {user?.isAuth ? (
+            {user?.isAuth ?
                 <FMenuToggle
                     toggle={toggle}
                     open={isSidebar}
                     className="absolute z-30 block lg:hidden ml-4 mt-5"
                 />
-            ) : null}
+                : null}
 
             {/* md:flex md:items-center md:justify-center */}
             <div className={`w-full h-20 bg-color_A grid grid-cols-3 px-2 sm:px-6 lg:px-8 ${user?.isAuth ? 'xl:pr-28 2xl:pr-80' : 'xl:px-28 2xl:px-80'}`}>
 
-                
+
                 <div
                     className="flex items-center justify-center
                                 row-start-1 col-start-2
@@ -102,69 +102,69 @@ const FNavbar = observer( function FNavbar() {
                     {/* Логотип */}
                     <Image
                         className="block h-16 w-auto"
-                        width={64} 
+                        width={64}
                         height={64}
                         src='/logo.png'
                         alt="Workflow"
                     />
 
                     {/* Дашборд */}
-                    {user?.isAuth && 
-                    <FNextLink
-                        href="/dashboard/profile"
-                        className='text-color_C hover:bg-color_C hover:text-color_G px-3 py-2 rounded-md
+                    {user?.isAuth &&
+                        <Link
+                            href="/dashboard/profile"
+                            className='text-color_C hover:bg-color_C hover:text-color_G px-3 py-2 rounded-md
                                     hidden md:block'
-                    >
-                        {isSidebar=='hidden' && 
-                        <p className="text-color_G text-2xl font-bold font-font_B lg:hidden">Dashboard</p>}
-                        <p className="text-color_G text-2xl font-bold font-font_B hidden lg:block">Dashboard</p>
-                    </FNextLink>}
+                        >
+                            {isSidebar == 'hidden' &&
+                                <p className="text-color_G text-2xl font-bold font-font_B lg:hidden">Dashboard</p>}
+                            <p className="text-color_G text-2xl font-bold font-font_B hidden lg:block">Dashboard</p>
+                        </Link>}
 
                 </div>
-                
+
                 {/* Ссылки */}
-                {isSidebar=='hidden' && 
-                <div className="flex items-center
+                {isSidebar == 'hidden' &&
+                    <div className="flex items-center
                                 row-start-1 col-start-3 justify-self-end lg:hidden">
 
-                    {/* Ссылка на главную */}
-                    {router.pathname != "/" &&
-                        <FNextLink
-                            href="/"
-                            className='text-color_C hover:bg-color_C hover:text-color_G px-3 py-2 rounded-md text-sm font-bold font-font_B'
-                        >
-                            <HomeIcon className="h-8 w-8" />
-                        </FNextLink>
-                    }
+                        {/* Ссылка на главную */}
+                        {router.pathname != "/" &&
+                            <Link
+                                href="/"
+                                className='text-color_C hover:bg-color_C hover:text-color_G px-3 py-2 rounded-md text-sm font-bold font-font_B'
+                            >
+                                <HomeIcon className="h-8 w-8" />
+                            </Link>
+                        }
 
-                    {/* Ссылки на авторизацию */}
-                    {user?.isAuth ?
-                        <FNavbarProfile
-                            uiAvatarsSrc={user?.avatar}
-                            logout={logout}
-                        />
-                        : router.pathname != "/authorization/login" && router.pathname != "/authorization/registration" &&
-                        <FNextLink
-                            href="/authorization/login"
-                            className='text-color_C hover:bg-color_C hover:text-color_G px-3 py-2 rounded-md text-sm font-bold font-font_B'
-                        >
-                            <UserCircleIcon className="h-8 w-8" />
-                        </FNextLink>
-                    }
-                </div>}
-                
+                        {/* Ссылки на авторизацию */}
+                        {user?.isAuth ?
+                            <FNavbarProfile
+                                uiAvatarsSrc={user?.avatar}
+                                logout={logout}
+                            />
+                            : router.pathname != "/authorization" && router.pathname != "/authorization/registration" &&
+                            <Link
+                                href="/authorization"
+                                className='text-color_C hover:bg-color_C hover:text-color_G px-3 py-2 rounded-md text-sm font-bold font-font_B'
+                            >
+                                <UserCircleIcon className="h-8 w-8" />
+                            </Link>
+                        }
+                    </div>}
+
                 {/* Ссылки */}
                 <div className=" items-center
                                 row-start-1 col-start-3 justify-self-end hidden lg:flex">
 
                     {/* Ссылка на главную */}
                     {router.pathname != "/" &&
-                        <FNextLink
+                        <Link
                             href="/"
                             className='text-color_C hover:bg-color_C hover:text-color_G px-3 py-2 rounded-md text-sm font-bold font-font_B'
                         >
                             <p className="text-color_G">На главную</p>
-                        </FNextLink>
+                        </Link>
                     }
 
                     {/* Ссылки на авторизацию */}
@@ -173,13 +173,13 @@ const FNavbar = observer( function FNavbar() {
                             uiAvatarsSrc={user?.avatar}
                             logout={logout}
                         />
-                        : router.pathname != "/authorization/login" && router.pathname != "/authorization/registration" &&
-                        <FNextLink
-                            href="/authorization/login"
+                        : router.pathname != "/authorization" && router.pathname != "/authorization/registration" &&
+                        <Link
+                            href="/authorization"
                             className='text-color_C hover:bg-color_C hover:text-color_G px-3 py-2 rounded-md text-sm font-bold font-font_B'
                         >
                             <p className="text-color_G">Войти</p>
-                        </FNextLink>
+                        </Link>
                     }
                 </div>
 
@@ -191,17 +191,17 @@ const FNavbar = observer( function FNavbar() {
                     key='FNavbarSidebar'
                     initial={false}
                     animate={isSidebar}
-                    variants={blackBox}      
+                    variants={blackBox}
                     onAnimationStart={(variant) => {
-                        if( variant == 'visible' ){
+                        if (variant == 'visible') {
                             document.body.classList.add("overflow-hidden")
-                        }else{
+                        } else {
                             document.body.classList.remove("overflow-hidden")
                         }
                     }}
                 >
                     <div className='h-full flex flex-col overflow-y-auto'>
-                        { getDashboardItemList( user?.positions ).map((item) => {
+                        {getDashboardItemList(user?.positions).map((item) => {
 
                             return (
                                 <motion.div
@@ -211,17 +211,19 @@ const FNavbar = observer( function FNavbar() {
                                 >
                                     <Link
                                         href={item.url}
-                                        key={`navItem${item.id}`}
                                         onClick={toggle}
-                                        className={`flex items-center mt-4 py-2 px-4 bg-color_B text-color_F
-                                        ${router.pathname.includes(item.url) ? '' : 'bg-opacity-25'}`}
-                                        legacyBehavior>
-                                        {item.icon}
-                                        <p className="mx-3">{item.text}</p>
+                                    >
+                                        <div
+                                            className={` flex items-center mt-4 py-2 px-4 bg-color_B text-color_F cursor-pointer
+                                            ${router.pathname.includes(item.url) ? '' : 'bg-opacity-25'}`}
+                                        >
+                                            {item.icon}
+                                            <p className="mx-3">{item.text}</p>
+                                        </div>
                                     </Link>
                                 </motion.div>
                             );
-                        }) }
+                        })}
                     </div>
 
                 </motion.div>

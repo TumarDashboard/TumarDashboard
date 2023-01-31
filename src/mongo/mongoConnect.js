@@ -1,5 +1,7 @@
 import mongoose from 'mongoose'
 
+mongoose.set('strictQuery', false);
+
 export default async function mongoConnect() {
 
   if (mongoose.connection.readyState >= 1) {

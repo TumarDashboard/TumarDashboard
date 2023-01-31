@@ -1,4 +1,4 @@
-import { ArchiveIcon, PencilAltIcon, PlusIcon, StopIcon, TrashIcon } from '@heroicons/react/solid';
+import { ArchiveBoxArrowDownIcon, PencilSquareIcon, PlusIcon, StopIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { motion, useDragControls } from "framer-motion";
 import Image from "next/legacy/image";
 import { useEffect, useRef, useState } from 'react';
@@ -18,7 +18,7 @@ const defaultDayShift = 8;
 
 const currentMonth = getCurrentMonth();
 
-export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXuser, MOBXui, errorCallback, guardPost, guardPosts, guardsData, users, usersAll }) {
+export default function ыFTimesheetTableHorizontal({ accessRules, userData, MOBXuser, MOBXui, errorCallback, guardPost, guardPosts, guardsData, users, usersAll }) {
 
   /*-------------------------------------------------------------------------------------------------------
       Определение правил доступа
@@ -113,7 +113,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
           guardPost.manager ? guardPost.manager._id : undefined, 
           value, );
 
-        console.log('guardPost.rate %o', rate);
+        // console.log('guardPost.rate %o', rate);
 
         if (value == currentMonth) {
           setInputGuardPostManager(guardPost.manager ? guardPost.manager._id : 'EMPTY');
@@ -146,8 +146,8 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
 
           setTimesheetTableBody(guardsRow);
 
-          const shiftsCount = 0;
-          const hoursCount = 0;
+          var shiftsCount = 0;
+          var hoursCount = 0;
 
           for (const guard of guardsRow) {
             for (let i = 0; i < guard.timesheetDays.length; i++) {
@@ -560,7 +560,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
     MOBXui.setLoading();
 
     try {
-      console.log(inputGuardPostRate);
+
       await changeTimesheet(
         guardPost._id,
         guardPost.manager ? guardPost.manager._id : undefined, 
@@ -933,7 +933,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
                                 })
                               }}
                             >
-                              <PencilAltIcon
+                              <PencilSquareIcon
                                 className="h-6 w-6 fill-orange-800"
                               />
                             </button>
@@ -1124,7 +1124,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
                           onClick={timesheetChangeHandle}
                           disabled={timesheetChanged}
                         >
-                          <ArchiveIcon
+                          <ArchiveBoxArrowDownIcon
                             className="h-6 w-6"
                           />
                           Сохранить

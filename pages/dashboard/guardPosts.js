@@ -7,6 +7,8 @@ import mongoUserModel from "../../src/mongo/models/mongoUserModel";
 import mongoConnect from "../../src/mongo/mongoConnect";
 import { FPositionNSO } from '../../components/levelZ_variable/FPositionItemList';
 import mongoGuardsModel from '../../src/mongo/models/mongoGuardsModel';
+import mongoTimesheetsGuardsModel from '../../src/mongo/models/mongoTimesheetsGuardsModel';
+import { getCurrentMonth } from '../../src/utils/dateUtils';
 
 const content = (isFirstMount) => ({
   animate: {
@@ -56,19 +58,91 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   // Подключение к базе данных
   await mongoConnect();
 
+  const month = new Date(getCurrentMonth());
+  const day = (new Date()).getDate() - 1;
+
+  //Запустить агрегат на посты, месяц и день
+  const guardsToday = await mongoTimesheetsGuardsModel.aggregate([
+      {
+          $match: {
+              month: month,
+              timesheetDays: day
+          }
+      },
+      {
+          $project: {
+              guardPost: 1,
+              guard: 1,
+          }
+      },
+      {
+          $group: {
+              _id: '$guardPost',
+              today: {
+                  $push: "$guard"
+              }
+          }
+      },
+  ]).then(responce => responce.map(element => {
+
+      //Результат - все посты имеющие охранников за сегодня
+      return {
+          _id: element._id.toString(),
+          today: element.today.map(value => value.toString()),
+      }
+  }));
+
+  // Выборка данных об охранниках
+  const guards = await mongoGuardsModel.find().populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
+
+  guards.sort((a, b) => {
+    return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
+  }).forEach(value => {
+    // Преобразование ID в строки
+    value._id = value._id.toString();
+    if (value.manager) {
+      value.manager._id = value.manager._id.toString();
+    } else {
+      value.manager = { _id: "EMPTY" }
+    }
+    if (value.guardPosts) {
+      value.guardPosts = value.guardPosts.map((value) => value._id.toString());
+    }
+  })
+
   // Выборка данных о физ. постах
   const guardPosts = await mongoGuardPostsModel.find({}, null, { sort: { 'manager': 1, 'number': 1 } }).populate('manager', 'surname firstName').lean();
 
   let userIsNotManager = true;
 
   guardPosts.forEach(value => {
+
+    // Преобразование ID в строки
     value._id = value._id.toString();
+
     if (value.manager) {
       value.manager._id = value.manager._id.toString();
       if (value.manager._id === userData.id) {
         userIsNotManager = false;
       }
     }
+
+    // Просмотр физ постов с имеющимися сегодня охранниками
+    const indexGuardsToday = guardsToday.findIndex(element => element._id === value._id);
+
+    // Если есть охранники сегодня у физ поста - запись их в переменную guardsToday
+    if( indexGuardsToday > -1 ){
+      
+      value.guardsToday = guards.filter(element => guardsToday[indexGuardsToday].today.includes(element._id) );
+
+      value.guardsToday = value.guardsToday.map(element => {
+        element.label = [element.surname, element.firstName, element.telephone].join(' ');
+        element.lower = element.label.toLowerCase().replace(/\s/g, '');;
+        return element;
+      })
+
+    }
+
   })
 
   // Корректировка прав доступа в случае если НСО не имеет физ. поста
@@ -91,23 +165,6 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   users.forEach(value => {
     value._id = value._id.toString();
-  })
-
-  // Выборка данных об охранниках
-  const guards = await mongoGuardsModel.find().populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
-
-  guards.sort((a, b) => {
-    return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
-  }).forEach(value => {
-    value._id = value._id.toString();
-    if (value.manager) {
-      value.manager._id = value.manager._id.toString();
-    } else {
-      value.manager = { _id: "EMPTY" }
-    }
-    if (value.guardPosts) {
-      value.guardPosts = value.guardPosts.map((value) => value._id.toString());
-    }
   })
 
   return {

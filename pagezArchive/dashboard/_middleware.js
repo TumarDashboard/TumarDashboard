@@ -19,9 +19,9 @@ function redirect( to, from ){
 
 }
 
-export default catchErrorsMiddleware(async (req, ev) => {
+export default catchErrorsMiddleware(async (request, ev) => {
     
-    const refreshToken = req.cookies['refreshToken'];
+    const refreshToken = request.cookies['refreshToken'];
 
     if (refreshToken) {
 
@@ -36,20 +36,20 @@ export default catchErrorsMiddleware(async (req, ev) => {
 
             if (!userData.isActivated) {
 
-                return redirect('/authorization/activatelink', req.nextUrl.pathname);
+                return redirect('/authorization/activatelink', request.nextUrl.pathname);
 
             }
 
-            const findedRule = FDashboardAccessRules.find( (rule) => req.nextUrl.pathname.search(rule.url) > -1 );
+            const findedRule = FDashboardAccessRules.find( (rule) => request.nextUrl.pathname.search(rule.url) > -1 );
 
-            if( req.nextUrl.pathname != "/dashboard" 
+            if( request.nextUrl.pathname != "/dashboard" 
                 && findedRule 
                 && findedRule.access.length > 0 
                 && userData.positions 
                 && userData.positions.length > 0
                 && intersectArrays( findedRule.access, userData.positions )){
 
-                req.user = userData;
+                request.user = userData;
 
                 return NextResponse.next().clearCookie('redirectAuth');
 
@@ -61,8 +61,8 @@ export default catchErrorsMiddleware(async (req, ev) => {
 
     }
 
-    console.log('catchErrorsMiddleware redirect to /authorization/login');
+    console.log('catchErrorsMiddleware redirect to /authorization');
     
-    return redirect('/authorization/login', req.nextUrl.pathname);
+    return redirect('/authorization', request.nextUrl.pathname);
 
 })

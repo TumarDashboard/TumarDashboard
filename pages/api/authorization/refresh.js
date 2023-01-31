@@ -3,7 +3,7 @@ import userService from "../../../src/service/userService";
 import { catchErrorsApi } from '../../../middleware/exceptions';
 import { getCookie, setCookies } from '../../../middleware/cookies';
 
-const delay = ms => new Promise(res => setTimeout(res, ms));
+// const delay = ms => new Promise(res => setTimeout(res, ms));
 
 export default catchErrorsApi( async (req, res) => {
     try {

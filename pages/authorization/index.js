@@ -12,6 +12,7 @@ const content = (isFirstMount) => ({
 });
 
 function Login({ isFirstMount, redirectAuth }) {
+  
   return (
     <div
       className="flex-1"
@@ -36,6 +37,7 @@ function Login({ isFirstMount, redirectAuth }) {
 }
 
 Login.getInitialProps = async ({ query, req, res }) => {
+
   const redirectAuth = getCookie("redirectAuth", {
     req,
     res

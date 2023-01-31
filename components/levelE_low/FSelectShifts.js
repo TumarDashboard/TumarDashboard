@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { XIcon, ChevronDownIcon } from '@heroicons/react/solid';
+import { XMarkIcon, ChevronDownIcon } from '@heroicons/react/20/solid';
 import FShiftItemList from '../levelZ_variable/FShiftsItemList';
 
 const maxlength = process.env.NEXT_PUBLIC_MAX_COUNT_SHIFTS;
@@ -85,7 +85,7 @@ export function FSelectShifts({ selected, onChange }) {
                         >
                             <span>{value}</span>
 
-                            <XIcon
+                            <XMarkIcon
                                 className="ml-auto fill-white mx-1 group-hover:fill-red-400 group-hover:scale-110 w-4 h-4 cursor-pointer"
                                 viewBox="0 0 18 18"
                             />

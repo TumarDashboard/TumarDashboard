@@ -6,7 +6,6 @@ import useSWR from 'swr'
 import { fetchAuth } from '../../middleware/requests';
 import { useRouter } from 'next/router';
 import { FButtonRed } from '../levelE_low/FButtonRed';
-import { RefreshIcon, UserCircleIcon } from '@heroicons/react/solid';
 import FNextLink from '../levelE_low/FNextLink';
 
 let mobxUser;
@@ -68,7 +67,7 @@ export function StoreProvider({ isFirstMount, children, initialState: initialDat
           </FButtonRed>
           
           <FNextLink
-              href="/authorization/login"
+              href="/authorization"
               className='text-color_C hover:bg-color_C hover:text-color_G px-3 py-2 rounded-md text-sm font-bold font-font_B'
           >
             <UserCircleIcon className="h-8 w-8" />

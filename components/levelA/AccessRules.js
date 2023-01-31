@@ -1,48 +1,57 @@
 import e from 'cors';
 import * as positions from '../levelZ_variable/FPositionItemList';
 
-export const FDashboardAccessRules = [
-    { url: /^\/dashboard\/profile$/, access: [] },
-    {
-        url: /^\/dashboard\/users$/, access: [
-            positions.FPositionDIR,
-            positions.FPositionZDIR,
-            positions.FPositionHRM,
-        ]
-    },
-    {
-        url: /^\/dashboard\/guardPosts$/, access: [
-            positions.FPositionDIR,
-            positions.FPositionZDIR,
-            positions.FPositionHRM,
-            positions.FPositionBUH,
-            positions.FPositionNSO,
-            positions.FPositionOPR,
-        ]
-    },
-    {
-        url: /^\/dashboard\/guardPosts(?=.)/, access: [
-            positions.FPositionDIR,
-            positions.FPositionZDIR,
-            positions.FPositionHRM,
-            positions.FPositionBUH,
-            positions.FPositionNSO,
-        ]
-    },
-    {
-        url: /^\/dashboard\/guards$/, access: [
-            positions.FPositionDIR,
-            positions.FPositionZDIR,
-            positions.FPositionHRM,
-            positions.FPositionNSO,
-            positions.FPositionBUH,
-        ]
-    }
-];
+// export const FDashboardAccessRules = [
+//     { url: /^\/dashboard\/profile$/, access: [] },
+//     {
+//         url: /^\/dashboard\/users$/, access: [
+//             positions.FPositionDIR,
+//             positions.FPositionZDIR,
+//             positions.FPositionHRM,
+//         ]
+//     },
+//     {
+//         url: /^\/dashboard\/guardPosts$/, access: [
+//             positions.FPositionDIR,
+//             positions.FPositionZDIR,
+//             positions.FPositionHRM,
+//             positions.FPositionBUH,
+//             positions.FPositionNSO,
+//             positions.FPositionOPR,
+//         ]
+//     },
+//     {
+//         url: /^\/dashboard\/guardPosts(?=.)/, access: [
+//             positions.FPositionDIR,
+//             positions.FPositionZDIR,
+//             positions.FPositionHRM,
+//             positions.FPositionBUH,
+//             positions.FPositionNSO,
+//         ]
+//     },
+//     {
+//         url: /^\/dashboard\/guards$/, access: [
+//             positions.FPositionDIR,
+//             positions.FPositionZDIR,
+//             positions.FPositionHRM,
+//             positions.FPositionNSO,
+//             positions.FPositionBUH,
+//         ]
+//     }
+// ];
 
 export const FApiMethodAccessRules = [
     
     // Guard methods
+    {
+        url: '/dashboard/guards', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionBUH },
+            { position: positions.FPositionNSO },
+        ]
+    },
     {
         url: '/api/method/guard/createGuard', access: [
             { position: positions.FPositionZDIR },
@@ -66,6 +75,25 @@ export const FApiMethodAccessRules = [
     },
 
     // GuardPost methods
+    {
+        url: '/dashboard/guardPosts\$', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionBUH },
+            { position: positions.FPositionNSO },
+            { position: positions.FPositionOPR }
+        ]
+    },
+    {
+        url: /^\/dashboard\/guardPosts(?=.)/, access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionBUH },
+            { position: positions.FPositionNSO },
+        ]
+    },
     {
         url: '/api/method/guardPost/createGuardPost', access: [
             { position: positions.FPositionZDIR },
@@ -100,6 +128,16 @@ export const FApiMethodAccessRules = [
         ]
     },
     {
+        url: '/api/method/timesheet/getTimesheetToday', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionBUH },
+            { position: positions.FPositionNSO },
+            { position: positions.FPositionOPR }
+        ]
+    },
+    {
         url: '/api/method/timesheet/getTimesheet', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
@@ -113,12 +151,40 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
+            { position: positions.FPositionBUH },
             { position: positions.FPositionNSO },
-            { position: positions.FPositionBUH }
+        ]
+    },
+    {
+        url: '/api/method/timesheet/getTimesheetPrintForDay', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionBUH },
+            { position: positions.FPositionOPR },
+        ]
+    },
+    {
+        url: '/api/method/timesheet/getTimesheetPrintForMonthPart', access: [
+            { position: positions.FPositionNSO },
+        ]
+    },
+    {
+        url: '/api/method/timesheet/getTimesheetPrintForMonthFull', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionBUH },
         ]
     },
 
     // User methods
+    {   
+        url: '/dashboard\$', access: [] 
+    },
+    {   
+        url: '/dashboard/profile', access: [] 
+    },
     {
         url: '/api/method/user/changeUser', access: [
             { position: positions.FPositionZDIR },
@@ -138,6 +204,13 @@ export const FApiMethodAccessRules = [
     },
     
     // UserHard methods
+    {
+        url: '/dashboard/users', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+        ]
+    },
     {
         url: '/api/method/userHard/createUserHard', access: [
             { position: positions.FPositionZDIR, userCompare: ['idHard'] },
@@ -179,6 +252,9 @@ export async function getApiMethodAccess(req, userData) {
         if (!userData.positions || userData.positions.length === 0){
             userData.positions=[''];
         }
+
+        
+    console.log(findedRule, userData.positions);
 
         for (const access of findedRule.access ) {
 
@@ -232,15 +308,17 @@ export async function getApiMethodAccess(req, userData) {
 }
 
 export function getApiMethodAccesRules(positions) {
-    
+
     const regExp = RegExp([
         '/api/method/guard/',
         '/api/method/guardPost/',
         '/api/method/timesheet/',
         '/api/method/user/',
         '/api/method/userHard/',
+        '/dashboard/',
+        '/\\^\\\\/dashboard\\\\/',
     ].join('|'), 'ig');
-
+    
     return [...new Set(FApiMethodAccessRules.reduce((result, value) => {
 
         let accessName = value.url.toString().replace(regExp, '');

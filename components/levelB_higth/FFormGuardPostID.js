@@ -1,4 +1,4 @@
-import { PencilAltIcon, ReplyIcon, TrashIcon } from '@heroicons/react/solid';
+import { PencilSquareIcon, ArrowUturnLeftIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { motion } from "framer-motion";
 import Image from "next/legacy/image";
 import { useRouter } from "next/router";
@@ -200,7 +200,7 @@ export default function FFormGuardPostID({ accessRules, userData, guardPost, gua
               router.push('/dashboard/guardPosts');
             }}
           >
-            <ReplyIcon
+            <ArrowUturnLeftIcon
               className="h-8 w-8 fill-color_C
             hover:fill-color_F"
             />
@@ -245,7 +245,7 @@ export default function FFormGuardPostID({ accessRules, userData, guardPost, gua
                   })
                 }}
               >
-                <PencilAltIcon
+                <PencilSquareIcon
                   className="h-4 w-4"
                 />
               </FButtonRed>}

@@ -24,7 +24,6 @@ export default function FFormLogin( { redirectAuth } ) {
     /*
         Использование глобальных данных
     */
-
     const router = useRouter();
 
     const { MOBXuser, MOBXui } = useStore();

@@ -1,6 +1,6 @@
 import { FModalForm } from '../FModalForm';
 import { useState, useEffect } from 'react';
-import { PhoneIcon, UserIcon } from '@heroicons/react/solid';
+import { PhoneIcon, UserIcon } from '@heroicons/react/24/solid';
 
 import { FInputNumber } from "../../levelE_low/FInputNumber";
 import { FTextArea } from "../../levelE_low/FTextArea";
@@ -23,6 +23,7 @@ export function FGuardPostShowGuardForm({ accessRules, form, setForm, submitAdd,
   useEffect(() => {
     if (form.error) {
     } else if (form.isOpen) {
+      console.log(form);
       setGuardsToday((form.guardsToday && form.guardsToday.length > 0) ? form.guardsToday : [])
     }
   }, [form])
@@ -32,7 +33,11 @@ export function FGuardPostShowGuardForm({ accessRules, form, setForm, submitAdd,
 
   return (
     <FModalForm
-      title="Просмотр смены"
+      title={[ 
+        'Просмотр смены',
+        form.guardPost?.number ? ': ' + form.guardPost?.number : null,
+        form.guardPost?.callsign ? ' - ' + form.guardPost?.callsign : null
+      ].filter(Boolean).join('')}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
       className="flex flex-col p-4 w-full overflow-y-auto max-h-[90vh] space-y-4"

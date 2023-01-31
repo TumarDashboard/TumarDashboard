@@ -362,7 +362,7 @@ const FFormProfile = observer(function FFormProfile({userData, accessRules}) {
           {/* {Должность} */}
           {ARchangeUserPositions &&
             <div className="form-item">
-              <label className="text-xl select-noneselect-none">Должность</label>
+              <label className="text-xl select-none">Должность</label>
               <FSelect
                 options={FPositionItemList}
                 onChange={positionsChange}

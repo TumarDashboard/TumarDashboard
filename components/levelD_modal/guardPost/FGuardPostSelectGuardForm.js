@@ -1,6 +1,6 @@
-import { XIcon, PlusIcon } from '@heroicons/react/solid';
+import { XMarkIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { FModalForm } from '../FModalForm';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FInputFile } from "../../levelE_low/FInputFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
@@ -17,8 +17,6 @@ import { FGuardEditForm } from '../guard/FGuardEditForm';
 import { createGuard } from '../../../src/dtos/dtoGuard';
 import { FFilterText } from '../../levelE_low/FFilterText';
 import { motion } from "framer-motion";
-
-var filterringTimeout = null;
 
 export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEdit, optionGuards, setGuards, users, guardPosts, MOBXui, errorCallback }) {
 
@@ -41,8 +39,8 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
   -------------------------------------------------------------------------------------------------------*/
 
   const [inputFilter, setInputFilter] = useState([]);
-
   const [inputFilterText, setInputFilterText] = useState([]);
+  const filterringTimeout = useRef();
 
   const filterChange = (text) => {
     var text = text.toLowerCase().replace(/\s/g, '');
@@ -170,6 +168,9 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
       setError(null);
       document.body.classList.add("overscroll-y-contain");
     }
+    return ()=>{
+      filterringTimeout.current && clearTimeout(filterringTimeout.current);
+    }
   }, [form])
   /*-------------------------------------------------------------------------------------------------------
   -------------------------------------------------------------------------------------------------------*/
@@ -196,7 +197,7 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
             }}
           >
             <span className='w-fit'>{value.label}</span>
-            <XIcon
+            <XMarkIcon
               className='w-4 h-4'
             />
           </button>
@@ -213,11 +214,8 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
             value={inputFilterText}
             onChange={(e)=>{
               setInputFilterText(e.target.value);
-              if( filterringTimeout ){
-                clearTimeout( filterringTimeout );
-                filterringTimeout = null;
-              }
-              filterringTimeout = setTimeout(()=>filterChange(e.target.value), 500);
+              filterringTimeout.current && clearTimeout(filterringTimeout.current);
+              filterringTimeout.current = setTimeout(() => filterChange(e.target.value), 500);
             }}
             onClear={() => {
               setInputFilterText('');

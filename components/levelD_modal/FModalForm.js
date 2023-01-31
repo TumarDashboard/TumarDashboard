@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { XIcon } from '@heroicons/react/solid';
+import { XMarkIcon } from '@heroicons/react/20/solid';
 
 const modal = {
   open: {
@@ -42,7 +42,7 @@ export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, childre
 
               <div className="text-white font-medium text-xl">{title}</div>
 
-              <XIcon
+              <XMarkIcon
                 className="ml-auto fill-white hover:fill-red-600 hover:scale-110 w-6 h-6 cursor-pointer"
                 viewBox="0 0 18 18"
                 onClick={() => setIsModalFormOpen({ isOpen: false })}

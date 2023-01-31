@@ -1,3 +1,5 @@
+import { NextResponse } from 'next/server'
+
 export class ApiError extends Error {
     statusCode;
     errors;
@@ -45,6 +47,23 @@ export class ApiError extends Error {
 
 }
 
+export class MiddlewareError extends NextResponse{
+    constructor(status, message){
+        super(
+            JSON.stringify({ success: false, message: message }),
+            { status: status, headers: { 'content-type': 'application/json' } }
+        );
+    }
+
+    static UnauthorizedError() {
+        return new MiddlewareError(401, "Пользователь не авторизован");
+    }
+
+    static BadRequest(message) {
+        return new MiddlewareError( 500, message );
+    }  
+}
+
 export function catchErrorsApi(handler) {
     return async (req, res) => {
         return handler(req, res)
@@ -61,7 +80,7 @@ export function catchErrorsApi(handler) {
             });
     }
 }
-
+// TODO: удалить catchErrorsMiddleware
 export function catchErrorsMiddleware(handler) {
     return async (req, ev) => {
         return handler(req, ev)

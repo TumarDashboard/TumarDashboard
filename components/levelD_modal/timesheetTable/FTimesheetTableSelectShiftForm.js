@@ -1,21 +1,5 @@
-import { XIcon, PlusIcon } from '@heroicons/react/solid';
 import { FModalForm } from '../FModalForm';
-import { useState, useEffect } from 'react';
-import { FInputFile } from "../../levelE_low/FInputFile";
-import { FButtonRed } from "../../levelE_low/FButtonRed";
-import { FButtonWhite } from "../../levelE_low/FButtonWhite";
-import { FSelect } from "../../levelE_low/FSelect";
 
-import { equalArrays } from '../../../src/utils/arrayUtils';
-import { FInputInitials } from '../../levelE_low/FInputInitials';
-import { FInputTelephone } from '../../levelE_low/FInputTelephone';
-import Select from 'react-select';
-import { useId } from 'react';
-import { FInputText } from '../../levelE_low/FInputText';
-import { array } from 'yup';
-import { FGuardEditForm } from '../guard/FGuardEditForm';
-import { createGuard } from '../../../src/dtos/dtoGuard';
-import { FSelectShifts } from '../../levelE_low/FSelectShifts';
 import FShiftItemList from '../../levelZ_variable/FShiftsItemList';
 
 export function FTimesheetTableSelectShiftForm({ form, setForm, submitHandle }) {

@@ -181,7 +181,7 @@ class GoogleDrive {
     const response = await this.drive.files.create({
       requestBody: {
         name: `Табель-${month}-${getCurrentTimeStamp()}.xlsx`,
-        parents: [process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHIFTS]
+        parents: [process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_FULL]
       },
       media: {
         body: bufferStream,

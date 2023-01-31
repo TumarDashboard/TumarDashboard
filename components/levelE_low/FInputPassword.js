@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { EyeIcon, EyeOffIcon } from '@heroicons/react/solid';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 
 const minlength = process.env.NEXT_PUBLIC_MIN_LENGTH_PASSWORD;
 const maxlength = process.env.NEXT_PUBLIC_MAX_LENGTH_PASSWORD;
@@ -48,7 +48,7 @@ export function FInputPassword({ onPasswordChange, className, ...props }) {
                 fill-color_D hover:fill-color_C hover:ring hover:ring-red-200"
                     onClick={() => setShown(true)}
                 />}
-                {shown && <EyeOffIcon
+                {shown && <EyeSlashIcon
                     className="absolute w-6 h-6 indent-5 
                 right-5 top-1/2 translate-x-1/2 -translate-y-1/2 rounded-full
                 fill-color_D hover:fill-color_C hover:ring hover:ring-red-200"

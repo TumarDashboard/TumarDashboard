@@ -70,7 +70,7 @@ export default function Profile({ accessRules, userData, isFirstMount }) {
           </ul>
         </nav>
 
-        <AnimatePresence exitBeforeEnter>
+        <AnimatePresence mode="wait">
           <motion.div
             initial="initial"
             animate="animate"

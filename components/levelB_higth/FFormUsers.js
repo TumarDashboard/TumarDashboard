@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import Image from "next/legacy/image";
-import { useState } from "react";
-import { ChevronDownIcon, ChevronUpIcon, PlusIcon, XIcon, PencilAltIcon, TrashIcon, ShieldCheckIcon, LockClosedIcon } from '@heroicons/react/solid';
-import { BanIcon } from '@heroicons/react/outline';
+import { useState, useCallback, useRef, useEffect } from "react";
+import { ChevronDownIcon, ChevronUpIcon, PlusIcon, PencilSquareIcon, TrashIcon, ShieldCheckIcon, LockClosedIcon } from '@heroicons/react/24/solid';
+import { NoSymbolIcon } from '@heroicons/react/24/outline';
 import { FFilterText } from "../levelE_low/FFilterText";
 import { FButtonRed } from "../levelE_low/FButtonRed";
 import { FButtonWhite } from "../levelE_low/FButtonWhite";
@@ -13,9 +13,12 @@ import { useStore } from "../levelA/StoreProvider";
 import { createUserHard, editUserHard, deleteUserHard, activateUserHard, resetUserPasswordHard } from "../../src/dtos/dtoUser";
 import { FButtonYellow } from "../levelE_low/FButtonYellow";
 import { FUserActivationForm } from "../levelD_modal/userHard/FUserActivationForm";
-import ReactTooltip from 'react-tooltip';
-import { FNoSSR } from "../levelC_middle/FNoSSR";
+// import { Tooltip, TooltipWrapper } from 'react-tooltip';
+// import 'react-tooltip/dist/react-tooltip.css';
 import { FUserResetPasswordForm } from "../levelD_modal/userHard/FUserResetPasswordForm";
+import { usePopper } from 'react-popper';
+import { FTooltip } from "../levelE_low/FTooltip";
+
 const inputs = {
   initial: {
     y: -20,
@@ -70,8 +73,6 @@ const sortingTableCallback = (a, b, rule, invert) => {
   }
 }
 
-var filterringTimeout = null;
-
 export default function FFormUsers({ accessRules, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
@@ -114,6 +115,7 @@ export default function FFormUsers({ accessRules, users }) {
       Фильтрация таблицы
   -------------------------------------------------------------------------------------------------------*/
   const [inputFilterText, setInputFilterText] = useState([]);
+  const filterringTimeout = useRef();
 
   const filteringTable = (text) => {
 
@@ -459,6 +461,18 @@ export default function FFormUsers({ accessRules, users }) {
   }
 
   /*----------------------------------------------------------------------------------------------------------------------------
+    Референс подсказки
+  ----------------------------------------------------------------------------------------------------------------------------*/
+  const [tooltipReference, setTooltipReference] = useState(null);
+
+  /*------------------------------------------------------------------------------------------------------------------*/
+  useEffect(()=>{
+    return ()=>{
+      filterringTimeout.current && clearTimeout(filterringTimeout.current);
+    }
+  }, []);
+
+  /*----------------------------------------------------------------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------*/
 
   return (
@@ -466,8 +480,6 @@ export default function FFormUsers({ accessRules, users }) {
       variants={inputs}
       className="w-full m-2"
     >
-      <FNoSSR><ReactTooltip delayShow={500} /></FNoSSR>
-
       {/* {Панель управления} */}
       <div
         className="w-full flex flex-col md:flex-row items-center space-y-2
@@ -506,11 +518,8 @@ export default function FFormUsers({ accessRules, users }) {
             value={inputFilterText}
             onChange={(e) => {
               setInputFilterText(e.target.value);
-              if (filterringTimeout) {
-                clearTimeout(filterringTimeout);
-                filterringTimeout = null;
-              }
-              filterringTimeout = setTimeout(() => filteringTable(e.target.value), 500);
+              filterringTimeout.current && clearTimeout(filterringTimeout.current);
+              filterringTimeout.current = setTimeout(() => filteringTable(e.target.value), 500);
             }}
             onClear={() => {
               setInputFilterText('');
@@ -622,7 +631,8 @@ export default function FFormUsers({ accessRules, users }) {
                       {ARactivateUserHard && !user.isActivated &&
                         <FButtonYellow
                           className="flex"
-                          data-tip="Активировать"
+                          onPointerEnter={event => setTooltipReference({ target: event.currentTarget, text: `Активировать учётную запись - ${[user.surname, user.firstName, user.patronymic].join(' ')}` })}
+                          onPointerLeave={() => setTooltipReference(null)}
                           onClick={(event) => {
                             event.stopPropagation();
 
@@ -639,12 +649,14 @@ export default function FFormUsers({ accessRules, users }) {
                             className="h-4 w-4"
                           />
                           {/* <span className='hidden 2xl:block text-xs'>Активировать</span> */}
-                        </FButtonYellow>}
+                        </FButtonYellow>
+                      }
 
                       {AReditUserHard &&
                         <FButtonRed
                           className="flex"
-                          data-tip="Изменить"
+                          onPointerEnter={event => setTooltipReference({ target: event.currentTarget, text: `Изменить данные - ${[user.surname, user.firstName, user.patronymic].join(' ')}` })}
+                          onPointerLeave={() => setTooltipReference(null)}
                           onClick={(event) => {
                             event.stopPropagation();
                             setUserEditForm({
@@ -656,17 +668,18 @@ export default function FFormUsers({ accessRules, users }) {
                             })
                           }}
                         >
-                          <PencilAltIcon
+                          <PencilSquareIcon
                             className="h-4 w-4"
                           />
                           {/* <span className='hidden 2xl:block'>Изменить</span> */}
-                        </FButtonRed>}
+                        </FButtonRed>
+                      }
 
                       {ARdeleteUserHard &&
                         <FButtonWhite
-
-                          data-tip="Удалить"
                           className="flex"
+                          onPointerEnter={event => setTooltipReference({ target: event.currentTarget, text: `Удалить данные - ${[user.surname, user.firstName, user.patronymic].join(' ')}` })}
+                          onPointerLeave={() => setTooltipReference(null)}
                           onClick={(event) => {
                             event.stopPropagation();
                             setUserDeleteForm({
@@ -681,12 +694,14 @@ export default function FFormUsers({ accessRules, users }) {
                             className="h-4 w-4"
                           />
                           {/* <span className='hidden 2xl:block'>Удалить</span> */}
-                        </FButtonWhite>}
+                        </FButtonWhite>
+                      }
 
                       {ARresetUserPasswordHard &&
                         <FButtonRed
                           className="flex"
-                          data-tip="Сбросить пароль"
+                          onPointerEnter={event => setTooltipReference({ target: event.currentTarget, text: `Сбросить пароль - ${[user.surname, user.firstName, user.patronymic].join(' ')}` })}
+                          onPointerLeave={() => setTooltipReference(null)}
                           onClick={(event) => {
                             event.stopPropagation();
 
@@ -699,13 +714,14 @@ export default function FFormUsers({ accessRules, users }) {
                             })
                           }}
                         >
-                          <BanIcon
+                          <NoSymbolIcon
                             className="absolute h-8 w-8 stroke-1"
                           />
                           <LockClosedIcon
                             className="h-4 w-4"
                           />
-                        </FButtonRed>}
+                        </FButtonRed>
+                      }
 
                     </div>
                   </td>}
@@ -746,6 +762,11 @@ export default function FFormUsers({ accessRules, users }) {
         form={userResetPasswordForm}
         setForm={setUserResetPasswordForm}
         submit={userResetPasswordFormSubmit}
+      />
+
+      {/* {Подсказка таблицы} */}
+      <FTooltip
+        reference={tooltipReference} 
       />
 
     </motion.div>

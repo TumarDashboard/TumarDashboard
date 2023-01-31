@@ -1,4 +1,4 @@
-import { ArchiveIcon, StopIcon, PlusIcon, ReplyIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
+import { ArchiveBoXMarkIcon, StopIcon, PlusIcon, ArrowUturnLeftIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { motion, useDragControls } from "framer-motion";
 import Image from "next/legacy/image";
 import { useState, useEffect, useRef } from 'react';
@@ -807,7 +807,7 @@ export default function FFormGuardPostID({ accessRules, guardPost, guardPosts, g
               router.push('/dashboard/guardPosts');
             }}
           >
-            <ReplyIcon
+            <ArrowUturnLeftIcon
               className="h-8 w-8 fill-color_C
             hover:fill-color_F"
             />
@@ -841,7 +841,7 @@ export default function FFormGuardPostID({ accessRules, guardPost, guardPosts, g
                 })
               }}
             >
-              <PencilAltIcon
+              <PencilSquareIcon
                 className="h-4 w-4"
               />
             </FButtonRed>
@@ -1171,7 +1171,7 @@ export default function FFormGuardPostID({ accessRules, guardPost, guardPosts, g
                               })
                             }}
                           >
-                            <PencilAltIcon
+                            <PencilSquareIcon
                               className="h-6 w-6 fill-orange-800"
                             />
                           </button>
@@ -1341,7 +1341,7 @@ export default function FFormGuardPostID({ accessRules, guardPost, guardPosts, g
                         onClick={timesheetChangeHandle}
                         disabled={timesheetChanged}
                       >
-                        <ArchiveIcon
+                        <ArchiveBoXMarkIcon
                           className="h-6 w-6"
                         />
                         Сохранить

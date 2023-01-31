@@ -5,7 +5,7 @@ export default function FNextLink(props) {
   const { href, onClick, children, ...rest } = props;
   return (
     <Link href={href} {...rest} onClick={onClick} legacyBehavior>
-        {children}
+        <>{children}</>
     </Link>
   );
 }
