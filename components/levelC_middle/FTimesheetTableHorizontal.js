@@ -626,6 +626,7 @@ export default function ыFTimesheetTableHorizontal({ accessRules, userData, MOB
       }
 
       setInputGuardPostManager(guardPost.manager ? guardPost.manager._id : 'EMPTY');
+      setInputGuardPostRate(guardPost.rate);
 
     }
 
@@ -733,7 +734,7 @@ export default function ыFTimesheetTableHorizontal({ accessRules, userData, MOB
                             value={inputGuardPostRate ? inputGuardPostRate : ''}
                             onChange={(e) => {
                               setTimesheetChanged(false);
-                              setInputGuardPostRate(parseInt(e.target.value));
+                              setInputGuardPostRate(parseFloat(e.target.value));
                             }}
                             className="border border-gray-300 block w-32
                             focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 

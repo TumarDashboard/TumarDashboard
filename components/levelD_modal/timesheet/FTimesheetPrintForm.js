@@ -38,25 +38,48 @@ const getInputDate = (operation) => {
   }
 }
 
-const getTimesheet = async(operation, guardPosts, date) =>{
+const getTimesheet = async(operation, guardPosts, date, manager) =>{
+  if(!date) throw ApiError.BadRequest('Отсутствуют необходимые данные: дата');
   switch (operation) {
 
     case DTForDay:
-      return await getTimesheetPrintForDay(date);
+      return {
+        responce: await getTimesheetPrintForDay(date),
+        documentName: 'Список охранников-' + date + '.xlsx'
+      };
 
     case DTForMonthPart:
-      return await getTimesheetPrintForMonthPart(date);
+      if(!manager) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о сотруднике, выполняющим операцию');
+
+      const NSOinitials = manager.surname ? [
+        manager.surname,
+        manager.firstName?.length > 0 ? manager.firstName.charAt(0) + '.' : null,
+        manager.patronymic?.length > 0 ? manager.patronymic.charAt(0) + '.' : null,
+      ].filter(Boolean).join(' ') : null;
+
+      return {
+        responce: await getTimesheetPrintForMonthPart(date, manager.id),
+        documentName: `Табель ${NSOinitials} ${date}.xlsx`
+      };
+      
 
     case DTForMonthFull:
-      return await getTimesheetPrintForMonthFull(date);
+      return {
+        responce: await getTimesheetPrintForMonthFull(date),
+        documentName: 'Табель-' + date + '.xlsx'
+      };
 
     default:
-      return await getTimesheetPrint(guardPosts.map(value => value._id), date);
+      if(!guardPosts) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о физ. постах');
+      return {
+        responce: await getTimesheetPrint(guardPosts.map(value => value._id), date),
+        documentName: 'Табель-' + date + '.xlsx'
+      };
 
   }
 }
 
-export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, errorCallback, guardPosts }) {
+export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, MOBXuser, errorCallback, guardPosts }) {
 
   /*----Определение правил доступа-----------------------------------------------------------------------*/
   const ARgetTimesheetPrintForDay = accessRules.includes('getTimesheetPrintForDay');
@@ -71,6 +94,7 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, errorC
     ARgetTimesheetPrintForDay ? { label: "Отчёт за день", value: DTForDay } : null,
     ARgetTimesheetPrintForMonthPart ? { label: "Отчёт за месяц - частичный", value: DTForMonthPart } : null,
     ARgetTimesheetPrintForMonthFull ? { label: "Отчёт за месяц - полный", value: DTForMonthFull } : null,
+    // { label: "getTimesheetPrint", value: 'getTimesheetPrint' }
   ].filter(Boolean);
 
   const [selectedOperation, setSelectedOperation] = useState();
@@ -105,17 +129,15 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, errorC
 
     try {
 
-      const responce = await getTimesheet( selectedOperation, guardPosts, inputTimesheetDate);
-
+      const {responce, documentName} = await getTimesheet( selectedOperation, guardPosts, inputTimesheetDate, MOBXuser?.user);
+      // console.log(responce);
       const googleDriveFileID = responce.headers.get('googleDriveFileID');
 
       const xlsblob = await responce.blob();
 
-      const xlsName = 'Табель-' + inputTimesheetDate + '.xlsx';
-
       const url = window.URL.createObjectURL(xlsblob);
 
-      setFile({ url: url, name: xlsName, googleDriveFileID: googleDriveFileID ? googleDriveFileID : null });
+      setFile({ url: url, name: documentName, googleDriveFileID: googleDriveFileID ? googleDriveFileID : null });
 
     } catch (error) {
 
@@ -183,6 +205,7 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, errorC
             options={FOperationItemList}
             onChange={selectedOperationChange}
             value={selectedOperation}
+            disabled={FOperationItemList.length==1}
           />
         </div>
 

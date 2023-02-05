@@ -94,8 +94,8 @@ export const getTimesheetPrintForDay = async (date) => {
     return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForDay', { date });
 }
 
-export const getTimesheetPrintForMonthPart = async (month) => {
-    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthPart', { month });
+export const getTimesheetPrintForMonthPart = async (month, guardPostManager) => {
+    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthPart', { month, guardPostManager });
 }
 
 export const getTimesheetPrintForMonthFull = async (month) => {

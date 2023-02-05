@@ -8,6 +8,18 @@ import mongoGuardPostsArchiveModel from "../mongo/models/mongoGuardPostsArchiveM
 import mongoGuardsModel from "../mongo/models/mongoGuardsModel";
 import mongoGuardsArchiveModel from "../mongo/models/mongoGuardsArchiveModel";
 import mongoose from "mongoose";
+import { getCurrentMonth } from "../utils/dateUtils";
+import mongoTimesheetsGuardPostModel from "../mongo/models/mongoTimesheetsGuardPostModel";
+
+function managerEquals( a, b ){
+    if( !a && !b ){
+        return true;
+    }
+    if( !a || !b ){
+        return false;
+    }
+    return a.toString().localeCompare( b.toString() );
+}
 
 class GuardPostService {
 
@@ -108,10 +120,15 @@ class GuardPostService {
 
     async editGuardPost(inputData) {
         try {
+            // console.log('-----------------------editGuardPost-------------------');
 
-            //Validate date
+            //Validate date 
             if (inputData.number) {
                 inputData.number = parseInt(inputData.number);
+            }
+
+            if (inputData.rate) {
+                inputData.rate = parseFloat(inputData.rate);
             }
 
             const guardPostData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
@@ -135,6 +152,7 @@ class GuardPostService {
             //cast manager id from string to id
             if (guardPostData.manager == 'EMPTY') {
                 guardPostData.manager = null;
+                guardPostData.managerSheme = null;
             } else if (guardPostData.manager) {
                 guardPostData.manager = new mongoose.mongo.ObjectId(guardPostData.manager);
                 guardPostData.managerSheme = 'User';
@@ -159,12 +177,35 @@ class GuardPostService {
 
             }
 
+            // Обновляем данные в записях о графиках физ постов--------------------------------------------------------------------------------------------------------
+            if( !managerEquals(mongoGuardPost.manager, guardPostData.manager) || mongoGuardPost.rate != guardPostData.rate ){
+
+                const month = new Date(getCurrentMonth());
+
+                if( guardPostData.rate == null && guardPostData.manager == null ){
+
+                    await mongoTimesheetsGuardPostModel.deleteOne({ guardPost: mongoGuardPost._id, month: month });
+                    
+                }else{
+
+                    await mongoTimesheetsGuardPostModel.updateOne({
+                        guardPost: mongoGuardPost._id,
+                        month: month
+                    }, {
+                        manager: guardPostData.manager,
+                        managerSheme: guardPostData.managerSheme,
+                        rate: guardPostData.rate
+                    });
+
+                }
+            }
+
+            // Обновляем данные в самого физ поста---------------------------------------------------------------------------------------------------------------------
             mongoGuardPost = await mongoGuardPostsModel.
                 findByIdAndUpdate(guardPostData.id, guardPostData, { new: true }).
                 populate('manager', 'surname firstName').lean();
 
             //DTO
-
             const dtoGuardPost = new DTOGuardPost(mongoGuardPost);
 
             //Result

@@ -6,6 +6,16 @@ export function getCurrentMonth() {
 
 }
 
+export function getMonthFromString(stamp) {
+
+    let datePrepare = stamp.split('-');
+
+    datePrepare.pop();
+    
+    return new Date( datePrepare.join('-') )
+
+}
+
 export function getCurrentTimeStamp() {
 
     const date = new Date();

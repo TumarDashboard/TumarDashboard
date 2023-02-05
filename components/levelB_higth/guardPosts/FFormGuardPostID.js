@@ -4,15 +4,15 @@ import Image from "next/legacy/image";
 import { useRouter } from "next/router";
 import { useState } from 'react';
 
-import { ApiError } from "../../middleware/exceptions";
-import { useStore } from "../levelA/StoreProvider";
-import { FButtonRed } from "../levelE_low/FButtonRed";
-import { FButtonWhite } from "../levelE_low/FButtonWhite";
+import { ApiError } from "../../../middleware/exceptions";
+import { useStore } from "../../levelA/StoreProvider";
+import { FButtonRed } from "../../levelE_low/FButtonRed";
+import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 
-import { deleteGuardPost, editGuardPost } from '../../src/dtos/dtoGuardPost';
-import FTimesheetHorizontal from '../levelC_middle/FTimesheetTableHorizontal';
-import { FGuardPostDeleteForm } from '../levelD_modal/guardPost/FGuardPostDeleteForm';
-import { FGuardPostEditForm } from '../levelD_modal/guardPost/FGuardPostEditForm';
+import { deleteGuardPost, editGuardPost } from '../../../src/dtos/dtoGuardPost';
+import FTimesheetHorizontal from '../../levelC_middle/FTimesheetTableHorizontal';
+import { FGuardPostDeleteForm } from '../../levelD_modal/guardPost/FGuardPostDeleteForm';
+import { FGuardPostEditForm } from '../../levelD_modal/guardPost/FGuardPostEditForm';
 
 const inputs = {
   initial: {

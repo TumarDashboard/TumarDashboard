@@ -4,21 +4,21 @@ import Image from "next/legacy/image";
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from "next/router";
 
-import { useStore } from "../levelA/StoreProvider";
-import { ApiError } from "../../middleware/exceptions";
-import { FButtonRed } from "../levelE_low/FButtonRed";
-import { FButtonWhite } from "../levelE_low/FButtonWhite";
+import { useStore } from "../../levelA/StoreProvider";
+import { ApiError } from "../../../middleware/exceptions";
+import { FButtonRed } from "../../levelE_low/FButtonRed";
+import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 
-import { createGuardPost, editGuardPost, deleteGuardPost } from '../../src/dtos/dtoGuardPost';
-import { FGuardPostDeleteForm } from '../levelD_modal/guardPost/FGuardPostDeleteForm';
-import { FGuardPostEditForm } from '../levelD_modal/guardPost/FGuardPostEditForm';
-import { FTimesheetPrintForm } from '../levelD_modal/timesheet/FTimesheetPrintForm';
-import { FFilterText } from '../levelE_low/FFilterText';
-import { FButtonWhiteSmall } from '../levelE_low/FButtonWhiteSmall';
-import { FTimesheetTableSelectGuardForm } from '../levelD_modal/timesheetTable/FTimesheetTableSelectGuardForm';
-import { FGuardPostSelectGuardForm } from '../levelD_modal/guardPost/FGuardPostSelectGuardForm';
-import { FGuardPostShowGuardForm } from '../levelD_modal/guardPost/FGuardPostShowGuardForm';
-import { changeTimesheetToday, getTimesheetToday } from '../../src/dtos/dtoTimesheet';
+import { createGuardPost, editGuardPost, deleteGuardPost } from '../../../src/dtos/dtoGuardPost';
+import { FGuardPostDeleteForm } from '../../levelD_modal/guardPost/FGuardPostDeleteForm';
+import { FGuardPostEditForm } from '../../levelD_modal/guardPost/FGuardPostEditForm';
+import { FTimesheetPrintForm } from '../../levelD_modal/timesheet/FTimesheetPrintForm';
+import { FFilterText } from '../../levelE_low/FFilterText';
+import { FButtonWhiteSmall } from '../../levelE_low/FButtonWhiteSmall';
+import { FTimesheetTableSelectGuardForm } from '../../levelD_modal/timesheetTable/FTimesheetTableSelectGuardForm';
+import { FGuardPostSelectGuardForm } from '../../levelD_modal/guardPost/FGuardPostSelectGuardForm';
+import { FGuardPostShowGuardForm } from '../../levelD_modal/guardPost/FGuardPostShowGuardForm';
+import { changeTimesheetToday, getTimesheetToday } from '../../../src/dtos/dtoTimesheet';
 
 const inputs = {
   initial: {
@@ -276,13 +276,16 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
         const index = array.findIndex(element => {
           return element._id == responce.guardPost._id
         });
-        if (index)
+        if (index){
+          responce.guardPost.guardsToday = array[index].guardsToday;
           array[index] = responce.guardPost;
+        }
         return array;
       });
 
       // Обновляем отображаемую таблицу
       setRenderTableGuardPosts(array => {
+        responce.guardPost.guardsToday = array[guardPostEditForm.index].guardsToday;
         array[guardPostEditForm.index] = responce.guardPost;
         return array;
       });
@@ -448,8 +451,8 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
       try {
 
         const responce = await getTimesheetToday();
-
-        if (responce?.timesheetToday && responce.timesheetToday.length > 0) {
+        // console.log(responce);
+        // if (responce?.timesheetToday && responce.timesheetToday.length > 0) {
 
           setTableGuardPosts(array => {
 
@@ -470,7 +473,7 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
             return result;
           });
 
-        }
+        // }
 
         MOBXui.setUpdate();
 
@@ -946,6 +949,7 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
         form={timesheetPrintForm}
         setForm={setTimesheetPrintForm}
         MOBXui={MOBXui}
+        MOBXuser={MOBXuser}
         errorCallback={errorCallback}
         guardPosts={tableGuardPosts}
       />

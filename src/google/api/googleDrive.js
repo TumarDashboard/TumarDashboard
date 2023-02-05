@@ -2,7 +2,6 @@ import { google } from 'googleapis';
 import OAUTH2Client from '../googleConnect';
 import fs from 'fs';
 import stream from 'stream';
-import { getCurrentTimeStamp } from '../../utils/dateUtils';
 
 class GoogleDrive {
 
@@ -167,7 +166,7 @@ class GoogleDrive {
   }
 
   //function to upload the excel timesheet file
-  async uploadExcelTimesheet(document, month) {
+  async uploadExcelTimesheet(document, name, parents) {
 
     await OAUTH2Client.checkAuth();
     
@@ -180,8 +179,8 @@ class GoogleDrive {
 
     const response = await this.drive.files.create({
       requestBody: {
-        name: `Табель-${month}-${getCurrentTimeStamp()}.xlsx`,
-        parents: [process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_FULL]
+        name: name,
+        parents: [parents]
       },
       media: {
         body: bufferStream,

@@ -11,14 +11,14 @@ export default catchErrorsApi( async (req, res) => {
       });
       
     const {document, googleDriveFileID} = await service.getTimesheetPrintForMonthPart( req.body );
-    
+
     res.writeHead(200, {
         'Content-Type': 'vnd.ms-excel',
-        'googleDriveFileID': googleDriveFileID
+        'googleDriveFileID': googleDriveFileID,
     });
 
     await document.write(res);
-        
+
     return res.end();
 
 })

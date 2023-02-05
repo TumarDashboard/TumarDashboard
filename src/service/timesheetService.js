@@ -13,9 +13,9 @@ import DTOGuard from "../dtos/dtoGuard";
 import mongoTimesheetsGuardPostModel from "../mongo/models/mongoTimesheetsGuardPostModel";
 import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
 import { FPositionBUH, FPositionHRM, FPositionZDIR } from "../../components/levelZ_variable/FPositionItemList";
-import { timesheetExcellForMonthFull } from "../utils/timesheetUtils";
+import { timesheetPrintServer, timesheetExcellForMonthPart, timesheetExcellForMonthFull, timesheetExcellForDay } from "../utils/timesheetUtils";
 import userService from "./userService";
-import { getCurrentMonth } from "../utils/dateUtils";
+import { getCurrentMonth, getCurrentTimeStamp, getMonthFromString } from "../utils/dateUtils";
 
 class TimesheetService {
 
@@ -31,6 +31,9 @@ class TimesheetService {
             });
 
             const { guardPost, month, guardsRow, manager, rate } = timesheetsData;
+
+            const parseRate = rate ? parseFloat(rate) : null;
+
             //Check initials condition
             await mongoConnect();
 
@@ -73,7 +76,7 @@ class TimesheetService {
                     }, {
                         manager: user.id,
                         managerSheme: user.constructor.modelName,
-                        rate: rate
+                        rate: parseRate
                     }, {
                         upsert: true
                     });
@@ -84,7 +87,7 @@ class TimesheetService {
 
                 }
 
-            } else if (rate) {
+            } else if (parseRate) {
 
                 await mongoTimesheetsGuardPostModel.updateOne({
                     guardPost: guardPost,
@@ -92,7 +95,7 @@ class TimesheetService {
                 }, {
                     manager: null,
                     managerSheme: null,
-                    rate: rate
+                    rate: parseRate
                 }, {
                     upsert: true
                 });
@@ -111,17 +114,11 @@ class TimesheetService {
 
     }
 
-    // Зачистить день если дежурный удалил данные за сегодня
-    // Удалить иного охранника если дежурный указал охранника
-    // Сохранить данные если указанный охранник уже был
-    // Сохранить данные если дежурный указал охранника 
-
-    // Запустить агрегат на посты, месяц и день
-
     async changeTimesheetToday(inputData) {
 
         try {
-            //Validate date
+            console.log('------------------changeTimesheetToday-----------------------');
+            //Validate date-------------------------------------------------------------------------------------------
 
             const timesheetsData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
@@ -137,12 +134,12 @@ class TimesheetService {
             const month = new Date(getCurrentMonth());
             const day = (new Date()).getDate() - 1;
 
-            // console.log('timesheetToday: %o', timesheetToday);
+            // console.log('guardPosts: %o', guardPosts);
 
-            //Check initials condition
+            //Check initials condition--------------------------------------------------------------------------------
             await mongoConnect();
 
-            //Запустить агрегат на посты, месяц и день
+            //Запустить агрегат на посты, месяц и день----------------------------------------------------------------
             const responceAggregateData = await mongoTimesheetsGuardsModel.aggregate([
                 {
                     $match: {
@@ -329,7 +326,57 @@ class TimesheetService {
 
             }
 
-            //Запустить агрегат на посты, не участвующие в обновлении
+            //Запустить агрегат на наличие записей об НСО и Тарифе----------------------------------------------------
+            const responseAggregateDataGuardPost = await mongoTimesheetsGuardPostModel.find({
+                guardPost: {
+                    $in: guardPosts
+                },
+                month: month,
+            }, 'guardPost rate manager').lean().then(responce => responce.reduce((result, element) => {
+                if (element.manager || element.rate) {
+                    result.push(element.guardPost.toString());
+                }
+                return result;
+            }, []));
+
+            // если в базе не совпадает кол-во записей за месяц об НСО и Тарифе
+            if (responseAggregateDataGuardPost.length != guardPosts.length) {
+
+                // Определить список остутствующих записей за месяц об НСО и Тарифах
+                const unresponsedDataGuardPost = guardPosts.reduce((result, value) => {
+                    if (!responseAggregateDataGuardPost.includes(value.toString())) {
+                        result.push(value)
+                    }
+                    return result;
+                }, []);
+
+                // Запросить данные об НСО и Тарифах для списка остутствующих
+                const dataGuardPost = await mongoGuardPostsModel.find({
+                    _id: {
+                        $in: unresponsedDataGuardPost
+                    },
+                }, '_id manager rate').lean();
+
+                // Создать записи
+                await mongoTimesheetsGuardPostModel.bulkWrite([
+                    ...dataGuardPost.map(element => {
+                        return {
+                            updateOne: {
+                                filter: { guardPost: element._id, month: month },
+                                update: {
+                                    manager: element.manager,
+                                    rate: element.rate
+                                },
+                                upsert: true
+                            }
+                        }
+                    }),
+                ]);
+
+                console.log(unresponsedDataGuardPost);
+            }
+
+            //Запустить агрегат на посты, не участвующие в обновлении--------------------------------------------------
             const responceAggregateUpdateData = await mongoTimesheetsGuardsModel.aggregate([
                 {
                     $match: {
@@ -364,6 +411,7 @@ class TimesheetService {
             }));
 
             // console.log('responceAggregateUpdateData: %o', responceAggregateUpdateData);
+
             return responceAggregateUpdateData;
 
         } catch (error) {
@@ -382,7 +430,7 @@ class TimesheetService {
             const month = new Date(getCurrentMonth());
             const day = (new Date()).getDate() - 1;
 
-            // console.log('timesheetToday: %o', timesheetToday);
+            // console.log('getTimesheetToday: %o', day);
 
             //Check initials condition
             await mongoConnect();
@@ -493,6 +541,7 @@ class TimesheetService {
 
         try {
 
+            console.log('----------------getTimesheetPrint--------------');
             //Validate date
             const timesheetsData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
@@ -737,9 +786,15 @@ class TimesheetService {
             const usersOnPosition = await userService.getUsersInitialsWithPositions([FPositionZDIR, FPositionHRM, FPositionBUH]);
 
             // Формируем документ из полученных данных
-            const document = timesheetExcellForMonthFull(responce, usersOnPosition, date);
+            const document = timesheetPrintServer(responce, usersOnPosition, date);
 
-            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=${await googleDrive.uploadExcelTimesheet(document, month)}`;
+            const documentName = `Табель-${month}-${getCurrentTimeStamp()}-old.xlsx`
+
+            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=${await googleDrive.uploadExcelTimesheet(
+                document,
+                documentName,
+                process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_FULL)
+                }`;
 
             return { document, googleDriveFileID };
 
@@ -753,35 +808,37 @@ class TimesheetService {
     async getTimesheetPrintForDay(inputData) {
 
         try {
+            console.log('------------------getTimesheetPrintForDay-----------------------');
 
-            //Validate date
+            //Validate date--------------------------------------------------------------------------------
             const timesheetsData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
                 throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
 
             });
 
-            //Извлечение параметров для формирования
-            const { guardPost, month } = timesheetsData;
+            //Извлечение параметров для формирования-------------------------------------------------------
 
-            if (month) {
-                throw ApiError.BadRequest(`Отсутствуют данные для формирования: month`);
+            const { date } = timesheetsData;
+
+            if (!date) {
+                throw ApiError.BadRequest(`Отсутствуют данные для формирования: date`);
             }
 
-            const date = new Date(month);
+            const month = getMonthFromString(date);
+            const day = new Date(date).getDate() - 1;
 
-            //Check initials condition
+            //Check initials condition---------------------------------------------------------------------
             await mongoConnect();
 
-            // Формируем ObjectID из списка guardPost на фильтр
-            // const guardPosts = guardPost.map(function (el) { return mongoose.Types.ObjectId(el) });
-
-            // Сначала запрашиваем данные из таблицы с ГРАФИКАМИ СМЕН
+            // Сначала запрашиваем данные из таблицы с ГРАФИКАМИ СМЕН--------------------------------------
             const responceTimesheetsGuards = await mongoTimesheetsGuardsModel.aggregate([
-                { $match: { 
-                    // guardPost: { $in: guardPosts }, 
-                    month: date 
-                } },
+                {
+                    $match: {
+                        month: month,
+                        timesheetDays: day
+                    }
+                },
                 {
                     $lookup: {
                         from: mongoGuardsModel.collection.name,
@@ -815,8 +872,6 @@ class TimesheetService {
                                 surname: "$guard.surname",
                                 firstName: "$guard.firstName",
                                 patronymic: "$guard.patronymic",
-                                timesheetDays: "$timesheetDays",
-                                timesheetShifts: "$timesheetShifts",
                             }
                         }
                     }
@@ -852,7 +907,6 @@ class TimesheetService {
                             address: "$guardPost.address",
                             number: "$guardPost.number",
                             callsign: "$guardPost.callsign",
-                            rate: "$guardPost.rate",
                             element: "$element"
                         }
                     }
@@ -860,18 +914,20 @@ class TimesheetService {
                 { $sort: { number: 1, callsign: 1 } }
             ]);
 
-            // Переводим ObjectID найденных ФИЗ. ПОСТОВ с имеющимися ГРАФИКАМИ СМЕН
+            // Переводим ObjectID с имеющимися ГРАФИКАМИ СМЕН----------------------------------------------
+            const registeredGuardPosts = [];
+
             const responceTimesheetsGuardsLean = responceTimesheetsGuards.map((element, index) => {
+                registeredGuardPosts.push(element._id);
                 element._id = element._id.toString();
                 return element;
-            })
+            });
 
-            // Запрашиваем данные физ поста на искомый ПЕРИОД по данным ФИЗ. ПОСТОВ
+            // Запрашиваем данные физ поста на искомый ПЕРИОД----------------------------------------------
             const responceTimesheetsGuardPost = await mongoTimesheetsGuardPostModel.aggregate([
                 {
                     $match: {
-                        // guardPost: { $in: guardPosts },
-                        month: date,
+                        month: month,
                         manager: { $exists: true, $ne: null }
                     }
                 },
@@ -880,10 +936,7 @@ class TimesheetService {
                         _id: '$manager',
                         managerSheme: { $first: "$managerSheme" },
                         guardPosts: {
-                            $push: {
-                                guardPost: "$guardPost",
-                                rate: "$rate",
-                            }
+                            $push: "$guardPost"
                         }
                     }
                 },
@@ -913,6 +966,7 @@ class TimesheetService {
                 {
                     $replaceRoot: {
                         newRoot: {
+                            _id: "$user._id",
                             surname: "$user.surname",
                             firstName: "$user.firstName",
                             patronymic: "$user.patronymic",
@@ -929,7 +983,7 @@ class TimesheetService {
             const responce = responceTimesheetsGuardPost.reduce((result, element) => {
 
                 const listGuardPosts = element.guardPosts.map((guardPost) => {
-                    return guardPost.guardPost.toString();
+                    return guardPost.toString();
                 })
 
                 const guardPosts = responceTimesheetsGuardsLean.filter((guardPost, index) => {
@@ -938,7 +992,6 @@ class TimesheetService {
 
                     if (indexOf >= 0) {
                         responceTimesheetsGuardsIncludeManagerIndex.push(index);
-                        guardPost.rate = element.guardPosts[indexOf].rate ? element.guardPosts[indexOf].rate : guardPost.rate;
                         return true;
                     }
 
@@ -948,6 +1001,7 @@ class TimesheetService {
 
                 if (guardPosts.length > 0) {
                     result.push({
+                        _id: element._id.toString(),
                         surname: element.surname,
                         firstName: element.firstName,
                         patronymic: element.patronymic,
@@ -997,13 +1051,125 @@ class TimesheetService {
                 throw ApiError.FileCreateError('Данные отсутствуют')
             }
 
-            // Добавляем данные о пользователях
-            const usersOnPosition = await userService.getUsersInitialsWithPositions([FPositionZDIR, FPositionHRM, FPositionBUH]);
+            // Рассматриваем текущий месяц или нет---------------------------------------------------------
+            if (date.startsWith(getCurrentMonth())) {
 
-            // Формируем документ из полученных данных
-            const document = timesheetExcellForMonthFull(responce, usersOnPosition, date);
+                // Запрашиваем данные о физ. постах без охранников за день и с НСО
+                const unregisteredDataWithManager = await mongoGuardPostsModel.aggregate([
+                    {
+                        $match: {
+                            _id: { $nin: registeredGuardPosts },
+                            manager: { $exists: true, $ne: null }
+                        }
+                    },
+                    { $sort: { callsign: 1, number: 1 } },
+                    {
+                        $group: {
+                            _id: '$manager',
+                            managerSheme: { $first: "$managerSheme" },
+                            guardPosts: {
+                                $push: {
+                                    _id: "$_id",
+                                    name: "$name",
+                                    address: "$address",
+                                    number: "$number",
+                                    callsign: "$callsign",
+                                }
+                            }
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: mongoUserModel.collection.name,
+                            localField: '_id',
+                            foreignField: '_id',
+                            as: 'user'
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: mongoUserArchiveModel.collection.name,
+                            localField: '_id',
+                            foreignField: '_id',
+                            as: 'userArchive'
+                        }
+                    },                {
+                        $project: {
+                            guardPosts: 1,
+                            user: { $setUnion: ["$user", "$userArchive"] }
+                        }
+                    },
+                    { $unwind: { path: "$user" } },
+                    {
+                        $replaceRoot: {
+                            newRoot: {
+                                _id: "$user._id",
+                                surname: "$user.surname",
+                                firstName: "$user.firstName",
+                                patronymic: "$user.patronymic",
+                                guardPosts: "$guardPosts"
+                            }
+                        }
+                    },
+                ])
 
-            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=${await googleDrive.uploadExcelTimesheet(document, month)}`;
+                // Добавляем найденные данные в респонс
+                if( unregisteredDataWithManager && unregisteredDataWithManager.length > 0 ){
+
+                    unregisteredDataWithManager.forEach(element=>{
+    
+                        element._id = element._id.toString();
+    
+                        const registeredInResponce = responce.find(value => value._id == element._id );
+
+                        if(registeredInResponce){
+                            registeredInResponce.guardPosts = registeredInResponce.guardPosts.concat( element.guardPosts );
+                        }else{
+                            responce.unshift( element );
+                        }
+    
+                    });
+
+                }
+
+                // Запрашиваем данные о физ. постах без охранников за день и без НСО
+                const unregisteredDataWithoutManager = await mongoGuardPostsModel.find({
+                    _id: { $nin: registeredGuardPosts },
+                    manager: null
+                }, 'name address number callsign').lean();
+
+                // Добавляем найденные данные в респонс
+                if( unregisteredDataWithoutManager && unregisteredDataWithoutManager.length > 0 ){
+
+                    const registeredInResponce = responce.find(value => value._id == undefined );
+
+                    if(registeredInResponce){
+                        registeredInResponce.guardPosts = registeredInResponce.guardPosts.concat( unregisteredDataWithoutManager );
+                    }else{
+                        responce.push( {
+                            surname: '',
+                            firstName: '',
+                            patronymic: '',
+                            guardPosts: unregisteredDataWithoutManager
+                        } );
+                    }
+
+                }
+
+            }
+
+            // console.log('%o', responce);
+
+            // Формируем документ из полученных данных-----------------------------------------------------
+            const document = timesheetExcellForDay(responce, date);
+
+            const documentName = `Список-охранников-${date}.xlsx`;
+
+            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=${await googleDrive.uploadExcelTimesheet(
+                document,
+                documentName,
+                process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_DAY)
+                }`;
 
             return { document, googleDriveFileID };
 
@@ -1017,6 +1183,7 @@ class TimesheetService {
 
         try {
 
+            console.log('----------------getTimesheetPrintForMonthPart--------------');
             //Validate date
             const timesheetsData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
@@ -1025,9 +1192,9 @@ class TimesheetService {
             });
 
             //Извлечение параметров для формирования
-            const { month } = timesheetsData;
+            const { month, guardPostManager } = timesheetsData;
 
-            if (month) {
+            if (!month || !guardPostManager) {
                 throw ApiError.BadRequest(`Отсутствуют данные для формирования: month`);
             }
 
@@ -1036,14 +1203,25 @@ class TimesheetService {
             //Check initials condition
             await mongoConnect();
 
+            // Формируем данные об НСО сделавшем запрос
+            const manager = await mongoUserModel.findById(guardPostManager);
+
+            // Запрашиваем данные физ поста на искомый ПЕРИОД по данным ФИЗ. ПОСТОВ
+            const responceTimesheetsGuardPost = await mongoTimesheetsGuardPostModel.find({
+                month: date,
+                manager: manager._id
+            }, 'guardPost');
+
             // Формируем ObjectID из списка guardPost на фильтр
-            // const guardPosts = guardPost.map(function (el) { return mongoose.Types.ObjectId(el) });
+            const guardPosts = responceTimesheetsGuardPost.map(function (el) { return el.guardPost });
 
             // Сначала запрашиваем данные из таблицы с ГРАФИКАМИ СМЕН
             const responceTimesheetsGuards = await mongoTimesheetsGuardsModel.aggregate([
-                { $match: { 
-                    // guardPost: { $in: guardPosts }, 
-                    month: date } 
+                {
+                    $match: {
+                        guardPost: { $in: guardPosts },
+                        month: date
+                    }
                 },
                 {
                     $lookup: {
@@ -1123,150 +1301,30 @@ class TimesheetService {
                 { $sort: { number: 1, callsign: 1 } }
             ]);
 
-            // Переводим ObjectID найденных ФИЗ. ПОСТОВ с имеющимися ГРАФИКАМИ СМЕН
-            const responceTimesheetsGuardsLean = responceTimesheetsGuards.map((element, index) => {
-                element._id = element._id.toString();
-                return element;
-            })
-
-            // Запрашиваем данные физ поста на искомый ПЕРИОД по данным ФИЗ. ПОСТОВ
-            const responceTimesheetsGuardPost = await mongoTimesheetsGuardPostModel.aggregate([
-                {
-                    $match: {
-                        // guardPost: { $in: guardPosts },`
-                        month: date,
-                        manager: { $exists: true, $ne: null }
-                    }
-                },
-                {
-                    $group: {
-                        _id: '$manager',
-                        managerSheme: { $first: "$managerSheme" },
-                        guardPosts: {
-                            $push: {
-                                guardPost: "$guardPost",
-                                rate: "$rate",
-                            }
-                        }
-                    }
-                },
-                {
-                    $lookup: {
-                        from: mongoUserModel.collection.name,
-                        localField: '_id',
-                        foreignField: '_id',
-                        as: 'user'
-                    }
-                },
-                {
-                    $lookup: {
-                        from: mongoUserArchiveModel.collection.name,
-                        localField: '_id',
-                        foreignField: '_id',
-                        as: 'userArchive'
-                    }
-                },
-                {
-                    $project: {
-                        guardPosts: 1,
-                        user: { $setUnion: ["$user", "$userArchive"] }
-                    }
-                },
-                { $unwind: { path: "$user" } },
-                {
-                    $replaceRoot: {
-                        newRoot: {
-                            surname: "$user.surname",
-                            firstName: "$user.firstName",
-                            patronymic: "$user.patronymic",
-                            guardPosts: "$guardPosts"
-                        }
-                    }
-                },
-            ]);
-
-            // Инициируем список индексов с графиками смен, для которых есть НСО
-            const responceTimesheetsGuardsIncludeManagerIndex = [];
-
-            // Формируем ответ, сопоставляя найденных НСО с графиками ФИЗ. ПОСТОВ
-            const responce = responceTimesheetsGuardPost.reduce((result, element) => {
-
-                const listGuardPosts = element.guardPosts.map((guardPost) => {
-                    return guardPost.guardPost.toString();
-                })
-
-                const guardPosts = responceTimesheetsGuardsLean.filter((guardPost, index) => {
-
-                    const indexOf = listGuardPosts.indexOf(guardPost._id);
-
-                    if (indexOf >= 0) {
-                        responceTimesheetsGuardsIncludeManagerIndex.push(index);
-                        guardPost.rate = element.guardPosts[indexOf].rate ? element.guardPosts[indexOf].rate : guardPost.rate;
-                        return true;
-                    }
-
-                    return false;
-
-                });
-
-                if (guardPosts.length > 0) {
-                    result.push({
-                        surname: element.surname,
-                        firstName: element.firstName,
-                        patronymic: element.patronymic,
-                        guardPosts: guardPosts
-                    })
-                }
-
-                return result;
-
-            }, []);
-
-            // Запрашиваем данные физ поста на искомый ПЕРИОД по данным ФИЗ. ПОСТОВ без НСО
-            const responceTimesheetsGuardPostEmptyManager = await mongoTimesheetsGuardPostModel.find({
-                // guardPost: { $in: guardPosts },
-                month: date,
-                manager: null
-            }).lean();
-
-            const listGuardPostsEmptyManager = responceTimesheetsGuardPostEmptyManager.map((timeSheetGuardPost) => {
-                return timeSheetGuardPost.guardPost.toString();
-            })
-
-            // Формируем список ФИЗ. ПОСТОВ без НСО
-            const guardPostsEmptyManager = responceTimesheetsGuardsLean.filter((guardPost, index) => {
-                if (responceTimesheetsGuardsIncludeManagerIndex.includes(index)) {
-                    return false;
-                } else {
-                    const indexOf = listGuardPostsEmptyManager.indexOf(guardPost._id);
-                    if (indexOf >= 0) {
-                        guardPost.rate = responceTimesheetsGuardPostEmptyManager[indexOf].rate ? responceTimesheetsGuardPostEmptyManager[indexOf].rate : guardPost.rate;
-                    }
-                    return true;
-                }
-            });
-
-            // Добавляем данные о ФИЗ. ПОСТАХ без НСО
-            if (guardPostsEmptyManager.length > 0) {
-                responce.push({
-                    surname: '',
-                    firstName: '',
-                    patronymic: '',
-                    guardPosts: guardPostsEmptyManager
-                })
-            }
-
-            if (responce.length == 0) {
+            if (responceTimesheetsGuards.length == 0) {
                 throw ApiError.FileCreateError('Данные отсутствуют')
             }
 
             // Добавляем данные о пользователях
             const usersOnPosition = await userService.getUsersInitialsWithPositions([FPositionZDIR, FPositionHRM, FPositionBUH]);
 
-            // Формируем документ из полученных данных
-            const document = timesheetExcellForMonthFull(responce, usersOnPosition, date);
+            // Формируем Инициалы NSO
+            const NSOinitials = manager.surname ? [
+                manager.surname,
+                manager.firstName?.length > 0 ? manager.firstName.charAt(0) + '.' : null,
+                manager.patronymic?.length > 0 ? manager.patronymic.charAt(0) + '.' : null,
+            ].filter(Boolean).join(' ') : null;
 
-            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=${await googleDrive.uploadExcelTimesheet(document, month)}`;
+            // Формируем документ из полученных данных
+            const document = timesheetExcellForMonthPart(NSOinitials, responceTimesheetsGuards, usersOnPosition, date);
+
+            const documentName = `Табель ${NSOinitials}-${month}-${getCurrentTimeStamp()}.xlsx`;
+
+            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=${await googleDrive.uploadExcelTimesheet(
+                document,
+                documentName,
+                process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_PART)
+                }`;
 
             return { document, googleDriveFileID };
 
@@ -1279,8 +1337,7 @@ class TimesheetService {
     async getTimesheetPrintForMonthFull(inputData) {
 
         try {
-            // console.log('--------------------------------');
-            // console.log('ARgetTimesheetPrintForMonthFull');
+            console.log('---------------ARgetTimesheetPrintForMonthFull-----------------');
             //Validate date
             const timesheetsData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
@@ -1529,7 +1586,13 @@ class TimesheetService {
             // Формируем документ из полученных данных
             const document = timesheetExcellForMonthFull(responce, usersOnPosition, date);
 
-            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=${await googleDrive.uploadExcelTimesheet(document, month)}`;
+            const documentName = `Табель-${month}-${getCurrentTimeStamp()}.xlsx`;
+
+            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=${await googleDrive.uploadExcelTimesheet(
+                document,
+                documentName,
+                process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_FULL)
+                }`;
 
             return { document, googleDriveFileID };
 

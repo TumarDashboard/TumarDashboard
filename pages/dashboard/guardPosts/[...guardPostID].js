@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import { motion } from "framer-motion";
 import catchAuthServer from '../../../middleware/authServer';
-import FFormGuardPostID from '../../../components/levelB_higth/FFormGuardPostID';
+import FFormGuardPostID from '../../../components/levelB_higth/guardPosts/FFormGuardPostID';
 import mongoGuardPostsModel from "../../../src/mongo/models/mongoGuardPostsModel";
 import mongoGuardsModel from "../../../src/mongo/models/mongoGuardsModel";
 import mongoUserModel from "../../../src/mongo/models/mongoUserModel";

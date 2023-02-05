@@ -41,7 +41,7 @@ import * as positions from '../levelZ_variable/FPositionItemList';
 // ];
 
 export const FApiMethodAccessRules = [
-    
+
     // Guard methods
     {
         url: '/dashboard/guards', access: [
@@ -84,6 +84,12 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionNSO },
             { position: positions.FPositionOPR }
         ]
+    },    
+    {
+        url: '/dashboard/guardPosts/archive\$', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR }
+        ]
     },
     {
         url: /^\/dashboard\/guardPosts(?=.)/, access: [
@@ -102,7 +108,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/guardPost/editGuardPost', access: [
             { position: positions.FPositionZDIR },
-            { position: positions.FPositionNSO, editBlock: ['rate', 'manager'], userCompare: ['manager']  }
+            { position: positions.FPositionNSO, editBlock: ['rate', 'manager'], userCompare: ['manager'] }
         ]
     },
     {
@@ -166,7 +172,7 @@ export const FApiMethodAccessRules = [
     },
     {
         url: '/api/method/timesheet/getTimesheetPrintForMonthPart', access: [
-            { position: positions.FPositionNSO },
+            { position: positions.FPositionNSO, userCompare: ['guardPostManager'] },
         ]
     },
     {
@@ -179,11 +185,11 @@ export const FApiMethodAccessRules = [
     },
 
     // User methods
-    {   
-        url: '/dashboard\$', access: [] 
+    {
+        url: '/dashboard\$', access: []
     },
-    {   
-        url: '/dashboard/profile', access: [] 
+    {
+        url: '/dashboard/profile', access: []
     },
     {
         url: '/api/method/user/changeUser', access: [
@@ -202,7 +208,7 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionZDIR }
         ]
     },
-    
+
     // UserHard methods
     {
         url: '/dashboard/users', access: [
@@ -243,50 +249,50 @@ export const FApiMethodAccessRules = [
 ];
 
 export async function getApiMethodAccess(req, userData) {
-    
+
     const findedRule = FApiMethodAccessRules.find((rule) => {
-        return req.nextUrl.pathname.search(rule.url+'\$') > -1
+        return req.nextUrl.pathname.search(rule.url + '\$') > -1
     });
     if (findedRule) {
 
-        if (!userData.positions || userData.positions.length === 0){
-            userData.positions=[''];
+        if (!userData.positions || userData.positions.length === 0) {
+            userData.positions = [''];
         }
 
-        
-    console.log(findedRule, userData.positions);
 
-        for (const access of findedRule.access ) {
+        // console.log(findedRule, userData.positions);
 
-            if( !access.position || userData.positions.includes( access.position ) ){
+        for (const access of findedRule.access) {
 
-                if( access.editBlock || access.userCompare ){
+            if (!access.position || userData.positions.includes(access.position)) {
+
+                if (access.editBlock || access.userCompare) {
 
                     const requestJson = await req.json();
 
-                    if( access.userCompare ){
+                    if (access.userCompare) {
                         for (const userIdKey of access.userCompare) {
 
-                            if( Array.isArray( requestJson[userIdKey] ) ){
+                            if (Array.isArray(requestJson[userIdKey])) {
 
-                                if(requestJson[userIdKey].length == 0 )
+                                if (requestJson[userIdKey].length == 0)
                                     return 'Вам отказано в доступе к выполняемой операции';
 
-                                if(requestJson[userIdKey].filter(element => element != userData.id).length > 0 )
+                                if (requestJson[userIdKey].filter(element => element != userData.id).length > 0)
                                     return 'Вам отказано в доступе к выполняемой операции';
 
-                            }else if(requestJson[userIdKey] != userData.id){
+                            } else if (requestJson[userIdKey] != userData.id) {
                                 return 'Вам отказано в доступе к выполняемой операции';
                             }
 
                         }
                     }
 
-                    if( access.editBlock ){
+                    if (access.editBlock) {
                         for (const editRule of access.editBlock) {
-                            if(requestJson[editRule]){
+                            if (requestJson[editRule]) {
                                 return `Отсутсвует право доступа на редкатирование поля "${editRule}"`;
-                            }else{
+                            } else {
                                 delete requestJson[editRule];
                             }
                         }
@@ -296,7 +302,7 @@ export async function getApiMethodAccess(req, userData) {
 
                 return null;
 
-            } 
+            }
         }
 
         return 'Вашей должности отказано в праве доступа к операции';
@@ -318,24 +324,24 @@ export function getApiMethodAccesRules(positions) {
         '/dashboard/',
         '/\\^\\\\/dashboard\\\\/',
     ].join('|'), 'ig');
-    
+
     return [...new Set(FApiMethodAccessRules.reduce((result, value) => {
 
         let accessName = value.url.toString().replace(regExp, '');
 
-        for (const access of value.access ) {
+        for (const access of value.access) {
 
-            if(!access.position || positions?.includes( access.position ) ){
+            if (!access.position || positions?.includes(access.position)) {
 
                 Object.keys(access).forEach((key) => {
-                    
-                    if(key != 'position'){
+
+                    if (key != 'position') {
 
                         for (const rule of access[key]) {
                             result.push(
                                 accessName + '/' + key + '/' + rule
                             );
-                            
+
                         }
 
                     }
@@ -344,7 +350,7 @@ export function getApiMethodAccesRules(positions) {
                 result.push(accessName);
 
                 break;
-            } 
+            }
         }
 
         return result;
