@@ -73,7 +73,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   await mongoConnect();
 
   // Охранники
-  const guards = await mongoGuardsModel.find().populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
+  const guards = await mongoGuardsModel.find({}, '-createdAt -updatedAt').populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
 
   guards.sort((a, b) => {
     return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
@@ -107,7 +107,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   
   // Физ пост
   var guardPost;
-  const guardPosts = await mongoGuardPostsModel.find().populate('manager', 'surname firstName').lean();
+  const guardPosts = await mongoGuardPostsModel.find({}, '-createdAt -updatedAt').populate('manager', 'surname firstName').lean();
   guardPosts.sort((a, b) => {
     return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
       a.number - b.number ||

@@ -116,6 +116,7 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
     inputGuardPatronymic,
     inputGuardUIAvatarsSrc,
     inputGuardTelephone,
+    inputGuardIIN,
     inputGuardManager,
     inputGuardGuardPosts) => {
       
@@ -131,6 +132,7 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
         inputGuardPatronymic,
         inputGuardUIAvatarsSrc,
         inputGuardTelephone,
+        inputGuardIIN,
         inputGuardManager,
         inputGuardGuardPosts
       );

@@ -60,6 +60,6 @@ export const MongooseSchema = new mongoose.Schema({
     type: Number,
   },
 
-})
+}, { timestamps: true })
 
 export default mongoose.models == null ? mongoose.model('GuardPostsArchive', MongooseSchema) : (mongoose.models.GuardPostsArchive || mongoose.model('GuardPostsArchive', MongooseSchema))

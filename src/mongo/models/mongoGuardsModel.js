@@ -23,6 +23,10 @@ export const MongooseSchema = new mongoose.Schema({
     type: [String]
   },
 
+  iin:{
+    type: [String]
+  },
+
   manager:{
     type: mongoose.Schema.Types.ObjectId,
     refPath: 'managerSheme'
@@ -39,6 +43,6 @@ export const MongooseSchema = new mongoose.Schema({
     ref: 'GuardPosts'
   }
 
-})
+}, { timestamps: true })
 
 export default mongoose.models == null ? mongoose.model('Guards', MongooseSchema) : (mongoose.models.Guards || mongoose.model('Guards', MongooseSchema))

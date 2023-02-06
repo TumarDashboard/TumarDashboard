@@ -50,6 +50,6 @@ const MongooseSchema = new mongoose.Schema({
   positions: {
     type: [String]
   }
-})
+}, { timestamps: true })
 
 export default mongoose.models == null ? mongoose.model('UserArchive', MongooseSchema) : (mongoose.models.UserArchive || mongoose.model('UserArchive', MongooseSchema))

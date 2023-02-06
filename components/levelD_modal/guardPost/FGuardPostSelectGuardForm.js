@@ -107,6 +107,7 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
     inputGuardPatronymic,
     inputGuardUIAvatarsSrc,
     inputGuardTelephone,
+    inputGuardIIN,
     inputGuardManager,
     inputGuardGuardPosts) => {
       
@@ -122,6 +123,7 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
         inputGuardPatronymic,
         inputGuardUIAvatarsSrc,
         inputGuardTelephone,
+        inputGuardIIN,
         inputGuardManager,
         inputGuardGuardPosts
       );

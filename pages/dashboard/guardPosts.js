@@ -146,7 +146,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   }));
 
   // Выборка данных об охранниках
-  const guards = await mongoGuardsModel.find().populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
+  const guards = await mongoGuardsModel.find({}, '-createdAt -updatedAt').populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
 
   guards.sort((a, b) => {
     return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
@@ -164,7 +164,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   })
 
   // Выборка данных о физ. постах
-  const guardPosts = await mongoGuardPostsModel.find({}, null, { sort: { 'manager': 1, 'number': 1 } }).populate('manager', 'surname firstName').lean();
+  const guardPosts = await mongoGuardPostsModel.find({}, '-createdAt -updatedAt', { sort: { 'manager': 1, 'number': 1 } }).populate('manager', 'surname firstName').lean();
 
   let userIsNotManager = true;
 
@@ -225,7 +225,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   
   if (accessRules.includes('guardPosts/archive$')) {
 
-    guardPostsArchive = await mongoGuardPostsArchiveModel.find({}, null, { sort: { 'manager': 1, 'number': 1 } })
+    guardPostsArchive = await mongoGuardPostsArchiveModel.find({}, '-createdAt -updatedAt', { sort: { 'manager': 1, 'number': 1 } })
       .populate('manager', 'surname firstName')
       .populate('userPerfomed', 'surname firstName')
       .lean();

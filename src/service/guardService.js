@@ -123,7 +123,7 @@ class GuardService {
     }
 
     async editGuard(inputData) {
-        console.log(inputData);
+        // console.log(inputData);
         //Validate date
         const guardData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 

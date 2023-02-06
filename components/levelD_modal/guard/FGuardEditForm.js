@@ -8,18 +8,15 @@ import { FSelect } from "../../levelE_low/FSelect";
 import { equalArrays } from '../../../src/utils/arrayUtils';
 import { FInputInitials, inputInitialsValidate } from '../../levelE_low/FInputInitials';
 import { FInputTelephone } from '../../levelE_low/FInputTelephone';
+import { FInputIIN } from '../../levelE_low/FInputIIN';
 
 export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPosts, users }) {
 
-  /*-------------------------------------------------------------------------------------------------------
-      Операция
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Операция-------------------------------------------------------------------------------------------*/
   const [operation, setOperation] = useState('');
   const [error, setError] = useState('');
 
-  /*-------------------------------------------------------------------------------------------------------
-      Фамилия охранника Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Фамилия охранника Формы редактирования-------------------------------------------------------------*/
   const [inputGuardSurname, setInputGuardSurname] = useState('');
 
   const [isInputValidateGuardSurname, setInputValidateGuardSurname] = useState(false);
@@ -36,9 +33,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Имя охранника Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Имя охранника Формы редактирования-----------------------------------------------------------------*/
   const [inputGuardfirstName, setInputGuardfirstName] = useState('');
 
   const [isInputValidateGuardfirstName, setInputValidateGuardfirstName] = useState(false);
@@ -55,9 +50,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Отчество охранника Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Отчество охранника Формы редактирования------------------------------------------------------------*/
   const [inputGuardPatronymic, setInputGuardPatronymic] = useState('');
 
   const [isInputValidateGuardPatronymic, setInputValidateGuardPatronymic] = useState(true);
@@ -77,14 +70,10 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Фото Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Фото Формы редактирования--------------------------------------------------------------------------*/
   const [inputGuardUIAvatarsSrc, setInputGuardUIAvatarsSrc] = useState('');
 
-  /*-------------------------------------------------------------------------------------------------------
-      Телефон Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Телефон Формы редактирования-----------------------------------------------------------------------*/
   const [inputGuardTelephone, setInputGuardTelephone] = useState('');
 
   const [isInputValidateGuardTelephone, setInputValidateGuardTelephone] = useState(true);
@@ -101,9 +90,24 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Менеджер Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--ИИН Формы редактирования-----------------------------------------------------------------------*/
+  const [inputGuardIIN, setInputGuardIIN] = useState('');
+
+  const [isInputValidateGuardIIN, setInputValidateGuardIIN] = useState(true);
+
+  const GuardIINChange = (value, validate) => {
+    setInputGuardIIN(value);
+    if (operation == 'Добавить') {
+      if (value)
+        setInputValidateGuardIIN(validate);
+      else
+        setInputValidateGuardIIN(true);
+    } else {
+      setInputValidateGuardIIN(validate && (value != form.guard?.IIN));
+    }
+  }
+
+  /*--Менеджер Формы редактирования----------------------------------------------------------------------*/
   const optionGuardManager = [{
     label: 'Отсутствует', value: 'EMPTY'
   }, ...users?.map((user) => {
@@ -114,9 +118,8 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
   })]
 
   const [inputGuardManager, setInputGuardManager] = useState('EMPTY');
-  /*-------------------------------------------------------------------------------------------------------
-      Физ.посты Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+
+  /*--Физ.посты Формы редактирования---------------------------------------------------------------------*/
   const optionGuardPosts = [{
     label: 'Отсутствует', value: 'EMPTY'
   }, ...guardPosts?.map((guardPost) => {
@@ -142,9 +145,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
     setInputGuardGuardPosts(positions);
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Чистка/Обновление инпутов
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Чистка/Обновление инпутов--------------------------------------------------------------------------*/
   useEffect(() => {
     if (form.error) {
       setError(form.error);
@@ -160,13 +161,15 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
       setInputGuardUIAvatarsSrc(null);
       setInputGuardTelephone(form.guard?.telephone);
       setInputValidateGuardTelephone(form.operation == 'Добавить');
+      setInputGuardIIN(form.guard?.iin);
+      setInputValidateGuardIIN(form.operation == 'Добавить');
       setInputGuardManager(form.guard?.manager?._id || 'EMPTY');
       setInputGuardGuardPosts(form.guard?.guardPosts || []);
       setError(null);
     }
   }, [form])
-  /*-------------------------------------------------------------------------------------------------------
-  -------------------------------------------------------------------------------------------------------*/
+
+  /*-----------------------------------------------------------------------------------------------------*/
 
   return (
     <FModalForm
@@ -221,7 +224,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
         />
       </div>
 
-      {/* Телефон Менеджер*/}
+      {/* Телефон Менеджер ИИН*/}
       <div className='flex flex-col md:flex-row w-full'>
 
         {/* Телефон */}
@@ -236,12 +239,23 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
         </div>
 
         {/* Менеджер */}
-        <div className="form-item w-full mt-4 flex items-center">
+        {/* <div className="form-item w-full mt-4 flex items-center">
           <label className="text-lg pr-4">НСО</label>
           <FSelect
             options={optionGuardManager}
             onChange={(e) => { setInputGuardManager(e?.target?.value) }}
             value={inputGuardManager ? inputGuardManager : 'EMPTY'}
+            key={form.key}
+          />
+        </div> */}
+
+        {/* ИИН */}
+        <div className="form-item w-full mt-4 flex items-center pr-4">
+          <label className="text-lg pr-4">ИИН</label>
+          <FInputIIN
+            placeholder='ИИН'
+            value={inputGuardIIN ? inputGuardIIN : ''}
+            onChange={GuardIINChange}
             key={form.key}
           />
         </div>
@@ -281,6 +295,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
               || isInputValidateGuardfirstName
               || isInputValidateGuardPatronymic
               || isInputValidateGuardTelephone
+              || isInputValidateGuardIIN
               || (inputGuardManager != form.guard?.manager?._id)
               || (!equalArrays(inputGuardGuardPosts, form.guard?.guardPosts))
               || inputGuardUIAvatarsSrc != null
@@ -292,6 +307,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
             inputGuardPatronymic,
             inputGuardUIAvatarsSrc,
             inputGuardTelephone,
+            inputGuardIIN,
             inputGuardManager,
             inputGuardGuardPosts
           ) : submitEdit(e,
@@ -300,6 +316,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
             inputGuardPatronymic,
             inputGuardUIAvatarsSrc,
             inputGuardTelephone,
+            inputGuardIIN,
             inputGuardManager,
             inputGuardGuardPosts
           )}

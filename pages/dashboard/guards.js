@@ -24,7 +24,7 @@ export default function Guards({ isFirstMount, accessRules, userData, guards, gu
       className="flex-1"
     >
       <Head>
-        <title>Физические посты</title>
+        <title>Охранники</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <motion.section
@@ -60,7 +60,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   await mongoConnect();
 
-  const guards = await mongoGuardsModel.find({}, null, { sort: { 'manager': 1, 'surname': 1, 'firstName': 1, } }).populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
+  const guards = await mongoGuardsModel.find({}, '-createdAt -updatedAt', { sort: { 'manager': 1, 'surname': 1, 'firstName': 1, } }).populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
 
   guards.forEach(value => {
     value._id = value._id.toString();
@@ -74,7 +74,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
     }
   })
 
-  const guardPosts = await mongoGuardPostsModel.find().populate('manager', 'surname firstName').lean();
+  const guardPosts = await mongoGuardPostsModel.find({}, '-createdAt -updatedAt').populate('manager', 'surname firstName').lean();
 
   guardPosts.sort((a, b) => {
     return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||

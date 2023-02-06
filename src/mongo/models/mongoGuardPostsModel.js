@@ -47,6 +47,6 @@ export const MongooseSchema = new mongoose.Schema({
     type: String
   },
 
-})
+}, { timestamps: true })
 
 export default mongoose.models == null ? mongoose.model('GuardPosts', MongooseSchema) : (mongoose.models.GuardPosts || mongoose.model('GuardPosts', MongooseSchema))

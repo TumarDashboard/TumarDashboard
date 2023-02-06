@@ -31,7 +31,7 @@ const inputs = {
 const constTableHead = [
   { value: 'surname', label: 'Инициалы' },
   { value: 'telephone', label: 'Телефон' },
-  { value: 'manager', label: 'НСО' },
+  // { value: 'manager', label: 'НСО' },
 ];
 
 const sortingTableCallback = (a, b, rule, invert) => {
@@ -56,8 +56,8 @@ const sortingTableCallback = (a, b, rule, invert) => {
     case 'telephone':
       return (a.telephone[0].localeCompare(b.telephone[0])) * invert;
 
-    case 'manager':
-      return (a.manager.surname.localeCompare(b.manager.surname) || a.manager.firstName.localeCompare(b.manager.firstName)) * invert;
+    // case 'manager':
+    //   return (a.manager.surname.localeCompare(b.manager.surname) || a.manager.firstName.localeCompare(b.manager.firstName)) * invert;
 
     case 'control':
       return false;
@@ -162,6 +162,7 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
     inputGuardPatronymic,
     inputGuardUIAvatarsSrc,
     inputGuardTelephone,
+    inputGuardIIN,
     inputGuardManager,
     inputGuardGuardPosts) => {
 
@@ -178,6 +179,7 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
         inputGuardPatronymic,
         inputGuardUIAvatarsSrc,
         inputGuardTelephone,
+        inputGuardIIN,
         inputGuardManager,
         inputGuardGuardPosts
       );
@@ -218,6 +220,7 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
     inputGuardPatronymic,
     inputGuardUIAvatarsSrc,
     inputGuardTelephone,
+    inputGuardIIN,
     inputGuardManager,
     inputGuardGuardPosts) => {
 
@@ -226,7 +229,7 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
     MOBXui.setLoading();
 
     try {
-      // console.log('inputGuardPatronymic', inputGuardPatronymic);
+      // console.log('inputGuardIIN', inputGuardIIN);
       // Отправляем запрос на сервер
       const responce = await editGuard(
         guardEditForm.guard._id,
@@ -235,6 +238,7 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
         inputGuardPatronymic,
         inputGuardUIAvatarsSrc,
         inputGuardTelephone,
+        inputGuardIIN,
         inputGuardManager,
         inputGuardGuardPosts
       );
@@ -526,7 +530,7 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
                 </td>
 
                 {/* {Телефон} */}
-                <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
+                <td className="px-1 md:p-2 md:border text-left md:table-cell flex flex-row items-center">
                   {guard.telephone?.length > 0 &&
                     <span className="break-all md:break-normal">
                       <b className='md:hidden'>Телефон</b> {guard.telephone}
@@ -534,16 +538,16 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
                 </td>
 
                 {/* {НСО} */}
-                <td className="px-1 md:p-2 md:border text-left block md:table-cell flex flex-row items-center">
+                {/* <td className="px-1 md:p-2 md:border text-left md:table-cell flex flex-row items-center">
                   {guard.manager?._id != "EMPTY" &&
                     <span className="break-all md:break-normal">
                       <b className='md:hidden'>НСО</b> {[guard.manager?.surname, guard.manager?.firstName].join(' ')}
                     </span>}
-                </td>
+                </td> */}
 
                 {/* {Кнопки управления компьютера} */}
                 {(AReditGuard || ARdeleteGuard) &&
-                  <td className="p-2 md:border text-left hidden md:block md:table-cell w-1">
+                  <td className="p-2 md:border text-left hidden md:table-cell w-1">
                     <div className='flex'>
 
                       {AReditGuard &&
