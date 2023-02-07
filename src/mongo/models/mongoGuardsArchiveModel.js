@@ -12,7 +12,7 @@ export const MongooseSchema = new mongoose.Schema({
 
   userPerfomedSheme:{
     type: String,
-    enum: ['User', 'UserArchive']
+    enum: ['User', 'UserArchive', null]
   },
   
   surname: {
@@ -48,7 +48,7 @@ export const MongooseSchema = new mongoose.Schema({
 
   managerSheme:{
     type: String,
-    enum: ['User', 'UserArchive']
+    enum: ['User', 'UserArchive', null]
   },
 
   guardPosts:{

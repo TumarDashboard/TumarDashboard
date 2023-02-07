@@ -1,4 +1,4 @@
-import DTOGuardPost, { validateYup } from "../dtos/dtoGuardPost";
+import DTOGuardPost, { DTOGuardPostArchive, validateYup } from "../dtos/dtoGuardPost";
 import mongoUserModel from "../mongo/models/mongoUserModel";
 import mongoConnect from "../mongo/mongoConnect";
 import { ApiError } from "../../middleware/exceptions";
@@ -236,16 +236,22 @@ class GuardPostService {
 
         await mongoConnect();
 
+        const userPerfomed = await mongoUserModel.findById(idUser, 'surname firstName').lean();
+
+        if (!userPerfomed) {
+            throw ApiError.BadRequest("Не найден ID Пользователя, проводящего операцию удаления");
+        }
+
         const mongoGuardPost = await mongoGuardPostsModel.findById(idGuardPost);
 
         if (!mongoGuardPost) {
             throw ApiError.BadRequest("Не найден физ. пост для проведения операции удаления");
         }
-
+        
         const mongoGuardPostArchive = await mongoGuardPostsArchiveModel.create(mongoGuardPost.toJSON());
 
         mongoGuardPostArchive.reason = reason;
-        mongoGuardPostArchive.userPerfomed = new mongoose.mongo.ObjectId(idUser);
+        mongoGuardPostArchive.userPerfomed = userPerfomed._id;
         mongoGuardPostArchive.userPerfomedSheme = 'User';
 
         await mongoGuardPostArchive.save();
@@ -264,10 +270,52 @@ class GuardPostService {
 
         await mongoGuardPost.delete();
 
-        const dtoGuardPost = new DTOGuardPost(mongoGuardPostArchive);
+        if( mongoGuardPostArchive.manager ){
+            mongoGuardPostArchive.manager = await mongoUserModel.findById(idUser, 'surname firstName').lean();
+        }
+
+        mongoGuardPostArchive.userPerfomed = userPerfomed;
+
+        const dtoGuardPost = new DTOGuardPostArchive(mongoGuardPostArchive);
 
         return { guardPost: dtoGuardPost }
     }
+
+    async recoverGuardPost(inputData) {
+
+        const { idGuardPost } = inputData;
+
+        if (!idGuardPost) {
+            throw ApiError.BadRequest("Не указан ID физ. поста для проведения операции восстановления");
+        }
+
+        //Mongo
+
+        await mongoConnect();
+
+        const mongoGuardPostArchive = await mongoGuardPostsArchiveModel.findById(idGuardPost);
+
+        if (!mongoGuardPostArchive) {
+            throw ApiError.BadRequest("Не найден физ. пост для проведения операции восстановления");
+        }
+
+        if(mongoGuardPostArchive['reason']) delete mongoGuardPostArchive['reason'];
+        if(mongoGuardPostArchive['userPerfomed']) delete mongoGuardPostArchive['userPerfomed'];
+        if(mongoGuardPostArchive['userPerfomedSheme']) delete mongoGuardPostArchive['userPerfomedSheme'];
+
+        const mongoGuardPost = await mongoGuardPostsModel.create(mongoGuardPostArchive.toJSON());
+
+        await mongoGuardPostArchive.delete();
+
+        if( mongoGuardPost.manager ){
+            mongoGuardPost.manager = await mongoUserModel.findById(idUser, 'surname firstName').lean();
+        }
+
+        const dtoGuardPost = new DTOGuardPost(mongoGuardPost);
+
+        return { guardPost: dtoGuardPost }
+    }
+
 }
 
 export default new GuardPostService();

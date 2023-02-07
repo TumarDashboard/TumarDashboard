@@ -10,6 +10,7 @@ import mongoConnect from "../../../src/mongo/mongoConnect";
 import { ApiError } from '../../../middleware/exceptions';
 import mongoose from 'mongoose'
 import { FPositionNSO } from '../../../components/levelZ_variable/FPositionItemList';
+import mongoGuardPostsArchiveModel from '../../../src/mongo/models/mongoGuardPostsArchiveModel';
 
 const content = (isFirstMount) => ({
   animate: {
@@ -30,9 +31,9 @@ export default function GuardPostID({ isFirstMount, accessRules, userData, guard
         <title>{pageName ? pageName : "Физ. пост"}</title>
         <link rel="icon" href={pageIcon ? pageIcon : "/favicon.ico"} />
       </Head>
-      <motion.section 
-          className="flex-1 flex w-full"
-      exit={{ opacity: 0 }}
+      <motion.section
+        className="flex-1 flex w-full"
+        exit={{ opacity: 0 }}
       >
         <motion.div
           initial="initial"
@@ -90,21 +91,21 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   })
 
   // НСО
-  const users = await mongoUserModel.find({positions: FPositionNSO}, 'surname firstName').lean();
+  const users = await mongoUserModel.find({ positions: FPositionNSO }, 'surname firstName').lean();
 
   users.forEach(value => {
     value._id = value._id.toString();
-  })  
-  
+  })
+
   // удаленные НСО
-  const usersArchive = await mongoUserArchiveModel.find({positions: FPositionNSO}, 'surname firstName').lean();
+  const usersArchive = await mongoUserArchiveModel.find({ positions: FPositionNSO }, 'surname firstName').lean();
 
   usersArchive.forEach(value => {
     value._id = value._id.toString();
   })
 
-  const usersAll = users.concat( usersArchive );
-  
+  const usersAll = users.concat(usersArchive);
+
   // Физ пост
   var guardPost;
   const guardPosts = await mongoGuardPostsModel.find({}, '-createdAt -updatedAt').populate('manager', 'surname firstName').lean();
@@ -114,22 +115,43 @@ export const getServerSideProps = catchAuthServer(async (context) => {
       a.callsign.localeCompare(b.callsign)
   }).forEach(value => {
     value._id = value._id.toString();
-    if(!guardPost && queryPath[0]===value._id){
+    if (!guardPost && queryPath[0] === value._id) {
       guardPost = value;
       if (guardPost.manager) {
         guardPost.manager._id = guardPost.manager._id.toString();
-        let index = usersAll.findIndex(x => x._id==guardPost.manager._id); 
-        if( index === -1 ){
+        let index = usersAll.findIndex(x => x._id == guardPost.manager._id);
+        if (index === -1) {
           usersAll.unshift(guardPost.manager)
         }
-      }  
-    }else if (value.manager) {
+      }
+    } else if (value.manager) {
       value.manager._id = value.manager._id.toString();
     }
   })
 
+  // Проверка существования физ поста по ID
   if (!guardPost) {
+
     throw ApiError.BadRequest('Физ. пост с указанным ID не найден');
+
+    // guardPost = await mongoGuardPostsArchiveModel.findOne({}, '-createdAt -updatedAt')
+    //   .populate('manager', 'surname firstName')
+    //   .populate('userPerfomed', 'surname firstName')
+    //   .lean();
+
+    // if (!guardPost) {
+    //   throw ApiError.BadRequest('Физ. пост с указанным ID не найден');
+    // }
+
+    // guardPost._id = guardPost._id.toString();
+
+    // if (guardPost.manager) {
+    //   guardPost.manager._id = guardPost.manager._id.toString();
+    // }
+
+    // if (guardPost.userPerfomed) {
+    //   guardPost.userPerfomed._id = guardPost.userPerfomed._id.toString();
+    // }
   }
 
   // Передача данных

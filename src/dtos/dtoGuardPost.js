@@ -35,6 +35,36 @@ export default class DTOGuardPost {
 
 }
 
+export class DTOGuardPostArchive {
+
+    _id;
+    reason;
+    number;
+    callsign;
+    name;
+    address;
+    photo;
+    manager;
+    shifts;
+    description;
+    rate;
+
+    constructor(model) {
+        this._id = model._id;
+        this.reason = model.reason;
+        this.number = model.number;
+        this.callsign = model.callsign;
+        this.name = model.name;
+        this.address = model.address;
+        this.photo = model.photo;
+        this.manager = model.manager;
+        this.shifts = model.shifts;
+        this.description = model.description;
+        this.rate = model.rate;
+    }
+
+}
+
 export const validateYup = (dtoGuardPost, options) => {
 
     let validationSchema = lazy(dtoGuardPost => object(
@@ -99,4 +129,8 @@ export const editGuardPost = async (id, number, callsign, name, address, photo, 
 
 export const deleteGuardPost = async (idGuardPost, idUser, reason) => {
     return await fetchAuthMethod('/method/guardPost/deleteGuardPost', { idGuardPost, idUser, reason });
+}
+
+export const recoverGuardPost = async (idGuardPost) => {
+    return await fetchAuthMethod('/method/guardPost/recoverGuardPost', { idGuardPost });
 }

@@ -20,7 +20,7 @@ export const MongooseSchema = new mongoose.Schema({
   guardSheme:{
     type: String,
     default: 'Guards',
-    enum: ['Guards', 'GuardsArchive']
+    enum: ['Guards', 'GuardsArchive', null]
   },
 
   timesheetShifts: {

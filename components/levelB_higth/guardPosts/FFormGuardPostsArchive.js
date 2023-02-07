@@ -1,4 +1,4 @@
-import { CalendarIcon, PlusIcon, PencilSquareIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon } from '@heroicons/react/24/solid';
+import { CalendarIcon, PlusIcon, PencilSquareIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, RectangleGroupIcon } from '@heroicons/react/24/solid';
 import { motion } from "framer-motion";
 import Image from "next/legacy/image";
 import { useState, useRef, useEffect } from 'react';
@@ -9,7 +9,7 @@ import { ApiError } from "../../../middleware/exceptions";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 
-import { createGuardPost, editGuardPost, deleteGuardPost } from '../../../src/dtos/dtoGuardPost';
+import { createGuardPost, editGuardPost, deleteGuardPost, recoverGuardPost } from '../../../src/dtos/dtoGuardPost';
 import { FGuardPostDeleteForm } from '../../levelD_modal/guardPost/FGuardPostDeleteForm';
 import { FGuardPostEditForm } from '../../levelD_modal/guardPost/FGuardPostEditForm';
 import { FTimesheetPrintForm } from '../../levelD_modal/timesheet/FTimesheetPrintForm';
@@ -19,6 +19,7 @@ import { FTimesheetTableSelectGuardForm } from '../../levelD_modal/timesheetTabl
 import { FGuardPostSelectGuardForm } from '../../levelD_modal/guardPost/FGuardPostSelectGuardForm';
 import { FGuardPostShowGuardForm } from '../../levelD_modal/guardPost/FGuardPostShowGuardForm';
 import { changeTimesheetToday, getTimesheetToday } from '../../../src/dtos/dtoTimesheet';
+import { FGuardPostRecoverForm } from '../../levelD_modal/guardPost/FGuardPostRecoverForm';
 
 const inputs = {
   initial: {
@@ -41,7 +42,6 @@ const constTableHead = [
   { value: 'name', label: 'Наименование' },
   { value: 'address', label: 'Адрес' },
   { value: 'manager', label: 'НСО' },
-  { value: 'guards', label: 'Охранники' },
 ];
 
 const constTableHeadControl = { value: 'control' };
@@ -82,7 +82,7 @@ const sortingTableCallback = (a, b, rule, invert) => {
   }
 }
 
-export default function FFormGuardPostsArchive({ accessRules, userData, guardPostsArchive, guardsData, users }) {
+export default function FFormGuardPostsArchive({ accessRules, userData, tableGuardPostsArchive, setTableGuardPosts, setTableGuardPostsArchive, guardsData, users }) {
   /*----Использование глобальных данных-------------------------------------------------------------------------------*/
   const router = useRouter();
 
@@ -91,23 +91,20 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
   const [error, setError] = useState('');
 
   /*----Определение правил доступа------------------------------------------------------------------------------------*/
-  const ARcreateGuardPost = accessRules.includes('createGuardPost');
-  const AReditGuardPost = accessRules.includes('editGuardPost');
-  const AReditGuardPostRate = !accessRules.includes('editGuardPost/editBlock/rate');
-  const AReditGuardPostAll = !accessRules.includes('editGuardPost/userCompare/manager');
-  const ARdeleteGuardPost = accessRules.includes('deleteGuardPost');
-  const ARgetTimesheetPrint = accessRules.includes('getTimesheetPrint')
-    || accessRules.includes('getTimesheetPrintForDay')
-    || accessRules.includes('getTimesheetPrintForMonthPart')
-    || accessRules.includes('getTimesheetPrintForMonthFul');
-  const ARchangeTimesheetToday = accessRules.includes('changeTimesheetToday');
-  const ARchangeTimesheetTodayAll = !accessRules.includes('changeTimesheetToday/userCompare/guardPostManagers');
-  const ARgetGuardPostID = accessRules.includes('guardPosts(?=.)/');
+  const AReditGuardPost = false; //accessRules.includes('editGuardPost');
+  const AReditGuardPostRate = false; //!accessRules.includes('editGuardPost/editBlock/rate');
+  const AReditGuardPostAll = false; //!accessRules.includes('editGuardPost/userCompare/manager');
+  const ARdeleteGuardPost = false; //accessRules.includes('deleteGuardPost');
+  const ARchangeTimesheetToday = false; //accessRules.includes('changeTimesheetToday');
+  const ARgetGuardPostID = false; //accessRules.includes('guardPosts(?=.)/');
+  const ARrecoverGuardPost = accessRules.includes('recoverGuardPost');
+
+
   // console.log('accessRules %o',accessRules);
   /*----Данные таблицы------------------------------------------------------------------------------------------------*/
-  const [tableGuardPosts, setTableGuardPosts] = useState(guardPostsArchive ? [...guardPostsArchive] : []);
+  // const [tableGuardPostsArchive, setTableGuardPostsArchive] = useState([]);
 
-  const [renderTableGuardPosts, setRenderTableGuardPosts] = useState(guardPostsArchive ? [...guardPostsArchive] : []);
+  const [renderTableGuardPosts, setRenderTableGuardPosts] = useState(tableGuardPostsArchive ? [...tableGuardPostsArchive] : []);
 
   const [guards, setGuards] = useState(guardsData.map(guard => {
     guard.label = [guard.surname, guard.firstName, guard.telephone].join(' ');
@@ -147,7 +144,7 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
 
     setRenderTableGuardPosts(
 
-      tableGuardPosts.filter(value => {
+      tableGuardPostsArchive.filter(value => {
 
         const parametrsArray = [
           value.callsign,
@@ -214,7 +211,7 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
       );
 
       // Обновляем таблицу в памяти
-      setTableGuardPosts(array => {
+      setTableGuardPostsArchive(array => {
         array.unshift(responce.guardPost);
         return array;
       });
@@ -272,11 +269,11 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
       );
 
       // Обновляем таблицу в памяти
-      setTableGuardPosts(array => {
+      setTableGuardPostsArchive(array => {
         const index = array.findIndex(element => {
           return element._id == responce.guardPost._id
         });
-        if (index){
+        if (index) {
           responce.guardPost.guardsToday = array[index].guardsToday;
           array[index] = responce.guardPost;
         }
@@ -328,7 +325,7 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
         );
 
         // Обновляем таблицу в памяти
-        setTableGuardPosts(array => {
+        setTableGuardPostsArchive(array => {
           const result = array.filter(value => {
             return responce.guardPost._id != value._id;
           })
@@ -350,6 +347,64 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
     } catch (error) {
 
       errorCallback(error, setGuardPostDeleteForm);
+
+    } finally {
+
+      MOBXui.setLoading();
+
+    }
+  }
+
+  /*----Модальное окно Формы восстановления-------------------------------------------------------------------------------*/
+  const [guardPostRecoverForm, setGuardPostRecoverForm] = useState({
+    isOpen: false
+  });
+
+  /*----Функция удаления поста Формы восстановления-------------------------------------------------------------------------*/
+  const guardPostRecoverFormSubmit = async (event, reason) => {
+
+    event.preventDefault();
+
+    MOBXui.setLoading();
+
+    try {
+
+      if (MOBXuser.user && MOBXuser.user.id) {
+
+        // Отправляем запрос на сервер
+        const responce = await recoverGuardPost(
+          guardPostRecoverForm.guardPostId
+        );
+
+        // Обновляем таблицу в памяти
+        setTableGuardPostsArchive(array => {
+          const result = array.filter(value => {
+            return responce.guardPost._id != value._id;
+          })
+          return result
+        });
+
+        // Обновляем отображаемую таблицу
+        setRenderTableGuardPosts(array => {
+          const result = array.filter(value => {
+            return responce.guardPost._id != value._id;
+          })
+          return result
+        });
+
+        // Обнавляем таблицу физ. постов в базе
+        setTableGuardPosts(array => {
+          array.unshift(responce.guardPost);
+          return array;
+        });
+
+        // Закрываем модальное окно
+        setGuardPostRecoverForm({ isOpen: false });
+      }
+
+    } catch (error) {
+
+      errorCallback(error, setGuardPostRecoverForm);
 
     } finally {
 
@@ -385,204 +440,16 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
 
   }
 
-  /*----Модальное окно Формы выгрузки графика рабочих часов-----------------------------------------------------------*/
-  const [timesheetPrintForm, setTimesheetPrintForm] = useState({
-    isOpen: false
-  });
-
-  /*----Модальное окно Формы редактирования Строки охранника----------------------------------------------------------*/
-  const [guardPostSelectGuardForm, setGuardPostSelectGuardForm] = useState({
-    isOpen: false
-  });
-
-  /*----Функция изменения Формы редактирования Строки охранника-------------------------------------------------------*/
-  const guardRowEdit = (event,
-    inputGuard) => {
-
-    event.preventDefault();
-
-    setError('');
-
-    // MOBXui.setLoading();
-    // console.log(inputGuard);
-    try {
-      // Обновляем таблицу в памяти
-      setTableGuardPosts(array => {
-        const index = array.findIndex(element => {
-          return element._id == guardPostSelectGuardForm.guardPost._id
-        });
-        if (index)
-          array[index].guardsToday = inputGuard;
-        return array;
-      });
-
-      // Обновляем отображаемую таблицу
-      setRenderTableGuardPosts(array => {
-        array[guardPostSelectGuardForm.index].guardsToday = inputGuard;
-        return array;
-      });
-
-      guardRowUpdate(guardPostSelectGuardForm.guardPost, inputGuard);
-
-      // Закрываем модальное окно
-      setGuardPostSelectGuardForm({ isOpen: false });
-
-    } catch (error) {
-
-      errorCallback(error, setGuardPostSelectGuardForm);
-
-    } finally {
-
-      // MOBXui.setLoading();
-
-    }
-  }
-
-  /*----Перезапуск обновления данных таблицы--------------------------------------------------------------------------*/
-  const resetRowUpdateInterval = useRef();
-
-  const resetRowUpdate = () => {
-
-    resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
-
-    resetRowUpdateInterval.current = setInterval(async () => {
-      MOBXui.setUpdate();
-
-      try {
-
-        const responce = await getTimesheetToday();
-        // console.log(responce);
-        // if (responce?.timesheetToday && responce.timesheetToday.length > 0) {
-
-          setTableGuardPosts(array => {
-
-            const result = array.map(element => {
-
-              let findA = responce.timesheetToday.find(value => value._id == element._id);
-
-              if (findA && findA.today && findA.today.length > 0) {
-                let guardsToday = guards.filter(guard => findA.today.includes(guard._id));
-                element.guardsToday = guardsToday;
-              } else {
-                element.guardsToday = [];
-              }
-
-              return element;
-            });
-
-            return result;
-          });
-
-        // }
-
-        MOBXui.setUpdate();
-
-      } catch (error) {
-
-        MOBXui.setUpdateError(error.message);
-
-        errorCallback(error, setGuardPostSelectGuardForm);
-
-      }
-    }, 30000);
-  }
-
-  /*----Функция загрузки данных об изменениях смен--------------------------------------------------------------------*/
-  const timesheetTodayUpdateMemory = useRef([]);
-  const guardPostManagersUpdateMemory = useRef([]);
-  const guardRowUpdateTimeout = useRef();
-
-  const guardRowUpdate = (guardPost,
-    inputGuard) => {
-
-    const elementInMemory = timesheetTodayUpdateMemory.current.find(element => element.guardPost == guardPost._id);
-
-    if (elementInMemory) {
-      elementInMemory.guardsToday = inputGuard.map(element => element._id);
-    } else {
-      timesheetTodayUpdateMemory.current.push({
-        guardPost: guardPost._id,
-        guardsToday: inputGuard.map(element => element._id)
-      })
-    }
-
-    if (guardPost.manager && !guardPostManagersUpdateMemory.current.includes(guardPost.manager._id)) {
-      guardPostManagersUpdateMemory.current.push(guardPost.manager._id)
-    }
-
-    guardRowUpdateTimeout.current && clearTimeout(guardRowUpdateTimeout.current);
-    resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
-
-    guardRowUpdateTimeout.current = setTimeout(async () => {
-      MOBXui.setUpdate();
-      console.log('guardRowUpdateTimeout');
-      try {
-        let a = guardPostManagersUpdateMemory.current;
-        let b = timesheetTodayUpdateMemory.current;
-
-        guardPostManagersUpdateMemory.current = [];
-        timesheetTodayUpdateMemory.current = [];
-
-        const responce = await changeTimesheetToday(a, b);
-
-        if (responce.timesheetToday && responce.timesheetToday.length > 0) {
-
-          setTableGuardPosts(array => {
-
-            const result = array.map(element => {
-
-              let findA = responce.timesheetToday.find(value => value._id == element._id);
-
-              if (findA && findA.today && findA.today.length > 0) {
-                let guardsToday = guards.filter(guard => findA.today.includes(guard._id));
-                element.guardsToday = guardsToday;
-              } else {
-
-                let findB = b.find(value => value.guardPost == element._id);
-
-                if (!findB) {
-                  element.guardsToday = [];
-                }
-
-              }
-
-              return element;
-            });
-
-            return result;
-          });
-
-        }
-
-        MOBXui.setUpdate();
-
-      } catch (error) {
-
-        MOBXui.setUpdateError(error.message);
-
-        errorCallback(error, setGuardPostSelectGuardForm);
-
-      } finally {
-        resetRowUpdate();
-      }
-
-    }, 30000);
-
-  }
-
-  /*----Модальное окно Формы просмотра Строки охранника---------------------------------------------------------------*/
-  const [guardPostShowGuardForm, setGuardPostShowGuardForm] = useState({
-    isOpen: false
-  });
-
   /*------------------------------------------------------------------------------------------------------------------*/
 
   useEffect(() => {
-    resetRowUpdate();
+
+    // setTableGuardPostsArchive(guardPostsArchive ? [...guardPostsArchive] : []);
+    // setRenderTableGuardPosts(guardPostsArchive ? [...guardPostsArchive] : []);
+    // setRenderTableGuardPosts(tableGuardPostsArchive ? [...tableGuardPostsArchive] : []);
+
     return () => {
       filterringTimeout.current && clearTimeout(filterringTimeout.current);
-      guardRowUpdateTimeout.current && clearTimeout(guardRowUpdateTimeout.current)
-      resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
     }
   }, []);
 
@@ -600,46 +467,6 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
         pt-2 pb-4"
       >
 
-        {/* Кнопка выгрузки табеля, кнопка создания физ. поста */}
-        <div className='flex-1 md:order-last md:ml-2 w-full flex justify-end'>
-
-          {/* Кнопка выгрузки табеля */}
-          {ARgetTimesheetPrint && tableGuardPosts?.length > 0 && (<button
-            className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
-            hover:bg-color_C active:bg-color_B mr-4"
-            onClick={() => {
-              setTimesheetPrintForm({
-                isOpen: true,
-                key: Math.random().toString(36)
-              })
-            }}
-          >
-            <CalendarIcon
-              className="h-8 w-8 fill-color_C
-              hover:fill-color_F"
-            />
-          </button>)}
-
-          {/* Кнопка создания физ. поста */}
-          {ARcreateGuardPost && <button
-            className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
-            hover:bg-color_C active:bg-color_B"
-            onClick={() => {
-              setGuardPostEditForm({
-                isOpen: true,
-                operation: 'Добавить',
-                key: Math.random().toString(36)
-              })
-            }}
-          >
-            <PlusIcon
-              className="h-8 w-8 fill-color_C
-              hover:fill-color_F"
-            />
-          </button>}
-
-        </div>
-
         {/* Фильтр, кнопка чистки фильтра */}
         <div
           className='flex-0 w-full flex'
@@ -655,7 +482,7 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
             }}
             onClear={() => {
               setInputFilterText('');
-              setRenderTableGuardPosts([...tableGuardPosts]);
+              setRenderTableGuardPosts([...tableGuardPostsArchive]);
             }}
           />
 
@@ -693,7 +520,7 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
             })}
 
             {/* Заголовок управления*/}
-            {(AReditGuardPost || ARdeleteGuardPost || ARchangeTimesheetToday) &&
+            {(AReditGuardPost || ARdeleteGuardPost || ARchangeTimesheetToday || ARrecoverGuardPost) &&
               <th
                 className="block md:table-cell md:border bg-color_B p-2"
                 onClick={(e) => sortingTable(constTableHeadControl.value)}
@@ -750,50 +577,6 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
                     {/* {Номер} */}
                     <p className="text-black ml-1 text-xl font-bold">{guardPost.number}</p>
 
-                    {/* {Кнопки управления мобильного устройства} */}
-                    {/* {(AReditGuardPost || ARdeleteGuardPost) &&
-                      <div className='flex md:hidden'>
-
-                        {((AReditGuardPost && AReditGuardPostAll)
-                          || (AReditGuardPost && guardPost.manager._id === MOBXuser.user.id)
-                          || (AReditGuardPost && guardPost.manager._id === userData.id)) &&
-                          <FButtonRed
-                            className="mr-2 flex"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              setGuardPostEditForm({
-                                isOpen: true,
-                                index: index,
-                                operation: 'Изменить',
-                                key: Math.random().toString(36),
-                                guardPost: guardPost
-                              })
-                            }}
-                          >
-                            <PencilSquareIcon
-                              className="h-4 w-4"
-                            />
-                          </FButtonRed>}
-
-                        {ARdeleteGuardPost &&
-                          <FButtonWhite
-                            className="flex"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              setGuardPostDeleteForm({
-                                isOpen: true,
-                                key: Math.random().toString(36),
-                                guardPostName: guardPost.name,
-                                guardPostId: guardPost._id,
-                              })
-                            }}
-                          >
-                            <TrashIcon
-                              className="h-4 w-4"
-                            />
-                          </FButtonWhite>}
-                      </div>} */}
-
                   </div>
                 </td>
 
@@ -820,60 +603,12 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
                     </span>}
                 </td>
 
-                {/* {Охранники} */}
-                <td
-                  className="px-1 md:p-2 md:border text-left block md:table-cell items-center hover:text-blue-500 cursor-pointer"
-                  onClick={(event) => {
-                    if (guardPost.guardsToday && guardPost.guardsToday.length > 0) {
-                      event.stopPropagation();
-                      setGuardPostShowGuardForm({
-                        isOpen: true,
-                        key: Math.random().toString(36),
-                        index: index,
-                        guardPost: guardPost,
-                        guardsToday: guardPost.guardsToday
-                      })
-                    }
-                  }}
-                >
-
-                  {/* {Список охранников} */}
-                  {guardPost.guardsToday && guardPost.guardsToday.length > 0 && guardPost.guardsToday.map(element => {
-                    return <p
-                      key={guardPost._id + element._id}
-                      className="truncate max-w-full md:max-w-[150px]"
-                    >
-                      {element.label}
-                    </p>
-                  })}
-                </td>
-
                 {/* {Кнопки управления компьютера} */}
-                {(AReditGuardPost || ARdeleteGuardPost || ARchangeTimesheetToday) &&
+                {(AReditGuardPost || ARdeleteGuardPost || ARrecoverGuardPost) &&
                   <td className="p-2 md:border text-left block md:table-cell md:w-1">
                     <div className='flex justify-end space-x-2'>
 
-                      {/* {Кнопка редактирования смены} */}
-                      {ARchangeTimesheetToday &&
-                        (ARchangeTimesheetTodayAll || guardPost.manager?._id === MOBXuser.user.id || guardPost.manager?._id === userData.id) &&
-                        <FButtonWhite
-                          className="flex"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setGuardPostSelectGuardForm({
-                              isOpen: true,
-                              key: Math.random().toString(36),
-                              index: index,
-                              guardPost: guardPost,
-                              guardsToday: guardPost.guardsToday
-                            })
-                          }}
-                        >
-                          <UserGroupIcon
-                            className="h-4 w-4"
-                          />
-                        </FButtonWhite>}
-
+                      {/* {Кнопка редактирования физ. поста} */}
                       {AReditGuardPost &&
                         (AReditGuardPostAll || guardPost.manager?._id === MOBXuser.user.id || guardPost.manager?._id === userData.id) &&
                         <FButtonRed
@@ -895,6 +630,7 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
                           <span className='hidden xl:block'>Изменить</span>
                         </FButtonRed>}
 
+                      {/* {Кнопка удаления физ. поста} */}
                       {ARdeleteGuardPost &&
                         <FButtonWhite
                           className="flex"
@@ -912,6 +648,28 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
                             className="h-4 w-4"
                           />
                           <span className='hidden xl:block'>Удалить</span>
+                        </FButtonWhite>}
+
+                      {/* {Кнопка восстановления физ. поста} */}
+                      {ARrecoverGuardPost &&
+                        <FButtonWhite
+                          className="flex"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setGuardPostRecoverForm({
+                              isOpen: true,
+                              key: Math.random().toString(36),
+                              guardPostCallsign: guardPost.callsign,
+                              guardPostReason: guardPost.reason,
+                              guardPostUserPerfomed: guardPost.userPerfomed,
+                              guardPostId: guardPost._id,
+                            })
+                          }}
+                        >
+                          <RectangleGroupIcon
+                            className="h-4 w-4"
+                          />
+                          <span className='hidden xl:block'>Восстановить</span>
                         </FButtonWhite>}
 
                     </div>
@@ -943,41 +701,13 @@ export default function FFormGuardPostsArchive({ accessRules, userData, guardPos
         submit={guardPostDeleteFormSubmit}
       />
 
-      {/* {Форма выгрузки графика рабочих часов} */}
-      <FTimesheetPrintForm
-        accessRules={accessRules}
-        form={timesheetPrintForm}
-        setForm={setTimesheetPrintForm}
-        MOBXui={MOBXui}
-        MOBXuser={MOBXuser}
-        errorCallback={errorCallback}
-        guardPosts={tableGuardPosts}
+      {/* {Форма удаления физ. поста} */}
+      <FGuardPostRecoverForm
+        form={guardPostRecoverForm}
+        setForm={setGuardPostRecoverForm}
+        submit={guardPostRecoverFormSubmit}
       />
 
-      {/* {Форма добавления/редактирования строки охранника} */}
-      <FGuardPostSelectGuardForm
-        accessRules={accessRules}
-        form={guardPostSelectGuardForm}
-        setForm={setGuardPostSelectGuardForm}
-        submitEdit={guardRowEdit}
-        setGuards={(guard) => {
-          setGuards(array => {
-            array.unshift(guard);
-            return array;
-          });
-        }}
-        optionGuards={guards}
-        users={users}
-        guardPosts={guardPostsArchive}
-        MOBXui={MOBXui}
-        errorCallback={errorCallback}
-      />
-
-      {/* {Форма добавления/редактирования строки охранника} */}
-      <FGuardPostShowGuardForm
-        form={guardPostShowGuardForm}
-        setForm={setGuardPostShowGuardForm}
-      />
     </motion.div>
   )
 

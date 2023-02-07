@@ -82,7 +82,7 @@ const sortingTableCallback = (a, b, rule, invert) => {
   }
 }
 
-export default function FFormGuardPosts({ accessRules, userData, guardPosts, guardsData, users }) {
+export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts, setTableGuardPosts, setTableGuardPostsArchive, guardsData, users }) {
   /*----Использование глобальных данных-------------------------------------------------------------------------------*/
   const router = useRouter();
 
@@ -105,9 +105,9 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
   const ARgetGuardPostID = accessRules.includes('guardPosts(?=.)/');
   // console.log('accessRules %o',accessRules);
   /*----Данные таблицы------------------------------------------------------------------------------------------------*/
-  const [tableGuardPosts, setTableGuardPosts] = useState(guardPosts ? [...guardPosts] : []);
+  // const [tableGuardPosts, setTableGuardPosts] = useState([]);
 
-  const [renderTableGuardPosts, setRenderTableGuardPosts] = useState(guardPosts ? [...guardPosts] : []);
+  const [renderTableGuardPosts, setRenderTableGuardPosts] = useState(tableGuardPosts ? [...tableGuardPosts] : []);
 
   const [guards, setGuards] = useState(guardsData.map(guard => {
     guard.label = [guard.surname, guard.firstName, guard.telephone].join(' ');
@@ -276,7 +276,7 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
         const index = array.findIndex(element => {
           return element._id == responce.guardPost._id
         });
-        if (index){
+        if (index) {
           responce.guardPost.guardsToday = array[index].guardsToday;
           array[index] = responce.guardPost;
         }
@@ -341,6 +341,12 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
             return responce.guardPost._id != value._id;
           })
           return result
+        });
+
+        // Обнавляем таблицу архива
+        setTableGuardPostsArchive(array => {
+          array.unshift(responce.guardPost);
+          return array;
         });
 
         // Закрываем модальное окно
@@ -441,50 +447,49 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
   /*----Перезапуск обновления данных таблицы--------------------------------------------------------------------------*/
   const resetRowUpdateInterval = useRef();
 
+  const rowUpdate = async() => {
+
+    MOBXui.setUpdate();
+
+    try {
+
+      const responce = await getTimesheetToday();
+
+      setTableGuardPosts(array => {
+
+        const result = array.map(element => {
+
+          let findA = responce.timesheetToday.find(value => value._id == element._id);
+
+          if (findA && findA.today && findA.today.length > 0) {
+            let guardsToday = guards.filter(guard => findA.today.includes(guard._id));
+            element.guardsToday = guardsToday;
+          } else {
+            element.guardsToday = [];
+          }
+
+          return element;
+        });
+
+        return result;
+      });
+
+      MOBXui.setUpdate();
+
+    } catch (error) {
+
+      MOBXui.setUpdateError(error.message);
+
+      errorCallback(error, setGuardPostSelectGuardForm);
+
+    } 
+  }
+
   const resetRowUpdate = () => {
 
     resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
 
-    resetRowUpdateInterval.current = setInterval(async () => {
-      MOBXui.setUpdate();
-
-      try {
-
-        const responce = await getTimesheetToday();
-        // console.log(responce);
-        // if (responce?.timesheetToday && responce.timesheetToday.length > 0) {
-
-          setTableGuardPosts(array => {
-
-            const result = array.map(element => {
-
-              let findA = responce.timesheetToday.find(value => value._id == element._id);
-
-              if (findA && findA.today && findA.today.length > 0) {
-                let guardsToday = guards.filter(guard => findA.today.includes(guard._id));
-                element.guardsToday = guardsToday;
-              } else {
-                element.guardsToday = [];
-              }
-
-              return element;
-            });
-
-            return result;
-          });
-
-        // }
-
-        MOBXui.setUpdate();
-
-      } catch (error) {
-
-        MOBXui.setUpdateError(error.message);
-
-        errorCallback(error, setGuardPostSelectGuardForm);
-
-      }
-    }, 30000);
+    resetRowUpdateInterval.current = setInterval(rowUpdate, 30000);
   }
 
   /*----Функция загрузки данных об изменениях смен--------------------------------------------------------------------*/
@@ -578,13 +583,21 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
   /*------------------------------------------------------------------------------------------------------------------*/
 
   useEffect(() => {
+
+    // setTableGuardPosts(guardPosts ? [...guardPosts] : []);
+    // setRenderTableGuardPosts(guardPosts ? [...guardPosts] : []);
+    // setRenderTableGuardPosts(tableGuardPosts ? [...tableGuardPosts] : []);
+
+    rowUpdate();
+
     resetRowUpdate();
+
     return () => {
       filterringTimeout.current && clearTimeout(filterringTimeout.current);
       guardRowUpdateTimeout.current && clearTimeout(guardRowUpdateTimeout.current)
       resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
     }
-  }, []);
+  }, [tableGuardPosts]);
 
   /*------------------------------------------------------------------------------------------------------------------*/
 
@@ -968,7 +981,7 @@ export default function FFormGuardPosts({ accessRules, userData, guardPosts, gua
         }}
         optionGuards={guards}
         users={users}
-        guardPosts={guardPosts}
+        guardPosts={tableGuardPosts}
         MOBXui={MOBXui}
         errorCallback={errorCallback}
       />

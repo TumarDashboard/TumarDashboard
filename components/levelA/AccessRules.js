@@ -116,6 +116,11 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionZDIR }
         ]
     },
+    {
+        url: '/api/method/guardPost/recoverGuardPost', access: [
+            { position: positions.FPositionZDIR }
+        ]
+    },
 
     // Timesheet methods
     {

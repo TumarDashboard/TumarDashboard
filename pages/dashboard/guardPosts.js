@@ -25,6 +25,9 @@ export default function GuardPosts({ isFirstMount, accessRules, userData, guardP
 
   const ARgetGuardPostsArchive = accessRules.includes('guardPosts/archive$');
 
+  const [tableGuardPosts, setTableGuardPosts] = useState(guardPosts);
+  const [tableGuardPostsArchive, setTableGuardPostsArchive] = useState(guardPostsArchive);
+
   const tabs = [
     {
       label: "База", component:
@@ -32,7 +35,9 @@ export default function GuardPosts({ isFirstMount, accessRules, userData, guardP
           key='FFormGuardPosts'
           accessRules={accessRules}
           userData={userData}
-          guardPosts={guardPosts}
+          tableGuardPosts={tableGuardPosts}
+          setTableGuardPosts={setTableGuardPosts}
+          setTableGuardPostsArchive={setTableGuardPostsArchive}
           guardsData={guards}
           users={users}
         />
@@ -43,7 +48,9 @@ export default function GuardPosts({ isFirstMount, accessRules, userData, guardP
           key='FFormGuardPostsArchive'
           accessRules={accessRules}
           userData={userData}
-          guardPostsArchive={guardPostsArchive}
+          tableGuardPostsArchive={tableGuardPostsArchive}
+          setTableGuardPosts={setTableGuardPosts}
+          setTableGuardPostsArchive={setTableGuardPostsArchive}
           guardsData={guards}
           users={users}
         />
@@ -119,35 +126,35 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   const day = (new Date()).getDate() - 1;
 
   //Запустить агрегат на посты, месяц и день
-  const guardsToday = await mongoTimesheetsGuardsModel.aggregate([
-    {
-      $match: {
-        month: month,
-        timesheetDays: day
-      }
-    },
-    {
-      $project: {
-        guardPost: 1,
-        guard: 1,
-      }
-    },
-    {
-      $group: {
-        _id: '$guardPost',
-        today: {
-          $push: "$guard"
-        }
-      }
-    },
-  ]).then(responce => responce.map(element => {
+  // const guardsToday = await mongoTimesheetsGuardsModel.aggregate([
+  //   {
+  //     $match: {
+  //       month: month,
+  //       timesheetDays: day
+  //     }
+  //   },
+  //   {
+  //     $project: {
+  //       guardPost: 1,
+  //       guard: 1,
+  //     }
+  //   },
+  //   {
+  //     $group: {
+  //       _id: '$guardPost',
+  //       today: {
+  //         $push: "$guard"
+  //       }
+  //     }
+  //   },
+  // ]).then(responce => responce.map(element => {
 
-    //Результат - все посты имеющие охранников за сегодня
-    return {
-      _id: element._id.toString(),
-      today: element.today.map(value => value.toString()),
-    }
-  }));
+  //   //Результат - все посты имеющие охранников за сегодня
+  //   return {
+  //     _id: element._id.toString(),
+  //     today: element.today.map(value => value.toString()),
+  //   }
+  // }));
 
   // Выборка данных об охранниках
   const guards = await mongoGuardsModel.find({}, '-createdAt -updatedAt').populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
@@ -185,20 +192,20 @@ export const getServerSideProps = catchAuthServer(async (context) => {
     }
 
     // Просмотр физ постов с имеющимися сегодня охранниками
-    const indexGuardsToday = guardsToday.findIndex(element => element._id === value._id);
+    // const indexGuardsToday = guardsToday.findIndex(element => element._id === value._id);
 
     // Если есть охранники сегодня у физ поста - запись их в переменную guardsToday
-    if (indexGuardsToday > -1) {
+    // if (indexGuardsToday > -1) {
 
-      value.guardsToday = guards.filter(element => guardsToday[indexGuardsToday].today.includes(element._id));
+    //   value.guardsToday = guards.filter(element => guardsToday[indexGuardsToday].today.includes(element._id));
 
-      value.guardsToday = value.guardsToday.map(element => {
-        element.label = [element.surname, element.firstName, element.telephone].join(' ');
-        element.lower = element.label.toLowerCase().replace(/\s/g, '');;
-        return element;
-      })
+    //   value.guardsToday = value.guardsToday.map(element => {
+    //     element.label = [element.surname, element.firstName, element.telephone].join(' ');
+    //     element.lower = element.label.toLowerCase().replace(/\s/g, '');;
+    //     return element;
+    //   })
 
-    }
+    // }
 
   })
 
