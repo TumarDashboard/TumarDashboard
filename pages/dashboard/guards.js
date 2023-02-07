@@ -23,10 +23,12 @@ export default function Guards({ isFirstMount, accessRules, userData, guards, gu
     <div
       className="flex-1"
     >
+
       <Head>
         <title>Охранники</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <motion.section
         exit={{ opacity: 0 }}
       >
@@ -47,6 +49,7 @@ export default function Guards({ isFirstMount, accessRules, userData, guards, gu
         </motion.div>
 
       </motion.section>
+      
     </div>
   )
 }

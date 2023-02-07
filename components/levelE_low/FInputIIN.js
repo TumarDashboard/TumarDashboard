@@ -6,7 +6,7 @@ export function FInputIIN({ id, className, onChange, placeholder, ...props }) {
     const [isInputValidate, setInputValidate] = useState(true);
 
     const handleChange = (e) => {
-        let value = parseInt( e.target.value );
+        let value = e.target.value;
         let isValid = isINNIndividual( value );
         setInputValidate(isNaN(value) || isValid);
         onChange(value, isNaN(value) || isValid);

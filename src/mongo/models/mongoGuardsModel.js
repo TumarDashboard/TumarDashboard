@@ -24,7 +24,7 @@ export const MongooseSchema = new mongoose.Schema({
   },
 
   iin:{
-    type: [String]
+    type: String
   },
 
   manager:{

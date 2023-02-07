@@ -56,10 +56,12 @@ export default function GuardPosts({ isFirstMount, accessRules, userData, guardP
     <div
       className="flex-1"
     >
+
       <Head>
         <title>Физические посты</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <motion.section exit={{ opacity: 0 }}>
 
         {tabs.length > 1 && <nav>
@@ -96,8 +98,10 @@ export default function GuardPosts({ isFirstMount, accessRules, userData, guardP
         </AnimatePresence>
 
       </motion.section>
+      
     </div>
   )
+
 }
 
 GuardPosts.onSidebar = true;

@@ -78,7 +78,7 @@ export const validateYup = (dtoGuardPost, options) => {
                 }
 
                 if (key === 'iin' && dtoGuardPost[key]) {
-                    return number()
+                    return string()
                         .test('innValid', 'Неверный ИНН', value => isINNIndividual(value))
                         .required('Не указан ИИН')
                 }

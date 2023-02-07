@@ -150,6 +150,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
     if (form.error) {
       setError(form.error);
     } else if (form.isOpen) {
+      console.log(form.guard);
       setOperation(form.operation);
       GuardSurnameChange(form.guard?.surname, inputInitialsValidate(form.guard?.surname) );
       // setInputGuardSurname(form.guard?.surname);

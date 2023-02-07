@@ -1,6 +1,6 @@
 export const isINNIndividual = (value) => {
     const valueToString = value ? value.toString() : '';
-    return valueToString.length === 12;
+    return /[0-9]{12}/.test(value);
     // const getN = (index) => (parseInt(valueToString[index]))
     // if(valueToString.length === 12){
     //   const dgt11 = (( 
