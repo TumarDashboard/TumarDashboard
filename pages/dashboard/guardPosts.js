@@ -125,39 +125,8 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   const month = new Date(getCurrentMonth());
   const day = (new Date()).getDate() - 1;
 
-  //Запустить агрегат на посты, месяц и день
-  // const guardsToday = await mongoTimesheetsGuardsModel.aggregate([
-  //   {
-  //     $match: {
-  //       month: month,
-  //       timesheetDays: day
-  //     }
-  //   },
-  //   {
-  //     $project: {
-  //       guardPost: 1,
-  //       guard: 1,
-  //     }
-  //   },
-  //   {
-  //     $group: {
-  //       _id: '$guardPost',
-  //       today: {
-  //         $push: "$guard"
-  //       }
-  //     }
-  //   },
-  // ]).then(responce => responce.map(element => {
-
-  //   //Результат - все посты имеющие охранников за сегодня
-  //   return {
-  //     _id: element._id.toString(),
-  //     today: element.today.map(value => value.toString()),
-  //   }
-  // }));
-
   // Выборка данных об охранниках
-  const guards = await mongoGuardsModel.find({}, '-createdAt -updatedAt').populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
+  const guards = await mongoGuardsModel.find().populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
 
   guards.sort((a, b) => {
     return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
@@ -172,10 +141,16 @@ export const getServerSideProps = catchAuthServer(async (context) => {
     if (value.guardPosts) {
       value.guardPosts = value.guardPosts.map((value) => value._id.toString());
     }
+    if(value.createdAt){
+      value.createdAt = value.createdAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    if(value.updatedAt){
+      value.updatedAt = value.updatedAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
   })
 
   // Выборка данных о физ. постах
-  const guardPosts = await mongoGuardPostsModel.find({}, '-createdAt -updatedAt', { sort: { 'manager': 1, 'number': 1 } }).populate('manager', 'surname firstName').lean();
+  const guardPosts = await mongoGuardPostsModel.find({}, null, { sort: { 'manager': 1, 'number': 1 } }).populate('manager', 'surname firstName').lean();
 
   let userIsNotManager = true;
 
@@ -190,22 +165,12 @@ export const getServerSideProps = catchAuthServer(async (context) => {
         userIsNotManager = false;
       }
     }
-
-    // Просмотр физ постов с имеющимися сегодня охранниками
-    // const indexGuardsToday = guardsToday.findIndex(element => element._id === value._id);
-
-    // Если есть охранники сегодня у физ поста - запись их в переменную guardsToday
-    // if (indexGuardsToday > -1) {
-
-    //   value.guardsToday = guards.filter(element => guardsToday[indexGuardsToday].today.includes(element._id));
-
-    //   value.guardsToday = value.guardsToday.map(element => {
-    //     element.label = [element.surname, element.firstName, element.telephone].join(' ');
-    //     element.lower = element.label.toLowerCase().replace(/\s/g, '');;
-    //     return element;
-    //   })
-
-    // }
+    if(value.createdAt){
+      value.createdAt = value.createdAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    if(value.updatedAt){
+      value.updatedAt = value.updatedAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
 
   })
 
@@ -236,7 +201,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   
   if (accessRules.includes('guardPosts/archive$')) {
 
-    guardPostsArchive = await mongoGuardPostsArchiveModel.find({}, '-createdAt -updatedAt', { sort: { 'manager': 1, 'number': 1 } })
+    guardPostsArchive = await mongoGuardPostsArchiveModel.find({}, null, { sort: { 'manager': 1, 'number': 1 } })
       .populate('manager', 'surname firstName')
       .populate('userPerfomed', 'surname firstName')
       .lean();
@@ -252,6 +217,13 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
       if (value.userPerfomed) {
         value.userPerfomed._id = value.userPerfomed._id.toString();
+      }
+
+      if(value.createdAt){
+        value.createdAt = value.createdAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+      }
+      if(value.updatedAt){
+        value.updatedAt = value.updatedAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
       }
 
     });

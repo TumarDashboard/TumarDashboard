@@ -74,7 +74,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   await mongoConnect();
 
   // Охранники
-  const guards = await mongoGuardsModel.find({}, '-createdAt -updatedAt').populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
+  const guards = await mongoGuardsModel.find().populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
 
   guards.sort((a, b) => {
     return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
@@ -87,6 +87,12 @@ export const getServerSideProps = catchAuthServer(async (context) => {
     }
     if (value.guardPosts) {
       value.guardPosts = value.guardPosts.map((value) => value._id.toString());
+    }
+    if(value.createdAt){
+      value.createdAt = value.createdAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    if(value.updatedAt){
+      value.updatedAt = value.updatedAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
     }
   })
 
@@ -108,7 +114,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   // Физ пост
   var guardPost;
-  const guardPosts = await mongoGuardPostsModel.find({}, '-createdAt -updatedAt').populate('manager', 'surname firstName').lean();
+  const guardPosts = await mongoGuardPostsModel.find().populate('manager', 'surname firstName').lean();
   guardPosts.sort((a, b) => {
     return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
       a.number - b.number ||
@@ -126,6 +132,12 @@ export const getServerSideProps = catchAuthServer(async (context) => {
       }
     } else if (value.manager) {
       value.manager._id = value.manager._id.toString();
+    }
+    if(value.createdAt){
+      value.createdAt = value.createdAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    if(value.updatedAt){
+      value.updatedAt = value.updatedAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
     }
   })
 
