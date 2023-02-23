@@ -396,12 +396,12 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
     isOpen: false
   });
 
-  /*----Модальное окно Формы редактирования Строки охранника----------------------------------------------------------*/
+  /*----Модальное окно Формы редактирования Физ. поста----------------------------------------------------------------*/
   const [guardPostSelectGuardForm, setGuardPostSelectGuardForm] = useState({
     isOpen: false
   });
 
-  /*----Функция изменения Формы редактирования Строки охранника-------------------------------------------------------*/
+  /*----Функция изменения Формы редактирования Физ. поста-------------------------------------------------------------*/
   const guardRowEdit = (event,
     inputGuard) => {
 
@@ -588,16 +588,16 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
     // setRenderTableGuardPosts(guardPosts ? [...guardPosts] : []);
     // setRenderTableGuardPosts(tableGuardPosts ? [...tableGuardPosts] : []);
 
-    rowUpdate();
+    // rowUpdate();
 
-    resetRowUpdate();
+    // resetRowUpdate();
 
     return () => {
       filterringTimeout.current && clearTimeout(filterringTimeout.current);
       guardRowUpdateTimeout.current && clearTimeout(guardRowUpdateTimeout.current)
       resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
     }
-  }, [tableGuardPosts]);
+  }, []);
 
   /*------------------------------------------------------------------------------------------------------------------*/
 

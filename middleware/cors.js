@@ -6,6 +6,13 @@ import userService from '../src/service/userService';
 // You can read more about the available options here: https://github.com/expressjs/cors#configuration-options
 // https://www.npmjs.com/package/cors
 export default async function checkCors(req, res, options) {
+    // console.log('-------start checkCors------');
+
+    // console.log("checkrefreshtoken", res.getHeaders()['checkrefreshtoken']);
+
+    // console.log("refreshToken", req.cookies['refreshToken']);
+
+    // console.log('-------end checkCors------');
 
     if( res.getHeaders()['checkrefreshtoken'] ){
 

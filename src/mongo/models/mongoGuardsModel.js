@@ -27,17 +27,6 @@ export const MongooseSchema = new mongoose.Schema({
     type: String
   },
 
-  manager:{
-    type: mongoose.Schema.Types.ObjectId,
-    refPath: 'managerSheme'
-  },
-
-  managerSheme:{
-    type: String,
-    default: 'User',
-    enum: ['User', 'UserArchive', null]
-  },
-
   guardPosts:{
     type:[mongoose.Schema.Types.ObjectId],
     ref: 'GuardPosts'

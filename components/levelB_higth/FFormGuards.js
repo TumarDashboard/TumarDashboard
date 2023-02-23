@@ -163,7 +163,6 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
     inputGuardUIAvatarsSrc,
     inputGuardTelephone,
     inputGuardIIN,
-    inputGuardManager,
     inputGuardGuardPosts) => {
 
     event.preventDefault();
@@ -180,7 +179,6 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
         inputGuardUIAvatarsSrc,
         inputGuardTelephone,
         inputGuardIIN,
-        inputGuardManager,
         inputGuardGuardPosts
       );
 
@@ -221,7 +219,6 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
     inputGuardUIAvatarsSrc,
     inputGuardTelephone,
     inputGuardIIN,
-    inputGuardManager,
     inputGuardGuardPosts) => {
 
     event.preventDefault();
@@ -239,7 +236,6 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
         inputGuardUIAvatarsSrc,
         inputGuardTelephone,
         inputGuardIIN,
-        inputGuardManager,
         inputGuardGuardPosts
       );
 

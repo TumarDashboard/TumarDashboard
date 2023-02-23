@@ -8,6 +8,7 @@ import mongoUserModel from "../../src/mongo/models/mongoUserModel";
 import mongoConnect from "../../src/mongo/mongoConnect";
 import { FPositionNSO } from '../../components/levelZ_variable/FPositionItemList';
 import FFormGuardPostsArchive from '../../components/levelB_higth/guardPosts/FFormGuardPostsArchive';
+import mongoGuardsArchiveModel from '../../src/mongo/models/mongoGuardsArchiveModel';
 
 const content = (isFirstMount) => ({
   animate: {
@@ -63,15 +64,10 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   await mongoConnect();
 
-  const guards = await mongoGuardsModel.find({}, '-createdAt -updatedAt', { sort: { 'manager': 1, 'surname': 1, 'firstName': 1, } }).populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
+  const guards = await mongoGuardsModel.find({}, '-createdAt -updatedAt', { sort: { 'surname': 1, 'firstName': 1, } }).populate('guardPosts', 'id').lean();
 
   guards.forEach(value => {
     value._id = value._id.toString();
-    if (value.manager) {
-      value.manager._id = value.manager._id.toString();
-    } else {
-      value.manager = { _id: "EMPTY" }
-    }
     if (value.guardPosts) {
       value.guardPosts = value.guardPosts.map((value) => value._id.toString());
     }

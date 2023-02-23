@@ -107,18 +107,6 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
     }
   }
 
-  /*--Менеджер Формы редактирования----------------------------------------------------------------------*/
-  const optionGuardManager = [{
-    label: 'Отсутствует', value: 'EMPTY'
-  }, ...users?.map((user) => {
-    return {
-      label: [user.surname, user.firstName].join(' '),
-      value: user._id,
-    }
-  })]
-
-  const [inputGuardManager, setInputGuardManager] = useState('EMPTY');
-
   /*--Физ.посты Формы редактирования---------------------------------------------------------------------*/
   const optionGuardPosts = [{
     label: 'Отсутствует', value: 'EMPTY'
@@ -164,7 +152,6 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
       setInputValidateGuardTelephone(form.operation == 'Добавить');
       setInputGuardIIN(form.guard?.iin);
       setInputValidateGuardIIN(form.operation == 'Добавить');
-      setInputGuardManager(form.guard?.manager?._id || 'EMPTY');
       setInputGuardGuardPosts(form.guard?.guardPosts || []);
       setError(null);
     }
@@ -239,17 +226,6 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
           />
         </div>
 
-        {/* Менеджер */}
-        {/* <div className="form-item w-full mt-4 flex items-center">
-          <label className="text-lg pr-4">НСО</label>
-          <FSelect
-            options={optionGuardManager}
-            onChange={(e) => { setInputGuardManager(e?.target?.value) }}
-            value={inputGuardManager ? inputGuardManager : 'EMPTY'}
-            key={form.key}
-          />
-        </div> */}
-
         {/* ИИН */}
         <div className="form-item w-full mt-4 flex items-center pr-4">
           <label className="text-lg pr-4">ИИН</label>
@@ -297,7 +273,6 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
               || isInputValidateGuardPatronymic
               || isInputValidateGuardTelephone
               || isInputValidateGuardIIN
-              || (inputGuardManager != form.guard?.manager?._id)
               || (!equalArrays(inputGuardGuardPosts, form.guard?.guardPosts))
               || inputGuardUIAvatarsSrc != null
             )
@@ -309,7 +284,6 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
             inputGuardUIAvatarsSrc,
             inputGuardTelephone,
             inputGuardIIN,
-            inputGuardManager,
             inputGuardGuardPosts
           ) : submitEdit(e,
             inputGuardSurname,
@@ -318,7 +292,6 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
             inputGuardUIAvatarsSrc,
             inputGuardTelephone,
             inputGuardIIN,
-            inputGuardManager,
             inputGuardGuardPosts
           )}
         >

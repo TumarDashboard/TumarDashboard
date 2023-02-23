@@ -108,7 +108,6 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
     inputGuardUIAvatarsSrc,
     inputGuardTelephone,
     inputGuardIIN,
-    inputGuardManager,
     inputGuardGuardPosts) => {
       
     event.preventDefault();
@@ -124,7 +123,6 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
         inputGuardUIAvatarsSrc,
         inputGuardTelephone,
         inputGuardIIN,
-        inputGuardManager,
         inputGuardGuardPosts
       );
 

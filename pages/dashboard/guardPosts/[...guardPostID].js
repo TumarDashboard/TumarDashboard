@@ -74,17 +74,10 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   await mongoConnect();
 
   // Охранники
-  const guards = await mongoGuardsModel.find({}, '-createdAt -updatedAt').populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
+  const guards = await mongoGuardsModel.find({}, '-createdAt -updatedAt', { sort: { 'surname': 1, 'firstName': 1, } }).populate('guardPosts', 'id').lean();
 
-  guards.sort((a, b) => {
-    return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
-  }).forEach(value => {
+  guards.forEach(value => {
     value._id = value._id.toString();
-    if (value.manager) {
-      value.manager._id = value.manager._id.toString();
-    } else {
-      value.manager = { _id: "EMPTY" }
-    }
     if (value.guardPosts) {
       value.guardPosts = value.guardPosts.map((value) => value._id.toString());
     }
@@ -155,6 +148,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   }
 
   // Передача данных
+  console.log(guards);
   return {
     props: { accessRules, userData, guardPost, guardPosts, guards, users, usersAll, initialState: { checkAuth: true } }
   }

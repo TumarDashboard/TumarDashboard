@@ -117,7 +117,6 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
     inputGuardUIAvatarsSrc,
     inputGuardTelephone,
     inputGuardIIN,
-    inputGuardManager,
     inputGuardGuardPosts) => {
       
     event.preventDefault();
@@ -133,7 +132,6 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
         inputGuardUIAvatarsSrc,
         inputGuardTelephone,
         inputGuardIIN,
-        inputGuardManager,
         inputGuardGuardPosts
       );
 

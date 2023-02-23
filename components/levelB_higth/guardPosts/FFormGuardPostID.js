@@ -231,8 +231,8 @@ export default function FFormGuardPostID({ accessRules, userData, guardPost, gua
 
             {/* {Кнопка редактирования} */}
             {((AReditGuardPost && AReditGuardPostAll)
-              || (AReditGuardPost && guardPost.manager._id === MOBXuser.user.id)
-              || (AReditGuardPost && guardPost.manager._id === userData.id)) &&
+              || (AReditGuardPost && guardPost.manager?._id === MOBXuser.user.id)
+              || (AReditGuardPost && guardPost.manager?._id === userData.id)) &&
               <FButtonRed
                 className="mr-2 flex"
                 onClick={(event) => {
@@ -336,8 +336,8 @@ export default function FFormGuardPostID({ accessRules, userData, guardPost, gua
 
       {/* {Таблица графика} */}
       {((ARgetTimesheet && ARgetTimesheetAll)
-        || (ARgetTimesheet && guardPost.manager._id === MOBXuser.user.id)
-        || (ARgetTimesheet && guardPost.manager._id === userData.id)) &&
+        || (ARgetTimesheet && guardPost.manager?._id === MOBXuser.user.id)
+        || (ARgetTimesheet && guardPost.manager?._id === userData.id)) &&
         <FTimesheetHorizontal
           accessRules={accessRules}
           userData={MOBXuser}

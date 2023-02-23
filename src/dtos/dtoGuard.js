@@ -15,8 +15,6 @@ export default class DTOGuard {
     uiAvatarsSrc;
     telephone;
     iin;
-    manager;
-    managerSheme;
     guardPosts;
 
     constructor(model) {
@@ -27,8 +25,6 @@ export default class DTOGuard {
         this.uiAvatarsSrc = model.uiAvatarsSrc;
         this.telephone = model.telephone;
         this.iin = model.iin;
-        this.manager = model.manager;
-        this.managerSheme = model.managerSheme;
         this.guardPosts = model.guardPosts;
     }
 
@@ -91,12 +87,12 @@ export const validateYup = (dtoGuardPost, options) => {
 
 }
 
-export const createGuard = async (surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, manager, guardPosts) => {
-    return await fetchAuthMethod('/method/guard/createGuard', { surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, manager, guardPosts });
+export const createGuard = async (surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, guardPosts) => {
+    return await fetchAuthMethod('/method/guard/createGuard', { surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, guardPosts });
 }
 
-export const editGuard = async (id, surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, manager, guardPosts) => {
-    return await fetchAuthMethod('/method/guard/editGuard', { id, surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, manager, guardPosts });
+export const editGuard = async (id, surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, guardPosts) => {
+    return await fetchAuthMethod('/method/guard/editGuard', { id, surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, guardPosts });
 }
 
 export const deleteGuard = async (idGuard, idUser, reason) => {

@@ -157,18 +157,12 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   // }));
 
   // Выборка данных об охранниках
-  const guards = await mongoGuardsModel.find({}, '-createdAt -updatedAt').populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
+  const guards = await mongoGuardsModel.find({}, '-createdAt -updatedAt', { sort: { 'surname': 1, 'firstName': 1, } }).populate('guardPosts', 'id').lean();
 
-  guards.sort((a, b) => {
-    return a.surname.localeCompare(b.surname) || a.firstName.localeCompare(b.firstName)
-  }).forEach(value => {
+  guards.forEach(value => {
     // Преобразование ID в строки
     value._id = value._id.toString();
-    if (value.manager) {
-      value.manager._id = value.manager._id.toString();
-    } else {
-      value.manager = { _id: "EMPTY" }
-    }
+
     if (value.guardPosts) {
       value.guardPosts = value.guardPosts.map((value) => value._id.toString());
     }

@@ -52,16 +52,6 @@ class GuardService {
                 throw ApiError.BadRequest(`Инициалы ${guardData.firstName} ${guardData.surname} уже использовались для создания, после чего были деактивированы`);
             }
 
-            //cast manager id from string to id
-            let manager;
-            if( guardData.manager == 'EMPTY' ){
-                guardData.manager = null;
-            }else if(guardData.manager){
-                guardData.manager = new mongoose.mongo.ObjectId(guardData.manager);
-                guardData.managerSheme = 'User';
-                manager = await mongoUserModel.findById(guardData.manager, 'surname firstName').lean();
-            }
-
             //cast guardPosts id from string to id
             let guardPosts = guardData.guardPosts;
             if( guardData.guardPosts == 'EMPTY' ){
@@ -84,12 +74,6 @@ class GuardService {
 
                 await mongoGuard.save();
                     
-            }
-
-            if( manager ){
-                mongoGuard._doc.manager = manager;
-            }else{
-                mongoGuard._doc.manager = {_id:"EMPTY"};
             }
 
             if( guardPosts ){
@@ -143,14 +127,6 @@ class GuardService {
             delete guardData['uiAvatarsSrc'];
         }
 
-        //cast manager id from string to id
-        if( guardData.manager == 'EMPTY' ){
-            guardData.manager = null;
-        }else if(guardData.manager){
-            guardData.manager = new mongoose.mongo.ObjectId(guardData.manager);
-            guardData.managerSheme = 'User';
-        }
-
         //cast guardPosts id from string to id
         if( guardData.guardPosts == 'EMPTY' ){
             guardData.guardPosts = null;
@@ -180,17 +156,11 @@ class GuardService {
 
         mongoGuard = await mongoGuardsModel.
                                         findByIdAndUpdate(guardData.id, guardData, { new: true }).
-                                        populate('manager', 'surname firstName').
                                         populate('guardPosts', 'id').lean();
 
         //break populate data
         mongoGuard._id = mongoGuard._id.toString();
 
-        if (mongoGuard.manager) {
-            mongoGuard.manager._id = mongoGuard.manager._id.toString();
-        }else{
-            mongoGuard.manager = {_id:"EMPTY"}
-        }
         if (mongoGuard.guardPosts) {
             mongoGuard.guardPosts = mongoGuard.guardPosts.map((value)=>value._id.toString())
         }
