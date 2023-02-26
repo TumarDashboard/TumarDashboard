@@ -103,7 +103,7 @@ export default function Guards({ isFirstMount, accessRules, userData, guards, gu
         </AnimatePresence>
 
       </motion.section>
-      
+
     </div>
   )
 }
@@ -117,37 +117,28 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   await mongoConnect();
 
-  const guards = await mongoGuardsModel.find({}, null, { sort: { 'manager': 1, 'surname': 1, 'firstName': 1, } }).populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
+  const guards = await mongoGuardsModel
+    .find({}, '-createdAt -updatedAt', { sort: { 'surname': 1, 'firstName': 1, } })
+    .populate('guardPosts', 'id')
+    .lean();
 
   guards.forEach(value => {
     value._id = value._id.toString();
     if (value.guardPosts) {
       value.guardPosts = value.guardPosts.map((value) => value._id.toString());
     }
-    if(value.createdAt){
-      value.createdAt = value.createdAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
-    }
-    if(value.updatedAt){
-      value.updatedAt = value.updatedAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
-    }
   })
 
-  const guardPosts = await mongoGuardPostsModel.find().populate('manager', 'surname firstName').lean();
+  const guardPosts = await mongoGuardPostsModel
+    .find({}, '-createdAt -updatedAt', { sort: { 'manager': 1, 'number': 1, 'callsign': 1 } })
+    .populate('manager', 'surname firstName')
+    .lean();
 
-  guardPosts.sort((a, b) => {
-    return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
-      a.number - b.number ||
-      a.callsign.localeCompare(b.callsign)
-  }).forEach(value => {
+  guardPosts.forEach(value => {
     value._id = value._id.toString();
+
     if (value.manager) {
       value.manager._id = value.manager._id.toString();
-    }
-    if(value.createdAt){
-      value.createdAt = value.createdAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
-    }
-    if(value.updatedAt){
-      value.updatedAt = value.updatedAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
     }
   })
 
@@ -159,10 +150,11 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   // Выборка данных об охранниках в Архиве
   var guardsArchive = '';
-  
+
   if (accessRules.includes('guards/archive')) {
 
-    guardsArchive = await mongoGuardsArchiveModel.find({}, '-createdAt -updatedAt', { sort: { 'surname': 1, 'firstName': 1, } })
+    guardsArchive = await mongoGuardsArchiveModel
+      .find({}, '-createdAt -updatedAt', { sort: { 'surname': 1, 'firstName': 1, } })
       .populate('guardPosts', 'id')
       .populate('userPerfomed', 'surname firstName')
       .lean();

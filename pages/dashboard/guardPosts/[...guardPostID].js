@@ -74,18 +74,15 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   await mongoConnect();
 
   // Охранники
-  const guards = await mongoGuardsModel.find().populate('manager', 'surname firstName').populate('guardPosts', 'id').lean();
+  const guards = await mongoGuardsModel
+    .find({}, '-createdAt -updatedAt', { sort: { 'surname': 1, 'firstName': 1, } })
+    .populate('guardPosts', 'id')
+    .lean();
 
   guards.forEach(value => {
     value._id = value._id.toString();
     if (value.guardPosts) {
       value.guardPosts = value.guardPosts.map((value) => value._id.toString());
-    }
-    if(value.createdAt){
-      value.createdAt = value.createdAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
-    }
-    if(value.updatedAt){
-      value.updatedAt = value.updatedAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
     }
   })
 
@@ -107,12 +104,13 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   // Физ пост
   var guardPost;
-  const guardPosts = await mongoGuardPostsModel.find().populate('manager', 'surname firstName').lean();
-  guardPosts.sort((a, b) => {
-    return (a.number === undefined || a.number === null) - (b.number === undefined || b.number === null) ||
-      a.number - b.number ||
-      a.callsign.localeCompare(b.callsign)
-  }).forEach(value => {
+
+  const guardPosts = await mongoGuardPostsModel
+    .find({}, '-createdAt -updatedAt', { sort: { 'manager': 1, 'number': 1, 'callsign': 1  } })
+    .populate('manager', 'surname firstName')
+    .lean();
+
+  guardPosts.forEach(value => {
     value._id = value._id.toString();
     if (!guardPost && queryPath[0] === value._id) {
       guardPost = value;
@@ -125,12 +123,6 @@ export const getServerSideProps = catchAuthServer(async (context) => {
       }
     } else if (value.manager) {
       value.manager._id = value.manager._id.toString();
-    }
-    if(value.createdAt){
-      value.createdAt = value.createdAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
-    }
-    if(value.updatedAt){
-      value.updatedAt = value.updatedAt.toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
     }
   })
 
@@ -160,7 +152,6 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   }
 
   // Передача данных
-  console.log(guards);
   return {
     props: { accessRules, userData, guardPost, guardPosts, guards, users, usersAll, initialState: { checkAuth: true } }
   }
