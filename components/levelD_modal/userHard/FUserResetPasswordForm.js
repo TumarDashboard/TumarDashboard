@@ -26,7 +26,7 @@ export function FUserResetPasswordForm({ form, setForm, submit }) {
           <li>Будет автоматически установлен следующий пароль:
             {form?.createdAt
               ? <b className="text-blue-700"> State{getDateStamp(new Date(form?.createdAt))}</b>
-              : <p className="text-blue-700"> State<b>ГодМесяцДата</b>, где ГодМесяцДата - дата создания пользователя</p>
+              : <p className="text-blue-700"> State<b>ГодМесяцДата</b>, где ГодМесяцДата - дата текущая дата</p>
             }
           </li>
           <li>На почту аккаунта <b>{form?.email}</b> будет отправлена ссылка для восстановления пароля,

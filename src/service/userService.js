@@ -317,7 +317,7 @@ class UserService {
         if (!mongoUser) {
             throw ApiError.BadRequest('Пользователь с указанным id не найден');
         }
-        console.log(mongoUser.password);
+        console.log('changeUserPassword %s', mongoUser.password);
         const isPassEquals = await bcrypt.compare(userData.password, mongoUser.password)
 
         if (!isPassEquals) {
@@ -714,7 +714,8 @@ class UserService {
         }
 
         //password create
-        const password = 'State' + getDateStamp(mongoUser.createdAt);
+        
+        const password = 'State' + getCurrentDateStamp();
 
         const hashPassword = await bcrypt.hash(password, parseInt(process.env.NEXT_PRIVATE_PASSWORD_SALT))
 

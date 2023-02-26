@@ -98,3 +98,7 @@ export const editGuard = async (id, surname, firstName, patronymic, uiAvatarsSrc
 export const deleteGuard = async (idGuard, idUser, reason) => {
     return await fetchAuthMethod('/method/guard/deleteGuard', { idGuard, idUser, reason });
 }
+
+export const recoverGuard = async (idGuard) => {
+    return await fetchAuthMethod('/method/guard/recoverGuard', { idGuard });
+}

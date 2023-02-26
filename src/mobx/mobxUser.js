@@ -33,7 +33,6 @@ export default class MOBXuser {
 
     setUser(user) {
         this.user = user;
-        // this.setAccessRules(this.user?.positions);
     }
 
     updateUser(user){

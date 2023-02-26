@@ -53,6 +53,14 @@ export const FApiMethodAccessRules = [
         ]
     },
     {
+        url: '/dashboard/guards/archive', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionNSO }
+        ]
+    },
+    {
         url: '/api/method/guard/createGuard', access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
@@ -73,6 +81,13 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionNSO }
         ]
     },
+    {
+        url: '/api/method/guard/recoverGuard', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionNSO }
+        ]
+    },
 
     // GuardPost methods
     {
@@ -84,7 +99,7 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionNSO },
             { position: positions.FPositionOPR }
         ]
-    },    
+    },
     {
         url: '/dashboard/guardPosts/archive\$', access: [
             { position: positions.FPositionDIR },
@@ -102,11 +117,22 @@ export const FApiMethodAccessRules = [
     },
     {
         url: '/api/method/guardPost/createGuardPost', access: [
+            { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionBUH },
+            { position: positions.FPositionNSO },
+            { position: positions.FPositionOPR }
         ]
     },
     {
         url: '/api/method/guardPost/editGuardPost', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionNSO, editBlock: ['rate', 'manager'], userCompare: ['manager'] }
+        ]
+    },
+    {
+        url: '/api/method/guardPost/getGuardPost', access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionNSO, editBlock: ['rate', 'manager'], userCompare: ['manager'] }
         ]

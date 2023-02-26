@@ -1,6 +1,7 @@
 import { ApiError } from "./exceptions";
 
 export async function fetchAuth(url, data = {}, method = 'POST'){
+    
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api${url}`, {
         method: method,
         mode: 'cors',

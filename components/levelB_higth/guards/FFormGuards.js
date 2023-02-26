@@ -3,15 +3,15 @@ import { motion } from "framer-motion";
 import Image from "next/legacy/image";
 import { useState, useRef, useEffect } from 'react';
 
-import { useStore } from "../levelA/StoreProvider";
-import { ApiError } from "../../middleware/exceptions";
-import { FButtonRed } from "../levelE_low/FButtonRed";
-import { FButtonWhite } from "../levelE_low/FButtonWhite";
+import { useStore } from "../../levelA/StoreProvider";
+import { ApiError } from "../../../middleware/exceptions";
+import { FButtonRed } from "../../levelE_low/FButtonRed";
+import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 
-import { createGuard, editGuard, deleteGuard } from '../../src/dtos/dtoGuard';
-import { FGuardDeleteForm } from '../levelD_modal/guard/FGuardDeleteForm';
-import { FGuardEditForm } from '../levelD_modal/guard/FGuardEditForm';
-import { FFilterText } from '../levelE_low/FFilterText';
+import { createGuard, editGuard, deleteGuard } from '../../../src/dtos/dtoGuard';
+import { FGuardDeleteForm } from '../../levelD_modal/guard/FGuardDeleteForm';
+import { FGuardEditForm } from '../../levelD_modal/guard/FGuardEditForm';
+import { FFilterText } from '../../levelE_low/FFilterText';
 
 const inputs = {
   initial: {
@@ -67,7 +67,7 @@ const sortingTableCallback = (a, b, rule, invert) => {
   }
 }
 
-export default function FFormGuards({ accessRules, guards, guardPosts, users }) {
+export default function FFormGuards({ accessRules, tableGuards, setTableGuards, setTableGuardsArchive, guardPosts, users }) {
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
   -------------------------------------------------------------------------------------------------------*/
@@ -80,18 +80,11 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
   const AReditGuard = accessRules.includes('editGuard');
   const ARdeleteGuard = accessRules.includes('deleteGuard');
 
-  /*-------------------------------------------------------------------------------------------------------
-      Данные таблицы
-  -------------------------------------------------------------------------------------------------------*/
-  const [tableGuards, setTableGuards] = useState(guards ? [...guards] : []);
+  /*--Данные таблицы-------------------------------------------------------------------------------------*/
+  const [renderTableGuards, setRenderTableGuards] = useState(tableGuards ? [...tableGuards] : []);
 
-  const [renderTableGuards, setRenderTableGuards] = useState(guards ? [...guards] : []);
-
-  /*-------------------------------------------------------------------------------------------------------
-      Сортировка таблицы
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Сортировка таблицы---------------------------------------------------------------------------------*/
   const [sortingRule, setSortingRule] = useState();
-  const filterringTimeout = useRef();
 
   const sortingTable = (rule) => {
 
@@ -105,10 +98,9 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
 
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Фильтрация таблицы
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Фильтрация таблицы---------------------------------------------------------------------------------*/
   const [inputFilterText, setInputFilterText] = useState([]);
+  const filterringTimeout = useRef();
 
   const filteringTable = (text) => {
 
@@ -146,16 +138,12 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
 
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Модальное окно Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Модальное окно Формы редактирования----------------------------------------------------------------*/
   const [guardEditForm, setGuardEditForm] = useState({
     isOpen: false
   });
 
-  /*-------------------------------------------------------------------------------------------------------
-      Добавление охранника Формой редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Добавление охранника Формой редактирования---------------------------------------------------------*/
   const guardAdd = async (event,
     inputGuardSurname,
     inputGuardFirstName,
@@ -209,9 +197,7 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
 
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Изменение охранника Формой редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Изменение охранника Формой редактирования----------------------------------------------------------*/
   const guardEdit = async (event,
     inputGuardSurname,
     inputGuardFirstName,
@@ -270,16 +256,12 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Модальное окно Формы удаления
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Модальное окно Формы удаления----------------------------------------------------------------------*/
   const [guardDeleteForm, setGuardDeleteForm] = useState({
     isOpen: false
   });
 
-  /*-------------------------------------------------------------------------------------------------------
-      Функция удаления поста Формы удаления
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Функция удаления поста Формы удаления--------------------------------------------------------------*/
   const guardDeleteFormSubmit = async (event, reason) => {
 
     event.preventDefault();
@@ -313,6 +295,12 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
           return result
         });
 
+        // Обнавляем таблицу архива
+        setTableGuardsArchive(array => {
+          array.unshift(responce.guard);
+          return array;
+        });
+
         // Закрываем модальное окно
         setGuardDeleteForm({ isOpen: false });
       }
@@ -328,9 +316,7 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
     }
   }
 
-  /*----------------------------------------------------------------------------------------------------------------------------
-    Переиспользование функции обработок ошибок
-  ----------------------------------------------------------------------------------------------------------------------------*/
+  /*--Переиспользование функции обработок ошибок---------------------------------------------------------*/
   const errorCallback = (error, callback) => {
 
     if (error.statusCode == 404)
@@ -357,15 +343,14 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
     }
   }
 
-  /*------------------------------------------------------------------------------------------------------------------*/
+  /*-----------------------------------------------------------------------------------------------------*/
   useEffect(()=>{
     return ()=>{
       filterringTimeout.current && clearTimeout(filterringTimeout.current);
     }
   }, []);
 
-  /*----------------------------------------------------------------------------------------------------------------------------
-  ----------------------------------------------------------------------------------------------------------------------------*/
+  /*-----------------------------------------------------------------------------------------------------*/
 
   return (
     <motion.div
@@ -593,7 +578,7 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
 
       </table>
 
-      {/* {Форма добавления/редактирования физ. поста} */}
+      {/* {Форма добавления/редактирования охранника} */}
       <FGuardEditForm
         form={guardEditForm}
         setForm={setGuardEditForm}
@@ -603,7 +588,7 @@ export default function FFormGuards({ accessRules, guards, guardPosts, users }) 
         users={users}
       />
 
-      {/* {Форма удаления физ. поста} */}
+      {/* {Форма удаления охранника} */}
       <FGuardDeleteForm
         form={guardDeleteForm}
         setForm={setGuardDeleteForm}

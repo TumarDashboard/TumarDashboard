@@ -29,53 +29,6 @@ export function StoreProvider({ isFirstMount, children, initialState: initialDat
 
   return <StoreContext.Provider value={{MOBXuser, MOBXui}}>
 
-    {/* {initialData?.checkAuth && error &&
-      <div
-        className="fixed z-[1400] w-full bg-white flex flex-col justify-center"
-      >
-        <div
-          className='flex w-full justify-center mx-2 mt-1'>
-          <p className="text-black font-bold mr-1">
-            Ошибка доступа к платформе:
-          </p>
-          <p className="text-color_C italic break-words">
-            {error.message}
-          </p>
-        </div>
-        <div className='flex justify-center my-2'>
-          <FButtonRed
-            className="flex mr-2"
-            onClick={async(e) => {
-              try {
-                MOBXui.setLoading();
-                const responce = await fetchAuth(`/authorization/refresh?store=${mobxUser?.isAuth == true ? 'update' : 'initialize'}`);
-                localStorage.setItem('token', responce.accessToken);
-                _mobxUser.setAuth(true);
-                _mobxUser.setUser(responce.user);
-                error = null;
-              } catch (error) {
-                
-              }finally{
-                MOBXui.setLoading();
-              }
-            }}
-          >
-            <RefreshIcon
-              className="h-6 w-6"
-            />
-            Обновить
-          </FButtonRed>
-          
-          <FNextLink
-              href="/authorization"
-              className='text-color_C hover:bg-color_C hover:text-color_G px-3 py-2 rounded-md text-sm font-bold font-font_B'
-          >
-            <UserCircleIcon className="h-8 w-8" />
-          </FNextLink>
-
-        </div>
-      </div>} */}
-
     {children}
 
   </StoreContext.Provider>
@@ -99,23 +52,6 @@ function refreshStore(initialData = null, isAuth) {
       // console.log(error);
 
       localStorage.removeItem('token');
-
-      // if (isAuth === 'initialize' && mobxUser) {  
-      //   console.log('delete mobxUser data');
-      //   mobxUser = null;
-      // }
-
-      // _mobxUser.setAuth(false);
-      // _mobxUser.setUser({});
-
-      // if (initialData?.checkAuth ) {
-        
-      //   router.push({
-      //     pathname: '/authorization/login',
-      //     query: { from: router.asPath },
-      //   }, undefined, { shallow: true });
-
-      // }
 
     } else if (data && _mobxUser.isLogout) {
       

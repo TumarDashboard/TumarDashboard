@@ -207,11 +207,50 @@ class GuardService {
 
         await mongoGuardArchive.save();
 
-        await mongoTimesheetsGuardsModel.updateMany({guard: mongoGuard.id}, {guardSheme:'GuardsArchive'}).lean();
+        await mongoTimesheetsGuardsModel.updateMany({guard: mongoGuard.id}, {
+            guard: mongoGuardArchive._id,
+            guardSheme:'GuardsArchive'
+        }).lean();
 
         await mongoGuard.delete();
         
         const dtoGuard = new DTOGuard(mongoGuardArchive);
+
+        return { guard: dtoGuard }
+    }
+
+    async recoverGuard(inputData) {
+
+        const { idGuard } = inputData;
+
+        if( !idGuard ){
+            throw ApiError.BadRequest("Не указан ID охранника для проведения операции удаления");
+        }
+
+        //Mongo 
+        await mongoConnect();
+
+        //Delete model
+        const mongoGuardArchive = await mongoGuardsArchiveModel.findById(idGuard);
+
+        if(!mongoGuardArchive){
+            throw ApiError.BadRequest("Не найдены данные охранника для проведения операции удаления");
+        }
+
+        if(mongoGuardArchive['reason']) delete mongoGuardArchive['reason'];
+        if(mongoGuardArchive['userPerfomed']) delete mongoGuardArchive['userPerfomed'];
+        if(mongoGuardArchive['userPerfomedSheme']) delete mongoGuardArchive['userPerfomedSheme'];
+
+        const mongoGuard = await mongoGuardsModel.create(mongoGuardArchive.toJSON());
+
+        await mongoTimesheetsGuardsModel.updateMany({guard: mongoGuardsArchiveModel.id}, {
+            guard: mongoGuard._id,
+            guardSheme:'Guards'
+        }).lean();
+
+        await mongoGuardArchive.delete();
+        
+        const dtoGuard = new DTOGuard(mongoGuard);
 
         return { guard: dtoGuard }
     }

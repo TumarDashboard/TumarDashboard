@@ -1,25 +1,25 @@
-import { CalendarIcon, PlusIcon, PencilSquareIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, UserGroupIcon, RectangleGroupIcon } from '@heroicons/react/24/solid';
+import { PencilSquareIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, RectangleGroupIcon } from '@heroicons/react/24/solid';
 import { motion } from "framer-motion";
-import Image from "next/legacy/image";
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from "next/router";
+import Image from "next/legacy/image";
 
 import { useStore } from "../../levelA/StoreProvider";
 import { ApiError } from "../../../middleware/exceptions";
-import { FButtonRed } from "../../levelE_low/FButtonRed";
-import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 
 import { createGuardPost, editGuardPost, deleteGuardPost, recoverGuardPost } from '../../../src/dtos/dtoGuardPost';
+import { changeTimesheetToday, getTimesheetToday } from '../../../src/dtos/dtoTimesheet';
 import { FGuardPostDeleteForm } from '../../levelD_modal/guardPost/FGuardPostDeleteForm';
 import { FGuardPostEditForm } from '../../levelD_modal/guardPost/FGuardPostEditForm';
-import { FTimesheetPrintForm } from '../../levelD_modal/timesheet/FTimesheetPrintForm';
-import { FFilterText } from '../../levelE_low/FFilterText';
-import { FButtonWhiteSmall } from '../../levelE_low/FButtonWhiteSmall';
-import { FTimesheetTableSelectGuardForm } from '../../levelD_modal/timesheetTable/FTimesheetTableSelectGuardForm';
+import { FGuardPostRecoverForm } from '../../levelD_modal/guardPost/FGuardPostRecoverForm';
 import { FGuardPostSelectGuardForm } from '../../levelD_modal/guardPost/FGuardPostSelectGuardForm';
 import { FGuardPostShowGuardForm } from '../../levelD_modal/guardPost/FGuardPostShowGuardForm';
-import { changeTimesheetToday, getTimesheetToday } from '../../../src/dtos/dtoTimesheet';
-import { FGuardPostRecoverForm } from '../../levelD_modal/guardPost/FGuardPostRecoverForm';
+import { FTimesheetPrintForm } from '../../levelD_modal/timesheet/FTimesheetPrintForm';
+import { FTimesheetTableSelectGuardForm } from '../../levelD_modal/timesheetTable/FTimesheetTableSelectGuardForm';
+import { FButtonRed } from "../../levelE_low/FButtonRed";
+import { FButtonWhite } from "../../levelE_low/FButtonWhite";
+import { FFilterText } from '../../levelE_low/FFilterText';
+import { FButtonWhiteSmall } from '../../levelE_low/FButtonWhiteSmall';
 
 const inputs = {
   initial: {
@@ -98,12 +98,9 @@ export default function FFormGuardPostsArchive({ accessRules, userData, tableGua
   const ARchangeTimesheetToday = false; //accessRules.includes('changeTimesheetToday');
   const ARgetGuardPostID = false; //accessRules.includes('guardPosts(?=.)/');
   const ARrecoverGuardPost = accessRules.includes('recoverGuardPost');
-
-
   // console.log('accessRules %o',accessRules);
-  /*----Данные таблицы------------------------------------------------------------------------------------------------*/
-  // const [tableGuardPostsArchive, setTableGuardPostsArchive] = useState([]);
 
+  /*----Данные таблицы------------------------------------------------------------------------------------------------*/
   const [renderTableGuardPosts, setRenderTableGuardPosts] = useState(tableGuardPostsArchive ? [...tableGuardPostsArchive] : []);
 
   const [guards, setGuards] = useState(guardsData.map(guard => {
@@ -355,13 +352,13 @@ export default function FFormGuardPostsArchive({ accessRules, userData, tableGua
     }
   }
 
-  /*----Модальное окно Формы восстановления-------------------------------------------------------------------------------*/
+  /*----Модальное окно Формы восстановления---------------------------------------------------------------------------*/
   const [guardPostRecoverForm, setGuardPostRecoverForm] = useState({
     isOpen: false
   });
 
-  /*----Функция удаления поста Формы восстановления-------------------------------------------------------------------------*/
-  const guardPostRecoverFormSubmit = async (event, reason) => {
+  /*----Функция восстановления поста Формы восстановления-------------------------------------------------------------*/
+  const guardPostRecoverFormSubmit = async (event) => {
 
     event.preventDefault();
 
@@ -557,7 +554,7 @@ export default function FFormGuardPostsArchive({ accessRules, userData, tableGua
                   <span className="break-all md:break-normal text-xl font-bold">{guardPost.callsign}</span>
                 </td>
 
-                {/* {Фото, Номер, Кнопки управления мобильного устройства} */}
+                {/* {Фото, Номер} */}
                 <td className="px-2 md:border text-left block md:table-cell">
                   <div className="flex flex-row items-center justify-start">
 
@@ -701,7 +698,7 @@ export default function FFormGuardPostsArchive({ accessRules, userData, tableGua
         submit={guardPostDeleteFormSubmit}
       />
 
-      {/* {Форма удаления физ. поста} */}
+      {/* {Форма восстановления физ. поста} */}
       <FGuardPostRecoverForm
         form={guardPostRecoverForm}
         setForm={setGuardPostRecoverForm}

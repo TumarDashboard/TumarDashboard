@@ -104,9 +104,8 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
   const ARchangeTimesheetTodayAll = !accessRules.includes('changeTimesheetToday/userCompare/guardPostManagers');
   const ARgetGuardPostID = accessRules.includes('guardPosts(?=.)/');
   // console.log('accessRules %o',accessRules);
-  /*----Данные таблицы------------------------------------------------------------------------------------------------*/
-  // const [tableGuardPosts, setTableGuardPosts] = useState([]);
 
+  /*----Данные таблицы------------------------------------------------------------------------------------------------*/
   const [renderTableGuardPosts, setRenderTableGuardPosts] = useState(tableGuardPosts ? [...tableGuardPosts] : []);
 
   const [guards, setGuards] = useState(guardsData.map(guard => {
@@ -364,33 +363,6 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
     }
   }
 
-  /*----Переиспользование функции обработок ошибок--------------------------------------------------------------------*/
-  const errorCallback = (error, callback) => {
-    if (error.statusCode == 404)
-      throw error
-    else if (error instanceof ApiError) {
-
-      if (error.statusCode == 520) {
-
-        // callback({ isOpen: false });
-
-        const message = JSON.parse(error.message);
-
-        MOBXui.openGoogleAuthError(message.email, message.authorizeUrl);
-
-      } else {
-        callback(form => {
-          let formNew = { ...form };
-          formNew.error = error.message;
-          return formNew;
-        });
-      }
-
-    } else
-      throw error
-
-  }
-
   /*----Модальное окно Формы выгрузки графика рабочих часов-----------------------------------------------------------*/
   const [timesheetPrintForm, setTimesheetPrintForm] = useState({
     isOpen: false
@@ -408,9 +380,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
     event.preventDefault();
 
     setError('');
-
-    // MOBXui.setLoading();
-    // console.log(inputGuard);
+    
     try {
       // Обновляем таблицу в памяти
       setTableGuardPosts(array => {
@@ -580,8 +550,34 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
     isOpen: false
   });
 
-  /*------------------------------------------------------------------------------------------------------------------*/
+  /*----Переиспользование функции обработок ошибок--------------------------------------------------------------------*/
+  const errorCallback = (error, callback) => {
+    if (error.statusCode == 404)
+      throw error
+    else if (error instanceof ApiError) {
 
+      if (error.statusCode == 520) {
+
+        // callback({ isOpen: false });
+
+        const message = JSON.parse(error.message);
+
+        MOBXui.openGoogleAuthError(message.email, message.authorizeUrl);
+
+      } else {
+        callback(form => {
+          let formNew = { ...form };
+          formNew.error = error.message;
+          return formNew;
+        });
+      }
+
+    } else
+      throw error
+
+  }
+
+  /*------------------------------------------------------------------------------------------------------------------*/
   useEffect(() => {
 
     // setTableGuardPosts(guardPosts ? [...guardPosts] : []);
@@ -762,50 +758,6 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
 
                     {/* {Номер} */}
                     <p className="text-black ml-1 text-xl font-bold">{guardPost.number}</p>
-
-                    {/* {Кнопки управления мобильного устройства} */}
-                    {/* {(AReditGuardPost || ARdeleteGuardPost) &&
-                      <div className='flex md:hidden'>
-
-                        {((AReditGuardPost && AReditGuardPostAll)
-                          || (AReditGuardPost && guardPost.manager._id === MOBXuser.user.id)
-                          || (AReditGuardPost && guardPost.manager._id === userData.id)) &&
-                          <FButtonRed
-                            className="mr-2 flex"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              setGuardPostEditForm({
-                                isOpen: true,
-                                index: index,
-                                operation: 'Изменить',
-                                key: Math.random().toString(36),
-                                guardPost: guardPost
-                              })
-                            }}
-                          >
-                            <PencilSquareIcon
-                              className="h-4 w-4"
-                            />
-                          </FButtonRed>}
-
-                        {ARdeleteGuardPost &&
-                          <FButtonWhite
-                            className="flex"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              setGuardPostDeleteForm({
-                                isOpen: true,
-                                key: Math.random().toString(36),
-                                guardPostName: guardPost.name,
-                                guardPostId: guardPost._id,
-                              })
-                            }}
-                          >
-                            <TrashIcon
-                              className="h-4 w-4"
-                            />
-                          </FButtonWhite>}
-                      </div>} */}
 
                   </div>
                 </td>

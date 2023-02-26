@@ -10,6 +10,7 @@ import mongoGuardsArchiveModel from "../mongo/models/mongoGuardsArchiveModel";
 import mongoose from "mongoose";
 import { getCurrentMonth } from "../utils/dateUtils";
 import mongoTimesheetsGuardPostModel from "../mongo/models/mongoTimesheetsGuardPostModel";
+import mongoTimesheetsGuardsModel from "../mongo/models/mongoTimesheetsGuardsModel";
 
 function managerEquals( a, b ){
     if( !a && !b ){
@@ -213,6 +214,61 @@ class GuardPostService {
             return { guardPost: dtoGuardPost }
         } catch (error) {
             console.log(error);
+            throw error;
+        }
+    }
+
+    async getGuardPost(inputData) {
+
+        try {
+
+            // console.log('-------------------------------------');
+            const month = new Date(getCurrentMonth());
+            const day = (new Date()).getDate() - 1;
+
+            // console.log('getTimesheetToday: %o', day);
+
+            //Check initials condition
+            await mongoConnect();
+
+            //Запустить агрегат на посты
+            const responceAggregateUpdateData = await mongoTimesheetsGuardsModel.aggregate([
+                {
+                    $match: {
+                        month: month,
+                        timesheetDays: day
+                    }
+                },
+                {
+                    $project: {
+                        guardPost: 1,
+                        guard: 1,
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$guardPost',
+                        today: {
+                            $push: {
+                                guard: "$guard",
+                            }
+                        }
+                    }
+                },
+            ]).then(responce => responce.map(element => {
+                //Результат - все посты имеющие охранников за сегодня
+                return {
+                    _id: element._id.toString(),
+                    today: element.today.map(value => value.guard.toString()),
+                }
+            }));
+
+            // console.log('responceAggregateUpdateData: %o', responceAggregateUpdateData);
+            return responceAggregateUpdateData;
+
+        } catch (error) {
+            console.log(error);
+
             throw error;
         }
     }

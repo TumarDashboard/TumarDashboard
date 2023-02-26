@@ -6,7 +6,7 @@ import { FTextArea } from "../../levelE_low/FTextArea";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 
-export function FGuardPostRecoverForm({ form, setForm, submit }) {
+export function FGuardRecoverForm({ form, setForm, submit }) {
 
   /*-------------------------------------------------------------------------------------------------------
       Статусы инпутов Формы удаления
@@ -29,25 +29,25 @@ export function FGuardPostRecoverForm({ form, setForm, submit }) {
 
   return (
     <FModalForm
-      title={"Восстановление физ. поста"}
+      title={"Восстановление данных охранника"}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
       className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
     >
 
-      {form?.guardPostUserPerfomed && <span className="mb-2">
-        Пользователь, удаливший физ. пост: <b>{[
-          form.guardPostUserPerfomed.surname ? form.guardPostUserPerfomed.surname : null,
-          form.guardPostUserPerfomed.firstName ? form.guardPostUserPerfomed.firstName : null
+      {form?.guardUserPerfomed && <span className="mb-2">
+        Пользователь, удаливший данные охранника: <b>{[
+          form.guardUserPerfomed.surname ? form.guardUserPerfomed.surname : null,
+          form.guardUserPerfomed.firstName ? form.guardUserPerfomed.firstName : null
           ].filter(Boolean).join(' ')}</b>
       </span>}
 
-      {form?.guardPostReason && <span className="mb-2">
-        Причина удаления: <b>{form.guardPostReason}</b>
+      {form?.guardReason && <span className="mb-2">
+        Причина удаления: <b>{form.guardReason}</b>
       </span>}
 
       <span>
-        Для подтверждения действия введите <b>{form.guardPostCallsign}</b> в поле ниже:
+        Для подтверждения действия введите <b>{form.guardInitials}</b> в поле ниже:
       </span>
 
       <input
@@ -73,7 +73,7 @@ export function FGuardPostRecoverForm({ form, setForm, submit }) {
 
         <FButtonRed
           className=""
-          disabled={inputValidate.localeCompare(form.guardPostCallsign, undefined, { sensitivity: 'base', ignorePunctuation: true })}
+          disabled={inputValidate.localeCompare(form.guardInitials, undefined, { sensitivity: 'base', ignorePunctuation: true })}
           onClick={(e)=>submit( e )}
         >
           Восстановить
