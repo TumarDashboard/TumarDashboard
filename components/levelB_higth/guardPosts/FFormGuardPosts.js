@@ -444,6 +444,11 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
         return result;
       });
 
+      // Обновляем отображаемую таблицу
+      setRenderTableGuardPosts(array => {
+        return [...array];
+      });
+
       MOBXui.setUpdate();
 
     } catch (error) {
@@ -525,6 +530,11 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
             });
 
             return result;
+          });
+
+          // Обновляем отображаемую таблицу
+          setRenderTableGuardPosts(array => {
+            return [...array];
           });
 
         }

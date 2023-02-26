@@ -436,5 +436,6 @@ yarn-error.log*
 .env.production.local
 
 # archive
-/pagezArchive
-/components/levelY_archive
+/pagezArchive/
+/components/levelY_archive/
+/temp/
