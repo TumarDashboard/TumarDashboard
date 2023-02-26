@@ -584,9 +584,9 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
     // setRenderTableGuardPosts(guardPosts ? [...guardPosts] : []);
     // setRenderTableGuardPosts(tableGuardPosts ? [...tableGuardPosts] : []);
 
-    // rowUpdate();
+    rowUpdate();
 
-    // resetRowUpdate();
+    resetRowUpdate();
 
     return () => {
       filterringTimeout.current && clearTimeout(filterringTimeout.current);

@@ -528,44 +528,7 @@ export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, se
                     />}
 
                     {/* {Инициалы} */}
-                    <p className="font-semibold text-black ml-1 text-xl font-bold">{[guard.surname, guard.firstName].join(' ')}</p>
-
-                    {/* {Кнопки управления мобильного телефона} */}
-                    <div className='flex md:hidden'>
-
-                      {AReditGuard &&
-                        <FButtonRed
-                          className="mr-2 flex"
-                          onClick={() => {
-                            setGuardEditForm({
-                              isOpen: true,
-                              index: index,
-                              operation: 'Изменить',
-                              key: Math.random().toString(36),
-                              guard: guard
-                            })
-                          }}
-                        >
-                          <PencilSquareIcon
-                            className="h-4 w-4"
-                          />
-                        </FButtonRed>}
-
-                      {ARdeleteGuard &&
-                        <FButtonWhite
-                          className="flex"
-                          onClick={() => setGuardDeleteForm({
-                            isOpen: true,
-                            key: Math.random().toString(36),
-                            guardInitials: [guard.surname, guard.firstName].join(' '),
-                            guardId: guard._id,
-                          })}
-                        >
-                          <TrashIcon
-                            className="h-4 w-4"
-                          />
-                        </FButtonWhite>}
-                    </div>
+                    <p className="text-black ml-1 text-xl font-bold">{[guard.surname, guard.firstName].join(' ')}</p>
 
                   </div>
                 </td>
@@ -580,8 +543,8 @@ export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, se
 
                 {/* {Кнопки управления компьютера} */}
                 {(AReditGuard || ARdeleteGuard || ARrecoverGuard) &&
-                  <td className="p-2 md:border text-left hidden md:table-cell w-1">
-                    <div className='flex'>
+                  <td className="p-2 md:border text-left block md:table-cell md:w-1">
+                    <div className='flex justify-end space-x-2'>
 
                       {/* {Кнопка редактирования охранника} */}
                       {AReditGuard &&
