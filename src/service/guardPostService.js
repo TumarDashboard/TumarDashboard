@@ -11,6 +11,7 @@ import mongoose from "mongoose";
 import { getCurrentMonth } from "../utils/dateUtils";
 import mongoTimesheetsGuardPostModel from "../mongo/models/mongoTimesheetsGuardPostModel";
 import mongoTimesheetsGuardsModel from "../mongo/models/mongoTimesheetsGuardsModel";
+import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
 
 function managerEquals( a, b ){
     if( !a && !b ){
@@ -326,13 +327,16 @@ class GuardPostService {
 
         await mongoGuardPost.delete();
 
-        if( mongoGuardPostArchive.manager ){
-            mongoGuardPostArchive.manager = await mongoUserModel.findById(idUser, 'surname firstName').lean();
-        }
-
         mongoGuardPostArchive.userPerfomed = userPerfomed;
 
         const dtoGuardPost = new DTOGuardPostArchive(mongoGuardPostArchive);
+
+        if( mongoGuardPostArchive.manager ){
+            dtoGuardPost.manager = await mongoUserModel.findById(mongoGuardPostArchive.manager, 'surname firstName').lean();            
+            if(!dtoGuardPost.manager){
+                dtoGuardPost.manager = await mongoUserArchiveModel.findById(mongoGuardPostArchive.manager, 'surname firstName').lean();
+            }
+        }
 
         return { guardPost: dtoGuardPost }
     }
@@ -363,11 +367,14 @@ class GuardPostService {
 
         await mongoGuardPostArchive.delete();
 
-        if( mongoGuardPost.manager ){
-            mongoGuardPost.manager = await mongoUserModel.findById(idUser, 'surname firstName').lean();
-        }
-
         const dtoGuardPost = new DTOGuardPost(mongoGuardPost);
+
+        if( mongoGuardPost.manager ){
+            dtoGuardPost.manager = await mongoUserModel.findById(mongoGuardPost.manager, 'surname firstName').lean();            
+            if(!dtoGuardPost.manager){
+                dtoGuardPost.manager = await mongoUserArchiveModel.findById(mongoGuardPost.manager, 'surname firstName').lean();
+            }
+        }
 
         return { guardPost: dtoGuardPost }
     }
