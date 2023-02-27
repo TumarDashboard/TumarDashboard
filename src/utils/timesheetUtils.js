@@ -2,6 +2,7 @@
 import ExcelJS from "exceljs";
 import { getDaysFromMonth } from "./dateUtils";
 import { FPositionBUH, FPositionHRM, FPositionZDIR } from "../../components/levelZ_variable/FPositionItemList";
+import { isFloat, ceil10 } from "./mathUtils";
 
 const tableHeader = {
   Index: {
@@ -39,10 +40,6 @@ const tableHeader = {
     width: 20.25,
     text: 'Ф.И.О. охранника',
   }
-}
-
-function isFloat(n) {
-  return Number(n) === n && n % 1 !== 0;
 }
 
 const smallFontSize = 9;
@@ -800,10 +797,13 @@ export function timesheetExcellForMonthPart(NSOinitials, guardPosts, usersData, 
         tableBodyCell.fill = bodyRowFillColor;
 
         // Сумма Тариф*часы
-        let rateSumm = hoursCount * rate;
+        let rateSumm = ceil10(hoursCount * rate);
         tableBodyCell = tableBodyRow.getCell(5 + daysCount);
-        tableBodyCell.value = { formula: `PRODUCT(${tableBodyRow.getCell(3 + daysCount).address}:${tableBodyRow.getCell(4 + daysCount).address})`, result: rateSumm };
-        tableBodyCell.numFmt = isFloat(rateSumm) ? '#.####' : '#';
+        tableBodyCell.value = { 
+          formula: `CEILING(PRODUCT(${tableBodyRow.getCell(3 + daysCount).address}:${tableBodyRow.getCell(4 + daysCount).address}), 1)`, 
+          result: rateSumm 
+        };
+        tableBodyCell.numFmt = '#';
         tableBodyCell.font = Style.FontSmallBold;
         tableBodyCell.alignment = Style.AlignmentMiddleCenter;
         tableBodyCell.border = Style.BorderThin;
@@ -873,7 +873,7 @@ export function timesheetExcellForMonthPart(NSOinitials, guardPosts, usersData, 
       // Итого сумма по тарифу
       tableFooterCell = tableFooterRow.getCell(5 + daysCount);
       tableFooterCell.value = { formula: `SUM(${totalRateSummAddressStart}:${totalRateSummAddressFinish})`, result: totalRateSummCount };
-      tableFooterCell.numFmt = isFloat(totalRateSummCount) ? '#.####' : '#';
+      tableFooterCell.numFmt = '#';
       tableFooterCell.font = Style.FontSmallBold;
       tableFooterCell.alignment = Style.AlignmentMiddleCenter;
       tableFooterCell.border = Style.BorderThin;
@@ -1168,10 +1168,13 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
           tableBodyCell.fill = bodyRowFillColor;
 
           // Сумма Тариф*часы
-          let rateSumm = hoursCount * rate;
+          let rateSumm = ceil10(hoursCount * rate);
           tableBodyCell = tableBodyRow.getCell(5 + daysCount);
-          tableBodyCell.value = { formula: `PRODUCT(${tableBodyRow.getCell(3 + daysCount).address}:${tableBodyRow.getCell(4 + daysCount).address})`, result: rateSumm };
-          tableBodyCell.numFmt = isFloat(rateSumm) ? '#.####' : '#';
+          tableBodyCell.value = { 
+            formula: `CEILING(PRODUCT(${tableBodyRow.getCell(3 + daysCount).address}:${tableBodyRow.getCell(4 + daysCount).address}), 1)`, 
+            result: rateSumm 
+          };
+          tableBodyCell.numFmt = '#';
           tableBodyCell.font = Style.FontSmallBold;
           tableBodyCell.alignment = Style.AlignmentMiddleCenter;
           tableBodyCell.border = Style.BorderThin;
@@ -1195,13 +1198,13 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
             if (guardDataCandidate) {
 
               guardDataCandidate.hoursSumm += hoursCount;
-              guardDataCandidate.rateSumm += hoursCount * rate;
+              guardDataCandidate.rateSumm += rateSumm;
 
               guardDataCandidate.lineTimesheet.push({
                 lineGuardPost: [guardPost.number ? guardPost.number : null, guardPost.callsign].filter(Boolean).join(', '),
                 lineHours: hoursCount,
                 lineRate: rate,
-                lineSumm: hoursCount * rate
+                lineSumm: rateSumm
               })
 
             } else {
@@ -1210,12 +1213,12 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
                 _id: guard._id.toString(),
                 value: [guard.surname, guard.firstName].join(' '),
                 hoursSumm: hoursCount,
-                rateSumm: hoursCount * rate,
+                rateSumm: rateSumm,
                 lineTimesheet: [{
                   lineGuardPost: [guardPost.number ? guardPost.number : null, guardPost.callsign].filter(Boolean).join(', '),
                   lineHours: hoursCount,
                   lineRate: rate,
-                  lineSumm: hoursCount * rate
+                  lineSumm: rateSumm
                 }]
               });
 
@@ -1278,7 +1281,7 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
         // Итого сумма по тарифу
         tableFooterCell = tableFooterRow.getCell(5 + daysCount);
         tableFooterCell.value = { formula: `SUM(${totalRateSummAddressStart}:${totalRateSummAddressFinish})`, result: totalRateSummCount };
-        tableFooterCell.numFmt = isFloat(totalRateSummCount) ? '#.####' : '#';
+        tableFooterCell.numFmt = '#';
         tableFooterCell.font = Style.FontSmallBold;
         tableFooterCell.alignment = Style.AlignmentMiddleCenter;
         tableFooterCell.border = Style.BorderThin;
@@ -1408,7 +1411,7 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
 
       tableBodyCell = tableBodyRow.getCell(4);
       tableBodyCell.value = guardData.rateSumm;
-      tableBodyCell.numFmt = isFloat(guardData.rateSumm) ? '#.####' : '#';
+      tableBodyCell.numFmt = '#';
       tableBodyCell.font = Style.FontSmall;
       tableBodyCell.alignment = Style.AlignmentMiddleCenter;
       tableBodyCell.border = Style.BorderThin;
@@ -1471,7 +1474,7 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
     // Итого сумма по тарифу
     tableFooterCell = tableFooterRow.getCell(4);
     tableFooterCell.value = { formula: `SUM(${totalRateSummAddressStart}:${totalRateSummAddressFinish})`, result: totalRateSummCount };
-    tableFooterCell.numFmt = isFloat(totalRateSummCount) ? '#.####' : '#';
+    tableFooterCell.numFmt = '#';
     tableFooterCell.font = Style.FontSmallBold;
     tableFooterCell.alignment = Style.AlignmentMiddleCenter;
     tableFooterCell.border = Style.BorderThin;

@@ -614,15 +614,6 @@ export default function FFormUsers({ accessRules, users }) {
                   <span className="inline-block w-1/3 md:hidden font-bold">Почта</span>{user.email}
                 </td>
 
-                {/* {Статус} */}
-                {/* <td className="p-2 md:border text-left block md:table-cell">
-                  <span className="inline-block w-1/3 md:hidden font-bold">Статус</span>
-                  <span className={`px-2 py-1 font-semibold leading-tight rounded-sm 
-                    ${user.isActivated ? 'text-green-700 bg-green-100' : 'text-gray-700 bg-gray-100'}`}>
-                    {user.isActivated ? 'Активирован' : 'Не активирован'}
-                  </span>
-                </td> */}
-
                 {/* {Кнопки управления компьютера} */}
                 {(AReditUserHard || ARdeleteUserHard || ARactivateUserHard) &&
                   <td className="p-2 md:border text-left block md:table-cell md:w-1">

@@ -30,6 +30,7 @@ const inputs = {
 
 const constTableHead = [
   { value: 'surname', label: 'Инициалы' },
+  { value: 'iin', label: 'ИИН' },
   { value: 'telephone', label: 'Телефон' },
   // { value: 'manager', label: 'НСО' },
 ];
@@ -55,6 +56,9 @@ const sortingTableCallback = (a, b, rule, invert) => {
 
     case 'telephone':
       return (a.telephone[0].localeCompare(b.telephone[0])) * invert;
+
+      case 'iin':
+        return (a.iin - b.iin) * invert;
 
     // case 'manager':
     //   return (a.manager.surname.localeCompare(b.manager.surname) || a.manager.firstName.localeCompare(b.manager.firstName)) * invert;
@@ -471,6 +475,14 @@ export default function FFormGuards({ accessRules, tableGuards, setTableGuards, 
                     <p className="text-black ml-1 text-xl font-bold">{[guard.surname, guard.firstName].join(' ')}</p>
 
                   </div>
+                </td>
+
+                {/* {ИИН} */}
+                <td className="px-1 md:p-2 md:border text-left md:table-cell flex flex-row items-center">
+                  {guard.iin &&
+                    <span className="break-all md:break-normal">
+                      <b className='md:hidden'>ИИН:</b> {guard.iin}
+                    </span>}
                 </td>
 
                 {/* {Телефон} */}

@@ -21,6 +21,7 @@ export default class MOBXui {
             googleAuthAuthorizeUrl: false,
             setLoading: action,
             setUpdate: action,
+            setUpdateState: action,
             setUpdateError: action,
             openGoogleAuthError: action,
             closeGoogleAuthError: action
@@ -57,6 +58,10 @@ export default class MOBXui {
 
         }
 
+    }
+
+    setUpdateState(state) {
+        this.isUpdate = state;
     }
 
     setUpdateError(error) {

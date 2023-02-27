@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import Image from "next/legacy/image";
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from "next/router";
+import useSWR from 'swr'
+import { fetchAuthFileMethod, fetchAuthMethod, fetchAuth } from "../../../middleware/requests";
 
 import { useStore } from "../../levelA/StoreProvider";
 import { ApiError } from "../../../middleware/exceptions";
@@ -19,6 +21,7 @@ import { FTimesheetTableSelectGuardForm } from '../../levelD_modal/timesheetTabl
 import { FGuardPostSelectGuardForm } from '../../levelD_modal/guardPost/FGuardPostSelectGuardForm';
 import { FGuardPostShowGuardForm } from '../../levelD_modal/guardPost/FGuardPostShowGuardForm';
 import { changeTimesheetToday, getTimesheetToday } from '../../../src/dtos/dtoTimesheet';
+import { FTooltip } from '../../levelE_low/FTooltip';
 
 const inputs = {
   initial: {
@@ -34,15 +37,6 @@ const inputs = {
     },
   },
 };
-
-const constTableHead = [
-  { value: 'number', label: '№' },
-  { value: 'callsign', label: 'Позывной' },
-  { value: 'name', label: 'Наименование' },
-  { value: 'address', label: 'Адрес' },
-  { value: 'manager', label: 'НСО' },
-  { value: 'guards', label: 'Охранники' },
-];
 
 const constTableHeadControl = { value: 'control' };
 
@@ -74,6 +68,9 @@ const sortingTableCallback = (a, b, rule, invert) => {
     case 'address':
       return (a.address?.localeCompare(b.address)) * invert;
 
+    case 'rate':
+      return (a.rate - b.rate) * invert;
+
     case 'manager':
       return (a.manager?.surname.localeCompare(b.manager?.surname) || a.manager?.firstName.localeCompare(b.manager?.firstName)) * invert;
 
@@ -88,7 +85,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
 
   const { MOBXuser, MOBXui } = useStore();
 
-  const [error, setError] = useState('');
+  // const [error, setError] = useState('');
 
   /*----Определение правил доступа------------------------------------------------------------------------------------*/
   const ARcreateGuardPost = accessRules.includes('createGuardPost');
@@ -105,12 +102,23 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
   const ARgetGuardPostID = accessRules.includes('guardPosts(?=.)/');
   // console.log('accessRules %o',accessRules);
 
+  /*----Заголовки таблицы------------------------------------------------------------------------------------------------*/
+  const constTableHead = [
+    { value: 'number', label: '№' },
+    { value: 'callsign', label: 'Позывной' },
+    { value: 'name', label: 'Наименование' },
+    { value: 'address', label: 'Адрес' },
+    AReditGuardPostRate ? { value: 'rate', label: 'Тариф' } : null,
+    { value: 'manager', label: 'НСО' },
+    { value: 'guards', label: 'Охранники' },
+  ].filter(Boolean);
+
   /*----Данные таблицы------------------------------------------------------------------------------------------------*/
   const [renderTableGuardPosts, setRenderTableGuardPosts] = useState(tableGuardPosts ? [...tableGuardPosts] : []);
 
   const [guards, setGuards] = useState(guardsData.map(guard => {
-    guard.label = [guard.surname, guard.firstName, guard.telephone].join(' ');
-    guard.lower = guard.label.toLowerCase().replace(/\s/g, '');;
+    guard.label = [guard.surname, guard.firstName, ...guard.telephone].join(' ');
+    guard.lower = guard.label.toLowerCase().replace(/(\s)|(\()|(\))|(\+)/g, '');
     return guard;
   }));
 
@@ -373,63 +381,23 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
     isOpen: false
   });
 
-  /*----Функция изменения Формы редактирования Физ. поста-------------------------------------------------------------*/
-  const guardRowEdit = (event,
-    inputGuard) => {
-
-    event.preventDefault();
-
-    setError('');
-    
-    try {
-      // Обновляем таблицу в памяти
-      setTableGuardPosts(array => {
-        const index = array.findIndex(element => {
-          return element._id == guardPostSelectGuardForm.guardPost._id
-        });
-        if (index)
-          array[index].guardsToday = inputGuard;
-        return array;
-      });
-
-      // Обновляем отображаемую таблицу
-      setRenderTableGuardPosts(array => {
-        array[guardPostSelectGuardForm.index].guardsToday = inputGuard;
-        return array;
-      });
-
-      guardRowUpdate(guardPostSelectGuardForm.guardPost, inputGuard);
-
-      // Закрываем модальное окно
-      setGuardPostSelectGuardForm({ isOpen: false });
-
-    } catch (error) {
-
-      errorCallback(error, setGuardPostSelectGuardForm);
-
-    } finally {
-
-      // MOBXui.setLoading();
-
-    }
-  }
-
   /*----Перезапуск обновления данных таблицы--------------------------------------------------------------------------*/
-  const resetRowUpdateInterval = useRef();
 
-  const rowUpdate = async() => {
+  const { data: dataTimesheetToday, error: errorTimesheetToday, isLoading: isLoadingTimesheetToday } = useSWR('/method/timesheet/getTimesheetToday', fetchAuthMethod);
 
-    MOBXui.setUpdate();
+  useEffect(()=>{
 
-    try {
-
-      const responce = await getTimesheetToday();
+    // console.log('useSWR %o %o %o', dataTimesheetToday, errorTimesheetToday, isLoadingTimesheetToday);
+    MOBXui.setUpdateState(isLoadingTimesheetToday)
+    if(errorTimesheetToday){
+      MOBXui.setUpdateError(errorTimesheetToday.message);
+    }else if(dataTimesheetToday){
 
       setTableGuardPosts(array => {
 
         const result = array.map(element => {
 
-          let findA = responce.timesheetToday.find(value => value._id == element._id);
+          let findA = dataTimesheetToday.timesheetToday.find(value => value._id == element._id);
 
           if (findA && findA.today && findA.today.length > 0) {
             let guardsToday = guards.filter(guard => findA.today.includes(guard._id));
@@ -449,23 +417,62 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
         return [...array];
       });
 
-      MOBXui.setUpdate();
+    }
 
-    } catch (error) {
+  }, [dataTimesheetToday, dataTimesheetToday, isLoadingTimesheetToday])
 
-      MOBXui.setUpdateError(error.message);
+  /*----Перезапуск обновления данных таблицы--------------------------------------------------------------------------*/
+  // const resetRowUpdateInterval = useRef();
 
-      errorCallback(error, setGuardPostSelectGuardForm);
+  // const rowUpdate = async () => {
 
-    } 
-  }
+  //   MOBXui.setUpdate();
 
-  const resetRowUpdate = () => {
+  //   try {
 
-    resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
+  //     const responce = await getTimesheetToday();
 
-    resetRowUpdateInterval.current = setInterval(rowUpdate, 30000);
-  }
+  //     setTableGuardPosts(array => {
+
+  //       const result = array.map(element => {
+
+  //         let findA = responce.timesheetToday.find(value => value._id == element._id);
+
+  //         if (findA && findA.today && findA.today.length > 0) {
+  //           let guardsToday = guards.filter(guard => findA.today.includes(guard._id));
+  //           element.guardsToday = guardsToday;
+  //         } else {
+  //           element.guardsToday = [];
+  //         }
+
+  //         return element;
+  //       });
+
+  //       return result;
+  //     });
+
+  //     // Обновляем отображаемую таблицу
+  //     setRenderTableGuardPosts(array => {
+  //       return [...array];
+  //     });
+
+  //     MOBXui.setUpdate();
+
+  //   } catch (error) {
+
+  //     MOBXui.setUpdateError(error.message);
+
+  //     errorCallback(error, setGuardPostSelectGuardForm);
+
+  //   }
+  // }
+
+  // const resetRowUpdate = () => {
+
+  //   resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
+
+  //   resetRowUpdateInterval.current = setInterval(rowUpdate, 30000);
+  // }
 
   /*----Функция загрузки данных об изменениях смен--------------------------------------------------------------------*/
   const timesheetTodayUpdateMemory = useRef([]);
@@ -491,11 +498,11 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
     }
 
     guardRowUpdateTimeout.current && clearTimeout(guardRowUpdateTimeout.current);
-    resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
+    // resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
 
     guardRowUpdateTimeout.current = setTimeout(async () => {
       MOBXui.setUpdate();
-      console.log('guardRowUpdateTimeout');
+      // console.log('guardRowUpdateTimeout');
       try {
         let a = guardPostManagersUpdateMemory.current;
         let b = timesheetTodayUpdateMemory.current;
@@ -548,11 +555,52 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
         errorCallback(error, setGuardPostSelectGuardForm);
 
       } finally {
-        resetRowUpdate();
+        // resetRowUpdate();
       }
 
     }, 30000);
 
+  }
+
+  /*----Функция изменения охранника за текущую смену Физ. поста-------------------------------------------------------*/
+  const guardRowEdit = (event,
+    inputGuard) => {
+
+    event.preventDefault();
+
+    // setError('');
+
+    try {
+      // Обновляем таблицу в памяти
+      setTableGuardPosts(array => {
+        const index = array.findIndex(element => {
+          return element._id == guardPostSelectGuardForm.guardPost._id
+        });
+        if (index)
+          array[index].guardsToday = inputGuard;
+        return array;
+      });
+
+      // Обновляем отображаемую таблицу
+      setRenderTableGuardPosts(array => {
+        array[guardPostSelectGuardForm.index].guardsToday = inputGuard;
+        return array;
+      });
+
+      guardRowUpdate(guardPostSelectGuardForm.guardPost, inputGuard);
+
+      // Закрываем модальное окно
+      setGuardPostSelectGuardForm({ isOpen: false });
+
+    } catch (error) {
+
+      errorCallback(error, setGuardPostSelectGuardForm);
+
+    } finally {
+
+      // MOBXui.setLoading();
+
+    }
   }
 
   /*----Модальное окно Формы просмотра Строки охранника---------------------------------------------------------------*/
@@ -587,21 +635,22 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
 
   }
 
+  /*----Референс подсказки--------------------------------------------------------------------------------------------*/
+  const getGuardPostIDtimeout = useRef();
+  const [tooltipReference, setTooltipReference] = useState(null);
+
   /*------------------------------------------------------------------------------------------------------------------*/
   useEffect(() => {
 
-    // setTableGuardPosts(guardPosts ? [...guardPosts] : []);
-    // setRenderTableGuardPosts(guardPosts ? [...guardPosts] : []);
-    // setRenderTableGuardPosts(tableGuardPosts ? [...tableGuardPosts] : []);
+    // rowUpdate();
 
-    rowUpdate();
-
-    resetRowUpdate();
+    // resetRowUpdate();
 
     return () => {
       filterringTimeout.current && clearTimeout(filterringTimeout.current);
       guardRowUpdateTimeout.current && clearTimeout(guardRowUpdateTimeout.current)
-      resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
+      // resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
+      getGuardPostIDtimeout.current && clearInterval(getGuardPostIDtimeout.current);
     }
   }, []);
 
@@ -736,11 +785,24 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
               <tr
                 className={`rounded-md md:border-none block md:table-row bg-color_G mb-2 ${ARgetGuardPostID && 'cursor-pointer'}`}
                 key={guardPost._id}
-                onClick={(event) => {
+                onPointerDown={(event) => {
                   if (ARgetGuardPostID) {
                     event.stopPropagation();
-                    router.push(`/dashboard/guardPosts/${guardPost._id}`);
+                    getGuardPostIDtimeout.current && clearTimeout(getGuardPostIDtimeout.current);
+                    getGuardPostIDtimeout.current = setTimeout(() => {
+                      router.push(`/dashboard/guardPosts/${guardPost._id}`);
+                      getGuardPostIDtimeout.current && clearTimeout(getGuardPostIDtimeout.current);
+                    }, 1000);
                   }
+                }}
+                onPointerUp={(event) => {
+                  getGuardPostIDtimeout.current && clearTimeout(getGuardPostIDtimeout.current);
+                }}
+                onPointerLeave={(event) => {
+                  getGuardPostIDtimeout.current && clearTimeout(getGuardPostIDtimeout.current);
+                }}
+                onPointerCancel={(event) => {
+                  getGuardPostIDtimeout.current && clearTimeout(getGuardPostIDtimeout.current);
                 }}
               >
 
@@ -787,6 +849,14 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
                   {guardPost.address && <span><b className='md:hidden'>Адрес</b> {guardPost.address}</span>}
                 </td>
 
+                {/* {Тариф} */}
+                {AReditGuardPostRate && <td className="px-1 md:p-2 md:border text-left block md:table-cell items-center">
+                  {guardPost.rate &&
+                    <span className="break-all md:break-normal">
+                      <b className='md:hidden'>Тариф</b> {guardPost.rate}
+                    </span>}
+                </td>}
+
                 {/* {НСО} */}
                 <td className="px-1 md:p-2 md:border text-left block md:table-cell items-center">
                   {guardPost.manager &&
@@ -811,16 +881,20 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
                     }
                   }}
                 >
-
                   {/* {Список охранников} */}
-                  {guardPost.guardsToday && guardPost.guardsToday.length > 0 && guardPost.guardsToday.map(element => {
-                    return <p
-                      key={guardPost._id + element._id}
-                      className="truncate max-w-full md:max-w-[150px]"
-                    >
-                      {element.label}
-                    </p>
-                  })}
+                  {guardPost.guardsToday && guardPost.guardsToday.length > 0 &&
+                    <div
+                      className='block p-2 md:p-0 bg-slate-200 md:bg-inherit rounded-md border-[1px] md:border-0 border-slate-600 text-neutral-800'
+                    >{
+                      guardPost.guardsToday.map(element => {
+                        return <p
+                          key={guardPost._id + element._id}
+                          className="truncate max-w-full md:max-w-[150px]"
+                        >
+                          {element.label}
+                        </p>
+                      }) }
+                  </div>}
                 </td>
 
                 {/* {Кнопки управления компьютера} */}
@@ -833,6 +907,8 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
                         (ARchangeTimesheetTodayAll || guardPost.manager?._id === MOBXuser.user.id || guardPost.manager?._id === userData.id) &&
                         <FButtonWhite
                           className="flex"
+                          onPointerEnter={event => setTooltipReference({ target: event.currentTarget, text: `Редактировать смену - ${[guardPost.callsign, guardPost.number].join(' ')}` })}
+                          onPointerLeave={() => setTooltipReference(null)}
                           onClick={(event) => {
                             event.stopPropagation();
                             setGuardPostSelectGuardForm({
@@ -853,6 +929,8 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
                         (AReditGuardPostAll || guardPost.manager?._id === MOBXuser.user.id || guardPost.manager?._id === userData.id) &&
                         <FButtonRed
                           className="flex"
+                          onPointerEnter={event => setTooltipReference({ target: event.currentTarget, text: `Редактировать физ. пост - ${[guardPost.callsign, guardPost.number].join(' ')}` })}
+                          onPointerLeave={() => setTooltipReference(null)}
                           onClick={(event) => {
                             event.stopPropagation();
                             setGuardPostEditForm({
@@ -867,12 +945,14 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
                           <PencilSquareIcon
                             className="h-4 w-4"
                           />
-                          <span className='hidden xl:block'>Изменить</span>
+                          {/* <span className='hidden xl:block'>Изменить</span> */}
                         </FButtonRed>}
 
                       {ARdeleteGuardPost &&
                         <FButtonWhite
                           className="flex"
+                          onPointerEnter={event => setTooltipReference({ target: event.currentTarget, text: `Удалить физ. пост - ${[guardPost.callsign, guardPost.number].join(' ')}` })}
+                          onPointerLeave={() => setTooltipReference(null)}
                           onClick={(event) => {
                             event.stopPropagation();
                             setGuardPostDeleteForm({
@@ -886,7 +966,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
                           <TrashIcon
                             className="h-4 w-4"
                           />
-                          <span className='hidden xl:block'>Удалить</span>
+                          {/* <span className='hidden xl:block'>Удалить</span> */}
                         </FButtonWhite>}
 
                     </div>
@@ -952,6 +1032,11 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
       <FGuardPostShowGuardForm
         form={guardPostShowGuardForm}
         setForm={setGuardPostShowGuardForm}
+      />
+
+      {/* {Подсказка таблицы} */}
+      <FTooltip
+        reference={tooltipReference}
       />
     </motion.div>
   )

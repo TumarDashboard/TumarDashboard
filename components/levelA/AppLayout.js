@@ -5,7 +5,7 @@ import FSidebar from '../levelB_higth/FSidebar';
 
 export default function AppLayout({ onSidebar, children }) {
     return (
-        <div className={`flex flex-col min-h-screen ${onSidebar ? 'bg-color_C' : null}`}>
+        <div className={`flex flex-col min-h-screen min-w-fit ${onSidebar ? 'bg-color_C' : null}`}>
             <FNavbar />
             {onSidebar ? <FSidebar /> : null}
             <main
