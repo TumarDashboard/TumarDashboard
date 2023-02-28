@@ -4,6 +4,7 @@ import { FInputFile } from "../../levelE_low/FInputFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 import { FSelect } from "../../levelE_low/FSelect";
+import Image from "next/legacy/image";
 
 import { equalArrays } from '../../../src/utils/arrayUtils';
 import { FInputInitials, inputInitialsValidate } from '../../levelE_low/FInputInitials';
@@ -139,8 +140,9 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
       setError(form.error);
     } else if (form.isOpen) {
       console.log(form.guard);
+      console.log(form.guard?.uiAvatarsSrc);
       setOperation(form.operation);
-      GuardSurnameChange(form.guard?.surname, inputInitialsValidate(form.guard?.surname) );
+      GuardSurnameChange(form.guard?.surname, inputInitialsValidate(form.guard?.surname));
       // setInputGuardSurname(form.guard?.surname);
       // setInputValidateGuardSurname(inputInitialsValidate());
       setInputGuardfirstName(form.guard?.firstName);
@@ -164,146 +166,227 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
       title={`${operation} данные охранника`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
-      className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
+      className="flex flex-col md:flex-row items-center md:items-start p-4 w-full overflow-y-auto max-h-[90vh]"
+      widthForm='min-w-min'
     >
 
-      {/* Фамилия */}
-      <div className="form-item w-full flex items-center">
-        <label className="text-lg pr-4">Фамилия</label>
-        <FInputInitials
-          id='family-name'
-          placeholder='Фамилия'
-          value={inputGuardSurname ? inputGuardSurname : ''}
-          onChange={GuardSurnameChange}
-          key={form.key}
-        />
+      {/* {Изображение аватара, кнопки управления} */}
+      <div
+        className="flex-none md:order-last md:ml-4 flex flex-col border-t-8 border-red-700 rounded-md bg-color_C"
+      >
+
+        {/* {Изображение аватара} */}
+        {(inputGuardUIAvatarsSrc || form.guard?.uiAvatarsSrc) &&
+          <div
+            className="w-full flex items-center justify-center p-4 select-none"
+          >
+            <Image
+              className="object-cover w-44 h-44 rounded-full"
+              width={176}
+              height={176}
+              src={inputGuardUIAvatarsSrc ? inputGuardUIAvatarsSrc : form.guard?.uiAvatarsSrc}
+              alt=""
+            />
+          </div>
+        }
+
+        {/* {Кнопки управления для компьютера} */}
+        <div
+          className="flex-1 p-4 hidden md:inline-flex items-center justify-center flex-col select-none"
+        >
+
+          <FButtonRed
+            className="hidden md:inline-flex m-4"
+            disabled={!(form.isOpen && (operation == 'Добавить' ?
+              (isInputValidateGuardSurname
+                && isInputValidateGuardfirstName
+                && isInputValidateGuardPatronymic
+                && isInputValidateGuardTelephone) :
+              (isInputValidateGuardSurname
+                || isInputValidateGuardfirstName
+                || isInputValidateGuardPatronymic
+                || isInputValidateGuardTelephone
+                || isInputValidateGuardIIN
+                || (!equalArrays(inputGuardGuardPosts, form.guard?.guardPosts))
+                || inputGuardUIAvatarsSrc != null
+              )
+            ))}
+            onClick={(e) => operation == 'Добавить' ? submitAdd(e,
+              inputGuardSurname,
+              inputGuardfirstName,
+              inputGuardPatronymic,
+              inputGuardUIAvatarsSrc,
+              inputGuardTelephone,
+              inputGuardIIN,
+              inputGuardGuardPosts
+            ) : submitEdit(e,
+              inputGuardSurname,
+              inputGuardfirstName,
+              inputGuardPatronymic,
+              inputGuardUIAvatarsSrc,
+              inputGuardTelephone,
+              inputGuardIIN,
+              inputGuardGuardPosts
+            )}
+          >
+            {operation}
+          </FButtonRed>
+
+          <FButtonWhite
+            className="hidden md:inline-flex m-4"
+            onClick={() => setForm({ isOpen: false })}
+          >
+            Закрыть
+          </FButtonWhite>
+
+        </div>
+
       </div>
 
-      {/* Имя */}
-      <div className="form-item w-full mt-4 flex items-center">
-        <label className="text-lg pr-4">Имя</label>
-        <FInputInitials
-          id='FullName'
-          placeholder='Имя'
-          value={inputGuardfirstName ? inputGuardfirstName : ''}
-          onChange={GuardfirstNameChange}
-          key={form.key}
-        />
-      </div>
+      {/* {Панель информации} */}
+      <div
+        className="flex-initial flex flex-col space-y-4 w-full md:max-w-xl bg-white rounded-md"
+      >
 
-      {/* Отчество */}
-      <div className="form-item w-full mt-4 flex items-center">
-        <label className="text-lg pr-4">Отчество</label>
-        <FInputInitials
-          id='additional-name'
-          placeholder='Отчество'
-          value={inputGuardPatronymic ? inputGuardPatronymic : ''}
-          onChange={GuardPatronymicChange}
-          key={form.key}
-        />
-      </div>
-
-      {/* Фото */}
-      <div className="form-item flex items-center w-full mt-4">
-        <label className="text-lg pr-4">Фото</label>
-        <FInputFile
-          setUri={setInputGuardUIAvatarsSrc}
-          key={form.key}
-        />
-      </div>
-
-      {/* Телефон Менеджер ИИН*/}
-      <div className='flex flex-col md:flex-row w-full'>
-
-        {/* Телефон */}
-        <div className="form-item w-full mt-4 flex items-center pr-4">
-          <label className="text-lg pr-4">Телефон</label>
-          <FInputTelephone
-            placeholder='Телефон'
-            value={inputGuardTelephone ? inputGuardTelephone : ''}
-            onChange={GuardTelephoneChange}
+        {/* Фамилия */}
+        <div className="form-item w-full flex items-center">
+          <label className="text-lg pr-4">Фамилия</label>
+          <FInputInitials
+            id='family-name'
+            placeholder='Фамилия'
+            value={inputGuardSurname ? inputGuardSurname : ''}
+            onChange={GuardSurnameChange}
             key={form.key}
           />
         </div>
 
-        {/* ИИН */}
-        <div className="form-item w-full mt-4 flex items-center pr-4">
-          <label className="text-lg pr-4">ИИН</label>
-          <FInputIIN
-            placeholder='ИИН'
-            value={inputGuardIIN ? inputGuardIIN : ''}
-            onChange={GuardIINChange}
+        {/* Имя */}
+        <div className="form-item w-full mt-4 flex items-center">
+          <label className="text-lg pr-4">Имя</label>
+          <FInputInitials
+            id='FullName'
+            placeholder='Имя'
+            value={inputGuardfirstName ? inputGuardfirstName : ''}
+            onChange={GuardfirstNameChange}
             key={form.key}
           />
         </div>
 
-      </div>
+        {/* Отчество */}
+        <div className="form-item w-full mt-4 flex items-center">
+          <label className="text-lg pr-4">Отчество</label>
+          <FInputInitials
+            id='additional-name'
+            placeholder='Отчество'
+            value={inputGuardPatronymic ? inputGuardPatronymic : ''}
+            onChange={GuardPatronymicChange}
+            key={form.key}
+          />
+        </div>
 
-      {/* Физ. посты */}
-      <div className="form-item w-full mt-4">
-        <label className="text-lg pr-4">Физ. посты</label>
-        <FSelect
-          options={optionGuardPosts}
-          onChange={guardPostChange}
-          value={inputGuardGuardPosts}
-          key={form.key}
-          multiple
-        />
-      </div>
+        {/* Фото */}
+        <div className="form-item flex items-center w-full mt-4">
+          <label className="text-lg pr-4">Фото</label>
+          <FInputFile
+            setUri={setInputGuardUIAvatarsSrc}
+            key={form.key}
+          />
+        </div>
 
-      {/* Статус ошибки */}
-      <div className="form-item">
-        <span className="text-color_C italic break-words">
-          {error}
-        </span>
-      </div>
+        {/* Телефон Менеджер ИИН*/}
+        <div className='flex flex-col md:flex-row w-full md:space-x-4 space-y-4 md:space-y-0'>
 
-      {/* Кнопки */}
-      <div className="ml-auto mt-4">
+          {/* Телефон */}
+          <div className="form-item w-full flex items-center">
+            <label className="text-lg pr-4">Телефон</label>
+            <FInputTelephone
+              placeholder='Телефон'
+              value={inputGuardTelephone ? inputGuardTelephone : ''}
+              onChange={GuardTelephoneChange}
+              key={form.key}
+            />
+          </div>
 
-        <FButtonRed
-          className=""
-          disabled={!(form.isOpen && (operation == 'Добавить' ?
-            (isInputValidateGuardSurname
-              && isInputValidateGuardfirstName
-              && isInputValidateGuardPatronymic
-              && isInputValidateGuardTelephone) :
-            (isInputValidateGuardSurname
-              || isInputValidateGuardfirstName
-              || isInputValidateGuardPatronymic
-              || isInputValidateGuardTelephone
-              || isInputValidateGuardIIN
-              || (!equalArrays(inputGuardGuardPosts, form.guard?.guardPosts))
-              || inputGuardUIAvatarsSrc != null
-            )
-          ))}
-          onClick={(e) => operation == 'Добавить' ? submitAdd(e,
-            inputGuardSurname,
-            inputGuardfirstName,
-            inputGuardPatronymic,
-            inputGuardUIAvatarsSrc,
-            inputGuardTelephone,
-            inputGuardIIN,
-            inputGuardGuardPosts
-          ) : submitEdit(e,
-            inputGuardSurname,
-            inputGuardfirstName,
-            inputGuardPatronymic,
-            inputGuardUIAvatarsSrc,
-            inputGuardTelephone,
-            inputGuardIIN,
-            inputGuardGuardPosts
-          )}
-        >
-          {operation}
-        </FButtonRed>
+          {/* ИИН */}
+          <div className="form-item w-full flex items-center">
+            <label className="text-lg pr-4">ИИН</label>
+            <FInputIIN
+              placeholder='ИИН'
+              value={inputGuardIIN ? inputGuardIIN : ''}
+              onChange={GuardIINChange}
+              key={form.key}
+            />
+          </div>
 
-        <FButtonWhite
-          className="ml-4"
-          onClick={() => setForm({ isOpen: false })}
-        >
-          Закрыть
-        </FButtonWhite>
+        </div>
+
+        {/* Физ. посты */}
+        <div className="form-item w-full mt-4">
+          <label className="text-lg pr-4">Физ. посты</label>
+          <FSelect
+            options={optionGuardPosts}
+            onChange={guardPostChange}
+            value={inputGuardGuardPosts}
+            key={form.key}
+            multiple
+          />
+        </div>
+
+        {/* Статус ошибки */}
+        <div className="form-item">
+          <span className="text-color_C italic break-words">
+            {error}
+          </span>
+        </div>
+
+        {/* Кнопки */}
+        <div className="form-item md:hidden self-end flex flex-col space-y-4 select-none">
+
+          <FButtonRed
+            className=""
+            disabled={!(form.isOpen && (operation == 'Добавить' ?
+              (isInputValidateGuardSurname
+                && isInputValidateGuardfirstName
+                && isInputValidateGuardPatronymic
+                && isInputValidateGuardTelephone) :
+              (isInputValidateGuardSurname
+                || isInputValidateGuardfirstName
+                || isInputValidateGuardPatronymic
+                || isInputValidateGuardTelephone
+                || isInputValidateGuardIIN
+                || (!equalArrays(inputGuardGuardPosts, form.guard?.guardPosts))
+                || inputGuardUIAvatarsSrc != null
+              )
+            ))}
+            onClick={(e) => operation == 'Добавить' ? submitAdd(e,
+              inputGuardSurname,
+              inputGuardfirstName,
+              inputGuardPatronymic,
+              inputGuardUIAvatarsSrc,
+              inputGuardTelephone,
+              inputGuardIIN,
+              inputGuardGuardPosts
+            ) : submitEdit(e,
+              inputGuardSurname,
+              inputGuardfirstName,
+              inputGuardPatronymic,
+              inputGuardUIAvatarsSrc,
+              inputGuardTelephone,
+              inputGuardIIN,
+              inputGuardGuardPosts
+            )}
+          >
+            {operation}
+          </FButtonRed>
+
+          <FButtonWhite
+            className="ml-4"
+            onClick={() => setForm({ isOpen: false })}
+          >
+            Закрыть
+          </FButtonWhite>
+
+        </div>
 
       </div>
 

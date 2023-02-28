@@ -290,7 +290,6 @@ export async function getApiMethodAccess(req, userData) {
             userData.positions = [''];
         }
 
-
         // console.log(findedRule, userData.positions);
 
         for (const access of findedRule.access) {
@@ -300,6 +299,7 @@ export async function getApiMethodAccess(req, userData) {
                 if (access.editBlock || access.userCompare) {
 
                     const requestJson = await req.json();
+                    var userCompare = {};
 
                     if (access.userCompare) {
                         for (const userIdKey of access.userCompare) {
@@ -316,12 +316,14 @@ export async function getApiMethodAccess(req, userData) {
                                 return 'Вам отказано в доступе к выполняемой операции';
                             }
 
+                            userCompare[userIdKey] = true;
+
                         }
                     }
 
                     if (access.editBlock) {
                         for (const editRule of access.editBlock) {
-                            if (requestJson[editRule]) {
+                            if (requestJson[editRule] && !userCompare[editRule]) {
                                 return `Отсутсвует право доступа на редкатирование поля "${editRule}"`;
                             } else {
                                 delete requestJson[editRule];

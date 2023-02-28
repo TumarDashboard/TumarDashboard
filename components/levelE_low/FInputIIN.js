@@ -13,9 +13,7 @@ export function FInputIIN({ id, className, onChange, placeholder, ...props }) {
     }
 
     return (
-        <div
-            className='flex relative space-x-2'
-        >
+        <>
             <input
                 id={id}
                 type="number"
@@ -35,7 +33,7 @@ export function FInputIIN({ id, className, onChange, placeholder, ...props }) {
                     Неккоректный формат ИИН
                 </p>
             }
-        </div>
+        </>
     )
 
 }

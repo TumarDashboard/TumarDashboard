@@ -25,9 +25,7 @@ export function FInputTelephone({ className, onChange, placeholder, ...props }) 
     }
 
     return (
-        <div
-            className='flex flex-col'
-        >
+        <>
             <input
                 id="telNo"
                 type="tel"
@@ -47,7 +45,7 @@ export function FInputTelephone({ className, onChange, placeholder, ...props }) 
                     Допустимый формат номера +77007007070
                 </p>
             }
-        </div>
+        </>
     )
 
 }

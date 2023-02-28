@@ -41,7 +41,7 @@ export function FGuardPostShowGuardForm({ accessRules, form, setForm, submitAdd,
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
       className="flex flex-col p-4 w-full overflow-y-auto max-h-[90vh] space-y-4"
-      widthForm=' lg:w-1/2 2xl:w-1/3 fl:w-1/4'
+      widthForm='min-w-fit'
     >
       {guardsToday.map((element, index) => {
         const isOdd = index & 1;

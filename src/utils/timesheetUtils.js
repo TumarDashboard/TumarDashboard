@@ -2,7 +2,7 @@
 import ExcelJS from "exceljs";
 import { getDaysFromMonth } from "./dateUtils";
 import { FPositionBUH, FPositionHRM, FPositionZDIR } from "../../components/levelZ_variable/FPositionItemList";
-import { isFloat, ceil10 } from "./mathUtils";
+import { isFloat, ceil10, round10 } from "./mathUtils";
 
 const tableHeader = {
   Index: {
@@ -43,8 +43,9 @@ const tableHeader = {
 }
 
 const smallFontSize = 9;
+const mediumFontSize = 12;
 const defaultFontSize = 14;
-const maxRowCount = 30;
+const maxRowCount = 28;
 const companyName = 'Тұмар Гранд Секьюрити';
 
 const Style = {
@@ -54,6 +55,7 @@ const Style = {
   AlignmentMiddleRightWrapText: { vertical: 'middle', horizontal: 'right', wrapText: true },
   FontDefault: { name: "Calibri", family: 1, size: defaultFontSize },
   FontDefaultBold: { name: "Calibri", family: 1, size: defaultFontSize, bold: true },
+  FontMediumBold: { name: "Calibri", family: 1, size: mediumFontSize, bold: true},
   FontSmall: { name: "Calibri", family: 1, size: smallFontSize },
   FontSmallBold: { name: "Calibri", family: 1, size: smallFontSize, bold: true },
   // FillYellow1: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'f4b084' }, },
@@ -797,10 +799,10 @@ export function timesheetExcellForMonthPart(NSOinitials, guardPosts, usersData, 
         tableBodyCell.fill = bodyRowFillColor;
 
         // Сумма Тариф*часы
-        let rateSumm = ceil10(hoursCount * rate);
+        let rateSumm = round10(hoursCount * rate);
         tableBodyCell = tableBodyRow.getCell(5 + daysCount);
         tableBodyCell.value = { 
-          formula: `CEILING(PRODUCT(${tableBodyRow.getCell(3 + daysCount).address}:${tableBodyRow.getCell(4 + daysCount).address}), 1)`, 
+          formula: `ROUND(PRODUCT(${tableBodyRow.getCell(3 + daysCount).address}:${tableBodyRow.getCell(4 + daysCount).address}), -1)`, 
           result: rateSumm 
         };
         tableBodyCell.numFmt = '#';
@@ -999,7 +1001,7 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
       // Наименование таблицы
       var tableCaptionRow = worksheet.addRow([[guardPost.number ? '№' + guardPost.number : null, guardPost.callsign, guardPost.name, guardPost.address].filter(Boolean).join(', ')]);
       var tableCustomCell = tableCaptionRow.getCell(1);
-      tableCustomCell.font = Style.FontSmallBold;
+      tableCustomCell.font = Style.FontMediumBold;
       tableCustomCell.alignment = Style.AlignmentMiddleCenter;
       tableCustomCell.fill = Style.FillYellow1;
       tableCustomCell.border = Style.BorderThin;
@@ -1168,10 +1170,10 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
           tableBodyCell.fill = bodyRowFillColor;
 
           // Сумма Тариф*часы
-          let rateSumm = ceil10(hoursCount * rate);
+          let rateSumm = round10(hoursCount * rate);
           tableBodyCell = tableBodyRow.getCell(5 + daysCount);
           tableBodyCell.value = { 
-            formula: `CEILING(PRODUCT(${tableBodyRow.getCell(3 + daysCount).address}:${tableBodyRow.getCell(4 + daysCount).address}), 1)`, 
+            formula: `ROUND(PRODUCT(${tableBodyRow.getCell(3 + daysCount).address}:${tableBodyRow.getCell(4 + daysCount).address}), -1)`, 
             result: rateSumm 
           };
           tableBodyCell.numFmt = '#';
