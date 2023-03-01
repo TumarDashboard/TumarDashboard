@@ -108,7 +108,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
     { value: 'callsign', label: 'Позывной' },
     { value: 'name', label: 'Наименование' },
     { value: 'address', label: 'Адрес' },
-    AReditGuardPostRate ? { value: 'rate', label: 'Тариф' } : null,
+    AReditGuardPost && AReditGuardPostRate ? { value: 'rate', label: 'Тариф' } : null,
     { value: 'manager', label: 'НСО' },
     { value: 'guards', label: 'Охранники' },
   ].filter(Boolean);
@@ -850,7 +850,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
                 </td>
 
                 {/* {Тариф} */}
-                {AReditGuardPostRate && <td className="px-1 md:p-2 md:border text-left block md:table-cell items-center">
+                {AReditGuardPost && AReditGuardPostRate && <td className="px-1 md:p-2 md:border text-left block md:table-cell items-center">
                   {guardPost.rate &&
                     <span className="break-all md:break-normal">
                       <b className='md:hidden'>Тариф</b> {guardPost.rate}
