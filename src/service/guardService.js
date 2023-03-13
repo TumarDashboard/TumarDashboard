@@ -40,16 +40,32 @@ class GuardService {
             //Check initials condition
             await mongoConnect();
 
-            const candidate = await mongoGuardsModel.findOne({ surname: guardData.surname, firstName: guardData.firstName }).lean();
+            //Check exist condition
+            const candidateCondition = [ 
+                { surname: guardData.surname, firstName: guardData.firstName }, 
+                guardData.iin ? { iin: guardData.iin } : null
+            ].filter(Boolean);
+
+            const candidate = await mongoGuardsModel.findOne({ $or: candidateCondition }).lean();
 
             if (candidate) {
-                throw ApiError.BadRequest(`Инициалы ${guardData.firstName} ${guardData.surname} уже использовались для создания`);
+                
+                if(guardData.iin && guardData.iin == candidate.iin ){
+                    throw ApiError.BadRequest(`ИИН ${candidate.iin} уже использовались для создания ${candidate.firstName} ${candidate.surname}`);
+                }
+
+                throw ApiError.BadRequest(`Инициалы ${candidate.firstName} ${candidate.surname} уже использовались для создания`);
             }
 
-            const candidateDeleted = await mongoGuardsArchiveModel.findOne({ surname: guardData.surname, firstName: guardData.firstName }).lean();
+            const candidateDeleted = await mongoGuardsArchiveModel.findOne({ $or: candidateCondition }).lean();
 
             if (candidateDeleted) {
-                throw ApiError.BadRequest(`Инициалы ${guardData.firstName} ${guardData.surname} уже использовались для создания, после чего были деактивированы`);
+                
+                if(guardData.iin && guardData.iin == candidateDeleted.iin ){
+                    throw ApiError.BadRequest(`ИИН ${candidateDeleted.iin} уже использовались для создания ${candidateDeleted.firstName} ${candidateDeleted.surname}, после чего были деактивированы`);
+                }
+
+                throw ApiError.BadRequest(`Инициалы ${candidateDeleted.firstName} ${candidateDeleted.surname} уже использовались для создания, после чего были деактивированы`);
             }
 
             //cast guardPosts id from string to id
@@ -139,6 +155,40 @@ class GuardService {
         //Mongo
         await mongoConnect();
 
+        // check exist condition
+        const candidateCondition = [ 
+            { surname: guardData.surname, firstName: guardData.firstName }, 
+            guardData.iin ? { iin: guardData.iin } : null
+        ].filter(Boolean);
+
+        const candidate = await mongoGuardsModel.findOne({ $and: [
+            { $or: candidateCondition },
+            { _id: { $ne: guardData.id } }
+        ] }).lean();
+
+        if (candidate) {
+            
+            if(guardData.iin && guardData.iin == candidate.iin ){
+                throw ApiError.BadRequest(`ИИН ${candidate.iin} уже используются для данных сотрудника ${candidate.firstName} ${candidate.surname}`);
+            }
+
+            throw ApiError.BadRequest(`Инициалы ${candidate.firstName} ${candidate.surname} уже используются для данных другого сотрудника`);
+        }
+
+        const candidateDeleted = await mongoGuardsArchiveModel.findOne({ $and: [
+            { $or: candidateCondition },
+            { _id: { $not: guardData.id } }
+        ] }).lean();
+
+        if (candidateDeleted) {
+            
+            if(guardData.iin && guardData.iin == candidateDeleted.iin ){
+                throw ApiError.BadRequest(`ИИН ${candidateDeleted.iin} уже использовались для данных сотрудника  ${candidateDeleted.firstName} ${candidateDeleted.surname}, после чего были деактивированы`);
+            }
+
+            throw ApiError.BadRequest(`Инициалы ${candidateDeleted.firstName} ${candidateDeleted.surname} уже использовались для данных другого сотрудника, после чего были деактивированы`);
+        }
+        //Абдулла Нурлыбек
         //Update model
         var mongoGuard = await mongoGuardsModel.findById(guardData.id);
 

@@ -119,10 +119,6 @@ export const FApiMethodAccessRules = [
         url: '/api/method/guardPost/createGuardPost', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
-            { position: positions.FPositionHRM },
-            { position: positions.FPositionBUH },
-            { position: positions.FPositionNSO },
-            { position: positions.FPositionOPR }
         ]
     },
     {

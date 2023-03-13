@@ -130,7 +130,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
     if (rule == constTableHeadControl.value) {
       setRenderTableGuardPosts(array => {
         return [...array.sort((a, b) => {
-          return (a.manager._id === MOBXuser.user.id) * -1;
+          return (a.manager?._id === MOBXuser?.user?.id) * -1;
         })];
       });
     } else {
@@ -421,59 +421,6 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
 
   }, [dataTimesheetToday, dataTimesheetToday, isLoadingTimesheetToday])
 
-  /*----Перезапуск обновления данных таблицы--------------------------------------------------------------------------*/
-  // const resetRowUpdateInterval = useRef();
-
-  // const rowUpdate = async () => {
-
-  //   MOBXui.setUpdate();
-
-  //   try {
-
-  //     const responce = await getTimesheetToday();
-
-  //     setTableGuardPosts(array => {
-
-  //       const result = array.map(element => {
-
-  //         let findA = responce.timesheetToday.find(value => value._id == element._id);
-
-  //         if (findA && findA.today && findA.today.length > 0) {
-  //           let guardsToday = guards.filter(guard => findA.today.includes(guard._id));
-  //           element.guardsToday = guardsToday;
-  //         } else {
-  //           element.guardsToday = [];
-  //         }
-
-  //         return element;
-  //       });
-
-  //       return result;
-  //     });
-
-  //     // Обновляем отображаемую таблицу
-  //     setRenderTableGuardPosts(array => {
-  //       return [...array];
-  //     });
-
-  //     MOBXui.setUpdate();
-
-  //   } catch (error) {
-
-  //     MOBXui.setUpdateError(error.message);
-
-  //     errorCallback(error, setGuardPostSelectGuardForm);
-
-  //   }
-  // }
-
-  // const resetRowUpdate = () => {
-
-  //   resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
-
-  //   resetRowUpdateInterval.current = setInterval(rowUpdate, 30000);
-  // }
-
   /*----Функция загрузки данных об изменениях смен--------------------------------------------------------------------*/
   const timesheetTodayUpdateMemory = useRef([]);
   const guardPostManagersUpdateMemory = useRef([]);
@@ -641,10 +588,6 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
 
   /*------------------------------------------------------------------------------------------------------------------*/
   useEffect(() => {
-
-    // rowUpdate();
-
-    // resetRowUpdate();
 
     return () => {
       filterringTimeout.current && clearTimeout(filterringTimeout.current);

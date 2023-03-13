@@ -15,12 +15,12 @@ import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
 
 function managerEquals( a, b ){
     if( !a && !b ){
-        return true;
-    }
-    if( !a || !b ){
         return false;
     }
-    return a.toString().localeCompare( b.toString() );
+    if( !a || !b ){
+        return true;
+    }
+    return Boolean(a.toString().localeCompare( b.toString() ));
 }
 
 class GuardPostService {
@@ -32,6 +32,17 @@ class GuardPostService {
         try {
 
             //Validate date
+            if (inputData.number) {
+                inputData.number = parseInt(inputData.number);
+            }else{
+                delete inputData.number
+            }
+
+            if (inputData.rate) {
+                inputData.rate = parseFloat(inputData.rate);
+            }else{
+                delete inputData.rate
+            }
 
             const guardPostData = await validateYup(inputData, { deleteEmptyKey: true }).catch((e) => {
 
@@ -127,10 +138,14 @@ class GuardPostService {
             //Validate date 
             if (inputData.number) {
                 inputData.number = parseInt(inputData.number);
+            }else{
+                inputData.number = null;
             }
 
             if (inputData.rate) {
                 inputData.rate = parseFloat(inputData.rate);
+            }else{
+                inputData.rate = null;
             }
 
             const guardPostData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
@@ -180,7 +195,8 @@ class GuardPostService {
             }
 
             // Обновляем данные в записях о графиках физ постов--------------------------------------------------------------------------------------------------------
-            if( !managerEquals(mongoGuardPost.manager, guardPostData.manager) || mongoGuardPost.rate != guardPostData.rate ){
+
+            if( managerEquals(mongoGuardPost.manager, guardPostData.manager) || mongoGuardPost.rate != guardPostData.rate ){
 
                 const month = new Date(getCurrentMonth());
 
@@ -189,7 +205,6 @@ class GuardPostService {
                     await mongoTimesheetsGuardPostModel.deleteOne({ guardPost: mongoGuardPost._id, month: month });
                     
                 }else{
-
                     await mongoTimesheetsGuardPostModel.updateOne({
                         guardPost: mongoGuardPost._id,
                         month: month
@@ -197,8 +212,9 @@ class GuardPostService {
                         manager: guardPostData.manager,
                         managerSheme: guardPostData.managerSheme,
                         rate: guardPostData.rate
+                    }, {
+                        upsert: true
                     });
-
                 }
             }
 
