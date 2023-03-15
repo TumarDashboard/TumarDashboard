@@ -177,7 +177,7 @@ class GuardService {
 
         const candidateDeleted = await mongoGuardsArchiveModel.findOne({ $and: [
             { $or: candidateCondition },
-            { _id: { $not: guardData.id } }
+            { _id: { $ne: guardData.id } }
         ] }).lean();
 
         if (candidateDeleted) {

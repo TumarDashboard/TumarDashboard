@@ -388,7 +388,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
   useEffect(()=>{
 
     // console.log('useSWR %o %o %o', dataTimesheetToday, errorTimesheetToday, isLoadingTimesheetToday);
-    MOBXui.setUpdateState(isLoadingTimesheetToday)
+    MOBXui.setUpdateState(isLoadingTimesheetToday);
     if(errorTimesheetToday){
       MOBXui.setUpdateError(errorTimesheetToday.message);
     }else if(dataTimesheetToday){
@@ -592,8 +592,9 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
     return () => {
       filterringTimeout.current && clearTimeout(filterringTimeout.current);
       guardRowUpdateTimeout.current && clearTimeout(guardRowUpdateTimeout.current)
-      // resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
       getGuardPostIDtimeout.current && clearInterval(getGuardPostIDtimeout.current);
+
+      MOBXui.setUpdateState(false);
     }
   }, []);
 
