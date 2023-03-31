@@ -1,29 +1,12 @@
-import { fromImage } from 'imtool';
+const fileToDataUri = async (file) => {
 
-const fileToDataUri = (file) =>
-  new Promise((resolve, reject) => {
+  const data = await (await import('imtool')).fromImage(file);
 
-    fromImage(file).then(tool=>{
+  const result = await data.thumbnail(1024).toDataURL()
 
-      tool.thumbnail(1024).toDataURL().then(dataURL=>{
+  return result;
 
-        resolve(dataURL);
-        
-      }).catch(e=>reject(e));
-
-    }).catch(e=>reject(e));
-
-    //------------------------------------
-    // const reader = new FileReader();
-
-    // reader.onload = (event) => {
-    //   console.log(event);
-    //   resolve(event.target.result);
-    // };
-
-    // reader.readAsDataURL(file);
-    //------------------------------------
-  });
+};
 
 export function FInputFile({ setUri, ...props }) {
 

@@ -18,7 +18,10 @@ import { createGuard } from '../../../src/dtos/dtoGuard';
 import { FFilterText } from '../../levelE_low/FFilterText';
 import { motion } from "framer-motion";
 
-export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submitEdit, optionGuards, setGuards, users, guardPosts, MOBXui, errorCallback }) {
+export function FTimesheetTableSelectGuardForm({ accessRules, form, setForm, submitAdd, submitEdit, optionGuards, setGuards, users, guardPosts, MOBXui, errorCallback }) {
+
+  /*----Определение правил доступа------------------------------------------------------------------------------------*/
+  const ARcreateGuard = accessRules.includes('createGuard');
 
   /*-------------------------------------------------------------------------------------------------------
       Операция
@@ -242,6 +245,7 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
         </div>
 
         {/* Кнопка вызова Формы добавления охранника */}
+        {ARcreateGuard &&
         <div className="form-item">
           <button
             className="bg-color_B h-8 w-8 flex justify-center items-center rounded-md
@@ -262,7 +266,7 @@ export function FTimesheetTableSelectGuardForm({ form, setForm, submitAdd, submi
               hover:fill-color_G"
             />
           </button>
-        </div>
+        </div>}
 
       </div>
 

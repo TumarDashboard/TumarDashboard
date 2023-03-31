@@ -1,44 +1,4 @@
-import e from 'cors';
 import * as positions from '../levelZ_variable/FPositionItemList';
-
-// export const FDashboardAccessRules = [
-//     { url: /^\/dashboard\/profile$/, access: [] },
-//     {
-//         url: /^\/dashboard\/users$/, access: [
-//             positions.FPositionDIR,
-//             positions.FPositionZDIR,
-//             positions.FPositionHRM,
-//         ]
-//     },
-//     {
-//         url: /^\/dashboard\/guardPosts$/, access: [
-//             positions.FPositionDIR,
-//             positions.FPositionZDIR,
-//             positions.FPositionHRM,
-//             positions.FPositionBUH,
-//             positions.FPositionNSO,
-//             positions.FPositionOPR,
-//         ]
-//     },
-//     {
-//         url: /^\/dashboard\/guardPosts(?=.)/, access: [
-//             positions.FPositionDIR,
-//             positions.FPositionZDIR,
-//             positions.FPositionHRM,
-//             positions.FPositionBUH,
-//             positions.FPositionNSO,
-//         ]
-//     },
-//     {
-//         url: /^\/dashboard\/guards$/, access: [
-//             positions.FPositionDIR,
-//             positions.FPositionZDIR,
-//             positions.FPositionHRM,
-//             positions.FPositionNSO,
-//             positions.FPositionBUH,
-//         ]
-//     }
-// ];
 
 export const FApiMethodAccessRules = [
 
@@ -64,28 +24,28 @@ export const FApiMethodAccessRules = [
         url: '/api/method/guard/createGuard', access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
-            { position: positions.FPositionNSO }
+            // { position: positions.FPositionNSO }
         ]
     },
     {
         url: '/api/method/guard/editGuard', access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
-            { position: positions.FPositionNSO }
+            // { position: positions.FPositionNSO }
         ]
     },
     {
         url: '/api/method/guard/deleteGuard', access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
-            { position: positions.FPositionNSO }
+            // { position: positions.FPositionNSO }
         ]
     },
     {
         url: '/api/method/guard/recoverGuard', access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
-            { position: positions.FPositionNSO }
+            // { position: positions.FPositionNSO }
         ]
     },
 

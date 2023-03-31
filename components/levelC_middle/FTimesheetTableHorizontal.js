@@ -18,7 +18,7 @@ const defaultDayShift = 8;
 
 const currentMonth = getCurrentMonth();
 
-export default function ыFTimesheetTableHorizontal({ accessRules, userData, MOBXuser, MOBXui, errorCallback, guardPost, guardPosts, guardsData, users, usersAll }) {
+export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXuser, MOBXui, errorCallback, guardPost, guardPosts, guardsData, users, usersAll }) {
 
   /*-------------------------------------------------------------------------------------------------------
       Определение правил доступа
@@ -1144,6 +1144,7 @@ export default function ыFTimesheetTableHorizontal({ accessRules, userData, MOB
 
       {/* {Форма добавления/редактирования строки охранника} */}
       <FTimesheetTableSelectGuardForm
+        accessRules={accessRules}
         form={guardRowSelectGuardForm}
         setForm={setGuardRowSelectGuardForm}
         submitAdd={guardRowAdd}

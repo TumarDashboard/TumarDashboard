@@ -19,7 +19,7 @@ export default catchErrorsApi( async (req, res) => {
       req,
       res
     });
-
+    return res.json({});
     return res.redirect(`${process.env.NEXT_PUBLIC_CLIENT_URL}${redirectAuth ? redirectAuth : '/'}`);
 
 })
