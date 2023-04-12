@@ -77,6 +77,10 @@ export const changeTimesheetToday = async (guardPostManagers, timesheetToday) =>
     return await fetchAuthMethod('/method/timesheet/changeTimesheetToday', { guardPostManagers, timesheetToday});
 }
 
+export const changeTimesheetToday2 = async (guardPost, guardPostManager, guardsToday) => {
+    return await fetchAuthMethod('/method/timesheet/changeTimesheetToday2', { guardPost, guardPostManager, guardsToday });
+}
+
 export const getTimesheetToday = async () => {
     return await fetchAuthMethod('/method/timesheet/getTimesheetToday');
 }
@@ -100,4 +104,8 @@ export const getTimesheetPrintForMonthPart = async (month, guardPostManager) => 
 
 export const getTimesheetPrintForMonthFull = async (month) => {
     return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthFull', { month });
+}
+
+export const getTimesheetPrintForMonthBuh = async (month) => {
+    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthBuh', { month });
 }

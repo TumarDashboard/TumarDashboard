@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import Image from "next/legacy/image";
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from "next/router";
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 import { fetchAuthFileMethod, fetchAuthMethod, fetchAuth } from "../../../middleware/requests";
 
 import { useStore } from "../../levelA/StoreProvider";
@@ -20,7 +20,7 @@ import { FButtonWhiteSmall } from '../../levelE_low/FButtonWhiteSmall';
 import { FTimesheetTableSelectGuardForm } from '../../levelD_modal/timesheetTable/FTimesheetTableSelectGuardForm';
 import { FGuardPostSelectGuardForm } from '../../levelD_modal/guardPost/FGuardPostSelectGuardForm';
 import { FGuardPostShowGuardForm } from '../../levelD_modal/guardPost/FGuardPostShowGuardForm';
-import { changeTimesheetToday, getTimesheetToday } from '../../../src/dtos/dtoTimesheet';
+import { changeTimesheetToday, changeTimesheetToday2, getTimesheetToday } from '../../../src/dtos/dtoTimesheet';
 import { FTooltip } from '../../levelE_low/FTooltip';
 
 const inputs = {
@@ -383,16 +383,26 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
 
   /*----Перезапуск обновления данных таблицы--------------------------------------------------------------------------*/
 
-  const { data: dataTimesheetToday, error: errorTimesheetToday, isLoading: isLoadingTimesheetToday } = useSWR('/method/timesheet/getTimesheetToday', fetchAuthMethod);
+  const { 
+    data: dataTimesheetToday, 
+    error: errorTimesheetToday, 
+    isLoading: isLoadingTimesheetToday,
+    mutate: mutateTimesheetToday,
+  } = useSWR('/method/timesheet/getTimesheetToday', fetchAuthMethod);
 
   useEffect(()=>{
 
-    // console.log('useSWR %o %o %o', dataTimesheetToday, errorTimesheetToday, isLoadingTimesheetToday);
+    // console.log('useSWR %o %o %o', 
+    //   dataTimesheetToday, 
+    //   errorTimesheetToday, 
+    //   isLoadingTimesheetToday);
+
     MOBXui.setUpdateState(isLoadingTimesheetToday);
     if(errorTimesheetToday){
       MOBXui.setUpdateError(errorTimesheetToday.message);
-    }else if(dataTimesheetToday){
+    }else if(dataTimesheetToday ){
 
+      // Обновляем таблицу в памяти
       setTableGuardPosts(array => {
 
         const result = array.map(element => {
@@ -419,133 +429,43 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
 
     }
 
-  }, [dataTimesheetToday, dataTimesheetToday, isLoadingTimesheetToday])
-
-  /*----Функция загрузки данных об изменениях смен--------------------------------------------------------------------*/
-  const timesheetTodayUpdateMemory = useRef([]);
-  const guardPostManagersUpdateMemory = useRef([]);
-  const guardRowUpdateTimeout = useRef();
-
-  const guardRowUpdate = (guardPost,
-    inputGuard) => {
-
-    const elementInMemory = timesheetTodayUpdateMemory.current.find(element => element.guardPost == guardPost._id);
-
-    if (elementInMemory) {
-      elementInMemory.guardsToday = inputGuard.map(element => element._id);
-    } else {
-      timesheetTodayUpdateMemory.current.push({
-        guardPost: guardPost._id,
-        guardsToday: inputGuard.map(element => element._id)
-      })
-    }
-
-    if (guardPost.manager && !guardPostManagersUpdateMemory.current.includes(guardPost.manager._id)) {
-      guardPostManagersUpdateMemory.current.push(guardPost.manager._id)
-    }
-
-    guardRowUpdateTimeout.current && clearTimeout(guardRowUpdateTimeout.current);
-    // resetRowUpdateInterval.current && clearInterval(resetRowUpdateInterval.current);
-
-    guardRowUpdateTimeout.current = setTimeout(async () => {
-      MOBXui.setUpdate();
-      // console.log('guardRowUpdateTimeout');
-      try {
-        let a = guardPostManagersUpdateMemory.current;
-        let b = timesheetTodayUpdateMemory.current;
-
-        guardPostManagersUpdateMemory.current = [];
-        timesheetTodayUpdateMemory.current = [];
-
-        const responce = await changeTimesheetToday(a, b);
-
-        if (responce.timesheetToday && responce.timesheetToday.length > 0) {
-
-          setTableGuardPosts(array => {
-
-            const result = array.map(element => {
-
-              let findA = responce.timesheetToday.find(value => value._id == element._id);
-
-              if (findA && findA.today && findA.today.length > 0) {
-                let guardsToday = guards.filter(guard => findA.today.includes(guard._id));
-                element.guardsToday = guardsToday;
-              } else {
-
-                let findB = b.find(value => value.guardPost == element._id);
-
-                if (!findB) {
-                  element.guardsToday = [];
-                }
-
-              }
-
-              return element;
-            });
-
-            return result;
-          });
-
-          // Обновляем отображаемую таблицу
-          setRenderTableGuardPosts(array => {
-            return [...array];
-          });
-
-        }
-
-        MOBXui.setUpdate();
-
-      } catch (error) {
-
-        MOBXui.setUpdateError(error.message);
-
-        errorCallback(error, setGuardPostSelectGuardForm);
-
-      } finally {
-        // resetRowUpdate();
-      }
-
-    }, 30000);
-
-  }
+  }, [dataTimesheetToday, errorTimesheetToday, isLoadingTimesheetToday])
 
   /*----Функция изменения охранника за текущую смену Физ. поста-------------------------------------------------------*/
-  const guardRowEdit = (event,
+  const guardRowEdit2 = (event,
     inputGuard) => {
 
     event.preventDefault();
 
-    // setError('');
-
     try {
-      // Обновляем таблицу в памяти
-      setTableGuardPosts(array => {
-        const index = array.findIndex(element => {
-          return element._id == guardPostSelectGuardForm.guardPost._id
-        });
-        if (index)
-          array[index].guardsToday = inputGuard;
-        return array;
-      });
 
-      // Обновляем отображаемую таблицу
-      setRenderTableGuardPosts(array => {
-        array[guardPostSelectGuardForm.index].guardsToday = inputGuard;
-        return array;
-      });
+      const guardsToday = inputGuard.map(element => element._id);
 
-      guardRowUpdate(guardPostSelectGuardForm.guardPost, inputGuard);
+      mutateTimesheetToday(
+        changeTimesheetToday2(
+          guardPostSelectGuardForm.guardPost._id, 
+          guardPostSelectGuardForm.guardPost?.manager?._id, 
+          guardsToday),
+        {
+          optimisticData: data=>({
+            timesheetToday: data.timesheetToday.map(element=>element._id===guardPostSelectGuardForm.guardPost._id ? {
+              ...element,
+              today: guardsToday
+            } : element)
+          }),
+          rollbackOnError: true,
+          populateCache: true,
+          revalidate: false
+        }
+      )
 
       // Закрываем модальное окно
       setGuardPostSelectGuardForm({ isOpen: false });
-
     } catch (error) {
 
-      errorCallback(error, setGuardPostSelectGuardForm);
+      MOBXui.setUpdateError(error.message);
 
     } finally {
-
-      // MOBXui.setLoading();
 
     }
   }
@@ -591,7 +511,6 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
 
     return () => {
       filterringTimeout.current && clearTimeout(filterringTimeout.current);
-      guardRowUpdateTimeout.current && clearTimeout(guardRowUpdateTimeout.current)
       getGuardPostIDtimeout.current && clearInterval(getGuardPostIDtimeout.current);
 
       MOBXui.setUpdateState(false);
@@ -958,7 +877,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
         accessRules={accessRules}
         form={guardPostSelectGuardForm}
         setForm={setGuardPostSelectGuardForm}
-        submitEdit={guardRowEdit}
+        submitEdit={guardRowEdit2}
         setGuards={(guard) => {
           setGuards(array => {
             array.unshift(guard);

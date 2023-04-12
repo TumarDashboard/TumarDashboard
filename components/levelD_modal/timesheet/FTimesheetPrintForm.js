@@ -13,12 +13,17 @@ import { FSelectShifts } from "../../levelE_low/FSelectShifts";
 import { equalArrays } from '../../../src/utils/arrayUtils';
 import { getCurrentMonth, getCurrentDateStamp } from '../../../src/utils/dateUtils';
 import { FInputMonth } from '../../levelE_low/FInputMonth';
-import { getTimesheetPrint, getTimesheetPrintForDay, getTimesheetPrintForMonthFull, getTimesheetPrintForMonthPart } from '../../../src/dtos/dtoTimesheet';
+import { getTimesheetPrint, 
+  getTimesheetPrintForDay, 
+  getTimesheetPrintForMonthFull, 
+  getTimesheetPrintForMonthBuh,
+  getTimesheetPrintForMonthPart } from '../../../src/dtos/dtoTimesheet';
 import { ApiError } from '../../../middleware/exceptions';
 
 const DTForDay = 'DTForDay';
 const DTForMonthPart = 'DTForMonthPart';
 const DTForMonthFull = 'DTForMonthFull';
+const DTForMonthBuh = 'DTForMonthBuh';
 
 const getInputDate = (operation) => {
   switch (operation) {
@@ -30,6 +35,9 @@ const getInputDate = (operation) => {
       return getCurrentMonth();
 
     case DTForMonthFull:
+      return getCurrentMonth();
+
+    case DTForMonthBuh:
       return getCurrentMonth();
 
     default:
@@ -62,11 +70,16 @@ const getTimesheet = async(operation, guardPosts, date, manager) =>{
         documentName: `Табель ${NSOinitials} ${date}.xlsx`
       };
       
-
     case DTForMonthFull:
       return {
         responce: await getTimesheetPrintForMonthFull(date),
         documentName: 'Табель-' + date + '.xlsx'
+      };
+
+    case DTForMonthBuh:
+      return {
+        responce: await getTimesheetPrintForMonthBuh(date),
+        documentName: 'Платёжная ведомость-' + date + '.xlsx'
       };
 
     default:
@@ -85,6 +98,7 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
   const ARgetTimesheetPrintForDay = accessRules.includes('getTimesheetPrintForDay');
   const ARgetTimesheetPrintForMonthPart = accessRules.includes('getTimesheetPrintForMonthPart');
   const ARgetTimesheetPrintForMonthFull = accessRules.includes('getTimesheetPrintForMonthFull');
+  const ARgetTimesheetPrintForMonthFullBuh = accessRules.includes('getTimesheetPrintForMonthBuh');
 
   /*--Операция-------------------------------------------------------------------------------------------*/
   const [error, setError] = useState('');
@@ -94,6 +108,7 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
     ARgetTimesheetPrintForDay ? { label: "Отчёт за день", value: DTForDay } : null,
     ARgetTimesheetPrintForMonthPart ? { label: "Отчёт за месяц - частичный", value: DTForMonthPart } : null,
     ARgetTimesheetPrintForMonthFull ? { label: "Отчёт за месяц - полный", value: DTForMonthFull } : null,
+    ARgetTimesheetPrintForMonthFullBuh ? { label: "Платёжная ведомость", value: DTForMonthBuh } : null,
     // { label: "getTimesheetPrint", value: 'getTimesheetPrint' }
   ].filter(Boolean);
 

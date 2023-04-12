@@ -121,6 +121,14 @@ export const FApiMethodAccessRules = [
         ]
     },
     {
+        url: '/api/method/timesheet/changeTimesheetToday2', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionOPR },
+            { position: positions.FPositionNSO, userCompare: ['guardPostManager'] },
+        ]
+    },
+    {
         url: '/api/method/timesheet/getTimesheetToday', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
@@ -164,6 +172,14 @@ export const FApiMethodAccessRules = [
     },
     {
         url: '/api/method/timesheet/getTimesheetPrintForMonthFull', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionBUH },
+        ]
+    },
+    {
+        url: '/api/method/timesheet/getTimesheetPrintForMonthBuh', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
