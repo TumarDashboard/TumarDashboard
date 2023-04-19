@@ -57,27 +57,31 @@ const reportBuhTableHeader = {
     text: 'объект',
   },
   Summ: {
-    width: 9.00,
+    width: 8.50,
     text: 'сумма',
   },
+  Award: {
+    width: 8.50,
+    text: 'премия',
+  },
   Taxes: {
-    width: 9.00,
+    width: 8.50,
     text: 'налоги',
   },
   Advance: {
-    width: 9.00,
+    width: 8.50,
     text: 'аванс',
   },
   Payoff: {
-    width: 9.00,
+    width: 8.50,
     text: 'к выплате',
   },
   Sign: {
-    width: 9.00,
+    width: 8.50,
     text: 'подпись',
   },
   Date: {
-    width: 9.00,
+    width: 8.50,
     text: 'дата',
   },
   SignInitials: {
@@ -90,7 +94,7 @@ const smallFontSize = 9;
 const mediumFontSize = 12;
 const defaultFontSize = 14;
 const maxRowFullCount = 28;
-const maxRowBuhCount = 48;
+const maxRowBuhCount = 51;
 const companyName = 'Тұмар Гранд Секьюрити';
 
 const Style = {
@@ -1568,7 +1572,7 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
 export function timesheetExcellForMonthBuh(responce, date) {
 
   // Переменные листа
-  const columns = 10;
+  const columns = 11;
   const tableBodyStartRow = 4;
 
   // Workbook and worksheet create
@@ -1627,9 +1631,9 @@ export function timesheetExcellForMonthBuh(responce, date) {
   // Заголовок таблицы
   try {
 
-    var tableHeaderRow = worksheet.addRow();
+    var tableFooterRow = worksheet.addRow();
 
-    tableHeaderRow.height = 27;
+    tableFooterRow.height = 27;
 
     var keyIndex = 0;
 
@@ -1637,7 +1641,7 @@ export function timesheetExcellForMonthBuh(responce, date) {
 
       keyIndex++;
 
-      let tableCustomCell = tableHeaderRow.getCell(keyIndex);
+      let tableCustomCell = tableFooterRow.getCell(keyIndex);
       tableCustomCell.value = reportBuhTableHeader[key].text;
       tableCustomCell.font = Style.FontSmallBold;
       tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
@@ -1649,18 +1653,31 @@ export function timesheetExcellForMonthBuh(responce, date) {
   } catch (error) { console.log(error) }
 
   // Тело таблицы
-  var rowsCount = 0;
+  var rowsCount = tableBodyStartRow + 1;
   var indexStartRow = tableBodyStartRow + 1;
+  var indexEndRow;
+  var allSummFinish = 0;
 
   responce.forEach((guard, indexA) => {
 
+    //Start variable
     const bodyRowFillColor = indexA & 1 ? Style.FillGreen1 : Style.FillBlue1;
 
-    const indexEndRow = indexStartRow + ( guard.element.length > 1 ? guard.element.length : 0 );
+    indexEndRow = indexStartRow + ( guard.element.length > 1 ? guard.element.length : 0 );
+
+    // Calc Page breaker
+    let indexElementsB = guard.element.length > 1 ? guard.element.length + 1 : 1;
+
+    if (rowsCount + indexElementsB > maxRowBuhCount) {
+      worksheet.lastRow.addPageBreak();
+      rowsCount = indexElementsB;
+    }else{
+      rowsCount += indexElementsB;
+    }
 
     // Index
     var tableBodyCell = worksheet.getCell(indexStartRow, 1);
-    tableBodyCell.value = indexA + 1;
+    tableBodyCell.value = rowsCount; //indexA + 1;
     tableBodyCell.font = Style.FontSmall;
     tableBodyCell.alignment = Style.AlignmentMiddleCenter;
     tableBodyCell.border = Style.BorderThin;
@@ -1705,46 +1722,19 @@ export function timesheetExcellForMonthBuh(responce, date) {
       tableBodyCell.border = Style.BorderThin;
       tableBodyCell.fill = bodyRowFillColor;
 
-      // Taxes
-      tableBodyCell = worksheet.getCell(indexStartRow + indexB, 5);
-      tableBodyCell.font = Style.FontSmall;
-      tableBodyCell.alignment = Style.AlignmentMiddleCenter;
-      tableBodyCell.border = Style.BorderThin;
-      tableBodyCell.fill = bodyRowFillColor;
-
-      // Advance
-      tableBodyCell = worksheet.getCell(indexStartRow + indexB, 6);
-      tableBodyCell.font = Style.FontSmall;
-      tableBodyCell.alignment = Style.AlignmentMiddleCenter;
-      tableBodyCell.border = Style.BorderThin;
-      tableBodyCell.fill = bodyRowFillColor;
-
-      // Payoff
-      tableBodyCell = worksheet.getCell(indexStartRow + indexB, 7);
-      tableBodyCell.value = guardPostSumm ? { 
-        formula: `ROUND(${
-          worksheet.getCell(indexStartRow + indexB, 4).address
-        }-${
-          worksheet.getCell(indexStartRow + indexB, 5).address
-        }-${
-          worksheet.getCell(indexStartRow + indexB, 6).address
-        }, -1)`, 
-        result: guardPostSumm 
-      } : "?";
-      tableBodyCell.font = guardPostSumm ? Style.FontSmall : Style.FontSmallBoldRed;
-      tableBodyCell.alignment = Style.AlignmentMiddleCenter;
-      tableBodyCell.border = Style.BorderThin;
-      tableBodyCell.fill = bodyRowFillColor;
-
     })
 
     // Слияние данных если выход выполнялся на несколько физ постов
     if ( indexStartRow != indexEndRow ) {
       worksheet.mergeCells(indexStartRow, 1, indexEndRow, 1);
       worksheet.mergeCells(indexStartRow, 2, indexEndRow, 2);
+      worksheet.mergeCells(indexStartRow, 5, indexEndRow, 5);
+      worksheet.mergeCells(indexStartRow, 6, indexEndRow, 6);
+      worksheet.mergeCells(indexStartRow, 7, indexEndRow, 7);
       worksheet.mergeCells(indexStartRow, 8, indexEndRow, 8);
       worksheet.mergeCells(indexStartRow, 9, indexEndRow, 9);
       worksheet.mergeCells(indexStartRow, 10, indexEndRow, 10);
+      worksheet.mergeCells(indexStartRow, 11, indexEndRow, 11);
 
       // Object all
       tableBodyCell = worksheet.getCell(indexEndRow, 3);
@@ -1765,63 +1755,116 @@ export function timesheetExcellForMonthBuh(responce, date) {
       tableBodyCell.border = Style.BorderThin;
       tableBodyCell.fill = bodyRowFillColor;
 
-      // Taxes all
-      tableBodyCell = worksheet.getCell(indexEndRow, 5);
-      tableBodyCell.value = { 
-        formula: `SUM(${worksheet.getCell(indexStartRow, 5).address}:${worksheet.getCell(indexEndRow-1, 5).address})`, 
-        result: 0 
-      };
-      tableBodyCell.font = Style.FontSmall;
-      tableBodyCell.alignment = Style.AlignmentMiddleCenter;
-      tableBodyCell.border = Style.BorderThin;
-      tableBodyCell.fill = bodyRowFillColor;
-
-      // Advance all
-      tableBodyCell = worksheet.getCell(indexEndRow, 6);
-      tableBodyCell.value = { 
-        formula: `SUM(${worksheet.getCell(indexStartRow, 6).address}:${worksheet.getCell(indexEndRow-1, 6).address})`, 
-        result: 0 
-      };
-      tableBodyCell.font = Style.FontSmall;
-      tableBodyCell.alignment = Style.AlignmentMiddleCenter;
-      tableBodyCell.border = Style.BorderThin;
-      tableBodyCell.fill = bodyRowFillColor;
-
-      // Payoff all
-      tableBodyCell = worksheet.getCell(indexEndRow, 7);
-      tableBodyCell.value = { 
-        formula: `SUM(${worksheet.getCell(indexStartRow, 7).address}:${worksheet.getCell(indexEndRow-1, 7).address})`, 
-        result: allSumm 
-      };
-      tableBodyCell.font = Style.FontSmall;
-      tableBodyCell.alignment = Style.AlignmentMiddleCenter;
-      tableBodyCell.border = Style.BorderThin;
-      tableBodyCell.fill = bodyRowFillColor;
     }
 
-    // Sign
-    tableBodyCell = worksheet.getCell(indexStartRow, 8);
+    // Awards
+    tableBodyCell = worksheet.getCell(indexStartRow, 5);
     tableBodyCell.font = Style.FontSmall;
-    tableBodyCell.alignment = Style.AlignmentMiddleLeft;
+    tableBodyCell.alignment = Style.AlignmentMiddleCenter;
     tableBodyCell.border = Style.BorderThin;
     tableBodyCell.fill = bodyRowFillColor;
 
-    // Date
+    // Taxes
+    tableBodyCell = worksheet.getCell(indexStartRow, 6);
+    tableBodyCell.font = Style.FontSmall;
+    tableBodyCell.alignment = Style.AlignmentMiddleCenter;
+    tableBodyCell.border = Style.BorderThin;
+    tableBodyCell.fill = bodyRowFillColor;
+
+    // Advance
+    tableBodyCell = worksheet.getCell(indexStartRow, 7);
+    tableBodyCell.font = Style.FontSmall;
+    tableBodyCell.alignment = Style.AlignmentMiddleCenter;
+    tableBodyCell.border = Style.BorderThin;
+    tableBodyCell.fill = bodyRowFillColor;
+
+    // Payoff
+    tableBodyCell = worksheet.getCell(indexStartRow, 8);
+    tableBodyCell.value = { 
+      formula: `ROUND(${
+        worksheet.getCell(indexEndRow, 4).address
+      }+${
+        worksheet.getCell(indexStartRow, 5).address
+      }-${
+        worksheet.getCell(indexStartRow, 6).address
+      }-${
+        worksheet.getCell(indexStartRow, 7).address
+      }, -1)`, 
+      result: allSumm 
+    } ;
+    tableBodyCell.font = Style.FontSmall;
+    tableBodyCell.alignment = Style.AlignmentMiddleCenter;
+    tableBodyCell.border = Style.BorderThin;
+    tableBodyCell.fill = bodyRowFillColor;
+
+    // Sign
     tableBodyCell = worksheet.getCell(indexStartRow, 9);
     tableBodyCell.font = Style.FontSmall;
     tableBodyCell.alignment = Style.AlignmentMiddleLeft;
     tableBodyCell.border = Style.BorderThin;
     tableBodyCell.fill = bodyRowFillColor;
 
-    // SignInitials
+    // Date
     tableBodyCell = worksheet.getCell(indexStartRow, 10);
     tableBodyCell.font = Style.FontSmall;
     tableBodyCell.alignment = Style.AlignmentMiddleLeft;
     tableBodyCell.border = Style.BorderThin;
     tableBodyCell.fill = bodyRowFillColor;
 
+    // SignInitials
+    tableBodyCell = worksheet.getCell(indexStartRow, 11);
+    tableBodyCell.font = Style.FontSmall;
+    tableBodyCell.alignment = Style.AlignmentMiddleLeft;
+    tableBodyCell.border = Style.BorderThin;
+    tableBodyCell.fill = bodyRowFillColor;
+
+    // Variables
+    allSummFinish += allSumm;
     indexStartRow = indexEndRow + 1; 
   });
+  
+  // Заголовок таблицы
+  try {
+
+    var tableFooterRow = worksheet.addRow();
+
+    tableFooterRow.height = 27;
+
+    var keyIndex = 0;
+
+    mapValue(reportBuhTableHeader, (value, key) => {
+
+      keyIndex++;
+
+      let tableCustomCell = tableFooterRow.getCell(keyIndex);
+      tableCustomCell.font = Style.FontSmallBold;
+      tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
+      tableCustomCell.fill = Style.FillYellow3;
+      tableCustomCell.border = Style.BorderThin;
+
+    })
+    tableFooterRow.getCell(2).value = "ИТОГО:"
+    tableFooterRow.getCell(5).value = { 
+      formula: `SUM(${worksheet.getCell(5, 5).address}:${worksheet.getCell(indexEndRow, 5).address})`, 
+      result: 0 
+    };
+
+    tableFooterRow.getCell(6).value = { 
+      formula: `SUM(${worksheet.getCell(5, 6).address}:${worksheet.getCell(indexEndRow, 6).address})`, 
+      result: 0 
+    };
+
+    tableFooterRow.getCell(7).value = { 
+      formula: `SUM(${worksheet.getCell(5, 7).address}:${worksheet.getCell(indexEndRow, 7).address})`, 
+      result: 0 
+    };
+
+    tableFooterRow.getCell(8).value = { 
+      formula: `SUM(${worksheet.getCell(5, 8).address}:${worksheet.getCell(indexEndRow, 8).address})`, 
+      result: allSummFinish
+    };
+
+  } catch (error) { console.log(error) }
 
   return ExcelJSWorkbook.xlsx;
 
