@@ -19,7 +19,7 @@ const content = (isFirstMount) => ({
   }
 });
 
-export default function Guards({ isFirstMount, accessRules, userData, guards, guardsArchive, guardPosts, users }) {
+export default function Guards({ isFirstMount, accessRules, userData, guards, guardsArchive }) {
 
   const ARgetGuardPostsArchive = accessRules.includes('guards/archive');
 
@@ -36,8 +36,6 @@ export default function Guards({ isFirstMount, accessRules, userData, guards, gu
           tableGuards={tableGuards}
           setTableGuards={setTableGuards}
           setTableGuardsArchive={setTableGuardsArchive}
-          guardPosts={guardPosts}
-          users={users}
         />
     },
     ARgetGuardPostsArchive ? {
@@ -49,8 +47,6 @@ export default function Guards({ isFirstMount, accessRules, userData, guards, gu
           tableGuardsArchive={tableGuardsArchive}
           setTableGuards={setTableGuards}
           setTableGuardsArchive={setTableGuardsArchive}
-          guardPosts={guardPosts}
-          users={users}
         />
     } : null,
   ].filter(Boolean);
@@ -129,25 +125,6 @@ export const getServerSideProps = catchAuthServer(async (context) => {
     }
   })
 
-  const guardPosts = await mongoGuardPostsModel
-    .find({}, '-createdAt -updatedAt', { sort: { 'manager': 1, 'number': 1, 'callsign': 1 } })
-    .populate('manager', 'surname firstName')
-    .lean();
-
-  guardPosts.forEach(value => {
-    value._id = value._id.toString();
-
-    if (value.manager) {
-      value.manager._id = value.manager._id.toString();
-    }
-  })
-
-  const users = await mongoUserModel.find({ positions: FPositionNSO }, 'surname firstName').lean();
-
-  users.forEach(value => {
-    value._id = value._id.toString();
-  })
-
   // Выборка данных об охранниках в Архиве
   var guardsArchive = '';
 
@@ -177,7 +154,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   }
 
   return {
-    props: { accessRules, userData, guards, guardsArchive, guardPosts, users, initialState: { checkAuth: true } }
+    props: { accessRules, userData, guards, guardsArchive, initialState: { checkAuth: true } }
   }
 
 })

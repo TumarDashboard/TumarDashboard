@@ -18,7 +18,8 @@ import { createGuard } from '../../../src/dtos/dtoGuard';
 import { FFilterText } from '../../levelE_low/FFilterText';
 import { motion } from "framer-motion";
 
-export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEdit, optionGuards, setGuards, users, guardPosts, MOBXui, errorCallback }) {
+export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEdit, optionGuards, 
+  setGuards, MOBXui, errorCallback }) {
 
   /*----Определение правил доступа------------------------------------------------------------------------------------*/
   const ARcreateGuard = accessRules.includes('createGuard');
@@ -302,8 +303,6 @@ export function FGuardPostSelectGuardForm({ accessRules, form, setForm, submitEd
         form={guardEditForm}
         setForm={setGuardEditForm}
         submitAdd={guardAdd}
-        guardPosts={guardPosts}
-        users={users}
       />
 
     </FModalForm >

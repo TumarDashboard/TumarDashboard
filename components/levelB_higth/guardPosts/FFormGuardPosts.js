@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 import Image from "next/legacy/image";
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from "next/router";
-import useSWR, { useSWRConfig } from 'swr'
-import { fetchAuthFileMethod, fetchAuthMethod, fetchAuth } from "../../../middleware/requests";
+import useSWR from 'swr';
+import { fetchAuthMethod } from "../../../middleware/requests";
 
 import { useStore } from "../../levelA/StoreProvider";
 import { ApiError } from "../../../middleware/exceptions";
@@ -16,11 +16,9 @@ import { FGuardPostDeleteForm } from '../../levelD_modal/guardPost/FGuardPostDel
 import { FGuardPostEditForm } from '../../levelD_modal/guardPost/FGuardPostEditForm';
 import { FTimesheetPrintForm } from '../../levelD_modal/timesheet/FTimesheetPrintForm';
 import { FFilterText } from '../../levelE_low/FFilterText';
-import { FButtonWhiteSmall } from '../../levelE_low/FButtonWhiteSmall';
-import { FTimesheetTableSelectGuardForm } from '../../levelD_modal/timesheetTable/FTimesheetTableSelectGuardForm';
 import { FGuardPostSelectGuardForm } from '../../levelD_modal/guardPost/FGuardPostSelectGuardForm';
 import { FGuardPostShowGuardForm } from '../../levelD_modal/guardPost/FGuardPostShowGuardForm';
-import { changeTimesheetToday, changeTimesheetToday2, getTimesheetToday } from '../../../src/dtos/dtoTimesheet';
+import { changeTimesheetToday2 } from '../../../src/dtos/dtoTimesheet';
 import { FTooltip } from '../../levelE_low/FTooltip';
 
 const inputs = {
@@ -79,7 +77,8 @@ const sortingTableCallback = (a, b, rule, invert) => {
   }
 }
 
-export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts, setTableGuardPosts, setTableGuardPostsArchive, guardsData, users }) {
+export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts, 
+  setTableGuardPosts, setTableGuardPostsArchive, guardsData, users }) {
   /*----Использование глобальных данных-------------------------------------------------------------------------------*/
   const router = useRouter();
 
@@ -382,7 +381,6 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
   });
 
   /*----Перезапуск обновления данных таблицы--------------------------------------------------------------------------*/
-
   const { 
     data: dataTimesheetToday, 
     error: errorTimesheetToday, 
@@ -885,8 +883,8 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
           });
         }}
         optionGuards={guards}
-        users={users}
-        guardPosts={tableGuardPosts}
+        // users={users}
+        // guardPosts={tableGuardPosts}
         MOBXui={MOBXui}
         errorCallback={errorCallback}
       />

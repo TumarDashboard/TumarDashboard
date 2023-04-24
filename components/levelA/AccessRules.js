@@ -248,6 +248,15 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionHRM, userCompare: ['idHard'] }
         ]
     },
+
+    // Modal methods
+    {
+        url: '/api/method/modal/getGuardEditForm', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            // { position: positions.FPositionNSO }
+        ]
+    },
 ];
 
 export async function getApiMethodAccess(req, userData) {

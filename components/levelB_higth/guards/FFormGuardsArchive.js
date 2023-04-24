@@ -68,7 +68,8 @@ const sortingTableCallback = (a, b, rule, invert) => {
   }
 }
 
-export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, setTableGuards, setTableGuardsArchive, guardPosts, users }) {
+export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, setTableGuards, 
+  setTableGuardsArchive }) {
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
   -------------------------------------------------------------------------------------------------------*/
@@ -623,8 +624,6 @@ export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, se
         setForm={setGuardEditForm}
         submitAdd={guardAdd}
         submitEdit={guardEdit}
-        guardPosts={guardPosts}
-        users={users}
       />
 
       {/* {Форма удаления охранника} */}

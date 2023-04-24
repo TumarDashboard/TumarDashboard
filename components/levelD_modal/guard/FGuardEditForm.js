@@ -5,13 +5,17 @@ import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 import { FSelect } from "../../levelE_low/FSelect";
 import Image from "next/legacy/image";
+import useSWR from 'swr';
+import useSWRMutation from 'swr/mutation';
+import useSWRImmutable from 'swr/immutable';
+import { fetchAuthMethod } from "../../../middleware/requests";
 
 import { equalArrays } from '../../../src/utils/arrayUtils';
 import { FInputInitials, inputInitialsValidate } from '../../levelE_low/FInputInitials';
 import { FInputTelephone } from '../../levelE_low/FInputTelephone';
 import { FInputIIN } from '../../levelE_low/FInputIIN';
 
-export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPosts, users }) {
+export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
 
   /*--Операция-------------------------------------------------------------------------------------------*/
   const [operation, setOperation] = useState('');
@@ -108,16 +112,15 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
     }
   }
 
-  /*--Физ.посты Формы редактирования---------------------------------------------------------------------*/
-  const optionGuardPosts = [{
-    label: 'Отсутствует', value: 'EMPTY'
-  }, ...guardPosts?.map((guardPost) => {
-    return {
-      label: [guardPost.number, guardPost.callsign].filter(Boolean).join(', '),
-      value: guardPost._id,
-    }
-  })]
+  /*--Запрос данных на сервере---------------------------------------------------------------------*/
 
+  const {
+    data: optionGuardPosts,
+    isMutating: isMutatingFromServer,
+    trigger: triggerFromServer,
+  } = useSWRMutation('/method/modal/getGuardEditForm', fetchAuthMethod);
+
+  /*--Физ.посты Формы редактирования---------------------------------------------------------------------*/
   const [inputGuardGuardPosts, setInputGuardGuardPosts] = useState([]);
 
   const guardPostChange = (e) => {
@@ -139,12 +142,10 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
     if (form.error) {
       setError(form.error);
     } else if (form.isOpen) {
-      console.log(form.guard);
-      console.log(form.guard?.uiAvatarsSrc);
+      triggerFromServer();
+
       setOperation(form.operation);
       GuardSurnameChange(form.guard?.surname, inputInitialsValidate(form.guard?.surname));
-      // setInputGuardSurname(form.guard?.surname);
-      // setInputValidateGuardSurname(inputInitialsValidate());
       setInputGuardfirstName(form.guard?.firstName);
       setInputValidateGuardfirstName(false);
       setInputGuardPatronymic(form.guard?.patronymic);
@@ -155,6 +156,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
       setInputGuardIIN(form.guard?.iin);
       setInputValidateGuardIIN(form.operation == 'Добавить');
       setInputGuardGuardPosts(form.guard?.guardPosts || []);
+
       setError(null);
     }
   }, [form])
@@ -321,16 +323,28 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit, guardPost
         </div>
 
         {/* Физ. посты */}
-        <div className="form-item w-full mt-4">
-          <label className="text-lg pr-4">Физ. посты</label>
-          <FSelect
-            options={optionGuardPosts}
-            onChange={guardPostChange}
-            value={inputGuardGuardPosts}
-            key={form.key}
-            multiple
-          />
-        </div>
+        {isMutatingFromServer ?
+          <div className="form-item w-full mt-4 flex justify-center">
+            <svg fill='none' className="w-32 h-32 animate-spin" viewBox="0 0 32 32" xmlns='http://www.w3.org/2000/svg'>
+              <path clipRule='evenodd'
+                d='M15.165 8.53a.5.5 0 01-.404.58A7 7 0 1023 16a.5.5 0 011 0 8 8 0 11-9.416-7.874.5.5 0 01.58.404z'
+                fill='currentColor' fillRule='evenodd' />
+            </svg>
+          </div>
+          :
+          <div className="form-item w-full mt-4">
+            <label className="text-lg pr-4">Физ. посты</label>
+            <FSelect
+              options={optionGuardPosts}
+              onChange={guardPostChange}
+              value={inputGuardGuardPosts}
+              key={form.key}
+              disabled={isMutatingFromServer}
+              multiple
+            />
+          </div>
+        }
+
 
         {/* Статус ошибки */}
         <div className="form-item">

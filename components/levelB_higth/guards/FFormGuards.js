@@ -71,15 +71,12 @@ const sortingTableCallback = (a, b, rule, invert) => {
   }
 }
 
-export default function FFormGuards({ accessRules, tableGuards, setTableGuards, setTableGuardsArchive, guardPosts, users }) {
-  /*-------------------------------------------------------------------------------------------------------
-      Использование глобальных данных
-  -------------------------------------------------------------------------------------------------------*/
+export default function FFormGuards({ accessRules, tableGuards, setTableGuards, 
+  setTableGuardsArchive }) {
+  /*--Использование глобальных данных--------------------------------------------------------------------*/
   const { MOBXuser, MOBXui } = useStore();
 
-  /*-------------------------------------------------------------------------------------------------------
-      Определение правил доступа
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Определение правил доступа-------------------------------------------------------------------------*/
   const ARcreateGuard = accessRules.includes('createGuard');
   const AReditGuard = accessRules.includes('editGuard');
   const ARdeleteGuard = accessRules.includes('deleteGuard');
@@ -551,8 +548,6 @@ export default function FFormGuards({ accessRules, tableGuards, setTableGuards, 
         setForm={setGuardEditForm}
         submitAdd={guardAdd}
         submitEdit={guardEdit}
-        guardPosts={guardPosts}
-        users={users}
       />
 
       {/* {Форма удаления охранника} */}

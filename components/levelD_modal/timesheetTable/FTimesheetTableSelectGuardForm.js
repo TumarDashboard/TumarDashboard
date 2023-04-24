@@ -1,44 +1,27 @@
 import { XMarkIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { FModalForm } from '../FModalForm';
 import { useState, useEffect, useRef } from 'react';
-import { FInputFile } from "../../levelE_low/FInputFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
-import { FSelect } from "../../levelE_low/FSelect";
 
-import { equalArrays } from '../../../src/utils/arrayUtils';
-import { FInputInitials } from '../../levelE_low/FInputInitials';
-import { FInputTelephone } from '../../levelE_low/FInputTelephone';
-import Select from 'react-select';
-import { useId } from 'react';
-import { FInputText } from '../../levelE_low/FInputText';
-import { array } from 'yup';
 import { FGuardEditForm } from '../guard/FGuardEditForm';
 import { createGuard } from '../../../src/dtos/dtoGuard';
 import { FFilterText } from '../../levelE_low/FFilterText';
-import { motion } from "framer-motion";
 
-export function FTimesheetTableSelectGuardForm({ accessRules, form, setForm, submitAdd, submitEdit, optionGuards, setGuards, users, guardPosts, MOBXui, errorCallback }) {
+export function FTimesheetTableSelectGuardForm({ accessRules, form, setForm, submitAdd, 
+  submitEdit, optionGuards, setGuards, MOBXui, errorCallback }) {
 
   /*----Определение правил доступа------------------------------------------------------------------------------------*/
   const ARcreateGuard = accessRules.includes('createGuard');
 
-  /*-------------------------------------------------------------------------------------------------------
-      Операция
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Операция-------------------------------------------------------------------------------------------*/
   const [operation, setOperation] = useState('');
   const [error, setError] = useState('');
 
-  /*-------------------------------------------------------------------------------------------------------
-      Данные для работы Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
-
+  /*--Данные для работы Формы редактирования-------------------------------------------------------------*/
   const [optionsForWork, setOptionsForWork] = useState([]);
 
-  /*-------------------------------------------------------------------------------------------------------
-      Фильтр Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
-
+  /*--Фильтр Формы редактирования------------------------------------------------------------------------*/
   const [inputFilter, setInputFilter] = useState([]);
   const [inputFilterText, setInputFilterText] = useState([]);
   const filterringTimeout = useRef();
@@ -52,10 +35,7 @@ export function FTimesheetTableSelectGuardForm({ accessRules, form, setForm, sub
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Выбранные данные для работы Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
-
+  /*--Выбранные данные для работы Формы редактирования---------------------------------------------------*/
   const [inputGuard, setInputGuard] = useState([]);
 
   const selectOption = (newValue) => {
@@ -103,16 +83,12 @@ export function FTimesheetTableSelectGuardForm({ accessRules, form, setForm, sub
 
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Модальное окно Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Модальное окно Формы редактирования----------------------------------------------------------------*/
   const [guardEditForm, setGuardEditForm] = useState({
     isOpen: false
   });
 
-  /*-------------------------------------------------------------------------------------------------------
-      Добавление охранника Формой редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Добавление охранника Формой редактирования---------------------------------------------------------*/
   const guardAdd = async (event,
     inputGuardSurname,
     inputGuardFirstName,
@@ -164,9 +140,7 @@ export function FTimesheetTableSelectGuardForm({ accessRules, form, setForm, sub
 
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Чистка/Обновление инпутов
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Чистка/Обновление инпутов--------------------------------------------------------------------------*/
   useEffect(() => {
     document.body.classList.remove("overscroll-y-contain");
     if (form.error) {
@@ -176,6 +150,7 @@ export function FTimesheetTableSelectGuardForm({ accessRules, form, setForm, sub
       setInputGuard(form.guard ? null : []);
       setOptionsForWork(optionGuards);
       setInputFilter(optionGuards);
+      console.log(optionGuards);
       setInputFilterText('');
       setError(null);
       document.body.classList.add("overscroll-y-contain");
@@ -184,8 +159,8 @@ export function FTimesheetTableSelectGuardForm({ accessRules, form, setForm, sub
       filterringTimeout.current && clearTimeout(filterringTimeout.current);
     }
   }, [form])
-  /*-------------------------------------------------------------------------------------------------------
-  -------------------------------------------------------------------------------------------------------*/
+
+  /*-----------------------------------------------------------------------------------------------------*/
 
   return (
     <FModalForm
@@ -327,8 +302,6 @@ export function FTimesheetTableSelectGuardForm({ accessRules, form, setForm, sub
         form={guardEditForm}
         setForm={setGuardEditForm}
         submitAdd={guardAdd}
-        guardPosts={guardPosts}
-        users={users}
       />
 
     </FModalForm >

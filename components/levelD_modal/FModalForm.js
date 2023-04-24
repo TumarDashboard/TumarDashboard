@@ -33,7 +33,6 @@ export function FModalForm({ title, isModalFormOpen, setIsModalFormOpen, childre
           className="w-full h-full flex items-center justify-center"
           id="modalForm"
           onPointerDown={(e) => { 
-            console.log(e.target.id);
             if (e.target.id == "modalForm") setIsModalFormOpen({ isOpen: false }) 
           }}
         >

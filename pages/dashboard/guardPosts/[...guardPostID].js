@@ -45,7 +45,6 @@ export default function GuardPostID({ isFirstMount, accessRules, userData, guard
             accessRules={accessRules}
             userData={userData}
             guardPost={guardPost}
-            guardPosts={guardPosts}
             guardsData={guards}
             users={users}
             usersAll={usersAll}
@@ -60,6 +59,7 @@ GuardPostID.onSidebar = true;
 
 export const getServerSideProps = catchAuthServer(async (context) => {
 
+  // Определение данных контекста
   const userData = context.userData;
   const accessRules = context.accessRules;
 
@@ -103,32 +103,9 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   const usersAll = users.concat(usersArchive);
 
   // Физ пост
-  var guardPost;
+  const guardPost = await mongoGuardPostsModel.findById(queryPath[0], '-createdAt -updatedAt').populate('manager', 'surname firstName').lean();
 
-  const guardPosts = await mongoGuardPostsModel
-    .find({}, '-createdAt -updatedAt', { sort: { 'manager': 1, 'number': 1, 'callsign': 1  } })
-    .populate('manager', 'surname firstName')
-    .lean();
-
-  guardPosts.forEach(value => {
-    value._id = value._id.toString();
-    if (!guardPost && queryPath[0] === value._id) {
-      guardPost = value;
-      if (guardPost.manager) {
-        guardPost.manager._id = guardPost.manager._id.toString();
-        let index = usersAll.findIndex(x => x._id == guardPost.manager._id);
-        if (index === -1) {
-          usersAll.unshift(guardPost.manager)
-        }
-      }
-    } else if (value.manager) {
-      value.manager._id = value.manager._id.toString();
-    }
-  })
-
-  // Проверка существования физ поста по ID
   if (!guardPost) {
-
     throw ApiError.BadRequest('Физ. пост с указанным ID не найден');
 
     // guardPost = await mongoGuardPostsArchiveModel.findOne({}, '-createdAt -updatedAt')
@@ -140,20 +117,25 @@ export const getServerSideProps = catchAuthServer(async (context) => {
     //   throw ApiError.BadRequest('Физ. пост с указанным ID не найден');
     // }
 
-    // guardPost._id = guardPost._id.toString();
-
-    // if (guardPost.manager) {
-    //   guardPost.manager._id = guardPost.manager._id.toString();
-    // }
-
     // if (guardPost.userPerfomed) {
     //   guardPost.userPerfomed._id = guardPost.userPerfomed._id.toString();
     // }
+
+  }
+
+  guardPost._id = guardPost._id.toString();
+
+  if (guardPost.manager) {
+    guardPost.manager._id = guardPost.manager._id.toString();
+    let index = usersAll.findIndex(x => x._id==guardPost.manager._id); 
+    if( index === -1 ){
+      usersAll.unshift(guardPost.manager)
+    }
   }
 
   // Передача данных
   return {
-    props: { accessRules, userData, guardPost, guardPosts, guards, users, usersAll, initialState: { checkAuth: true } }
+    props: { accessRules, userData, guardPost, guards, users, usersAll, initialState: { checkAuth: true } }
   }
 
 })

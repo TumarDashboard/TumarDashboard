@@ -29,7 +29,7 @@ const inputs = {
   },
 };
 
-export default function FFormGuardPostID({ accessRules, userData, guardPost, guardPosts, guardsData, users, usersAll }) {
+export default function FFormGuardPostID({ accessRules, userData, guardPost, guardsData, users, usersAll }) {
 
   /*-------------------------------------------------------------------------------------------------------
       Определение правил доступа
@@ -345,9 +345,7 @@ export default function FFormGuardPostID({ accessRules, userData, guardPost, gua
           MOBXui={MOBXui}
           errorCallback={errorCallback}
           guardPost={guardPostData}
-          guardPosts={guardPosts}
           guardsData={guardsData}
-          users={users}
           usersAll={usersAll}
         />}
 
