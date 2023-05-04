@@ -18,7 +18,7 @@ const defaultDayShift = 8;
 
 const currentMonth = getCurrentMonth();
 
-export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXuser, 
+export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXuser,
   MOBXui, errorCallback, guardPost, guardsData, usersAll }) {
 
   /*-------------------------------------------------------------------------------------------------------
@@ -110,9 +110,9 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
         setTimesheetTableHeader(daysFromMonth);
 
         const { guardsRow, optionGuards, manager, rate } = await getTimesheet(
-          guardPost._id, 
-          guardPost.manager ? guardPost.manager._id : undefined, 
-          value, );
+          guardPost._id,
+          guardPost.manager ? guardPost.manager._id : undefined,
+          value,);
 
         // console.log('guardPost.rate %o', rate);
 
@@ -278,7 +278,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
   const guardCellSelectShift = (event) => {
 
     setTimesheetChanged(false);
-    
+
     setGuardPostDataShifts(array => {
       array.push(event.target.id);
       return array;
@@ -564,7 +564,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
 
       await changeTimesheet(
         guardPost._id,
-        guardPost.manager ? guardPost.manager._id : undefined, 
+        guardPost.manager ? guardPost.manager._id : undefined,
         timesheetMonth,
         timesheetTableBody.reduce((result, guardRow) => {
           if (guardRow.timesheetShifts && guardRow.timesheetShifts.length > 0) {
@@ -576,7 +576,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
           }
           return result;
         }, []),
-        ARchangeTimesheetManager ? inputGuardPostManager : undefined, 
+        ARchangeTimesheetManager ? inputGuardPostManager : undefined,
         ARchangeTimesheetRate ? inputGuardPostRate : undefined
       );
 
@@ -699,55 +699,64 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
                   colSpan={timesheetTableHeader.length}
                 >
                   <div className='flex justify-center space-x-2'>
+
+                    {/* Месяц */}
                     <FInputMonth
                       onChange={updateDate}
                       value={timesheetMonth}
-                    // className='flex-initial'
+                      className='flex items-center'
                     />
+
+                    {/* НСО и Тариф */}
                     {timesheetMonth && timesheetMonth != currentMonth &&
                       <>
                         {/* НСО */}
-                        {ARchangeTimesheet && ARchangeTimesheetManager &&
-                          <FSelect
-                            options={optionGuardPostManager}
-                            onChange={(e) => {
-                              setTimesheetChanged(false);
-                              setInputGuardPostManager(e?.target?.value)
-                            }}
-                            className='w-fit'
-                            value={inputGuardPostManager ? inputGuardPostManager : 'EMPTY'}
-                          />}
+                        <div className='w-fit'>
+                          {ARchangeTimesheet && ARchangeTimesheetManager &&
+                            <FSelect
+                              options={optionGuardPostManager}
+                              onChange={(e) => {
+                                setTimesheetChanged(false);
+                                setInputGuardPostManager(e?.target?.value)
+                              }}
+                              value={inputGuardPostManager ? inputGuardPostManager : 'EMPTY'}
+                            />}
 
-                        {!(ARchangeTimesheet && ARchangeTimesheetManager) && inputGuardPostManager && inputGuardPostManager != 'EMPTY' &&
-                          <span
-                            className="block w-fit text-white font-bold text-center"
-                          >
-                            НСО {optionGuardPostManager.find(element => element.value == inputGuardPostManager).label}.
-                          </span>}
+                          {!(ARchangeTimesheet && ARchangeTimesheetManager) && inputGuardPostManager && inputGuardPostManager != 'EMPTY' &&
+                            <span
+                              className="block w-fit text-white font-bold text-center"
+                            >
+                              НСО {optionGuardPostManager.find(element => element.value == inputGuardPostManager).label}.
+                            </span>}
+                        </div>
 
                         {/* Тариф */}
-                        {ARchangeTimesheet && ARchangeTimesheetRate &&
-                          <input
-                            id='guard-post-rate'
-                            type="number"
-                            name='guard-post-rate'
-                            placeholder='Тариф'
-                            value={inputGuardPostRate ? inputGuardPostRate : ''}
-                            onChange={(e) => {
-                              setTimesheetChanged(false);
-                              setInputGuardPostRate(parseFloat(e.target.value));
-                            }}
-                            className="border border-gray-300 block w-32
-                            focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
-                            rounded-md shadow-sm disabled:bg-gray-100"
-                          />}
+                        {/* <div
+                          className='w-fit'
+                        > */}
+                          {ARchangeTimesheet && ARchangeTimesheetRate &&
+                            <input
+                              id='guard-post-rate'
+                              type="number"
+                              name='guard-post-rate'
+                              placeholder='Тариф'
+                              value={inputGuardPostRate ? inputGuardPostRate : ''}
+                              onChange={(e) => {
+                                setTimesheetChanged(false);
+                                setInputGuardPostRate(parseFloat(e.target.value));
+                              }}
+                              className="border border-gray-300 block w-32
+                              focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
+                              rounded-md shadow-sm disabled:bg-gray-100"
+                            />}
 
-                        {!(ARchangeTimesheet && ARchangeTimesheetRate) && inputGuardPostRate &&
-                          <span
-                            className="block w-fit text-white font-bold text-center"
-                          >
-                            Тариф {inputGuardPostRate}тг.
-                          </span>}
+                          {!(ARchangeTimesheet && ARchangeTimesheetRate) && inputGuardPostRate &&
+                            <span
+                              className="block w-fit text-white font-bold text-center"
+                            >
+                              Тариф {inputGuardPostRate}тг.
+                            </span>}
+                        {/* </div> */}
 
                       </>}
                   </div>
@@ -1010,7 +1019,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
                         >
                           {shift}
                         </td>;
-                      }else {
+                      } else {
                         return <td
                           key={i}
                           className={`text-center table-cell  border-r-[1px] last:border-r-[0px] select-none 

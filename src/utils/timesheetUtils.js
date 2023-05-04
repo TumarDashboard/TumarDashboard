@@ -1586,8 +1586,15 @@ export function timesheetExcellForMonthBuh(responce, date) {
         left: 0.25, right: 0.25,
         top: 0.6, bottom: 0.6,
         header: 0.25, footer: 0.25
-      }
-    }
+      },
+    },
+    views: [{
+      state: 'frozen', 
+      xSplit: 2, 
+      ySplit: 4, 
+      // topLeftCell: 'G1', 
+      // activeCell: 'A1'
+    }]
   });
 
   //columns heights
@@ -1677,7 +1684,7 @@ export function timesheetExcellForMonthBuh(responce, date) {
 
     // Index
     var tableBodyCell = worksheet.getCell(indexStartRow, 1);
-    tableBodyCell.value = rowsCount; //indexA + 1;
+    tableBodyCell.value = indexA + 1;
     tableBodyCell.font = Style.FontSmall;
     tableBodyCell.alignment = Style.AlignmentMiddleCenter;
     tableBodyCell.border = Style.BorderThin;
@@ -1707,9 +1714,7 @@ export function timesheetExcellForMonthBuh(responce, date) {
       let totalHoursCount = guarpPost.timesheetShifts.reduce((partialSum, a) => partialSum + (isNaN(a) ? 0 : parseInt(a)), 0);
       let guardPostSumm = round10( totalHoursCount * guarpPost.rate );
       allSumm += guardPostSumm ? guardPostSumm : 0;
-      if(!guardPostSumm){
-        console.log(totalHoursCount, guarpPost.rate, guarpPost.timesheetShifts);
-      }
+
       // Summ
       tableBodyCell = worksheet.getCell(indexStartRow + indexB, 4);
       tableBodyCell.value = guardPostSumm ? {
@@ -1823,7 +1828,7 @@ export function timesheetExcellForMonthBuh(responce, date) {
     indexStartRow = indexEndRow + 1; 
   });
   
-  // Заголовок таблицы
+  // Низ таблицы
   try {
 
     var tableFooterRow = worksheet.addRow();
@@ -1843,7 +1848,9 @@ export function timesheetExcellForMonthBuh(responce, date) {
       tableCustomCell.border = Style.BorderThin;
 
     })
+
     tableFooterRow.getCell(2).value = "ИТОГО:"
+
     tableFooterRow.getCell(5).value = { 
       formula: `SUM(${worksheet.getCell(5, 5).address}:${worksheet.getCell(indexEndRow, 5).address})`, 
       result: 0 
