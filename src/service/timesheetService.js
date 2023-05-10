@@ -422,7 +422,7 @@ class TimesheetService {
     async changeTimesheetToday2(inputData) {
 
         try {
-            // console.log('------------------changeTimesheetToday-----------------------');
+            console.log('------------------changeTimesheetToday2-----------------------');
             //Validate date-------------------------------------------------------------------------------------------
             const timesheetsData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
@@ -431,7 +431,7 @@ class TimesheetService {
             });
 
             const { guardPost, guardPostManager, guardsToday } = timesheetsData;
-
+            console.log('guardsToday', guardsToday);
             const guardPostID = mongoose.Types.ObjectId(guardPost);
 
             const month = new Date(getCurrentMonth());
@@ -603,16 +603,14 @@ class TimesheetService {
             }
 
             //Запросить текущие данные об НСО и Тарифе в данных поста
-            const responceGuardPostsModel = await mongoGuardPostsModel.find({
-                _id: guardPostID,
-            }, 'manager rate').lean();
+            const responceGuardPostsModel = await mongoGuardPostsModel.findById(guardPostID, 'manager rate').lean();
 
             //Обновить данные об НСО и Тарифе в записи на месяц
-            await mongoTimesheetsGuardPostModel.findOneAndUpdate(
+            const mongoTimesheetsGuardPostUpdate = await mongoTimesheetsGuardPostModel.findOneAndUpdate(
                 { guardPost: guardPostID, month: month },
                 {
-                    manager: responceGuardPostsModel.manager,
-                    rate: responceGuardPostsModel.rate
+                        manager: responceGuardPostsModel.manager,
+                        rate: responceGuardPostsModel.rate
                 },
                 {
                     upsert: true
