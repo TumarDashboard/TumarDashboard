@@ -228,7 +228,9 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
         <div className='flex flex-col md:flex-row w-full '>
 
           <div className="form-item flex items-center md:mr-4">
-            <label className="text-lg pr-4 select-none">Месяц</label>
+            <label className="text-lg pr-4 select-none">{selectedOperation == DTForDay ? 'Дата' :
+                  selectedOperation == DTForMonthPart ? 'Месяц' :
+                    selectedOperation == DTForMonthPart ? 'Месяц' : 'Месяц'}</label>
             <div className='flex justify-center'>
               <input
                 type={selectedOperation == DTForDay ? 'date' :

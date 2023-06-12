@@ -43,7 +43,22 @@ const reportFullTableHeader = {
   },
 }
 
-const reportBuhTableHeader = {
+const reportExcellForDay = {
+  GuardPostNumber: {
+    width: 6.00,
+    text: '№',
+  },
+  GuardPostCallsignNameAddres: {
+    width: 60.00,
+    text: 'Наименование и адрес',
+  },
+  InitialsGuard: {
+    width: 20.25,
+    text: 'Ф.И.О. охранника',
+  },
+}
+
+const reportExcellForMonthBuh = {
   Index: {
     width: 3.5,
     text: '№',
@@ -100,8 +115,9 @@ const companyName = 'Тұмар Гранд Секьюрити';
 const Style = {
   AlignmentMiddleCenter: { vertical: 'middle', horizontal: 'center' },
   AlignmentMiddleLeft: { vertical: 'middle', horizontal: 'left' },
-  AlignmentMiddleRightText: { vertical: 'middle', horizontal: 'right' },
+  AlignmentMiddleRight: { vertical: 'middle', horizontal: 'right' },
   AlignmentMiddleCenterWrapText: { vertical: 'middle', horizontal: 'center', wrapText: true },
+  AlignmentMiddleLeftWrapText: { vertical: 'middle', horizontal: 'left', wrapText: true },
   AlignmentMiddleRightWrapText: { vertical: 'middle', horizontal: 'right', wrapText: true },
   FontDefault: { name: "Calibri", family: 1, size: defaultFontSize },
   FontDefaultBold: { name: "Calibri", family: 1, size: defaultFontSize, bold: true },
@@ -493,78 +509,102 @@ export function timesheetExcellForDay(responce, date) {
       paperSize: 9,
       orientation: 'portrait',
       margins: {
-        left: 0.25, right: 0.25,
+        left: 0.6, right: 0.25,
         top: 0.6, bottom: 0.6,
         header: 0.25, footer: 0.25
       }
     }
   });
 
-  // Header 
-  var customCell = worksheet.getCell(1, 1);
-  customCell.font = Style.FontDefaultBold;
-  customCell.alignment = Style.AlignmentMiddleCenter;
-  customCell.value = `Список охранников заступивших на смену ${new Date(date).toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' })}`;
-  worksheet.mergeCells(1, 1, 1, 3);
+  //columns heights
+  try {
 
-  worksheet.getColumn(1).width = reportFullTableHeader.GuardPostNumber.width;
-  worksheet.getColumn(2).width = reportFullTableHeader.GuardPostCallsignNameAddres.width;
-  worksheet.getColumn(3).width = reportFullTableHeader.InitialsGuard.width;
+    var keyIndex = 0;
+
+    mapValue(reportExcellForDay, (value, key) => {
+
+      keyIndex++;
+
+      worksheet.getColumn(keyIndex).width = reportExcellForDay[key].width;
+
+    })
+
+  } catch (error) { console.log(error) }
+
+  // Заголовок страницы
+  try {
+
+    let customCell = worksheet.getCell(1, 1);
+    customCell.font = Style.FontDefaultBold;
+    customCell.alignment = Style.AlignmentMiddleCenter;
+    customCell.value = `Список охранников заступивших на смену ${new Date(date).toLocaleString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+    worksheet.mergeCells(1, 1, 1, 3);
+
+  } catch (error) { console.log(error) }
 
   // Заголовок таблицы
-  var tableHeaderRow = worksheet.addRow();
-  tableHeaderRow.height = 27;
+  try {
 
-  var tableHeaderCell = tableHeaderRow.getCell(1);
-  tableHeaderCell.value = reportFullTableHeader.GuardPostNumber.text;
-  tableHeaderCell.font = Style.FontSmallBold;
-  tableHeaderCell.alignment = Style.AlignmentMiddleCenterWrapText;
-  tableHeaderCell.fill = Style.FillYellow1;
-  tableHeaderCell.border = Style.BorderThin;
+    var tableFooterRow = worksheet.addRow();
 
-  tableHeaderCell = tableHeaderRow.getCell(2);
-  tableHeaderCell.value = reportFullTableHeader.GuardPostCallsignNameAddres.text;
-  tableHeaderCell.font = Style.FontSmallBold;
-  tableHeaderCell.alignment = Style.AlignmentMiddleCenter;
-  tableHeaderCell.fill = Style.FillYellow1;
-  tableHeaderCell.border = Style.BorderThin;
+    tableFooterRow.height = 27;
 
-  tableHeaderCell = tableHeaderRow.getCell(3);
-  tableHeaderCell.value = reportFullTableHeader.InitialsGuard.text;
-  tableHeaderCell.font = Style.FontSmallBold;
-  tableHeaderCell.alignment = Style.AlignmentMiddleCenterWrapText;
-  tableHeaderCell.fill = Style.FillYellow1;
-  tableHeaderCell.border = Style.BorderThin;
+    var keyIndex = 0;
 
+    mapValue(reportExcellForDay, (value, key) => {
+
+      keyIndex++;
+
+      let tableCustomCell = tableFooterRow.getCell(keyIndex);
+      tableCustomCell.value = reportExcellForDay[key].text;
+      tableCustomCell.font = Style.FontSmallBold;
+      tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
+      tableCustomCell.fill = Style.FillYellow1;
+      tableCustomCell.border = Style.BorderThin;
+
+    })
+
+  } catch (error) { console.log(error) }
+
+  // Тело таблицы
   for (const NSOdata of responce) {
 
-    const NSOinitials = NSOdata.surname ? [
-      NSOdata.surname,
-      NSOdata.firstName ? NSOdata.firstName : null,
-      NSOdata.patronymic ? NSOdata.patronymic : null,
-    ].filter(Boolean).join(' ') : null;
+    // Глава таблицы с записями об НСО
+    try {
 
-    var tableCaptionRow = worksheet.addRow();
+      const NSOinitials = NSOdata.surname ? [
+        NSOdata.surname,
+        NSOdata.firstName ? NSOdata.firstName : null,
+        NSOdata.patronymic ? NSOdata.patronymic : null,
+      ].filter(Boolean).join(' ') : null;
 
-    var tableCustomCell = tableCaptionRow.getCell(1);
-    tableCustomCell.value = NSOinitials ? "НСО " + NSOinitials : "Без НСО";
-    tableCustomCell.font = Style.FontSmallBold;
-    tableCustomCell.alignment = Style.AlignmentMiddleCenter;
-    tableCustomCell.fill = Style.FillYellow3;
-    tableCustomCell.border = Style.BorderThin;
-    worksheet.mergeCells(tableCaptionRow.number, 1, tableCaptionRow.number, 3);
+      let tableCaptionRow = worksheet.addRow();
 
+      let tableCustomCell = tableCaptionRow.getCell(1);
+      tableCustomCell.value = NSOinitials ? "НСО " + NSOinitials : "Без НСО";
+      tableCustomCell.font = Style.FontSmallBold;
+      tableCustomCell.alignment = Style.AlignmentMiddleCenter;
+      tableCustomCell.fill = Style.FillYellow3;
+      tableCustomCell.border = Style.BorderThin;
+      worksheet.mergeCells(tableCaptionRow.number, 1, tableCaptionRow.number, 3);
+
+    } catch (error) { console.log(error) }
+
+    // Список физ постов
     for (const guardPost of NSOdata.guardPosts) {
 
-      const tableBodyRow = worksheet.addRow();
+      // Новая строка
+      let tableBodyRow = worksheet.addRow();
 
-      var tableBodyCell = tableBodyRow.getCell(1);
+      // Номер физ поста
+      let tableBodyCell = tableBodyRow.getCell(1);
       tableBodyCell.value = guardPost.number;
       tableBodyCell.font = Style.FontSmall;
-      tableBodyCell.alignment = Style.AlignmentMiddleCenter;
+      tableBodyCell.alignment = Style.AlignmentMiddleRight;
       tableBodyCell.border = Style.BorderThin;
       tableBodyCell.fill = Style.FillYellow4;
 
+      // Наименование и адрес физ поста
       tableBodyCell = tableBodyRow.getCell(2);
       tableBodyCell.value = [guardPost.callsign, guardPost.name, guardPost.address].filter(Boolean).join(', ');
       tableBodyCell.font = Style.FontSmall;
@@ -572,6 +612,7 @@ export function timesheetExcellForDay(responce, date) {
       tableBodyCell.border = Style.BorderThin;
       tableBodyCell.fill = Style.FillYellow4;
 
+      // Охранники физ. поста
       tableBodyCell = tableBodyRow.getCell(3);
       tableBodyCell.value = guardPost.element?.length > 0 ?
         guardPost.element.map(guard => {
@@ -1589,9 +1630,9 @@ export function timesheetExcellForMonthBuh(responce, date) {
       },
     },
     views: [{
-      state: 'frozen', 
-      xSplit: 2, 
-      ySplit: 4, 
+      state: 'frozen',
+      xSplit: 2,
+      ySplit: 4,
       // topLeftCell: 'G1', 
       // activeCell: 'A1'
     }]
@@ -1602,11 +1643,11 @@ export function timesheetExcellForMonthBuh(responce, date) {
 
     var keyIndex = 0;
 
-    mapValue(reportBuhTableHeader, (value, key) => {
+    mapValue(reportExcellForMonthBuh, (value, key) => {
 
       keyIndex++;
 
-      worksheet.getColumn(keyIndex).width = reportBuhTableHeader[key].width;
+      worksheet.getColumn(keyIndex).width = reportExcellForMonthBuh[key].width;
 
     })
 
@@ -1644,12 +1685,12 @@ export function timesheetExcellForMonthBuh(responce, date) {
 
     var keyIndex = 0;
 
-    mapValue(reportBuhTableHeader, (value, key) => {
+    mapValue(reportExcellForMonthBuh, (value, key) => {
 
       keyIndex++;
 
       let tableCustomCell = tableFooterRow.getCell(keyIndex);
-      tableCustomCell.value = reportBuhTableHeader[key].text;
+      tableCustomCell.value = reportExcellForMonthBuh[key].text;
       tableCustomCell.font = Style.FontSmallBold;
       tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
       tableCustomCell.fill = Style.FillYellow1;
@@ -1670,7 +1711,7 @@ export function timesheetExcellForMonthBuh(responce, date) {
     //Start variable
     const bodyRowFillColor = indexA & 1 ? Style.FillGreen1 : Style.FillBlue1;
 
-    indexEndRow = indexStartRow + ( guard.element.length > 1 ? guard.element.length : 0 );
+    indexEndRow = indexStartRow + (guard.element.length > 1 ? guard.element.length : 0);
 
     // Calc Page breaker
     let indexElementsB = guard.element.length > 1 ? guard.element.length + 1 : 1;
@@ -1678,7 +1719,7 @@ export function timesheetExcellForMonthBuh(responce, date) {
     if (rowsCount + indexElementsB > maxRowBuhCount) {
       worksheet.lastRow.addPageBreak();
       rowsCount = indexElementsB;
-    }else{
+    } else {
       rowsCount += indexElementsB;
     }
 
@@ -1712,7 +1753,7 @@ export function timesheetExcellForMonthBuh(responce, date) {
 
       // Calculate Summ
       let totalHoursCount = guarpPost.timesheetShifts.reduce((partialSum, a) => partialSum + (isNaN(a) ? 0 : parseInt(a)), 0);
-      let guardPostSumm = round10( totalHoursCount * guarpPost.rate );
+      let guardPostSumm = round10(totalHoursCount * guarpPost.rate);
       allSumm += guardPostSumm ? guardPostSumm : 0;
 
       // Summ
@@ -1720,7 +1761,7 @@ export function timesheetExcellForMonthBuh(responce, date) {
       tableBodyCell.value = guardPostSumm ? {
         formula: `ROUND(${guardPostSumm}, -1)`,
         result: guardPostSumm
-      } : ( totalHoursCount ? totalHoursCount + "ч" : "?" );
+      } : (totalHoursCount ? totalHoursCount + "ч" : "?");
       tableBodyCell.numFmt = '#';
       tableBodyCell.font = guardPostSumm ? Style.FontSmall : Style.FontSmallBoldRed;
       tableBodyCell.alignment = Style.AlignmentMiddleCenter;
@@ -1730,7 +1771,7 @@ export function timesheetExcellForMonthBuh(responce, date) {
     })
 
     // Слияние данных если выход выполнялся на несколько физ постов
-    if ( indexStartRow != indexEndRow ) {
+    if (indexStartRow != indexEndRow) {
       worksheet.mergeCells(indexStartRow, 1, indexEndRow, 1);
       worksheet.mergeCells(indexStartRow, 2, indexEndRow, 2);
       worksheet.mergeCells(indexStartRow, 5, indexEndRow, 5);
@@ -1745,15 +1786,15 @@ export function timesheetExcellForMonthBuh(responce, date) {
       tableBodyCell = worksheet.getCell(indexEndRow, 3);
       tableBodyCell.value = "итого";
       tableBodyCell.font = Style.FontSmall;
-      tableBodyCell.alignment = Style.AlignmentMiddleRightText;
+      tableBodyCell.alignment = Style.AlignmentMiddleRight;
       tableBodyCell.border = Style.BorderThin;
       tableBodyCell.fill = bodyRowFillColor;
 
       // Summ all
       tableBodyCell = worksheet.getCell(indexEndRow, 4);
-      tableBodyCell.value = { 
-        formula: `SUM(${worksheet.getCell(indexStartRow, 4).address}:${worksheet.getCell(indexEndRow-1, 4).address})`, 
-        result: allSumm 
+      tableBodyCell.value = {
+        formula: `SUM(${worksheet.getCell(indexStartRow, 4).address}:${worksheet.getCell(indexEndRow - 1, 4).address})`,
+        result: allSumm
       };
       tableBodyCell.font = Style.FontSmall;
       tableBodyCell.alignment = Style.AlignmentMiddleCenter;
@@ -1785,18 +1826,14 @@ export function timesheetExcellForMonthBuh(responce, date) {
 
     // Payoff
     tableBodyCell = worksheet.getCell(indexStartRow, 8);
-    tableBodyCell.value = { 
-      formula: `ROUND(${
-        worksheet.getCell(indexEndRow, 4).address
-      }+${
-        worksheet.getCell(indexStartRow, 5).address
-      }-${
-        worksheet.getCell(indexStartRow, 6).address
-      }-${
-        worksheet.getCell(indexStartRow, 7).address
-      }, -1)`, 
-      result: allSumm 
-    } ;
+    tableBodyCell.value = {
+      formula: `ROUND(${worksheet.getCell(indexEndRow, 4).address
+        }+${worksheet.getCell(indexStartRow, 5).address
+        }-${worksheet.getCell(indexStartRow, 6).address
+        }-${worksheet.getCell(indexStartRow, 7).address
+        }, -1)`,
+      result: allSumm
+    };
     tableBodyCell.font = Style.FontSmall;
     tableBodyCell.alignment = Style.AlignmentMiddleCenter;
     tableBodyCell.border = Style.BorderThin;
@@ -1825,9 +1862,9 @@ export function timesheetExcellForMonthBuh(responce, date) {
 
     // Variables
     allSummFinish += allSumm;
-    indexStartRow = indexEndRow + 1; 
+    indexStartRow = indexEndRow + 1;
   });
-  
+
   // Низ таблицы
   try {
 
@@ -1837,7 +1874,7 @@ export function timesheetExcellForMonthBuh(responce, date) {
 
     var keyIndex = 0;
 
-    mapValue(reportBuhTableHeader, (value, key) => {
+    mapValue(reportExcellForMonthBuh, (value, key) => {
 
       keyIndex++;
 
@@ -1851,23 +1888,23 @@ export function timesheetExcellForMonthBuh(responce, date) {
 
     tableFooterRow.getCell(2).value = "ИТОГО:"
 
-    tableFooterRow.getCell(5).value = { 
-      formula: `SUM(${worksheet.getCell(5, 5).address}:${worksheet.getCell(indexEndRow, 5).address})`, 
-      result: 0 
+    tableFooterRow.getCell(5).value = {
+      formula: `SUM(${worksheet.getCell(5, 5).address}:${worksheet.getCell(indexEndRow, 5).address})`,
+      result: 0
     };
 
-    tableFooterRow.getCell(6).value = { 
-      formula: `SUM(${worksheet.getCell(5, 6).address}:${worksheet.getCell(indexEndRow, 6).address})`, 
-      result: 0 
+    tableFooterRow.getCell(6).value = {
+      formula: `SUM(${worksheet.getCell(5, 6).address}:${worksheet.getCell(indexEndRow, 6).address})`,
+      result: 0
     };
 
-    tableFooterRow.getCell(7).value = { 
-      formula: `SUM(${worksheet.getCell(5, 7).address}:${worksheet.getCell(indexEndRow, 7).address})`, 
-      result: 0 
+    tableFooterRow.getCell(7).value = {
+      formula: `SUM(${worksheet.getCell(5, 7).address}:${worksheet.getCell(indexEndRow, 7).address})`,
+      result: 0
     };
 
-    tableFooterRow.getCell(8).value = { 
-      formula: `SUM(${worksheet.getCell(5, 8).address}:${worksheet.getCell(indexEndRow, 8).address})`, 
+    tableFooterRow.getCell(8).value = {
+      formula: `SUM(${worksheet.getCell(5, 8).address}:${worksheet.getCell(indexEndRow, 8).address})`,
       result: allSummFinish
     };
 

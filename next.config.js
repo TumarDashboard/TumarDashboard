@@ -30,7 +30,7 @@ module.exports = async (phase, { defaultConfig }) => {
 
             // #Min and Max data for number rate
             NEXT_PUBLIC_MIN_LENGTH_RATE_INPUT: '1',
-            NEXT_PUBLIC_MAX_LENGTH_RATE_INPUT: '100000',
+            NEXT_PUBLIC_MAX_LENGTH_RATE_INPUT: '1000000',
 
             // #Max count for shifts
             NEXT_PUBLIC_MAX_COUNT_SHIFTS: '20',
