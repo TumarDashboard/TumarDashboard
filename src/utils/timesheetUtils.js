@@ -58,6 +58,32 @@ const reportExcellForDay = {
   },
 }
 
+const reportExcellForMonthFull = {
+  Index: {
+    width: 3.5,
+    text: '№\r\nп/п'
+  },
+  Initials: {
+    width: 20.25,
+    text: 'Ф.И.О.',
+  },
+  Days: {
+    width: 2.65,
+  },
+  Count: {
+    width: 5.85,
+    text: 'кол-во\r\nчас',
+  },
+  Rate: {
+    width: 9.00,
+    text: 'тариф',
+  },
+  RateSumm: {
+    width: 10.00,
+    text: 'сумма',
+  },
+}
+
 const reportExcellForMonthBuh = {
   Index: {
     width: 3.5,
@@ -108,7 +134,7 @@ const reportExcellForMonthBuh = {
 const smallFontSize = 9;
 const mediumFontSize = 12;
 const defaultFontSize = 14;
-const maxRowFullCount = 28;
+const maxRowFullCount = 33;
 const maxRowBuhCount = 51;
 const companyName = 'Тұмар Гранд Секьюрити';
 
@@ -999,24 +1025,25 @@ export function timesheetExcellForMonthPart(NSOinitials, guardPosts, usersData, 
 
 export function timesheetExcellForMonthFull(responce, usersData, date) {
 
+  // Переменные книги
   const daysTimesheet = getDaysFromMonth(date);
   const daysCount = daysTimesheet.length;
   const columns = daysCount + 5;
 
-  // Workbook and worksheet create
+  // Workbook create
   const ExcelJSWorkbook = new ExcelJS.Workbook();
 
   // Данные отчета по охранникам
-  // var GuardsData = [];
-
   for (const NSOdata of responce) {
 
+    // Переменные листа
     const NSOinitials = NSOdata.surname ? [
       NSOdata.surname,
       NSOdata.firstName?.length > 0 ? NSOdata.firstName.charAt(0) + '.' : null,
       NSOdata.patronymic?.length > 0 ? NSOdata.patronymic.charAt(0) + '.' : null,
     ].filter(Boolean).join(' ') : null;
 
+    // Worksheet create
     const worksheet = ExcelJSWorkbook.addWorksheet(NSOinitials ? NSOinitials : "без НСО", {
       pageSetup: {
         paperSize: 9,
@@ -1036,49 +1063,64 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
       }
     });
 
-    // Header 
-    let headerCellCenter = Math.trunc(columns / 2);
-    var customCell = worksheet.getCell(1, 2);
-    customCell.font = Style.FontDefaultBold;
-    customCell.alignment = Style.AlignmentMiddleLeft;
-    customCell.value = `НСО: ${NSOinitials ? NSOinitials : 'не указан'}`;
-    worksheet.mergeCells(1, 2, 1, headerCellCenter - 1);
-
-    customCell = worksheet.getCell(1, headerCellCenter);
-    customCell.font = Style.FontDefaultBold;
-    customCell.alignment = Style.AlignmentMiddleRightWrapText;
-    customCell.value = `Утверждаю \r\n Директор ТОО \r\n "${companyName}" \r\n _______________Ким А.А.`;
-    worksheet.mergeCells(1, headerCellCenter, 1, columns);
-    worksheet.getRow(1).height = (defaultFontSize + 5) * 4;
-
-    customCell = worksheet.getCell(2, 1);
-    customCell.font = Style.FontDefaultBold;
-    customCell.alignment = Style.AlignmentMiddleCenter;
-    customCell.value = `Табель сотрудников ТОО "${companyName}"`;
-    worksheet.mergeCells(2, 1, 2, columns);
-
-    customCell = worksheet.getCell(3, 1);
-    customCell.font = Style.FontDefaultBold;
-    customCell.alignment = Style.AlignmentMiddleCenter;
-    customCell.value = `за ${date.toLocaleDateString('ru-KZ', { year: 'numeric', month: 'long' })}`;
-    worksheet.mergeCells(3, 1, 3, columns);
-
     //columns heights
-    worksheet.getColumn(1).width = reportFullTableHeader.Index.width;
-    worksheet.getColumn(2).width = reportFullTableHeader.Initials.width;
-    worksheet.getColumn(3 + daysCount).width = reportFullTableHeader.Count.width;
-    worksheet.getColumn(4 + daysCount).width = reportFullTableHeader.Rate.width;
-    worksheet.getColumn(5 + daysCount).width = reportFullTableHeader.RateSumm.width;
-    for (let i = 0; i < daysCount; i++) {
-      worksheet.getColumn(3 + i).width = reportFullTableHeader.Days.width;
-    }
+    try {
 
-    var rowsCount = 0;
+      worksheet.getColumn(1).width = reportExcellForMonthFull.Index.width;
+      worksheet.getColumn(2).width = reportExcellForMonthFull.Initials.width;
+      worksheet.getColumn(3 + daysCount).width = reportExcellForMonthFull.Count.width;
+      worksheet.getColumn(4 + daysCount).width = reportExcellForMonthFull.Rate.width;
+      worksheet.getColumn(5 + daysCount).width = reportExcellForMonthFull.RateSumm.width;
+  
+      for (let i = 0; i < daysCount; i++) {
+        worksheet.getColumn(3 + i).width = reportExcellForMonthFull.Days.width;
+      }
+
+    } catch (error) { console.log(error) }
+
+    // Заголовок страницы 
+    try {
+
+      let headerCellCenter = Math.trunc(columns / 2);
+
+      // Имя НСО
+      var customCell = worksheet.getCell(1, 2);
+      customCell.font = Style.FontDefaultBold;
+      customCell.alignment = Style.AlignmentMiddleLeft;
+      customCell.value = `НСО: ${NSOinitials ? NSOinitials : 'не указан'}`;
+      worksheet.mergeCells(1, 2, 1, headerCellCenter - 1);
+  
+      // Шапочка страницы
+      customCell = worksheet.getCell(1, headerCellCenter);
+      customCell.font = Style.FontDefaultBold;
+      customCell.alignment = Style.AlignmentMiddleRightWrapText;
+      customCell.value = `Утверждаю \r\n Директор ТОО \r\n "${companyName}" \r\n _______________Ким А.А.`;
+      worksheet.mergeCells(1, headerCellCenter, 1, columns);
+      worksheet.getRow(1).height = (defaultFontSize + 5) * 4;
+  
+      // Оглавление страницы 1
+      customCell = worksheet.getCell(2, 1);
+      customCell.font = Style.FontDefaultBold;
+      customCell.alignment = Style.AlignmentMiddleCenter;
+      customCell.value = `Табель сотрудников ТОО "${companyName}"`;
+      worksheet.mergeCells(2, 1, 2, columns);
+      
+      // Оглавление страницы 2
+      customCell = worksheet.getCell(3, 1);
+      customCell.font = Style.FontDefaultBold;
+      customCell.alignment = Style.AlignmentMiddleCenter;
+      customCell.value = `за ${date.toLocaleDateString('ru-KZ', { year: 'numeric', month: 'long' })}`;
+      worksheet.mergeCells(3, 1, 3, columns);
+
+    } catch (error) { console.log(error) }
+
+    // Тело таблицы
+    var rowsCount = 7;
 
     for (const guardPost of NSOdata.guardPosts) {
 
+      // Calc Page breaker
       var tableRowsCount = guardPost.element?.length > 0 ? guardPost.element.length + 5 : 3;
-
       if (rowsCount > 0) {
         if (rowsCount + tableRowsCount > maxRowFullCount) {
           if (rowsCount < maxRowFullCount) {
@@ -1090,75 +1132,85 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
           worksheet.addRow();
         }
       }
-
       rowsCount += tableRowsCount;
 
-      // Наименование таблицы
-      var tableCaptionRow = worksheet.addRow([[guardPost.number ? '№' + guardPost.number : null, guardPost.callsign, guardPost.name, guardPost.address].filter(Boolean).join(', ')]);
-      var tableCustomCell = tableCaptionRow.getCell(1);
-      tableCustomCell.font = Style.FontMediumBold;
-      tableCustomCell.alignment = Style.AlignmentMiddleCenter;
-      tableCustomCell.fill = Style.FillYellow1;
-      tableCustomCell.border = Style.BorderThin;
-      worksheet.mergeCells(tableCaptionRow.number, 1, tableCaptionRow.number, columns);
-
       // Заголовок таблицы
-      var tableHeaderRow = worksheet.addRow();
-      tableHeaderRow.height = 27;
+      try {
 
-      tableCustomCell = tableHeaderRow.getCell(1);
-      tableCustomCell.value = reportFullTableHeader.Index.text;
-      tableCustomCell.font = Style.FontSmall;
-      tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
-      tableCustomCell.fill = Style.FillYellow1;
-      tableCustomCell.border = Style.BorderThin;
+        // Наименование таблицы
+        let tableCaptionRow = worksheet.addRow([[guardPost.number ? '№' + guardPost.number : null, guardPost.callsign, guardPost.name, guardPost.address].filter(Boolean).join(', ')]);
+        let tableCustomCell = tableCaptionRow.getCell(1);
+        tableCustomCell.font = Style.FontMediumBold;
+        tableCustomCell.alignment = Style.AlignmentMiddleCenter;
+        tableCustomCell.fill = Style.FillYellow1;
+        tableCustomCell.border = Style.BorderThin;
+        worksheet.mergeCells(tableCaptionRow.number, 1, tableCaptionRow.number, columns);
 
-      tableCustomCell = tableHeaderRow.getCell(2);
-      tableCustomCell.value = reportFullTableHeader.Initials.text;
-      tableCustomCell.font = Style.FontSmall;
-      tableCustomCell.alignment = Style.AlignmentMiddleCenter;
-      tableCustomCell.fill = Style.FillYellow1;
-      tableCustomCell.border = Style.BorderThin;
+        // Заголовок таблицы
+        let tableHeaderRow = worksheet.addRow();
+        tableHeaderRow.height = 27;
+        
+        // Индекс
+        tableCustomCell = tableHeaderRow.getCell(1);
+        tableCustomCell.value = reportExcellForMonthFull.Index.text;
+        tableCustomCell.font = Style.FontSmall;
+        tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
+        tableCustomCell.fill = Style.FillYellow1;
+        tableCustomCell.border = Style.BorderThin;
 
-      tableCustomCell = tableHeaderRow.getCell(3 + daysCount);
-      tableCustomCell.value = reportFullTableHeader.Count.text;
-      tableCustomCell.font = Style.FontSmall;
-      tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
-      tableCustomCell.fill = Style.FillYellow1;
-      tableCustomCell.border = Style.BorderThin;
-
-      tableCustomCell = tableHeaderRow.getCell(4 + daysCount);
-      tableCustomCell.value = reportFullTableHeader.Rate.text;
-      tableCustomCell.font = Style.FontSmall;
-      tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
-      tableCustomCell.fill = Style.FillYellow1;
-      tableCustomCell.border = Style.BorderThin;
-
-      tableCustomCell = tableHeaderRow.getCell(5 + daysCount);
-      tableCustomCell.value = reportFullTableHeader.RateSumm.text;
-      tableCustomCell.font = Style.FontSmall;
-      tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
-      tableCustomCell.fill = Style.FillYellow1;
-      tableCustomCell.border = Style.BorderThin;
-
-      for (let i = 0; i < daysCount; i++) {
-        tableCustomCell = tableHeaderRow.getCell(3 + i);
-        tableCustomCell.value = i + 1;
+        // Инициалы охранника
+        tableCustomCell = tableHeaderRow.getCell(2);
+        tableCustomCell.value = reportExcellForMonthFull.Initials.text;
         tableCustomCell.font = Style.FontSmall;
         tableCustomCell.alignment = Style.AlignmentMiddleCenter;
+        tableCustomCell.fill = Style.FillYellow1;
         tableCustomCell.border = Style.BorderThin;
-        if (daysTimesheet[i] == 'сб' || daysTimesheet[i] == 'вс') {
-          tableCustomCell.font = Style.FontSmallBold;
-          tableCustomCell.fill = Style.FillYellow2;
-        } else {
+
+        // Кол-во часов
+        tableCustomCell = tableHeaderRow.getCell(3 + daysCount);
+        tableCustomCell.value = reportExcellForMonthFull.Count.text;
+        tableCustomCell.font = Style.FontSmall;
+        tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
+        tableCustomCell.fill = Style.FillYellow1;
+        tableCustomCell.border = Style.BorderThin;
+
+        // Тариф
+        tableCustomCell = tableHeaderRow.getCell(4 + daysCount);
+        tableCustomCell.value = reportExcellForMonthFull.Rate.text;
+        tableCustomCell.font = Style.FontSmall;
+        tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
+        tableCustomCell.fill = Style.FillYellow1;
+        tableCustomCell.border = Style.BorderThin;
+
+        // Сумма
+        tableCustomCell = tableHeaderRow.getCell(5 + daysCount);
+        tableCustomCell.value = reportExcellForMonthFull.RateSumm.text;
+        tableCustomCell.font = Style.FontSmall;
+        tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
+        tableCustomCell.fill = Style.FillYellow1;
+        tableCustomCell.border = Style.BorderThin;
+
+        // Дни
+        for (let i = 0; i < daysCount; i++) {
+          tableCustomCell = tableHeaderRow.getCell(3 + i);
+          tableCustomCell.value = i + 1;
           tableCustomCell.font = Style.FontSmall;
-          tableCustomCell.fill = Style.FillYellow1;
+          tableCustomCell.alignment = Style.AlignmentMiddleCenter;
+          tableCustomCell.border = Style.BorderThin;
+          if (daysTimesheet[i] == 'сб' || daysTimesheet[i] == 'вс') {
+            tableCustomCell.font = Style.FontSmallBold;
+            tableCustomCell.fill = Style.FillYellow2;
+          } else {
+            tableCustomCell.font = Style.FontSmall;
+            tableCustomCell.fill = Style.FillYellow1;
+          }
         }
-      }
-      // console.log(guardPost.element?.length);
+      } catch (error) { console.log(error) }
+      
       // Тело таблицы
       if (guardPost.element?.length > 0) {
 
+        // Переменные таблицы
         var totalHoursCount = 0;
         var totalHoursAddressStart = '';
         var totalHoursAddressFinish = '';
@@ -1169,13 +1221,17 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
         const totalDaysHoursCountAddressStart = new Array(daysCount).fill('');
         const totalDaysHoursCountAddressFinish = new Array(daysCount).fill('');
         var rate = guardPost.rate ? guardPost.rate : 0;
-        // Тело таблицы
+
+        // Строки таблицы
         guardPost.element.forEach((guard, index) => {
 
-          const tableBodyRow = worksheet.addRow();
-
+          // Переменные строк таблицы
           const bodyRowFillColor = index & 1 ? Style.FillYellow3 : Style.FillYellow4;
 
+          // Добавление строки таблицы
+          const tableBodyRow = worksheet.addRow();
+
+          // Индекс строки таблицы
           var tableBodyCell = tableBodyRow.getCell(1);
           tableBodyCell.value = index + 1;
           tableBodyCell.font = Style.FontSmall;
@@ -1183,6 +1239,7 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
           tableBodyCell.border = Style.BorderThin;
           tableBodyCell.fill = bodyRowFillColor;
 
+          // Инициалы строки таблицы
           tableBodyCell = tableBodyRow.getCell(2);
           tableBodyCell.value = [guard.surname, guard.firstName].join(' ');
           tableBodyCell.font = Style.FontSmall;
@@ -1190,6 +1247,7 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
           tableBodyCell.border = Style.BorderThin;
           tableBodyCell.fill = bodyRowFillColor;
 
+          // Часы в днях таблицы
           var hoursCount = 0;
 
           for (let i = 0; i < daysCount; i++) {
@@ -1254,6 +1312,7 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
           tableBodyCell.border = Style.BorderThin;
           tableBodyCell.fill = bodyRowFillColor;
 
+          // Фиксация стартовой и оконечной яйчейки Сумма часов в строке
           totalHoursCount += hoursCount;
 
           if (index == 0) {
@@ -1286,8 +1345,9 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
           tableBodyCell.border = Style.BorderThin;
           tableBodyCell.fill = bodyRowFillColor;
 
+          // Фиксация стартовой и оконечной яйчейки Сумма Тариф*часы
           totalRateSummCount += rateSumm;
-
+          
           if (index == 0) {
             totalRateSummAddressStart = tableBodyCell.address;
           }
@@ -1296,102 +1356,73 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
             totalRateSummAddressFinish = tableBodyCell.address;
           }
 
-          //Обновление данных страницы отчёта по охранникам
-          // if (hoursCount > 0) {
-
-          //   const guardDataCandidate = GuardsData.find(guardsDataElement => guardsDataElement._id == guard._id.toString());
-
-          //   if (guardDataCandidate) {
-
-          //     guardDataCandidate.hoursSumm += hoursCount;
-          //     guardDataCandidate.rateSumm += rateSumm;
-
-          //     guardDataCandidate.lineTimesheet.push({
-          //       lineGuardPost: [guardPost.number ? guardPost.number : null, guardPost.callsign].filter(Boolean).join(', '),
-          //       lineHours: hoursCount,
-          //       lineRate: rate,
-          //       lineSumm: rateSumm
-          //     })
-
-          //   } else {
-
-          //     GuardsData.push({
-          //       _id: guard._id.toString(),
-          //       value: [guard.surname, guard.firstName].join(' '),
-          //       hoursSumm: hoursCount,
-          //       rateSumm: rateSumm,
-          //       lineTimesheet: [{
-          //         lineGuardPost: [guardPost.number ? guardPost.number : null, guardPost.callsign].filter(Boolean).join(', '),
-          //         lineHours: hoursCount,
-          //         lineRate: rate,
-          //         lineSumm: rateSumm
-          //       }]
-          //     });
-
-          //   }
-          // }
-
         })
 
         // Строка итогов
-        const tableFooterRow = worksheet.addRow();
+        try {
 
-        const bodyFooterFillColor = guardPost.element.length & 1 ? Style.FillYellow3 : Style.FillYellow4;
+          // Переменные строки итогов
+          const bodyFooterFillColor = guardPost.element.length & 1 ? Style.FillYellow3 : Style.FillYellow4;
 
-        var tableFooterCell = tableFooterRow.getCell(1);
-        tableFooterCell.font = Style.FontSmall;
-        tableFooterCell.alignment = Style.AlignmentMiddleCenter;
-        tableFooterCell.border = Style.BorderThin;
-        tableFooterCell.fill = bodyFooterFillColor;
+          // Добавление Строки итогов
+          const tableFooterRow = worksheet.addRow();
 
-        tableFooterCell = tableFooterRow.getCell(2);
-        tableFooterCell.font = Style.FontSmall;
-        tableFooterCell.alignment = Style.AlignmentMiddleLeft;
-        tableFooterCell.border = Style.BorderThin;
-        tableFooterCell.fill = bodyFooterFillColor;
-
-        // console.log(totalDaysHoursCountAddressStart);
-        // console.log(totalDaysHoursCountAddressFinish);
-        for (let i = 0; i < daysCount; i++) {
-
-          tableFooterCell = tableFooterRow.getCell(3 + i);
+          // Индекс
+          var tableFooterCell = tableFooterRow.getCell(1);
           tableFooterCell.font = Style.FontSmall;
           tableFooterCell.alignment = Style.AlignmentMiddleCenter;
           tableFooterCell.border = Style.BorderThin;
           tableFooterCell.fill = bodyFooterFillColor;
-          tableFooterCell.value = {
-            formula: `SUM(${totalDaysHoursCountAddressStart[i]}:${totalDaysHoursCountAddressFinish[i]})`,
-            result: totalDaysHoursCount[i] > 0 ? totalDaysHoursCount[i] : '',
-          };
-          tableFooterCell.numFmt = isFloat(totalDaysHoursCount[i]) ? '#.####' : '#';
-          // if( totalDaysHoursCount[i] > 0)
-          //   tableFooterCell.value = totalDaysHoursCount[i];
-          // console.log(`SUM(${totalDaysHoursCountAddressStart.col}${i+totalDaysHoursCountAddressStart.row}:${totalDaysHoursCountAddressFinish.col}${i+totalDaysHoursCountAddressFinish.row})`);
-        }
 
-        // Итого сумма часов
-        tableFooterCell = tableFooterRow.getCell(3 + daysCount);
-        tableFooterCell.value = { formula: `SUM(${totalHoursAddressStart}:${totalHoursAddressFinish})`, result: totalHoursCount };
-        tableFooterCell.numFmt = isFloat(totalHoursCount) ? '#.####' : '#';
-        tableFooterCell.font = Style.FontSmallBold;
-        tableFooterCell.alignment = Style.AlignmentMiddleCenter;
-        tableFooterCell.border = Style.BorderThin;
-        tableFooterCell.fill = bodyFooterFillColor;
-        // Итого тариф
-        tableFooterCell = tableFooterRow.getCell(4 + daysCount);
-        tableFooterCell.font = Style.FontSmallBold;
-        tableFooterCell.alignment = Style.AlignmentMiddleCenter;
-        tableFooterCell.border = Style.BorderThin;
-        tableFooterCell.fill = bodyFooterFillColor;
+          // Инициалы
+          tableFooterCell = tableFooterRow.getCell(2);
+          tableFooterCell.font = Style.FontSmall;
+          tableFooterCell.alignment = Style.AlignmentMiddleLeft;
+          tableFooterCell.border = Style.BorderThin;
+          tableFooterCell.fill = bodyFooterFillColor;
 
-        // Итого сумма по тарифу
-        tableFooterCell = tableFooterRow.getCell(5 + daysCount);
-        tableFooterCell.value = { formula: `SUM(${totalRateSummAddressStart}:${totalRateSummAddressFinish})`, result: totalRateSummCount };
-        tableFooterCell.numFmt = '#';
-        tableFooterCell.font = Style.FontSmallBold;
-        tableFooterCell.alignment = Style.AlignmentMiddleCenter;
-        tableFooterCell.border = Style.BorderThin;
-        tableFooterCell.fill = bodyFooterFillColor;
+          // Дни
+          for (let i = 0; i < daysCount; i++) {
+
+            tableFooterCell = tableFooterRow.getCell(3 + i);
+            tableFooterCell.font = Style.FontSmall;
+            tableFooterCell.alignment = Style.AlignmentMiddleCenter;
+            tableFooterCell.border = Style.BorderThin;
+            tableFooterCell.fill = bodyFooterFillColor;
+            tableFooterCell.value = {
+              formula: `SUM(${totalDaysHoursCountAddressStart[i]}:${totalDaysHoursCountAddressFinish[i]})`,
+              result: totalDaysHoursCount[i] > 0 ? totalDaysHoursCount[i] : '',
+            };
+            tableFooterCell.numFmt = isFloat(totalDaysHoursCount[i]) ? '#.####' : '#';
+
+          }
+
+          // Итого сумма часов
+          tableFooterCell = tableFooterRow.getCell(3 + daysCount);
+          tableFooterCell.value = { formula: `SUM(${totalHoursAddressStart}:${totalHoursAddressFinish})`, result: totalHoursCount };
+          tableFooterCell.numFmt = isFloat(totalHoursCount) ? '#.####' : '#';
+          tableFooterCell.font = Style.FontSmallBold;
+          tableFooterCell.alignment = Style.AlignmentMiddleCenter;
+          tableFooterCell.border = Style.BorderThin;
+          tableFooterCell.fill = bodyFooterFillColor;
+
+          // Итого тариф
+          tableFooterCell = tableFooterRow.getCell(4 + daysCount);
+          tableFooterCell.font = Style.FontSmallBold;
+          tableFooterCell.alignment = Style.AlignmentMiddleCenter;
+          tableFooterCell.border = Style.BorderThin;
+          tableFooterCell.fill = bodyFooterFillColor;
+
+          // Итого сумма по тарифу
+          tableFooterCell = tableFooterRow.getCell(5 + daysCount);
+          tableFooterCell.value = { formula: `SUM(${totalRateSummAddressStart}:${totalRateSummAddressFinish})`, result: totalRateSummCount };
+          tableFooterCell.numFmt = '#';
+          tableFooterCell.font = Style.FontSmallBold;
+          tableFooterCell.alignment = Style.AlignmentMiddleCenter;
+          tableFooterCell.border = Style.BorderThin;
+          tableFooterCell.fill = bodyFooterFillColor;
+
+        } catch (error) { console.log(error) }
 
       } else {
 
@@ -1409,202 +1440,6 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
     }
 
   }
-
-  // if (GuardsData.length > 0) {
-
-  //   // console.log('%o', GuardsData);
-
-  //   GuardsData = GuardsData.sort((a, b) => a.value.localeCompare(b.value));
-
-  //   const worksheet = ExcelJSWorkbook.addWorksheet('Общий отчёт', {
-  //     pageSetup: {
-  //       paperSize: 9,
-  //       orientation: 'portrait',
-  //       margins: {
-  //         left: 0.25, right: 0.25,
-  //         top: 0.6, bottom: 0.6,
-  //         header: 0.25, footer: 0.25
-  //       }
-  //     },
-  //   });
-
-  //   // Заголовок таблицы
-  //   var tableHeaderRow = worksheet.addRow();
-  //   tableHeaderRow.height = 27;
-
-  //   tableCustomCell = tableHeaderRow.getCell(1);
-  //   tableCustomCell.value = tableHeader.Index.text;
-  //   tableCustomCell.font = Style.FontSmall;
-  //   tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
-  //   tableCustomCell.fill = Style.FillYellow1;
-  //   tableCustomCell.border = Style.BorderThin;
-
-  //   tableCustomCell = tableHeaderRow.getCell(2);
-  //   tableCustomCell.value = tableHeader.Initials.text;
-  //   tableCustomCell.font = Style.FontSmall;
-  //   tableCustomCell.alignment = Style.AlignmentMiddleCenter;
-  //   tableCustomCell.fill = Style.FillYellow1;
-  //   tableCustomCell.border = Style.BorderThin;
-
-  //   tableCustomCell = tableHeaderRow.getCell(3);
-  //   tableCustomCell.value = tableHeader.Count.text;
-  //   tableCustomCell.font = Style.FontSmall;
-  //   tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
-  //   tableCustomCell.fill = Style.FillYellow1;
-  //   tableCustomCell.border = Style.BorderThin;
-
-  //   tableCustomCell = tableHeaderRow.getCell(4);
-  //   tableCustomCell.value = tableHeader.RateSumm.text;
-  //   tableCustomCell.font = Style.FontSmall;
-  //   tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
-  //   tableCustomCell.fill = Style.FillYellow1;
-  //   tableCustomCell.border = Style.BorderThin;
-
-  //   //columns heights
-  //   worksheet.getColumn(1).width = tableHeader.Index.width;
-  //   worksheet.getColumn(2).width = tableHeader.Initials.width;
-  //   worksheet.getColumn(3).width = tableHeader.RateSumm.width;
-  //   worksheet.getColumn(4).width = tableHeader.RateSumm.width;
-
-  //   const columnLineStart = 5;
-  //   var countOfColumn = columnLineStart;
-
-  //   var totalHoursCount = 0;
-  //   var totalHoursAddressStart = '';
-  //   var totalHoursAddressFinish = '';
-  //   var totalRateSummCount = 0;
-  //   var totalRateSummAddressStart = '';
-  //   var totalRateSummAddressFinish = '';
-
-  //   GuardsData.forEach((guardData, index) => {
-
-  //     const tableBodyRow = worksheet.addRow();
-
-  //     // const bodyRowFillColor = index & 1 ? Style.FillYellow3 : Style.FillYellow4;
-  //     const bodyRowFillColor = Style.FillYellow4;
-
-  //     var tableBodyCell = tableBodyRow.getCell(1);
-  //     tableBodyCell.value = index + 1;
-  //     tableBodyCell.font = Style.FontSmall;
-  //     tableBodyCell.alignment = Style.AlignmentMiddleCenter;
-  //     tableBodyCell.border = Style.BorderThin;
-  //     tableBodyCell.fill = bodyRowFillColor;
-
-  //     tableBodyCell = tableBodyRow.getCell(2);
-  //     tableBodyCell.value = guardData.value;
-  //     tableBodyCell.font = Style.FontSmall;
-  //     tableBodyCell.alignment = Style.AlignmentMiddleLeft;
-  //     tableBodyCell.border = Style.BorderThin;
-  //     tableBodyCell.fill = bodyRowFillColor;
-
-  //     tableBodyCell = tableBodyRow.getCell(3);
-  //     tableBodyCell.value = guardData.hoursSumm;
-  //     tableBodyCell.numFmt = isFloat(guardData.hoursSumm) ? '#.####' : '#';
-  //     tableBodyCell.font = Style.FontSmall;
-  //     tableBodyCell.alignment = Style.AlignmentMiddleCenter;
-  //     tableBodyCell.border = Style.BorderThin;
-  //     tableBodyCell.fill = bodyRowFillColor;
-
-  //     totalHoursCount += guardData.hoursSumm;
-
-  //     if (index == 0) {
-  //       totalHoursAddressStart = tableBodyCell.address;
-  //     }
-
-  //     if (index == (GuardsData.length - 1)) {
-  //       totalHoursAddressFinish = tableBodyCell.address;
-  //     }
-
-  //     tableBodyCell = tableBodyRow.getCell(4);
-  //     tableBodyCell.value = guardData.rateSumm;
-  //     tableBodyCell.numFmt = '#';
-  //     tableBodyCell.font = Style.FontSmall;
-  //     tableBodyCell.alignment = Style.AlignmentMiddleCenter;
-  //     tableBodyCell.border = Style.BorderThin;
-  //     tableBodyCell.fill = bodyRowFillColor;
-
-  //     totalRateSummCount += guardData.rateSumm;
-
-  //     if (index == 0) {
-  //       totalRateSummAddressStart = tableBodyCell.address;
-  //     }
-
-  //     if (index == (GuardsData.length - 1)) {
-  //       totalRateSummAddressFinish = tableBodyCell.address;
-  //     }
-
-  //     guardData.lineTimesheet.forEach((line, lineIndex) => {
-
-  //       let offSetIndex = columnLineStart + lineIndex;
-
-  //       countOfColumn = countOfColumn < offSetIndex ? offSetIndex : countOfColumn;
-
-  //       tableBodyCell = tableBodyRow.getCell(offSetIndex);
-  //       tableBodyCell.value = `${line.lineGuardPost}\r\n${line.lineHours}ч x ${line.lineRate} = ${line.lineSumm}`;
-  //       tableBodyCell.font = Style.FontSmall;
-  //       tableBodyCell.alignment = Style.AlignmentMiddleCenterWrapText;
-  //       // tableBodyCell.border = Style.BorderThin;
-  //       // tableBodyCell.fill = bodyRowFillColor;
-
-  //     })
-
-  //   })
-
-  //   // Строка итогов
-  //   const tableFooterRow = worksheet.addRow();
-
-  //   const bodyFooterFillColor = Style.FillYellow3;
-
-  //   var tableFooterCell = tableFooterRow.getCell(1);
-  //   tableFooterCell.font = Style.FontSmall;
-  //   tableFooterCell.alignment = Style.AlignmentMiddleCenter;
-  //   tableFooterCell.border = Style.BorderThin;
-  //   tableFooterCell.fill = bodyFooterFillColor;
-
-  //   tableFooterCell = tableFooterRow.getCell(2);
-  //   tableFooterCell.value = 'ИТОГО';
-  //   tableFooterCell.font = Style.FontSmallBold;
-  //   tableFooterCell.alignment = Style.AlignmentMiddleRightWrapText;
-  //   tableFooterCell.border = Style.BorderThin;
-  //   tableFooterCell.fill = bodyFooterFillColor;
-  //   // console.log(totalHoursCount);
-  //   // Итого сумма часов
-  //   tableFooterCell = tableFooterRow.getCell(3);
-  //   tableFooterCell.value = { formula: `SUM(${totalHoursAddressStart}:${totalHoursAddressFinish})`, result: totalHoursCount };
-  //   tableFooterCell.numFmt = isFloat(totalHoursCount) ? '#.####' : '#';
-  //   tableFooterCell.font = Style.FontSmallBold;
-  //   tableFooterCell.alignment = Style.AlignmentMiddleCenter;
-  //   tableFooterCell.border = Style.BorderThin;
-  //   tableFooterCell.fill = bodyFooterFillColor;
-
-  //   // Итого сумма по тарифу
-  //   tableFooterCell = tableFooterRow.getCell(4);
-  //   tableFooterCell.value = { formula: `SUM(${totalRateSummAddressStart}:${totalRateSummAddressFinish})`, result: totalRateSummCount };
-  //   tableFooterCell.numFmt = '#';
-  //   tableFooterCell.font = Style.FontSmallBold;
-  //   tableFooterCell.alignment = Style.AlignmentMiddleCenter;
-  //   tableFooterCell.border = Style.BorderThin;
-  //   tableFooterCell.fill = bodyFooterFillColor;
-
-  //   for (let i = columnLineStart; i < countOfColumn + 1; i++) {
-  //     worksheet.getColumn(i).width = tableHeader.Initials.width;
-
-  //     // tableFooterCell = tableHeaderRow.getCell(i);
-  //     // tableFooterCell.value = 'ИТОГО';
-  //     // tableFooterCell.font = Style.FontSmall;
-  //     // tableFooterCell.alignment = Style.AlignmentMiddleCenter;
-  //     // tableFooterCell.fill = Style.FillYellow1;
-  //     // tableFooterCell.border = Style.BorderThin;
-
-  //     // tableFooterCell = tableFooterRow.getCell(i);
-  //     // tableFooterCell.font = Style.FontSmall;
-  //     // tableFooterCell.alignment = Style.AlignmentMiddleRightWrapText;
-  //     // tableFooterCell.border = Style.BorderThin;
-  //     // tableFooterCell.fill = bodyFooterFillColor;
-
-  //   }
-
-  // }
 
   return ExcelJSWorkbook.xlsx;
 
