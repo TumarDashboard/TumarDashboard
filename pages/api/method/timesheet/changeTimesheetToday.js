@@ -10,7 +10,7 @@ export default catchErrorsApi( async (req, res) => {
         methods: ['POST']
       });
       
-    const responceAggregateUpdateData = await service.changeTimesheetToday( req.body );
+    const responceAggregateUpdateData = {};//await service.changeTimesheetToday( req.body );
     
     return res.json({timesheetToday: responceAggregateUpdateData });
 

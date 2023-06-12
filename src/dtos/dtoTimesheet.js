@@ -73,9 +73,9 @@ export const changeTimesheet = async (guardPost, guardPostManager, month, guards
     return await fetchAuthMethod('/method/timesheet/changeTimesheet', { guardPost, guardPostManager, month, guardsRow, manager, rate});
 }
 
-export const changeTimesheetToday = async (guardPostManagers, timesheetToday) => {
-    return await fetchAuthMethod('/method/timesheet/changeTimesheetToday', { guardPostManagers, timesheetToday});
-}
+// export const changeTimesheetToday = async (guardPostManagers, timesheetToday) => {
+//     return await fetchAuthMethod('/method/timesheet/changeTimesheetToday', { guardPostManagers, timesheetToday});
+// }
 
 export const changeTimesheetToday2 = async (guardPost, guardPostManager, guardsToday) => {
     return await fetchAuthMethod('/method/timesheet/changeTimesheetToday2', { guardPost, guardPostManager, guardsToday });

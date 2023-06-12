@@ -114,310 +114,310 @@ class TimesheetService {
 
     }
 
-    async changeTimesheetToday(inputData) {
+    // async changeTimesheetToday(inputData) {
 
-        try {
-            console.log('------------------changeTimesheetToday-----------------------');
-            //Validate date-------------------------------------------------------------------------------------------
-            const timesheetsData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
+    //     try {
+    //         console.log('------------------changeTimesheetToday-----------------------');
+    //         //Validate date-------------------------------------------------------------------------------------------
+    //         const timesheetsData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
-                throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
+    //             throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
 
-            });
+    //         });
 
-            const { timesheetToday } = timesheetsData;
+    //         const { timesheetToday } = timesheetsData;
 
-            const guardPosts = timesheetToday.map(element => mongoose.Types.ObjectId(element.guardPost));
-            const month = new Date(getCurrentMonth());
-            const day = (new Date()).getDate() - 1;
+    //         const guardPosts = timesheetToday.map(element => mongoose.Types.ObjectId(element.guardPost));
+    //         const month = new Date(getCurrentMonth());
+    //         const day = (new Date()).getDate() - 1;
 
-            // console.log('guardPosts: %o', guardPosts);
+    //         // console.log('guardPosts: %o', guardPosts);
 
-            //Check initials condition--------------------------------------------------------------------------------
-            await mongoConnect();
+    //         //Check initials condition--------------------------------------------------------------------------------
+    //         await mongoConnect();
 
-            //Запустить агрегат на посты, месяц и день----------------------------------------------------------------
-            const responceAggregateData = await mongoTimesheetsGuardsModel.aggregate([
-                {
-                    $match: {
-                        guardPost: {
-                            $in: guardPosts
-                        },
-                        month: month,
-                        timesheetDays: day
-                    }
-                },
-                {
-                    $project: {
-                        guardPost: 1,
-                        guard: 1,
-                        index: { $indexOfArray: ["$timesheetDays", day] },
-                        size: { $size: "$timesheetDays" }
-                    }
-                },
-                {
-                    $group: {
-                        _id: '$guardPost',
-                        today: {
-                            $push: {
-                                timesheet: "$_id",
-                                guard: "$guard",
-                                index: "$index",
-                                size: "$size",
-                            }
-                        }
-                    }
-                },
-            ]).then(responce => responce.map(element => {
+    //         //Запустить агрегат на посты, месяц и день----------------------------------------------------------------
+    //         const responceAggregateData = await mongoTimesheetsGuardsModel.aggregate([
+    //             {
+    //                 $match: {
+    //                     guardPost: {
+    //                         $in: guardPosts
+    //                     },
+    //                     month: month,
+    //                     timesheetDays: day
+    //                 }
+    //             },
+    //             {
+    //                 $project: {
+    //                     guardPost: 1,
+    //                     guard: 1,
+    //                     index: { $indexOfArray: ["$timesheetDays", day] },
+    //                     size: { $size: "$timesheetDays" }
+    //                 }
+    //             },
+    //             {
+    //                 $group: {
+    //                     _id: '$guardPost',
+    //                     today: {
+    //                         $push: {
+    //                             timesheet: "$_id",
+    //                             guard: "$guard",
+    //                             index: "$index",
+    //                             size: "$size",
+    //                         }
+    //                     }
+    //                 }
+    //             },
+    //         ]).then(responce => responce.map(element => {
 
-                //Результат - все посты имеющие охранников за сегодня, где указана позиция сегоднешнего дня в их списке дней,
-                //и общее количество дней за этот месяц
-                return {
-                    _id: element._id.toString(),
-                    today: element.today.map(value => {
-                        return {
-                            timesheet: value.timesheet.toString(),
-                            guard: value.guard.toString(),
-                            index: value.index,
-                            size: value.size
-                        }
-                    }),
-                }
-            }));
+    //             //Результат - все посты имеющие охранников за сегодня, где указана позиция сегоднешнего дня в их списке дней,
+    //             //и общее количество дней за этот месяц
+    //             return {
+    //                 _id: element._id.toString(),
+    //                 today: element.today.map(value => {
+    //                     return {
+    //                         timesheet: value.timesheet.toString(),
+    //                         guard: value.guard.toString(),
+    //                         index: value.index,
+    //                         size: value.size
+    //                     }
+    //                 }),
+    //             }
+    //         }));
 
-            // console.log('responceAggregateData: %o', responceAggregateData);
-            // сюда записываются данные о том что надо удалить данные за сегодня у охранника
-            const bulkClearData = [];
+    //         // console.log('responceAggregateData: %o', responceAggregateData);
+    //         // сюда записываются данные о том что надо удалить данные за сегодня у охранника
+    //         const bulkClearData = [];
 
-            // сюда записываются данные о том что данные за сегодня были за сегодня и данные 
-            // о выходе охранника на пост подлежат удалению
-            const bulkDeleteData = [];
+    //         // сюда записываются данные о том что данные за сегодня были за сегодня и данные 
+    //         // о выходе охранника на пост подлежат удалению
+    //         const bulkDeleteData = [];
 
-            //сюда записываются данные о том что охранник вышел на пост сегодня
-            const bulkWriteData = timesheetToday.reduce((result, element) => {
+    //         //сюда записываются данные о том что охранник вышел на пост сегодня
+    //         const bulkWriteData = timesheetToday.reduce((result, element) => {
 
-                let aggregateData = responceAggregateData.find(value => value._id == element.guardPost);
+    //             let aggregateData = responceAggregateData.find(value => value._id == element.guardPost);
 
-                // console.log('aggregateData: %o', aggregateData);
+    //             // console.log('aggregateData: %o', aggregateData);
 
-                // Просматриваем среди данных на изменение найденные в агрегации данные
-                // если есть - ни чего не делаем с bulkWriteData, из агрегационных данных убираем позицию
-                // если нет - добавляем в bulkWriteData
-                element.guardsToday.forEach((valueA) => {
+    //             // Просматриваем среди данных на изменение найденные в агрегации данные
+    //             // если есть - ни чего не делаем с bulkWriteData, из агрегационных данных убираем позицию
+    //             // если нет - добавляем в bulkWriteData
+    //             element.guardsToday.forEach((valueA) => {
 
-                    let existDay;
+    //                 let existDay;
 
-                    if (aggregateData?.today?.length > 0) {
+    //                 if (aggregateData?.today?.length > 0) {
 
-                        aggregateData.today = aggregateData.today.reduce((data, valueB) => {
+    //                     aggregateData.today = aggregateData.today.reduce((data, valueB) => {
 
-                            if (valueB.guard == valueA) {
-                                existDay = valueB;
-                            } else {
-                                data.push(valueB)
-                            }
+    //                         if (valueB.guard == valueA) {
+    //                             existDay = valueB;
+    //                         } else {
+    //                             data.push(valueB)
+    //                         }
 
-                            return data;
+    //                         return data;
 
-                        }, []);
+    //                     }, []);
 
-                    }
+    //                 }
 
-                    // console.log('existDay: %o', existDay);
+    //                 // console.log('existDay: %o', existDay);
 
-                    if (existDay) {
+    //                 if (existDay) {
 
-                    } else {
+    //                 } else {
 
-                        result.push({
-                            updateOne: {
-                                filter: { guardPost: element.guardPost, month: month, guard: valueA },
-                                update: {
-                                    $push: {
-                                        timesheetShifts: '?',
-                                        timesheetDays: day
-                                    }
-                                },
-                                upsert: true
-                            }
-                        })
+    //                     result.push({
+    //                         updateOne: {
+    //                             filter: { guardPost: element.guardPost, month: month, guard: valueA },
+    //                             update: {
+    //                                 $push: {
+    //                                     timesheetShifts: '?',
+    //                                     timesheetDays: day
+    //                                 }
+    //                             },
+    //                             upsert: true
+    //                         }
+    //                     })
 
-                    }
+    //                 }
 
-                })
+    //             })
 
-                // console.log('aggregateData.today: %o', aggregateData?.today);
-                // Если среди агрегационных данных остались позиции - значит необходимо удалить
-                // Если запись о смене была не единственной в этом месяце на физ посте - удаляем данные об сегоднешнем дне
-                // Если запись о смене была единственно в этом месяце на физ посте - удаляем данные об участии охранника
-                if (aggregateData?.today?.length > 0) {
+    //             // console.log('aggregateData.today: %o', aggregateData?.today);
+    //             // Если среди агрегационных данных остались позиции - значит необходимо удалить
+    //             // Если запись о смене была не единственной в этом месяце на физ посте - удаляем данные об сегоднешнем дне
+    //             // Если запись о смене была единственно в этом месяце на физ посте - удаляем данные об участии охранника
+    //             if (aggregateData?.today?.length > 0) {
 
-                    aggregateData.today.forEach(value => {
+    //                 aggregateData.today.forEach(value => {
 
-                        if (value.size > 1) {
+    //                     if (value.size > 1) {
 
-                            result.push({
-                                updateOne: {
-                                    filter: { _id: value.timesheet },
-                                    update: {
-                                        $set: {
-                                            ['timesheetShifts.' + value.index]: null,
-                                            ['timesheetDays.' + value.index]: null
-                                        }
-                                    }
-                                }
-                            })
+    //                         result.push({
+    //                             updateOne: {
+    //                                 filter: { _id: value.timesheet },
+    //                                 update: {
+    //                                     $set: {
+    //                                         ['timesheetShifts.' + value.index]: null,
+    //                                         ['timesheetDays.' + value.index]: null
+    //                                     }
+    //                                 }
+    //                             }
+    //                         })
 
-                            bulkClearData.push({
-                                updateOne: {
-                                    filter: { _id: value.timesheet },
-                                    update: {
-                                        $pullAll: {
-                                            'timesheetShifts': [null],
-                                            'timesheetDays': [null]
-                                        }
-                                    }
-                                }
-                            })
+    //                         bulkClearData.push({
+    //                             updateOne: {
+    //                                 filter: { _id: value.timesheet },
+    //                                 update: {
+    //                                     $pullAll: {
+    //                                         'timesheetShifts': [null],
+    //                                         'timesheetDays': [null]
+    //                                     }
+    //                                 }
+    //                             }
+    //                         })
 
-                        } else {
+    //                     } else {
 
-                            bulkDeleteData.push(value.timesheet)
+    //                         bulkDeleteData.push(value.timesheet)
 
-                        }
-                    })
-                }
+    //                     }
+    //                 })
+    //             }
 
-                return result;
-            }, []);
+    //             return result;
+    //         }, []);
 
-            // console.log('bulkWriteData: %o', bulkWriteData);
-            // если среди данных нет агрегата - добавить ?
-            if (bulkWriteData.length > 0) {
+    //         // console.log('bulkWriteData: %o', bulkWriteData);
+    //         // если среди данных нет агрегата - добавить ?
+    //         if (bulkWriteData.length > 0) {
 
-                const responce = await mongoTimesheetsGuardsModel.bulkWrite(bulkWriteData);
+    //             const responce = await mongoTimesheetsGuardsModel.bulkWrite(bulkWriteData);
 
-                // console.log('bulkWrite: %o', responce);
+    //             // console.log('bulkWrite: %o', responce);
 
-            }
+    //         }
 
-            // console.log('bulkClearData: %o', bulkClearData);
-            // если среди агрегата нет данных - удалить смену за сегодня
-            // это выполняется отдельным bulkWrite из за невозможности использовать в одном PipeLine $set и $pullAll
-            // перед этим в bulkWriteData была сделана запись $set о назначении null смене
-            if (bulkClearData.length > 0) {
+    //         // console.log('bulkClearData: %o', bulkClearData);
+    //         // если среди агрегата нет данных - удалить смену за сегодня
+    //         // это выполняется отдельным bulkWrite из за невозможности использовать в одном PipeLine $set и $pullAll
+    //         // перед этим в bulkWriteData была сделана запись $set о назначении null смене
+    //         if (bulkClearData.length > 0) {
 
-                const responce = await mongoTimesheetsGuardsModel.bulkWrite(bulkClearData);
+    //             const responce = await mongoTimesheetsGuardsModel.bulkWrite(bulkClearData);
 
-                // console.log('bulkClear: %o', responce);
+    //             // console.log('bulkClear: %o', responce);
 
-            }
+    //         }
 
-            // console.log('bulkDeleteData: %o', bulkDeleteData);
-            // если среди агрегата нет данных и смена единственная за месяц - зачистить данные об участии охранника на физ. посте
-            if (bulkDeleteData.length > 0) {
+    //         // console.log('bulkDeleteData: %o', bulkDeleteData);
+    //         // если среди агрегата нет данных и смена единственная за месяц - зачистить данные об участии охранника на физ. посте
+    //         if (bulkDeleteData.length > 0) {
 
-                const responce = await mongoTimesheetsGuardsModel.deleteMany({ _id: { $in: bulkDeleteData } })
+    //             const responce = await mongoTimesheetsGuardsModel.deleteMany({ _id: { $in: bulkDeleteData } })
 
-                // console.log('bulkDelete: %o', responce);
+    //             // console.log('bulkDelete: %o', responce);
 
-            }
+    //         }
 
-            //Запустить агрегат на наличие записей об НСО и Тарифе----------------------------------------------------
-            const responseAggregateDataGuardPost = await mongoTimesheetsGuardPostModel.find({
-                guardPost: {
-                    $in: guardPosts
-                },
-                month: month,
-            }, 'guardPost rate manager').lean().then(responce => responce.reduce((result, element) => {
-                if (element.manager || element.rate) {
-                    result.push(element.guardPost.toString());
-                }
-                return result;
-            }, []));
+    //         //Запустить агрегат на наличие записей об НСО и Тарифе----------------------------------------------------
+    //         const responseAggregateDataGuardPost = await mongoTimesheetsGuardPostModel.find({
+    //             guardPost: {
+    //                 $in: guardPosts
+    //             },
+    //             month: month,
+    //         }, 'guardPost rate manager').lean().then(responce => responce.reduce((result, element) => {
+    //             if (element.manager || element.rate) {
+    //                 result.push(element.guardPost.toString());
+    //             }
+    //             return result;
+    //         }, []));
 
-            // если в базе не совпадает кол-во записей за месяц об НСО и Тарифе
-            if (responseAggregateDataGuardPost.length != guardPosts.length) {
+    //         // если в базе не совпадает кол-во записей за месяц об НСО и Тарифе
+    //         if (responseAggregateDataGuardPost.length != guardPosts.length) {
 
-                // Определить список остутствующих записей за месяц об НСО и Тарифах
-                const unresponsedDataGuardPost = guardPosts.reduce((result, value) => {
-                    if (!responseAggregateDataGuardPost.includes(value.toString())) {
-                        result.push(value)
-                    }
-                    return result;
-                }, []);
+    //             // Определить список остутствующих записей за месяц об НСО и Тарифах
+    //             const unresponsedDataGuardPost = guardPosts.reduce((result, value) => {
+    //                 if (!responseAggregateDataGuardPost.includes(value.toString())) {
+    //                     result.push(value)
+    //                 }
+    //                 return result;
+    //             }, []);
 
-                // Запросить данные об НСО и Тарифах для списка остутствующих
-                const dataGuardPost = await mongoGuardPostsModel.find({
-                    _id: {
-                        $in: unresponsedDataGuardPost
-                    },
-                }, '_id manager rate').lean();
+    //             // Запросить данные об НСО и Тарифах для списка остутствующих
+    //             const dataGuardPost = await mongoGuardPostsModel.find({
+    //                 _id: {
+    //                     $in: unresponsedDataGuardPost
+    //                 },
+    //             }, '_id manager rate').lean();
 
-                // Создать записи
-                await mongoTimesheetsGuardPostModel.bulkWrite([
-                    ...dataGuardPost.map(element => {
-                        return {
-                            updateOne: {
-                                filter: { guardPost: element._id, month: month },
-                                update: {
-                                    manager: element.manager,
-                                    rate: element.rate
-                                },
-                                upsert: true
-                            }
-                        }
-                    }),
-                ]);
+    //             // Создать записи
+    //             await mongoTimesheetsGuardPostModel.bulkWrite([
+    //                 ...dataGuardPost.map(element => {
+    //                     return {
+    //                         updateOne: {
+    //                             filter: { guardPost: element._id, month: month },
+    //                             update: {
+    //                                 manager: element.manager,
+    //                                 rate: element.rate
+    //                             },
+    //                             upsert: true
+    //                         }
+    //                     }
+    //                 }),
+    //             ]);
 
-                console.log(unresponsedDataGuardPost);
-            }
+    //             console.log(unresponsedDataGuardPost);
+    //         }
 
-            //Запустить агрегат на посты, не участвующие в обновлении--------------------------------------------------
-            const responceAggregateUpdateData = await mongoTimesheetsGuardsModel.aggregate([
-                {
-                    $match: {
-                        guardPost: { $nin: guardPosts },
-                        month: month,
-                        timesheetDays: day
-                    }
-                },
-                {
-                    $project: {
-                        guardPost: 1,
-                        guard: 1,
-                    }
-                },
-                {
-                    $group: {
-                        _id: '$guardPost',
-                        today: {
-                            $push: {
-                                guard: "$guard",
-                            }
-                        }
-                    }
-                },
-            ]).then(responce => responce.map(element => {
+    //         //Запустить агрегат на посты, не участвующие в обновлении--------------------------------------------------
+    //         const responceAggregateUpdateData = await mongoTimesheetsGuardsModel.aggregate([
+    //             {
+    //                 $match: {
+    //                     guardPost: { $nin: guardPosts },
+    //                     month: month,
+    //                     timesheetDays: day
+    //                 }
+    //             },
+    //             {
+    //                 $project: {
+    //                     guardPost: 1,
+    //                     guard: 1,
+    //                 }
+    //             },
+    //             {
+    //                 $group: {
+    //                     _id: '$guardPost',
+    //                     today: {
+    //                         $push: {
+    //                             guard: "$guard",
+    //                         }
+    //                     }
+    //                 }
+    //             },
+    //         ]).then(responce => responce.map(element => {
 
-                //Результат - все посты имеющие охранников за сегодня
-                return {
-                    _id: element._id.toString(),
-                    today: element.today.map(value => value.guard.toString()),
-                }
-            }));
+    //             //Результат - все посты имеющие охранников за сегодня
+    //             return {
+    //                 _id: element._id.toString(),
+    //                 today: element.today.map(value => value.guard.toString()),
+    //             }
+    //         }));
 
-            // console.log('responceAggregateUpdateData: %o', responceAggregateUpdateData);
+    //         // console.log('responceAggregateUpdateData: %o', responceAggregateUpdateData);
 
-            return {};
+    //         return {};
 
-        } catch (error) {
-            console.log(error);
+    //     } catch (error) {
+    //         console.log(error);
 
-            throw error;
-        }
+    //         throw error;
+    //     }
 
-    }
+    // }
 
     async changeTimesheetToday2(inputData) {
 
