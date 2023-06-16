@@ -32,6 +32,9 @@ module.exports = async (phase, { defaultConfig }) => {
             NEXT_PUBLIC_MIN_LENGTH_RATE_INPUT: '1',
             NEXT_PUBLIC_MAX_LENGTH_RATE_INPUT: '1000000',
 
+            // #over rate calc
+            NEXT_PUBLIC_OVER_RATE_CALC: 10000,
+
             // #Max count for shifts
             NEXT_PUBLIC_MAX_COUNT_SHIFTS: '20',
             

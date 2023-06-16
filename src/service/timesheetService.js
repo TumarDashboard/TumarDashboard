@@ -15,7 +15,7 @@ import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
 import { FPositionBUH, FPositionHRM, FPositionZDIR } from "../../components/levelZ_variable/FPositionItemList";
 import { timesheetPrintServer, timesheetExcellForMonthPart, timesheetExcellForMonthFull, timesheetExcellForDay, timesheetExcellForMonthBuh } from "../utils/timesheetUtils";
 import userService from "./userService";
-import { getCurrentMonth, getCurrentTimeStamp, getMonthFromString } from "../utils/dateUtils";
+import { getCurrentMonth, getCurrentTimeStamp, getMonthFromString, getDaysFromMonth } from "../utils/dateUtils";
 
 class TimesheetService {
 
@@ -480,7 +480,7 @@ class TimesheetService {
             const bulkDeleteData = [];
 
             //сюда записываются данные о том что охранник вышел на пост сегодня
-            const bulkWriteData =[];
+            const bulkWriteData = [];
 
             // Просматриваем среди данных на изменение найденные в агрегации данные
             // если есть - ни чего не делаем с bulkWriteData, из агрегационных данных убираем позицию
@@ -609,8 +609,8 @@ class TimesheetService {
             const mongoTimesheetsGuardPostUpdate = await mongoTimesheetsGuardPostModel.findOneAndUpdate(
                 { guardPost: guardPostID, month: month },
                 {
-                        manager: responceGuardPostsModel.manager,
-                        rate: responceGuardPostsModel.rate
+                    manager: responceGuardPostsModel.manager,
+                    rate: responceGuardPostsModel.rate
                 },
                 {
                     upsert: true
@@ -1333,7 +1333,7 @@ class TimesheetService {
                             foreignField: '_id',
                             as: 'userArchive'
                         }
-                    },                {
+                    }, {
                         $project: {
                             guardPosts: 1,
                             user: { $setUnion: ["$user", "$userArchive"] }
@@ -1354,20 +1354,20 @@ class TimesheetService {
                 ])
 
                 // Добавляем найденные данные в респонс
-                if( unregisteredDataWithManager && unregisteredDataWithManager.length > 0 ){
+                if (unregisteredDataWithManager && unregisteredDataWithManager.length > 0) {
 
-                    unregisteredDataWithManager.forEach(element=>{
-    
+                    unregisteredDataWithManager.forEach(element => {
+
                         element._id = element._id.toString();
-    
-                        const registeredInResponce = responce.find(value => value._id == element._id );
 
-                        if(registeredInResponce){
-                            registeredInResponce.guardPosts = registeredInResponce.guardPosts.concat( element.guardPosts );
-                        }else{
-                            responce.unshift( element );
+                        const registeredInResponce = responce.find(value => value._id == element._id);
+
+                        if (registeredInResponce) {
+                            registeredInResponce.guardPosts = registeredInResponce.guardPosts.concat(element.guardPosts);
+                        } else {
+                            responce.unshift(element);
                         }
-    
+
                     });
 
                 }
@@ -1379,19 +1379,19 @@ class TimesheetService {
                 }, 'name address number callsign').lean();
 
                 // Добавляем найденные данные в респонс
-                if( unregisteredDataWithoutManager && unregisteredDataWithoutManager.length > 0 ){
+                if (unregisteredDataWithoutManager && unregisteredDataWithoutManager.length > 0) {
 
-                    const registeredInResponce = responce.find(value => value._id == undefined );
+                    const registeredInResponce = responce.find(value => value._id == undefined);
 
-                    if(registeredInResponce){
-                        registeredInResponce.guardPosts = registeredInResponce.guardPosts.concat( unregisteredDataWithoutManager );
-                    }else{
-                        responce.push( {
+                    if (registeredInResponce) {
+                        registeredInResponce.guardPosts = registeredInResponce.guardPosts.concat(unregisteredDataWithoutManager);
+                    } else {
+                        responce.push({
                             surname: '',
                             firstName: '',
                             patronymic: '',
                             guardPosts: unregisteredDataWithoutManager
-                        } );
+                        });
                     }
 
                 }
@@ -1816,6 +1816,7 @@ class TimesheetService {
                 })
             }
 
+            // Проверка на наличие данных
             if (responce.length == 0) {
                 throw ApiError.FileCreateError('Данные отсутствуют')
             }
@@ -1935,16 +1936,134 @@ class TimesheetService {
 
             // console.log('responceTimesheetsGuards: %o', responceTimesheetsGuards);
 
+            // Проверка на наличие данных
+            if (responceTimesheetsGuards.length == 0) {
+                throw ApiError.FileCreateError('Данные отсутствуют')
+            }
+
+            // Формируем переменные для пересчёта овер тарифов
+            const maxRateCalc = process.env.NEXT_PUBLIC_OVER_RATE_CALC;
+
+            // Запрашиваем данные о физ постах с овер тарифами
+            var responceGuardPostsOverRate = await mongoGuardPostsModel.find({ rate: { $gt: maxRateCalc } }, '_id').lean();
+
+            // console.log('responceGuardPostsOverRate: %o', responceGuardPostsOverRate);
+
+            // Если есть физ посты с овер тарифами
+            if (responceGuardPostsOverRate.length > 0) {
+                
+                // Формируем переменные для пересчёта овер тарифов
+                const daysTimesheet = getDaysFromMonth(date);
+                const daysCount = daysTimesheet.length;
+                const selectedMonth = date.getMonth();
+                const currentMonth = new Date().getMonth();
+                const currentDay = new Date().getDate();
+
+                // Формируем список физических постов с данными по сменам на них
+                responceGuardPostsOverRate = await mongoTimesheetsGuardsModel.aggregate([
+                    {
+                        $match: {
+                            guardPost: { $in: responceGuardPostsOverRate.map(guardPost => guardPost._id) },
+                            month: date
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: mongoGuardPostsModel.collection.name,
+                            localField: 'guardPost',
+                            foreignField: '_id',
+                            as: 'guardPost'
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: mongoGuardPostsArchiveModel.collection.name,
+                            localField: 'guardPost',
+                            foreignField: '_id',
+                            as: 'guardPostArchive'
+                        }
+                    },
+                    {
+                        $project: {
+                            timesheetDays: 1,
+                            timesheetShifts: 1,
+                            guardPost: { $setUnion: ["$guardPost", "$guardPostArchive"] },
+                        }
+                    },
+                    { $unwind: { path: "$guardPost" } },
+                    {
+                        $group: {
+                            _id: "$guardPost._id",
+                            rate: { $first: "$guardPost.rate" },
+                            element: {
+                                $push: {
+                                    timesheetDays: "$timesheetDays",
+                                    timesheetShifts: "$timesheetShifts",
+                                }
+                            }
+                        }
+                    },
+                ]);
+
+                // console.log('responceGuardPostsOverRate: %o', responceGuardPostsOverRate);
+
+                // Выполняем подсчёт часов и формируем ориентировочные тарифы
+                for (const timesheetGuardsOverRate of responceGuardPostsOverRate) {
+
+                    var totalHoursCount = 0;
+                    var totalDaysCount = 0;
+                    const totalDaysCalcCount = new Array(daysCount).fill(0);
+
+                    for (const element of timesheetGuardsOverRate.element) {
+
+                        for (let i = 0; i < element.timesheetDays.length; i++) {
+
+                            let day = element.timesheetDays[i];
+                            let shift = parseInt(element.timesheetShifts[i]);
+
+                            if (shift >= 0) {
+
+                                totalHoursCount += shift;
+
+                                if (totalDaysCalcCount[day] == 0) {
+                                    totalDaysCount++;
+                                    totalDaysCalcCount[day] = 1;
+                                }
+
+                            } else if (
+                                (element.timesheetShifts[i] == 'В' || element.timesheetShifts[i] == 'B')
+                                && totalDaysCalcCount[day] == 0
+                                && ((selectedMonth < currentMonth) || (selectedMonth == currentMonth && day <= currentDay))
+                            ) {
+                                totalDaysCount++;
+                                totalDaysCalcCount[day] = 1;
+                            }
+
+                        }
+
+                    }
+
+                    timesheetGuardsOverRate.rate = (timesheetGuardsOverRate.rate * totalDaysCount) / (totalHoursCount * daysCount);
+                    timesheetGuardsOverRate.isFinished = daysCount == totalDaysCount;
+                    timesheetGuardsOverRate._id = timesheetGuardsOverRate._id.toString();
+                    
+                    delete timesheetGuardsOverRate.element;
+                }
+
+                // console.log('responceGuardPostsOverRate: %o', responceGuardPostsOverRate);
+
+            }
+
             // Формируем документ из полученных данных
-            const document = timesheetExcellForMonthBuh(responceTimesheetsGuards, date);
+            const document = timesheetExcellForMonthBuh(responceTimesheetsGuards, date, responceGuardPostsOverRate);
 
             const documentName = `Ведомость-${month}-${getCurrentTimeStamp()}.xlsx`;
 
-            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=${await googleDrive.uploadExcelTimesheet(
-                document,
-                documentName,
-                process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_BUH)
-                }`;
+            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=`;//${await googleDrive.uploadExcelTimesheet(
+            // document,
+            // documentName,
+            // process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_BUH)
+            // }`;
 
             return { document, googleDriveFileID };
 
