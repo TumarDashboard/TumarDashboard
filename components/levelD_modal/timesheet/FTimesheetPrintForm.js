@@ -13,17 +13,21 @@ import { FSelectShifts } from "../../levelE_low/FSelectShifts";
 import { equalArrays } from '../../../src/utils/arrayUtils';
 import { getCurrentMonth, getCurrentDateStamp } from '../../../src/utils/dateUtils';
 import { FInputMonth } from '../../levelE_low/FInputMonth';
-import { getTimesheetPrint, 
-  getTimesheetPrintForDay, 
-  getTimesheetPrintForMonthFull, 
+import {
+  getTimesheetPrint,
+  getTimesheetPrintForDay,
+  getTimesheetPrintForMonthFull,
   getTimesheetPrintForMonthBuh,
-  getTimesheetPrintForMonthPart } from '../../../src/dtos/dtoTimesheet';
+  getTimesheetPrintForMonthPart
+} from '../../../src/dtos/dtoTimesheet';
+import { reportGuardPosts } from '../../../src/dtos/dtoGuardPost';
 import { ApiError } from '../../../middleware/exceptions';
 
 const DTForDay = 'DTForDay';
 const DTForMonthPart = 'DTForMonthPart';
 const DTForMonthFull = 'DTForMonthFull';
 const DTForMonthBuh = 'DTForMonthBuh';
+const PRForAllGuardPosts = 'PRForAllGuardPosts';
 
 const getInputDate = (operation) => {
   switch (operation) {
@@ -40,14 +44,17 @@ const getInputDate = (operation) => {
     case DTForMonthBuh:
       return getCurrentMonth();
 
+    case PRForAllGuardPosts:
+      return getCurrentMonth();
+
     default:
       return getCurrentMonth();
 
   }
 }
 
-const getTimesheet = async(operation, guardPosts, date, manager) =>{
-  if(!date) throw ApiError.BadRequest('Отсутствуют необходимые данные: дата');
+const getTimesheet = async (operation, guardPosts, date, manager) => {
+  if (!date) throw ApiError.BadRequest('Отсутствуют необходимые данные: дата');
   switch (operation) {
 
     case DTForDay:
@@ -57,7 +64,7 @@ const getTimesheet = async(operation, guardPosts, date, manager) =>{
       };
 
     case DTForMonthPart:
-      if(!manager) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о сотруднике, выполняющим операцию');
+      if (!manager) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о сотруднике, выполняющим операцию');
 
       const NSOinitials = manager.surname ? [
         manager.surname,
@@ -69,7 +76,7 @@ const getTimesheet = async(operation, guardPosts, date, manager) =>{
         responce: await getTimesheetPrintForMonthPart(date, manager.id),
         documentName: `Табель ${NSOinitials} ${date}.xlsx`
       };
-      
+
     case DTForMonthFull:
       return {
         responce: await getTimesheetPrintForMonthFull(date),
@@ -82,8 +89,14 @@ const getTimesheet = async(operation, guardPosts, date, manager) =>{
         documentName: 'Платёжная ведомость-' + date + '.xlsx'
       };
 
+    case PRForAllGuardPosts:
+      return {
+        responce: await reportGuardPosts(),
+        documentName: 'Список физ. постов -' + date + '.xlsx'
+      };
+
     default:
-      if(!guardPosts) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о физ. постах');
+      if (!guardPosts) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о физ. постах');
       return {
         responce: await getTimesheetPrint(guardPosts.map(value => value._id), date),
         documentName: 'Табель-' + date + '.xlsx'
@@ -99,6 +112,7 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
   const ARgetTimesheetPrintForMonthPart = accessRules.includes('getTimesheetPrintForMonthPart');
   const ARgetTimesheetPrintForMonthFull = accessRules.includes('getTimesheetPrintForMonthFull');
   const ARgetTimesheetPrintForMonthFullBuh = accessRules.includes('getTimesheetPrintForMonthBuh');
+  const ARreportGuardPosts = accessRules.includes('reportGuardPosts');
 
   /*--Операция-------------------------------------------------------------------------------------------*/
   const [error, setError] = useState('');
@@ -109,7 +123,7 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
     ARgetTimesheetPrintForMonthPart ? { label: "Отчёт за месяц - частичный", value: DTForMonthPart } : null,
     ARgetTimesheetPrintForMonthFull ? { label: "Отчёт за месяц - полный", value: DTForMonthFull } : null,
     ARgetTimesheetPrintForMonthFullBuh ? { label: "Платёжная ведомость", value: DTForMonthBuh } : null,
-    // { label: "getTimesheetPrint", value: 'getTimesheetPrint' }
+    ARreportGuardPosts ? { label: "Список физ. постов", value: PRForAllGuardPosts } : null,
   ].filter(Boolean);
 
   const [selectedOperation, setSelectedOperation] = useState();
@@ -144,7 +158,7 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
 
     try {
 
-      const {responce, documentName} = await getTimesheet( selectedOperation, guardPosts, inputTimesheetDate, MOBXuser?.user);
+      const { responce, documentName } = await getTimesheet(selectedOperation, guardPosts, inputTimesheetDate, MOBXuser?.user);
       // console.log(responce);
       const googleDriveFileID = responce.headers.get('googleDriveFileID');
 
@@ -194,7 +208,7 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
       setError(form.error);
     } else if (form.isOpen) {
       setError(null);
-      if(FOperationItemList.length > 0 && !selectedOperation){
+      if (FOperationItemList.length > 0 && !selectedOperation) {
         setSelectedOperation(FOperationItemList[0].value);
         setInputTimesheetDate(getInputDate(FOperationItemList[0].value));
       }
@@ -220,36 +234,42 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
             options={FOperationItemList}
             onChange={selectedOperationChange}
             value={selectedOperation}
-            disabled={FOperationItemList.length==1}
+            disabled={FOperationItemList.length == 1}
           />
         </div>
 
         {/* Месяц и Кнопка выгрузки */}
         <div className='flex flex-col md:flex-row w-full '>
 
-          <div className="form-item flex items-center md:mr-4">
-            <label className="text-lg pr-4 select-none">{selectedOperation == DTForDay ? 'Дата' :
+          {selectedOperation != PRForAllGuardPosts &&
+            <div className="form-item flex items-center md:mr-4">
+              <label className="text-lg pr-4 select-none">{
+                selectedOperation == DTForDay ? 'Дата' :
                   selectedOperation == DTForMonthPart ? 'Месяц' :
-                    selectedOperation == DTForMonthPart ? 'Месяц' : 'Месяц'}</label>
-            <div className='flex justify-center'>
-              <input
-                type={selectedOperation == DTForDay ? 'date' :
-                  selectedOperation == DTForMonthPart ? 'month' :
-                    selectedOperation == DTForMonthPart ? 'month' : 'month'}
-                id="start"
-                name="start"
-                min="2022-01"
-                max="2023-12"
-                onChange={(e) => setInputTimesheetDate(e.target.value)}
-                value={inputTimesheetDate}
-                className='border border-gray-300 p-0
+                    selectedOperation == DTForMonthPart ? 'Месяц' : 'Месяц'
+              }</label>
+              <div className='flex justify-center'>
+                <input
+                  type={
+                    selectedOperation == DTForDay ? 'date' :
+                      selectedOperation == DTForMonthPart ? 'month' :
+                        selectedOperation == DTForMonthPart ? 'month' : 'month'
+                  }
+                  id="start"
+                  name="start"
+                  min="2022-01"
+                  max="2023-12"
+                  onChange={(e) => setInputTimesheetDate(e.target.value)}
+                  value={inputTimesheetDate}
+                  className='border border-gray-300 p-0
                     focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
                     rounded-md shadow-sm disabled:bg-gray-100 open:bg-black
                     text-black font-bold text-center'
-              />
+                />
+              </div>
             </div>
-          </div>
-
+          }
+          
           <div className="form-item flex items-center justify-end md:justify-start w-full mt-4 md:mt-0">
             <FButtonRed
               disabled={!inputTimesheetDate}

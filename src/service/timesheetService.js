@@ -2059,11 +2059,11 @@ class TimesheetService {
 
             const documentName = `Ведомость-${month}-${getCurrentTimeStamp()}.xlsx`;
 
-            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=`;//${await googleDrive.uploadExcelTimesheet(
-            // document,
-            // documentName,
-            // process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_BUH)
-            // }`;
+            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=${await googleDrive.uploadExcelTimesheet(
+            document,
+            documentName,
+            process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_BUH)
+            }`;
 
             return { document, googleDriveFileID };
 

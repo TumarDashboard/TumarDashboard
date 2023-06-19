@@ -8,10 +8,11 @@ import mongoGuardPostsArchiveModel from "../mongo/models/mongoGuardPostsArchiveM
 import mongoGuardsModel from "../mongo/models/mongoGuardsModel";
 import mongoGuardsArchiveModel from "../mongo/models/mongoGuardsArchiveModel";
 import mongoose from "mongoose";
-import { getCurrentMonth } from "../utils/dateUtils";
+import { getCurrentMonth, getCurrentTimeStamp } from "../utils/dateUtils";
 import mongoTimesheetsGuardPostModel from "../mongo/models/mongoTimesheetsGuardPostModel";
 import mongoTimesheetsGuardsModel from "../mongo/models/mongoTimesheetsGuardsModel";
 import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
+import { reportForAllGuardPosts } from "../utils/reportsUtils";
 
 function managerEquals( a, b ){
     if( !a && !b ){
@@ -393,6 +394,43 @@ class GuardPostService {
         }
 
         return { guardPost: dtoGuardPost }
+    }
+
+    async reportGuardPosts() {
+
+        try {
+            console.log('---------------reportGuardPosts-----------------');
+
+            //Check initials condition
+            await mongoConnect();
+
+            // Сначала запрашиваем данные 
+            const responceGuardPosts = await mongoGuardPostsModel.find({},
+                '-createdAt -updatedAt -description -shifts', 
+                { sort: { 'manager': 1, 'number': 1, 'callsign': 1 } })
+                .populate('manager', 'surname firstName')
+                .lean();
+
+            // console.log('responceGuardPosts: %o', responceGuardPosts);
+
+            // Формируем документ из полученных данных
+            const document = reportForAllGuardPosts(responceGuardPosts);
+
+            const documentName = `Список физ. постов-${getCurrentTimeStamp()}.xlsx`;
+
+            const googleDriveFileID = `http://drive.google.com/uc?export=view&id=`;//${await googleDrive.uploadExcelTimesheet(
+            // document,
+            // documentName,
+            // process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_GUARD_POSTS)
+            // }`;
+
+            return { document, googleDriveFileID };
+
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+
     }
 
 }

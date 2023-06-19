@@ -103,6 +103,13 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionZDIR }
         ]
     },
+    {
+        url: '/api/method/guardPost/reportGuardPosts', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionBUH},
+        ]
+    },
 
     // Timesheet methods
     {

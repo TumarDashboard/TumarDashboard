@@ -1,5 +1,5 @@
 import { object, lazy, string, number } from "yup";
-import { fetchAuthMethod } from "../../middleware/requests";
+import { fetchAuthFileMethod, fetchAuthMethod } from "../../middleware/requests";
 import { mapValue } from "../utils/arrayUtils";
 
 const minlengthNumber = process.env.NEXT_PUBLIC_MIN_LENGTH_NUMBER_INPUT;
@@ -133,4 +133,8 @@ export const deleteGuardPost = async (idGuardPost, idUser, reason) => {
 
 export const recoverGuardPost = async (idGuardPost) => {
     return await fetchAuthMethod('/method/guardPost/recoverGuardPost', { idGuardPost });
+}
+
+export const reportGuardPosts = async () => {
+    return await fetchAuthFileMethod('/method/guardPost/reportGuardPosts');
 }
