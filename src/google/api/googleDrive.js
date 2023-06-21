@@ -121,6 +121,50 @@ class GoogleDrive {
     }
   }
 
+  //function to upload the protected objects file
+  async uploadProtectedObjectPhoto(mongoProtectedObjectID, photo) {
+
+    await OAUTH2Client.checkAuth();
+
+    const existsFile = await this.findFile(`'${process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_PROTECTEDOBJECTS}' in parents and name contains '${mongoProtectedObjectID}'`);
+
+    if (existsFile) {
+      this.deleteFile(existsFile);
+    }
+
+    const regex = /^data:.+\/(.+);base64,(.*)$/;
+    const matches = photo.match(regex);
+    const type = matches[1];
+    const data = matches[2];
+    const buffer = Buffer.from(data, 'base64');
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(buffer);
+
+    const response = await this.drive.files.create({
+      requestBody: {
+        name: `${mongoProtectedObjectID}.${type}`,
+        parents: [process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_PROTECTEDOBJECTS]
+      },
+      media: {
+        body: bufferStream,
+      },
+    });
+
+    return response.data.id;
+  }
+
+  //function to delete the protected objects file
+  async deleteProtectedObjectAvatar(mongoProtectedObjectID) {
+
+    await OAUTH2Client.checkAuth();
+
+    const existsFile = await this.findFile(`'${process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS}' in parents and name contains '${mongoProtectedObjectID}'`);
+
+    if (existsFile) {
+      this.deleteFile(existsFile);
+    }
+  }
+
   //function to upload the guard file
   async uploadGuardAvatar(mongoGuardID, uiAvatarsSrc) {
 

@@ -111,6 +111,65 @@ export const FApiMethodAccessRules = [
         ]
     },
 
+    // ProtectedObject methods
+    {
+        url: '/dashboard/protectedObjects\$', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/dashboard/protectedObjects/archive\$', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: /^\/dashboard\/protectedObjects(?=.)/, access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/protectedObject/createProtectedObject', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/protectedObject/editProtectedObject', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/protectedObject/getProtectedObject', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/protectedObject/deleteProtectedObject', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/protectedObject/recoverProtectedObject', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/protectedObject/reportProtectedObjects', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+
     // Timesheet methods
     {
         url: '/api/method/timesheet/changeTimesheet', access: [
@@ -338,6 +397,7 @@ export function getApiMethodAccesRules(positions) {
     const regExp = RegExp([
         '/api/method/guard/',
         '/api/method/guardPost/',
+        '/api/method/protectedObject/',
         '/api/method/timesheet/',
         '/api/method/user/',
         '/api/method/userHard/',

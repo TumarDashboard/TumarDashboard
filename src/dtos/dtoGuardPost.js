@@ -2,8 +2,8 @@ import { object, lazy, string, number } from "yup";
 import { fetchAuthFileMethod, fetchAuthMethod } from "../../middleware/requests";
 import { mapValue } from "../utils/arrayUtils";
 
-const minlengthNumber = process.env.NEXT_PUBLIC_MIN_LENGTH_NUMBER_INPUT;
-const maxlengthNumber = process.env.NEXT_PUBLIC_MAX_LENGTH_NUMBER_INPUT;
+const minlengthNumber = process.env.NEXT_PUBLIC_MIN_LENGTH_GUARD_POST_NUMBER_INPUT;
+const maxlengthNumber = process.env.NEXT_PUBLIC_MAX_LENGTH_GUARD_POST_NUMBER_INPUT;
 const minlengthRateNumber = process.env.NEXT_PUBLIC_MIN_LENGTH_RATE_INPUT;
 const maxlengthRateNumber = process.env.NEXT_PUBLIC_MAX_LENGTH_RATE_INPUT;
 

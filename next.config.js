@@ -12,9 +12,13 @@ module.exports = async (phase, { defaultConfig }) => {
             NEXT_PUBLIC_MIN_LENGTH_INITIALS: '1',
             NEXT_PUBLIC_MAX_LENGTH_INITIALS: '30',
 
-            // #Min and Max data for number input
-            NEXT_PUBLIC_MIN_LENGTH_NUMBER_INPUT: '100',
-            NEXT_PUBLIC_MAX_LENGTH_NUMBER_INPUT: '999',
+            // #Min and Max data for number input for guard posts
+            NEXT_PUBLIC_MIN_LENGTH_GUARD_POST_NUMBER_INPUT: '100',
+            NEXT_PUBLIC_MAX_LENGTH_GUARD_POST_NUMBER_INPUT: '999',
+
+            // #Min and Max data for number input for guard posts
+            NEXT_PUBLIC_MIN_LENGTH_PROTECTED_OBJECT_NUMBER_INPUT: '1',
+            NEXT_PUBLIC_MAX_LENGTH_PROTECTED_OBJECT_NUMBER_INPUT: '100000',
 
             // #Min and Max data for number input
             NEXT_PUBLIC_MIN_LENGTH_TELEPHONE_INPUT: '10',
@@ -49,16 +53,20 @@ module.exports = async (phase, { defaultConfig }) => {
             // #JWT config for redirect auth token
             NEXT_PUBLIC_JWT_REDIRECT_AUTH_EXPIRES_IN: '5m',
             
-            // #Google Drive info 
+            // #Google Drive info for image
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_DASHBOARD: '1s2KFHjOhXQ9kQ8QcGGofR47PeFNwhD2j',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS: '1oWbuTn70nfV9UMQ90KrIKO4yKbmm4nH0',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS: '16VCgeX_BbwS5UpWdhO0o8loLSPafBPCL',
+            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_PROTECTEDOBJECTS: '1zEUDiK63E7YGHHAV5onX75b2FcDxfA2L',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDS: '1efI0RWRTXHfz4pMz5Nvjna4HFc4ULlmq',
+
+            // #Google Drive info for excel
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_DAY: '1QpNbsuqoSXogZOopyOCRhOPLTU380oHj',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_PART: '1w81XJFdlgtqpTH6Dj9FjcPLI63chEQR9',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_FULL: '13nNbh8tsyo-MHAbcLFfdEveO6MW-Dt7r',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_BUH: '1Tiqp50Yt2a5KTgdFeG4wClsP9hvA1gxR',
             NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_GUARD_POSTS: '1KaF67tYa7oEMcU-gaBM0mPsi5W39F3BG',
+            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_PROTECTED_OBJECTS: '1RVLbfkZFipIEZ_b-VRJr81PoQyFBPVMs',
         },
 
         images: {

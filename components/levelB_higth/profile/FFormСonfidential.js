@@ -8,7 +8,7 @@ import { changeUser, changeUserPassword, deleteUser } from "../../../src/dtos/dt
 import { ApiError } from "../../../middleware/exceptions";
 import { FUserDeleteForm } from "../../levelD_modal/userHard/FUserDeleteForm";
 import { FInputInitials } from "../../levelE_low/FInputInitials";
-import { FInputFile } from "../../levelE_low/FInputFile";
+import { FInputImageFile } from "../../levelE_low/FInputImageFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FSelect } from "../../levelE_low/FSelect";
 import FPositionItemList from "../../levelZ_variable/FPositionItemList";

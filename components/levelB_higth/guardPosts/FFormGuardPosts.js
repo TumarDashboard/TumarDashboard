@@ -14,7 +14,7 @@ import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 import { createGuardPost, editGuardPost, deleteGuardPost } from '../../../src/dtos/dtoGuardPost';
 import { FGuardPostDeleteForm } from '../../levelD_modal/guardPost/FGuardPostDeleteForm';
 import { FGuardPostEditForm } from '../../levelD_modal/guardPost/FGuardPostEditForm';
-import { FTimesheetPrintForm } from '../../levelD_modal/timesheet/FTimesheetPrintForm';
+import { FGuardPostPrintForm } from '../../levelD_modal/guardPost/FGuardPostPrintForm';
 import { FFilterText } from '../../levelE_low/FFilterText';
 import { FGuardPostSelectGuardForm } from '../../levelD_modal/guardPost/FGuardPostSelectGuardForm';
 import { FGuardPostShowGuardForm } from '../../levelD_modal/guardPost/FGuardPostShowGuardForm';
@@ -92,10 +92,11 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
   const AReditGuardPostRate = !accessRules.includes('editGuardPost/editBlock/rate');
   const AReditGuardPostAll = !accessRules.includes('editGuardPost/userCompare/manager');
   const ARdeleteGuardPost = accessRules.includes('deleteGuardPost');
-  const ARgetTimesheetPrint = accessRules.includes('getTimesheetPrint')
+  const ARgetGuardPostPrint = accessRules.includes('getTimesheetPrint')
     || accessRules.includes('getTimesheetPrintForDay')
     || accessRules.includes('getTimesheetPrintForMonthPart')
-    || accessRules.includes('getTimesheetPrintForMonthFul');
+    || accessRules.includes('getTimesheetPrintForMonthFul')
+    || accessRules.includes('reportGuardPosts');
   const ARchangeTimesheetToday = accessRules.includes('changeTimesheetToday');
   const ARchangeTimesheetTodayAll = !accessRules.includes('changeTimesheetToday/userCompare/guardPostManagers');
   const ARgetGuardPostID = accessRules.includes('guardPosts(?=.)/');
@@ -533,7 +534,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
         <div className='flex-1 md:order-last md:ml-2 w-full flex justify-end'>
 
           {/* Кнопка выгрузки табеля */}
-          {ARgetTimesheetPrint && tableGuardPosts?.length > 0 && (<button
+          {ARgetGuardPostPrint && tableGuardPosts?.length > 0 && (<button
             className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
             hover:bg-color_C active:bg-color_B mr-4"
             onClick={() => {
@@ -860,7 +861,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
       />
 
       {/* {Форма выгрузки графика рабочих часов} */}
-      <FTimesheetPrintForm
+      <FGuardPostPrintForm
         accessRules={accessRules}
         form={timesheetPrintForm}
         setForm={setTimesheetPrintForm}

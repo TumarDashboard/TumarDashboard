@@ -1,50 +1,43 @@
-import { FModalForm } from '../FModalForm';
-import { useState, useEffect } from 'react';
 import { ShareIcon } from '@heroicons/react/24/solid';
+import { useEffect, useState } from 'react';
+import { FModalForm } from '../FModalForm';
 
-import { FInputNumber } from "../../levelE_low/FInputNumber";
-import { FTextArea } from "../../levelE_low/FTextArea";
-import { FInputFile } from "../../levelE_low/FInputFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
-import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 import { FSelect } from "../../levelE_low/FSelect";
-import { FSelectShifts } from "../../levelE_low/FSelectShifts";
 
-import { equalArrays } from '../../../src/utils/arrayUtils';
-import { getCurrentMonth, getCurrentDateStamp } from '../../../src/utils/dateUtils';
-import { FInputMonth } from '../../levelE_low/FInputMonth';
+import { ApiError } from '../../../middleware/exceptions';
+import { reportProtectedObjects } from '../../../src/dtos/dtoProtectedObject';
 import {
   getTimesheetPrint,
   getTimesheetPrintForDay,
-  getTimesheetPrintForMonthFull,
   getTimesheetPrintForMonthBuh,
+  getTimesheetPrintForMonthFull,
   getTimesheetPrintForMonthPart
 } from '../../../src/dtos/dtoTimesheet';
-import { reportGuardPosts } from '../../../src/dtos/dtoGuardPost';
-import { ApiError } from '../../../middleware/exceptions';
+import { getCurrentDateStamp, getCurrentMonth } from '../../../src/utils/dateUtils';
 
 const DTForDay = 'DTForDay';
 const DTForMonthPart = 'DTForMonthPart';
 const DTForMonthFull = 'DTForMonthFull';
 const DTForMonthBuh = 'DTForMonthBuh';
-const PRForAllGuardPosts = 'PRForAllGuardPosts';
+const PRForAllProtectedObjects = 'PRForAllProtectedObjects';
 
 const getInputDate = (operation) => {
   switch (operation) {
 
-    case DTForDay:
-      return getCurrentDateStamp('-');
+    // case DTForDay:
+    //   return getCurrentDateStamp('-');
 
-    case DTForMonthPart:
-      return getCurrentMonth();
+    // case DTForMonthPart:
+    //   return getCurrentMonth();
 
-    case DTForMonthFull:
-      return getCurrentMonth();
+    // case DTForMonthFull:
+    //   return getCurrentMonth();
 
-    case DTForMonthBuh:
-      return getCurrentMonth();
+    // case DTForMonthBuh:
+    //   return getCurrentMonth();
 
-    case PRForAllGuardPosts:
+    case PRForAllProtectedObjects:
       return getCurrentMonth();
 
     default:
@@ -53,77 +46,77 @@ const getInputDate = (operation) => {
   }
 }
 
-const getTimesheet = async (operation, guardPosts, date, manager) => {
+const getTimesheet = async (operation, protectedObjects, date, manager) => {
   if (!date) throw ApiError.BadRequest('Отсутствуют необходимые данные: дата');
   switch (operation) {
 
-    case DTForDay:
+    // case DTForDay:
+    //   return {
+    //     responce: await getTimesheetPrintForDay(date),
+    //     documentName: 'Список охранников-' + date + '.xlsx'
+    //   };
+
+    // case DTForMonthPart:
+    //   if (!manager) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о сотруднике, выполняющим операцию');
+
+    //   const NSOinitials = manager.surname ? [
+    //     manager.surname,
+    //     manager.firstName?.length > 0 ? manager.firstName.charAt(0) + '.' : null,
+    //     manager.patronymic?.length > 0 ? manager.patronymic.charAt(0) + '.' : null,
+    //   ].filter(Boolean).join(' ') : null;
+
+    //   return {
+    //     responce: await getTimesheetPrintForMonthPart(date, manager.id),
+    //     documentName: `Табель ${NSOinitials} ${date}.xlsx`
+    //   };
+
+    // case DTForMonthFull:
+    //   return {
+    //     responce: await getTimesheetPrintForMonthFull(date),
+    //     documentName: 'Табель-' + date + '.xlsx'
+    //   };
+
+    // case DTForMonthBuh:
+    //   return {
+    //     responce: await getTimesheetPrintForMonthBuh(date),
+    //     documentName: 'Платёжная ведомость-' + date + '.xlsx'
+    //   };
+
+    case PRForAllProtectedObjects:
       return {
-        responce: await getTimesheetPrintForDay(date),
-        documentName: 'Список охранников-' + date + '.xlsx'
-      };
-
-    case DTForMonthPart:
-      if (!manager) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о сотруднике, выполняющим операцию');
-
-      const NSOinitials = manager.surname ? [
-        manager.surname,
-        manager.firstName?.length > 0 ? manager.firstName.charAt(0) + '.' : null,
-        manager.patronymic?.length > 0 ? manager.patronymic.charAt(0) + '.' : null,
-      ].filter(Boolean).join(' ') : null;
-
-      return {
-        responce: await getTimesheetPrintForMonthPart(date, manager.id),
-        documentName: `Табель ${NSOinitials} ${date}.xlsx`
-      };
-
-    case DTForMonthFull:
-      return {
-        responce: await getTimesheetPrintForMonthFull(date),
-        documentName: 'Табель-' + date + '.xlsx'
-      };
-
-    case DTForMonthBuh:
-      return {
-        responce: await getTimesheetPrintForMonthBuh(date),
-        documentName: 'Платёжная ведомость-' + date + '.xlsx'
-      };
-
-    case PRForAllGuardPosts:
-      return {
-        responce: await reportGuardPosts(),
-        documentName: 'Список физ. постов -' + date + '.xlsx'
+        responce: await reportProtectedObjects(),
+        documentName: 'Список пультовых объектов -' + date + '.xlsx'
       };
 
     default:
-      if (!guardPosts) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о физ. постах');
+      if (!protectedObjects) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о пультовой объектах');
       return {
-        responce: await getTimesheetPrint(guardPosts.map(value => value._id), date),
+        responce: await getTimesheetPrint(protectedObjects.map(value => value._id), date),
         documentName: 'Табель-' + date + '.xlsx'
       };
 
   }
 }
 
-export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, MOBXuser, errorCallback, guardPosts }) {
+export function FProtectedObjectPrintForm({ accessRules, form, setForm, MOBXui, MOBXuser, errorCallback, protectedObjects }) {
 
   /*----Определение правил доступа-----------------------------------------------------------------------*/
-  const ARgetTimesheetPrintForDay = accessRules.includes('getTimesheetPrintForDay');
-  const ARgetTimesheetPrintForMonthPart = accessRules.includes('getTimesheetPrintForMonthPart');
-  const ARgetTimesheetPrintForMonthFull = accessRules.includes('getTimesheetPrintForMonthFull');
-  const ARgetTimesheetPrintForMonthFullBuh = accessRules.includes('getTimesheetPrintForMonthBuh');
-  const ARreportGuardPosts = accessRules.includes('reportGuardPosts');
+  // const ARgetTimesheetPrintForDay = accessRules.includes('getTimesheetPrintForDay');
+  // const ARgetTimesheetPrintForMonthPart = accessRules.includes('getTimesheetPrintForMonthPart');
+  // const ARgetTimesheetPrintForMonthFull = accessRules.includes('getTimesheetPrintForMonthFull');
+  // const ARgetTimesheetPrintForMonthFullBuh = accessRules.includes('getTimesheetPrintForMonthBuh');
+  const ARreportProtectedObjects = accessRules.includes('reportProtectedObjects');
 
   /*--Операция-------------------------------------------------------------------------------------------*/
   const [error, setError] = useState('');
 
   /*--Данные по типу проводимой операции-----------------------------------------------------------------*/
   const FOperationItemList = [
-    ARgetTimesheetPrintForDay ? { label: "Отчёт за день", value: DTForDay } : null,
-    ARgetTimesheetPrintForMonthPart ? { label: "Отчёт за месяц - частичный", value: DTForMonthPart } : null,
-    ARgetTimesheetPrintForMonthFull ? { label: "Отчёт за месяц - полный", value: DTForMonthFull } : null,
-    ARgetTimesheetPrintForMonthFullBuh ? { label: "Платёжная ведомость", value: DTForMonthBuh } : null,
-    ARreportGuardPosts ? { label: "Список физ. постов", value: PRForAllGuardPosts } : null,
+    // ARgetTimesheetPrintForDay ? { label: "Отчёт за день", value: DTForDay } : null,
+    // ARgetTimesheetPrintForMonthPart ? { label: "Отчёт за месяц - частичный", value: DTForMonthPart } : null,
+    // ARgetTimesheetPrintForMonthFull ? { label: "Отчёт за месяц - полный", value: DTForMonthFull } : null,
+    // ARgetTimesheetPrintForMonthFullBuh ? { label: "Платёжная ведомость", value: DTForMonthBuh } : null,
+    ARreportProtectedObjects ? { label: "Список пультовых объектов", value: PRForAllProtectedObjects } : null,
   ].filter(Boolean);
 
   const [selectedOperation, setSelectedOperation] = useState();
@@ -158,7 +151,7 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
 
     try {
 
-      const { responce, documentName } = await getTimesheet(selectedOperation, guardPosts, inputTimesheetDate, MOBXuser?.user);
+      const { responce, documentName } = await getTimesheet(selectedOperation, protectedObjects, inputTimesheetDate, MOBXuser?.user);
       // console.log(responce);
       const googleDriveFileID = responce.headers.get('googleDriveFileID');
 
@@ -219,7 +212,7 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
 
   return (
     <FModalForm
-      title={`Выгрузка графика рабочих часов`}
+      title={`Формирование отчётов для пультовых объектов`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
       className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
@@ -241,7 +234,7 @@ export function FTimesheetPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
         {/* Месяц и Кнопка выгрузки */}
         <div className='flex flex-col md:flex-row w-full '>
 
-          {selectedOperation != PRForAllGuardPosts &&
+          {selectedOperation != PRForAllProtectedObjects &&
             <div className="form-item flex items-center md:mr-4">
               <label className="text-lg pr-4 select-none">{
                 selectedOperation == DTForDay ? 'Дата' :

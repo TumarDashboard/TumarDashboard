@@ -1,25 +1,16 @@
-import { PencilSquareIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon, RectangleGroupIcon } from '@heroicons/react/24/solid';
+import { ChevronDownIcon, ChevronUpIcon, RectangleGroupIcon } from '@heroicons/react/24/solid';
 import { motion } from "framer-motion";
-import { useState, useRef, useEffect } from 'react';
-import { useRouter } from "next/router";
 import Image from "next/legacy/image";
+import { useRouter } from "next/router";
+import { useEffect, useRef, useState } from 'react';
 
-import { useStore } from "../../levelA/StoreProvider";
 import { ApiError } from "../../../middleware/exceptions";
+import { useStore } from "../../levelA/StoreProvider";
 
-import { createGuardPost, editGuardPost, deleteGuardPost, recoverGuardPost } from '../../../src/dtos/dtoGuardPost';
-import { changeTimesheetToday, getTimesheetToday } from '../../../src/dtos/dtoTimesheet';
-import { FGuardPostDeleteForm } from '../../levelD_modal/guardPost/FGuardPostDeleteForm';
-import { FGuardPostEditForm } from '../../levelD_modal/guardPost/FGuardPostEditForm';
+import { recoverGuardPost } from '../../../src/dtos/dtoGuardPost';
 import { FGuardPostRecoverForm } from '../../levelD_modal/guardPost/FGuardPostRecoverForm';
-import { FGuardPostSelectGuardForm } from '../../levelD_modal/guardPost/FGuardPostSelectGuardForm';
-import { FGuardPostShowGuardForm } from '../../levelD_modal/guardPost/FGuardPostShowGuardForm';
-import { FTimesheetPrintForm } from '../../levelD_modal/timesheet/FTimesheetPrintForm';
-import { FTimesheetTableSelectGuardForm } from '../../levelD_modal/timesheetTable/FTimesheetTableSelectGuardForm';
-import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 import { FFilterText } from '../../levelE_low/FFilterText';
-import { FButtonWhiteSmall } from '../../levelE_low/FButtonWhiteSmall';
 
 const inputs = {
   initial: {
@@ -65,6 +56,7 @@ const sortingTableCallback = (a, b, rule, invert) => {
       if (a.number && b.number)
         return (a.number - b.number) * invert;
       else return -1;
+    
     case 'callsign':
       return (a.callsign?.localeCompare(b.callsign)) * invert;
 
@@ -88,26 +80,26 @@ export default function FFormGuardPostsArchive({ accessRules, userData, tableGua
 
   const { MOBXuser, MOBXui } = useStore();
 
-  const [error, setError] = useState('');
+  // const [error, setError] = useState('');
 
   /*----Определение правил доступа------------------------------------------------------------------------------------*/
-  const AReditGuardPost = false; //accessRules.includes('editGuardPost');
-  const AReditGuardPostRate = false; //!accessRules.includes('editGuardPost/editBlock/rate');
-  const AReditGuardPostAll = false; //!accessRules.includes('editGuardPost/userCompare/manager');
-  const ARdeleteGuardPost = false; //accessRules.includes('deleteGuardPost');
-  const ARchangeTimesheetToday = false; //accessRules.includes('changeTimesheetToday');
-  const ARgetGuardPostID = false; //accessRules.includes('guardPosts(?=.)/');
+  // const AReditGuardPost = false; //accessRules.includes('editGuardPost');
+  // const AReditGuardPostRate = false; //!accessRules.includes('editGuardPost/editBlock/rate');
+  // const AReditGuardPostAll = false; //!accessRules.includes('editGuardPost/userCompare/manager');
+  // const ARdeleteGuardPost = false; //accessRules.includes('deleteGuardPost');
+  // const ARchangeTimesheetToday = false; //accessRules.includes('changeTimesheetToday');
+  // const ARgetGuardPostID = false; //accessRules.includes('guardPosts(?=.)/');
   const ARrecoverGuardPost = accessRules.includes('recoverGuardPost');
   // console.log('accessRules %o',accessRules);
 
   /*----Данные таблицы------------------------------------------------------------------------------------------------*/
   const [renderTableGuardPosts, setRenderTableGuardPosts] = useState(tableGuardPostsArchive ? [...tableGuardPostsArchive] : []);
 
-  const [guards, setGuards] = useState(guardsData.map(guard => {
-    guard.label = [guard.surname, guard.firstName, guard.telephone].join(' ');
-    guard.lower = guard.label.toLowerCase().replace(/\s/g, '');;
-    return guard;
-  }));
+  // const [guards, setGuards] = useState(guardsData.map(guard => {
+  //   guard.label = [guard.surname, guard.firstName, guard.telephone].join(' ');
+  //   guard.lower = guard.label.toLowerCase().replace(/\s/g, '');;
+  //   return guard;
+  // }));
 
   /*----Сортировка таблицы--------------------------------------------------------------------------------------------*/
   const [sortingRule, setSortingRule] = useState();
@@ -172,185 +164,185 @@ export default function FFormGuardPostsArchive({ accessRules, userData, tableGua
   }
 
   /*----Модальное окно Формы редактирования---------------------------------------------------------------------------*/
-  const [guardPostEditForm, setGuardPostEditForm] = useState({
-    isOpen: false
-  });
+  // const [guardPostEditForm, setGuardPostEditForm] = useState({
+  //   isOpen: false
+  // });
 
   /*----Создание физ. поста Формы редактирования----------------------------------------------------------------------*/
-  const guardPostAdd = async (event,
-    inputGuardPostNumber,
-    inputGuardPostCallsign,
-    inputGuardPostName,
-    inputGuardPostAddress,
-    inputGuardPostPhoto,
-    inputGuardPostManager,
-    inputGuardPostShifts,
-    inputGuardPostDescription,
-    inputGuardPostRate) => {
+  // const guardPostAdd = async (event,
+  //   inputGuardPostNumber,
+  //   inputGuardPostCallsign,
+  //   inputGuardPostName,
+  //   inputGuardPostAddress,
+  //   inputGuardPostPhoto,
+  //   inputGuardPostManager,
+  //   inputGuardPostShifts,
+  //   inputGuardPostDescription,
+  //   inputGuardPostRate) => {
 
-    event.preventDefault();
+  //   event.preventDefault();
 
-    MOBXui.setLoading();
+  //   MOBXui.setLoading();
 
-    try {
+  //   try {
 
-      // Отправляем запрос на сервер
-      const responce = await createGuardPost(
-        inputGuardPostNumber,
-        inputGuardPostCallsign,
-        inputGuardPostName,
-        inputGuardPostAddress,
-        inputGuardPostPhoto,
-        inputGuardPostManager,
-        inputGuardPostShifts,
-        inputGuardPostDescription,
-        inputGuardPostRate
-      );
+  //     // Отправляем запрос на сервер
+  //     const responce = await createGuardPost(
+  //       inputGuardPostNumber,
+  //       inputGuardPostCallsign,
+  //       inputGuardPostName,
+  //       inputGuardPostAddress,
+  //       inputGuardPostPhoto,
+  //       inputGuardPostManager,
+  //       inputGuardPostShifts,
+  //       inputGuardPostDescription,
+  //       inputGuardPostRate
+  //     );
 
-      // Обновляем таблицу в памяти
-      setTableGuardPostsArchive(array => {
-        array.unshift(responce.guardPost);
-        return array;
-      });
+  //     // Обновляем таблицу в памяти
+  //     setTableGuardPostsArchive(array => {
+  //       array.unshift(responce.guardPost);
+  //       return array;
+  //     });
 
-      // Обновляем отображаемую таблицу
-      setRenderTableGuardPosts(array => {
-        array.unshift(responce.guardPost);
-        return array;
-      });
+  //     // Обновляем отображаемую таблицу
+  //     setRenderTableGuardPosts(array => {
+  //       array.unshift(responce.guardPost);
+  //       return array;
+  //     });
 
-      // Закрываем модальное окно
-      setGuardPostEditForm({ isOpen: false });
+  //     // Закрываем модальное окно
+  //     setGuardPostEditForm({ isOpen: false });
 
-    } catch (error) {
+  //   } catch (error) {
 
-      errorCallback(error, setGuardPostEditForm);
+  //     errorCallback(error, setGuardPostEditForm);
 
-    } finally {
+  //   } finally {
 
-      MOBXui.setLoading();
+  //     MOBXui.setLoading();
 
-    }
-  }
+  //   }
+  // }
 
   /*----Изменение физ. поста Формы редактирования---------------------------------------------------------------------*/
-  const guardPostEdit = async (event,
-    inputGuardPostNumber,
-    inputGuardPostCallsign,
-    inputGuardPostName,
-    inputGuardPostAddress,
-    inputGuardPostPhoto,
-    inputGuardPostManager,
-    inputGuardPostShifts,
-    inputGuardPostDescription,
-    inputGuardPostRate) => {
+  // const guardPostEdit = async (event,
+  //   inputGuardPostNumber,
+  //   inputGuardPostCallsign,
+  //   inputGuardPostName,
+  //   inputGuardPostAddress,
+  //   inputGuardPostPhoto,
+  //   inputGuardPostManager,
+  //   inputGuardPostShifts,
+  //   inputGuardPostDescription,
+  //   inputGuardPostRate) => {
 
-    event.preventDefault();
+  //   event.preventDefault();
 
-    MOBXui.setLoading();
+  //   MOBXui.setLoading();
 
-    try {
+  //   try {
 
-      // Отправляем запрос на сервер
-      const responce = await editGuardPost(
-        guardPostEditForm.guardPost._id,
-        inputGuardPostNumber,
-        inputGuardPostCallsign,
-        inputGuardPostName,
-        inputGuardPostAddress,
-        inputGuardPostPhoto,
-        inputGuardPostManager,
-        inputGuardPostShifts,
-        inputGuardPostDescription,
-        AReditGuardPostRate ? inputGuardPostRate : undefined
-      );
+  //     // Отправляем запрос на сервер
+  //     const responce = await editGuardPost(
+  //       guardPostEditForm.guardPost._id,
+  //       inputGuardPostNumber,
+  //       inputGuardPostCallsign,
+  //       inputGuardPostName,
+  //       inputGuardPostAddress,
+  //       inputGuardPostPhoto,
+  //       inputGuardPostManager,
+  //       inputGuardPostShifts,
+  //       inputGuardPostDescription,
+  //       AReditGuardPostRate ? inputGuardPostRate : undefined
+  //     );
 
-      // Обновляем таблицу в памяти
-      setTableGuardPostsArchive(array => {
-        const index = array.findIndex(element => {
-          return element._id == responce.guardPost._id
-        });
-        if (index) {
-          responce.guardPost.guardsToday = array[index].guardsToday;
-          array[index] = responce.guardPost;
-        }
-        return array;
-      });
+  //     // Обновляем таблицу в памяти
+  //     setTableGuardPostsArchive(array => {
+  //       const index = array.findIndex(element => {
+  //         return element._id == responce.guardPost._id
+  //       });
+  //       if (index) {
+  //         responce.guardPost.guardsToday = array[index].guardsToday;
+  //         array[index] = responce.guardPost;
+  //       }
+  //       return array;
+  //     });
 
-      // Обновляем отображаемую таблицу
-      setRenderTableGuardPosts(array => {
-        responce.guardPost.guardsToday = array[guardPostEditForm.index].guardsToday;
-        array[guardPostEditForm.index] = responce.guardPost;
-        return array;
-      });
+  //     // Обновляем отображаемую таблицу
+  //     setRenderTableGuardPosts(array => {
+  //       responce.guardPost.guardsToday = array[guardPostEditForm.index].guardsToday;
+  //       array[guardPostEditForm.index] = responce.guardPost;
+  //       return array;
+  //     });
 
-      // Закрываем модальное окно
-      setGuardPostEditForm({ isOpen: false });
+  //     // Закрываем модальное окно
+  //     setGuardPostEditForm({ isOpen: false });
 
-    } catch (error) {
+  //   } catch (error) {
 
-      errorCallback(error, setGuardPostEditForm);
+  //     errorCallback(error, setGuardPostEditForm);
 
-    } finally {
+  //   } finally {
 
-      MOBXui.setLoading();
+  //     MOBXui.setLoading();
 
-    }
-  }
+  //   }
+  // }
 
   /*----Модальное окно Формы удаления-------------------------------------------------------------------------------*/
-  const [guardPostDeleteForm, setGuardPostDeleteForm] = useState({
-    isOpen: false
-  });
+  // const [guardPostDeleteForm, setGuardPostDeleteForm] = useState({
+  //   isOpen: false
+  // });
 
   /*----Функция удаления поста Формы удаления-------------------------------------------------------------------------*/
-  const guardPostDeleteFormSubmit = async (event, reason) => {
+  // const guardPostDeleteFormSubmit = async (event, reason) => {
 
-    event.preventDefault();
+  //   event.preventDefault();
 
-    MOBXui.setLoading();
+  //   MOBXui.setLoading();
 
-    try {
+  //   try {
 
-      if (MOBXuser.user && MOBXuser.user.id) {
+  //     if (MOBXuser.user && MOBXuser.user.id) {
 
-        // Отправляем запрос на сервер
-        const responce = await deleteGuardPost(
-          guardPostDeleteForm.guardPostId,
-          MOBXuser.user.id,
-          reason
-        );
+  //       // Отправляем запрос на сервер
+  //       const responce = await deleteGuardPost(
+  //         guardPostDeleteForm.guardPostId,
+  //         MOBXuser.user.id,
+  //         reason
+  //       );
 
-        // Обновляем таблицу в памяти
-        setTableGuardPostsArchive(array => {
-          const result = array.filter(value => {
-            return responce.guardPost._id != value._id;
-          })
-          return result
-        });
+  //       // Обновляем таблицу в памяти
+  //       setTableGuardPostsArchive(array => {
+  //         const result = array.filter(value => {
+  //           return responce.guardPost._id != value._id;
+  //         })
+  //         return result
+  //       });
 
-        // Обновляем отображаемую таблицу
-        setRenderTableGuardPosts(array => {
-          const result = array.filter(value => {
-            return responce.guardPost._id != value._id;
-          })
-          return result
-        });
+  //       // Обновляем отображаемую таблицу
+  //       setRenderTableGuardPosts(array => {
+  //         const result = array.filter(value => {
+  //           return responce.guardPost._id != value._id;
+  //         })
+  //         return result
+  //       });
 
-        // Закрываем модальное окно
-        setGuardPostDeleteForm({ isOpen: false });
-      }
+  //       // Закрываем модальное окно
+  //       setGuardPostDeleteForm({ isOpen: false });
+  //     }
 
-    } catch (error) {
+  //   } catch (error) {
 
-      errorCallback(error, setGuardPostDeleteForm);
+  //     errorCallback(error, setGuardPostDeleteForm);
 
-    } finally {
+  //   } finally {
 
-      MOBXui.setLoading();
+  //     MOBXui.setLoading();
 
-    }
-  }
+  //   }
+  // }
 
   /*----Модальное окно Формы восстановления---------------------------------------------------------------------------*/
   const [guardPostRecoverForm, setGuardPostRecoverForm] = useState({
@@ -517,7 +509,8 @@ export default function FFormGuardPostsArchive({ accessRules, userData, tableGua
             })}
 
             {/* Заголовок управления*/}
-            {(AReditGuardPost || ARdeleteGuardPost || ARchangeTimesheetToday || ARrecoverGuardPost) &&
+            {/* {(AReditGuardPost || ARdeleteGuardPost || ARchangeTimesheetToday || ARrecoverGuardPost) && */}
+            {ARrecoverGuardPost &&
               <th
                 className="block md:table-cell md:border bg-color_B p-2"
                 onClick={(e) => sortingTable(constTableHeadControl.value)}
@@ -539,14 +532,15 @@ export default function FFormGuardPostsArchive({ accessRules, userData, tableGua
             return (
 
               <tr
-                className={`rounded-md md:border-none block md:table-row bg-color_G mb-2 ${ARgetGuardPostID && 'cursor-pointer'}`}
+                className={`rounded-md md:border-none block md:table-row bg-color_G mb-2`}
+                // className={`rounded-md md:border-none block md:table-row bg-color_G mb-2 ${ARgetGuardPostID && 'cursor-pointer'}`}
                 key={guardPost._id}
-                onClick={(event) => {
-                  if (ARgetGuardPostID) {
-                    event.stopPropagation();
-                    router.push(`/dashboard/guardPosts/${guardPost._id}`);
-                  }
-                }}
+                // onClick={(event) => {
+                //   if (ARgetGuardPostID) {
+                //     event.stopPropagation();
+                //     router.push(`/dashboard/guardPosts/${guardPost._id}`);
+                //   }
+                // }}
               >
 
                 {/* {Позывной мобильного устройства} */}
@@ -601,12 +595,13 @@ export default function FFormGuardPostsArchive({ accessRules, userData, tableGua
                 </td>
 
                 {/* {Кнопки управления компьютера} */}
-                {(AReditGuardPost || ARdeleteGuardPost || ARrecoverGuardPost) &&
+                {/* {(AReditGuardPost || ARdeleteGuardPost || ARrecoverGuardPost) && */}
+                {ARrecoverGuardPost &&
                   <td className="p-2 md:border text-left block md:table-cell md:w-1">
                     <div className='flex justify-end space-x-2'>
 
                       {/* {Кнопка редактирования физ. поста} */}
-                      {AReditGuardPost &&
+                      {/* {AReditGuardPost &&
                         (AReditGuardPostAll || guardPost.manager?._id === MOBXuser.user.id || guardPost.manager?._id === userData.id) &&
                         <FButtonRed
                           className="flex"
@@ -625,10 +620,10 @@ export default function FFormGuardPostsArchive({ accessRules, userData, tableGua
                             className="h-4 w-4"
                           />
                           <span className='hidden xl:block'>Изменить</span>
-                        </FButtonRed>}
+                        </FButtonRed>} */}
 
                       {/* {Кнопка удаления физ. поста} */}
-                      {ARdeleteGuardPost &&
+                      {/* {ARdeleteGuardPost &&
                         <FButtonWhite
                           className="flex"
                           onClick={(event) => {
@@ -645,7 +640,7 @@ export default function FFormGuardPostsArchive({ accessRules, userData, tableGua
                             className="h-4 w-4"
                           />
                           <span className='hidden xl:block'>Удалить</span>
-                        </FButtonWhite>}
+                        </FButtonWhite>} */}
 
                       {/* {Кнопка восстановления физ. поста} */}
                       {ARrecoverGuardPost &&
@@ -682,21 +677,21 @@ export default function FFormGuardPostsArchive({ accessRules, userData, tableGua
       </table>
 
       {/* {Форма добавления/редактирования физ. поста} */}
-      <FGuardPostEditForm
+      {/* <FGuardPostEditForm
         accessRules={accessRules}
         form={guardPostEditForm}
         setForm={setGuardPostEditForm}
         submitAdd={guardPostAdd}
         submitEdit={guardPostEdit}
         users={users}
-      />
+      /> */}
 
       {/* {Форма удаления физ. поста} */}
-      <FGuardPostDeleteForm
+      {/* <FGuardPostDeleteForm
         form={guardPostDeleteForm}
         setForm={setGuardPostDeleteForm}
         submit={guardPostDeleteFormSubmit}
-      />
+      /> */}
 
       {/* {Форма восстановления физ. поста} */}
       <FGuardPostRecoverForm

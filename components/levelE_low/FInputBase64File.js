@@ -1,40 +1,39 @@
 const fileToDataUri = async (file) => {
 
-  const data = await (await import('imtool')).fromImage(file);
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
 
-  const result = await data.thumbnail(1024).toDataURL()
+    reader.onload = (event) => {
+      console.log("event.target.result %o", event.target.result);
+      resolve(event.target.result);
+    };
 
-  return result;
+    reader.readAsDataURL(file);
+  });
 
 };
 
-export function FInputFile({ setUri, ...props }) {
+export function FInputBase64File({ setUri, ...props }) {
 
-  const onChange = ({ target }) => {
+  const onChange = async ({ target }) => {
 
-    const img = target.files[0];
+    const file = target.files[0];
 
-    if (!img) {
+    if (!file) {
       alert("Файл не выбран");
       setUri(null);
       return;
     }
 
-    if (img.size > 16777216) {
+    if (file.size > 16777216) {
       alert("Размер файла не должен превышать 16mb");
       setUri(null);
       target.value = null;
       return;
     }
 
-    if (img.type.split('/')[0] != 'image') {
-      alert("Для загрузки доступны только файлы с изображениями");
-      setUri(null);
-      target.value = null;
-      return;
-    }
-
-    fileToDataUri(img).then((dataUri) => {
+    await fileToDataUri(file).then((dataUri) => {
+      console.log("dataUri %o", dataUri);
       setUri(dataUri);
     });
 
@@ -44,7 +43,7 @@ export function FInputFile({ setUri, ...props }) {
     <input
       type="file"
       onChange={onChange}
-      accept="image/*"
+      // accept=".xlsx"
       className="border border-gray-300 block w-full 
             focus:border-blue-300 focus:outline-none focus:ring focus:ring-blue-200 focus:ring-opacity-50 
             rounded-md shadow-sm

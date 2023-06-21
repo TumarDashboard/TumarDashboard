@@ -5,6 +5,7 @@ export const FPositionNSO = 'FPNSO';
 export const FPositionHRM = 'FPHRM';
 export const FPositionOPR = 'FPOPR';
 export const FPositionBUH = 'FPBUH';
+export const FPositionING = 'FPING';
 export const FPositionTHN = 'FPTHN';
 
 const FPositionItemList = [
@@ -15,6 +16,7 @@ const FPositionItemList = [
     { label: "Сотрудник отдела кадров", value: FPositionHRM },
     { label: "Дежурный оператор", value: FPositionOPR },
     { label: "Бухгалтер", value: FPositionBUH },
+    { label: "Инженер технического отдела", value: FPositionING },
     { label: "Сотрудник технического отдела", value: FPositionTHN },
 ];
 

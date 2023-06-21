@@ -1,7 +1,7 @@
 import { FModalForm } from '../FModalForm';
 import { useState, useEffect } from 'react';
 
-import { FInputGuardPostNumber } from "../../levelE_low/FInputGuardPostNumber";
+import { FInputProtectedObjectNumber } from "../../levelE_low/FInputProtectedObjectNumber";
 import { FTextArea } from "../../levelE_low/FTextArea";
 import { FInputImageFile } from "../../levelE_low/FInputImageFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
@@ -12,7 +12,7 @@ import { FSelectShifts } from "../../levelE_low/FSelectShifts";
 import { equalArrays } from '../../../src/utils/arrayUtils';
 import { FInputText } from '../../levelE_low/FInputText';
 
-export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, submitEdit, users }) {
+export function FProtectedObjectEditForm({ accessRules, form, setForm, submitAdd, submitEdit, users }) {
 
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
@@ -23,76 +23,76 @@ export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, subm
   /*-------------------------------------------------------------------------------------------------------
       Определение правил доступа
   -------------------------------------------------------------------------------------------------------*/
-  const AReditGuardPostManager = !accessRules.includes('editGuardPost/editBlock/manager');
-  const AReditGuardPostRate = !accessRules.includes('editGuardPost/editBlock/rate');
+  // const AReditProtectedObjectManager = !accessRules.includes('editProtectedObject/editBlock/manager');
+  // const AReditProtectedObjectRate = !accessRules.includes('editProtectedObject/editBlock/rate');
 
   /*-------------------------------------------------------------------------------------------------------
-      Номер физ. поста Формы редактирования
+      Номер пультовой объекта Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
-  const [inputGuardPostNumber, setInputGuardPostNumber] = useState('');
+  const [inputProtectedObjectNumber, setInputProtectedObjectNumber] = useState('');
 
-  const [isInputValidateGuardPostNumber, setInputValidateGuardPostNumber] = useState(true);
+  const [isInputValidateProtectedObjectNumber, setInputValidateProtectedObjectNumber] = useState(true);
 
-  const GuardPostNumberChange = (value, validate) => {
-    setInputGuardPostNumber(value);
+  const ProtectedObjectNumberChange = (value, validate) => {
+    setInputProtectedObjectNumber(value);
     if (operation == 'Добавить') {
       if (value)
-        setInputValidateGuardPostNumber(validate);
+        setInputValidateProtectedObjectNumber(validate);
       else
-        setInputValidateGuardPostNumber(true);
+        setInputValidateProtectedObjectNumber(true);
     } else {
-      setInputValidateGuardPostNumber(validate && (value != form.guardPost?.number));
+      setInputValidateProtectedObjectNumber(validate && (value != form.protectedObject?.number));
     }
   }
 
   /*-------------------------------------------------------------------------------------------------------
       Краткое Наименование Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
-  const [inputGuardPostCallsign, setInputGuardPostCallsign] = useState('');
+  // const [inputProtectedObjectCallsign, setInputProtectedObjectCallsign] = useState('');
 
   /*-------------------------------------------------------------------------------------------------------
       Наименование Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
-  const [inputGuardPostName, setInputGuardPostName] = useState('');
+  const [inputProtectedObjectName, setInputProtectedObjectName] = useState('');
 
   /*-------------------------------------------------------------------------------------------------------
       Адрес Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
-  const [inputGuardPostAddress, setInputGuardPostAddress] = useState('');
+  const [inputProtectedObjectAddress, setInputProtectedObjectAddress] = useState('');
 
   /*-------------------------------------------------------------------------------------------------------
       Описание Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
-  const [inputGuardPostDescription, setInputGuardPostDescription] = useState('');
+  const [inputProtectedObjectDescription, setInputProtectedObjectDescription] = useState('');
 
   /*-------------------------------------------------------------------------------------------------------
       Фото Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
-  const [inputGuardPostPhoto, setInputGuardPostPhoto] = useState('');
+  const [inputProtectedObjectPhoto, setInputProtectedObjectPhoto] = useState('');
 
   /*-------------------------------------------------------------------------------------------------------
       Менеджер Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
-  const optionGuardPostManager = [{
-    label: 'Отсутствует', value: 'EMPTY'
-  }, ...users?.map((user) => {
-    return {
-      label: [user.surname, user.firstName].join(' '),
-      value: user._id
-    }
-  })]
+  // const optionProtectedObjectManager = [{
+  //   label: 'Отсутствует', value: 'EMPTY'
+  // }, ...users?.map((user) => {
+  //   return {
+  //     label: [user.surname, user.firstName].join(' '),
+  //     value: user._id
+  //   }
+  // })]
 
-  const [inputGuardPostManager, setInputGuardPostManager] = useState('EMPTY');
+  // const [inputProtectedObjectManager, setInputProtectedObjectManager] = useState('EMPTY');
 
   /*-------------------------------------------------------------------------------------------------------
       Смены Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
-  const [inputGuardPostShifts, setInputGuardPostShifts] = useState([]);
+  // const [inputProtectedObjectShifts, setInputProtectedObjectShifts] = useState([]);
 
   /*-------------------------------------------------------------------------------------------------------
       Тариф Формы редактирования
   -------------------------------------------------------------------------------------------------------*/
-  const [inputGuardPostRate, setInputGuardPostRate] = useState('');
+  // const [inputProtectedObjectRate, setInputProtectedObjectRate] = useState('');
 
   /*-------------------------------------------------------------------------------------------------------
       Чистка/Обновление инпутов
@@ -102,16 +102,16 @@ export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, subm
       setError(form.error);
     } else if (form.isOpen) {
       setOperation(form.operation);
-      setInputGuardPostNumber(form.guardPost?.number);
-      setInputGuardPostCallsign(form.guardPost?.callsign);
-      setInputValidateGuardPostNumber(form.operation == 'Добавить');
-      setInputGuardPostName(form.guardPost?.name);
-      setInputGuardPostAddress(form.guardPost?.address);
-      setInputGuardPostDescription(form.guardPost?.description);
-      setInputGuardPostPhoto(null);
-      setInputGuardPostManager(form.guardPost?.manager?._id || 'EMPTY');
-      setInputGuardPostShifts(form.guardPost?.shifts || []);
-      setInputGuardPostRate(form.guardPost?.rate);
+      setInputProtectedObjectNumber(form.protectedObject?.number);
+      // setInputProtectedObjectCallsign(form.protectedObject?.callsign);
+      setInputValidateProtectedObjectNumber(form.operation == 'Добавить');
+      setInputProtectedObjectName(form.protectedObject?.name);
+      setInputProtectedObjectAddress(form.protectedObject?.address);
+      setInputProtectedObjectDescription(form.protectedObject?.description);
+      setInputProtectedObjectPhoto(null);
+      // setInputProtectedObjectManager(form.protectedObject?.manager?._id || 'EMPTY');
+      // setInputProtectedObjectShifts(form.protectedObject?.shifts || []);
+      // setInputProtectedObjectRate(form.protectedObject?.rate);
       setError(null);
     }
   }, [form])
@@ -121,7 +121,7 @@ export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, subm
 
   return (
     <FModalForm
-      title={`${operation} физ. пост`}
+      title={`${operation} пультовой объект`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
       className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
@@ -132,41 +132,40 @@ export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, subm
         {/* Номер */}
         <div className="form-item flex items-center xl:mr-4 min-w-[150px]">
           <label className="text-lg pr-4">Номер</label>
-          <FInputGuardPostNumber
+          <FInputProtectedObjectNumber
             id='guard-post-number'
             placeholder='###'
-            value={inputGuardPostNumber ? inputGuardPostNumber : ''}
-            onChange={GuardPostNumberChange}
+            value={inputProtectedObjectNumber ? inputProtectedObjectNumber : ''}
+            onChange={ProtectedObjectNumberChange}
             key={form.key}
           />
         </div>
 
         {/* Кратко */}
-        <div className="form-item flex w-full items-center mt-4 xl:mt-0 xl:mr-4">
-          {/* <label className="text-lg pr-4">Позывной</label> */}
+        {/* <div className="form-item flex w-full items-center mt-4 xl:mt-0 xl:mr-4">
           <FInputText
             id='guard-post-callsign'
             placeholder='Кратко'
-            value={inputGuardPostCallsign ? inputGuardPostCallsign : ''}
-            onChange={setInputGuardPostCallsign}
+            value={inputProtectedObjectCallsign ? inputProtectedObjectCallsign : ''}
+            onChange={setInputProtectedObjectCallsign}
             className="font-bold"
             key={form.key}
           />
-        </div>
+        </div> */}
 
         {/* менеджер */}
-        {AReditGuardPostManager &&
+        {/* {AReditProtectedObjectManager &&
           <div className="form-item flex min-w-fit items-center mt-4 xl:mt-0">
             <label className="text-lg pr-4">НСО</label>
             <FSelect
-              options={optionGuardPostManager}
-              onChange={(e) => { setInputGuardPostManager(e?.target?.value) }}
-              value={inputGuardPostManager ? inputGuardPostManager : 'EMPTY'}
+              options={optionProtectedObjectManager}
+              onChange={(e) => { setInputProtectedObjectManager(e?.target?.value) }}
+              value={inputProtectedObjectManager ? inputProtectedObjectManager : 'EMPTY'}
               key={form.key}
             />
-            {!AReditGuardPostManager && form.guardPost?.manager &&
-              <label className="text-lg pr-4">{[form.guardPost?.manager?.surname, form.guardPost?.manager?.firstName].join(' ')}</label>}
-          </div>}
+            {!AReditProtectedObjectManager && form.protectedObject?.manager &&
+              <label className="text-lg pr-4">{[form.protectedObject?.manager?.surname, form.protectedObject?.manager?.firstName].join(' ')}</label>}
+          </div>} */}
 
       </div>
 
@@ -176,8 +175,8 @@ export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, subm
         <FTextArea
           id='name'
           placeholder='Наименование'
-          value={inputGuardPostName ? inputGuardPostName : ''}
-          onChange={setInputGuardPostName}
+          value={inputProtectedObjectName ? inputProtectedObjectName : ''}
+          onChange={setInputProtectedObjectName}
           key={form.key}
         />
       </div>
@@ -188,8 +187,8 @@ export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, subm
         <FTextArea
           id='address'
           placeholder='Адрес'
-          value={inputGuardPostAddress ? inputGuardPostAddress : ''}
-          onChange={setInputGuardPostAddress}
+          value={inputProtectedObjectAddress ? inputProtectedObjectAddress : ''}
+          onChange={setInputProtectedObjectAddress}
           key={form.key}
         />
       </div>
@@ -198,7 +197,7 @@ export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, subm
       <div className="form-item flex items-center w-full mt-4">
         <label className="text-lg pr-4">Фото</label>
         <FInputImageFile
-          setUri={setInputGuardPostPhoto}
+          setUri={setInputProtectedObjectPhoto}
           key={form.key}
         />
       </div>
@@ -209,24 +208,24 @@ export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, subm
         <FTextArea
           id='description'
           placeholder='Описание'
-          value={inputGuardPostDescription ? inputGuardPostDescription : ''}
-          onChange={setInputGuardPostDescription}
+          value={inputProtectedObjectDescription ? inputProtectedObjectDescription : ''}
+          onChange={setInputProtectedObjectDescription}
           key={form.key}
         />
       </div>
 
       {/* Смены */}
-      <div className="form-item flex items-center w-full mt-4">
+      {/* <div className="form-item flex items-center w-full mt-4">
         <label className="text-lg pr-4">Смены</label>
         <FSelectShifts
-          onChange={setInputGuardPostShifts}
-          selected={inputGuardPostShifts ? inputGuardPostShifts : []}
+          onChange={setInputProtectedObjectShifts}
+          selected={inputProtectedObjectShifts ? inputProtectedObjectShifts : []}
           key={form.key}
         />
-      </div>
+      </div> */}
 
       {/* Тариф */}
-      {AReditGuardPostRate &&
+      {/* {AReditProtectedObjectRate &&
         <div className="form-item flex items-center mt-4 ">
           <label className="text-lg pr-4">Тариф</label>
           <input
@@ -234,13 +233,13 @@ export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, subm
             type="number"
             name='guard-post-rate'
             placeholder='###'
-            value={inputGuardPostRate ? inputGuardPostRate : ''}
-            onChange={(e) => { setInputGuardPostRate(e.target.value) }}
+            value={inputProtectedObjectRate ? inputProtectedObjectRate : ''}
+            onChange={(e) => { setInputProtectedObjectRate(e.target.value) }}
             className="border border-gray-300 block w-full
             focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
             rounded-md shadow-sm disabled:bg-gray-100 "
           />
-        </div>}
+        </div>} */}
 
       {/* Статус ошибки */}
       <div className="form-item">
@@ -255,38 +254,38 @@ export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, subm
         <FButtonRed
           className=""
           disabled={!(form.isOpen && (operation == 'Добавить' ?
-            (isInputValidateGuardPostNumber
-              && inputGuardPostCallsign) :
-            (isInputValidateGuardPostNumber
-              || (inputGuardPostCallsign != '' && inputGuardPostCallsign != form.guardPost?.callsign)
-              || (inputGuardPostName != form.guardPost?.name)
-              || (inputGuardPostAddress != form.guardPost?.address)
-              || (inputGuardPostManager != form.guardPost?.manager?._id)
-              || (inputGuardPostDescription != form.guardPost?.description)
-              || (!equalArrays(inputGuardPostShifts, form.guardPost?.shifts))
-              || (inputGuardPostRate != form.guardPost?.rate)
-              || inputGuardPostPhoto != null)
+            (isInputValidateProtectedObjectNumber
+              && inputProtectedObjectName) :
+            (isInputValidateProtectedObjectNumber
+              // || (inputProtectedObjectCallsign != '' && inputProtectedObjectCallsign != form.protectedObject?.callsign)
+              || (inputProtectedObjectName != form.protectedObject?.name)
+              || (inputProtectedObjectAddress != form.protectedObject?.address)
+              // || (inputProtectedObjectManager != form.protectedObject?.manager?._id)
+              || (inputProtectedObjectDescription != form.protectedObject?.description)
+              // || (!equalArrays(inputProtectedObjectShifts, form.protectedObject?.shifts))
+              // || (inputProtectedObjectRate != form.protectedObject?.rate)
+              || inputProtectedObjectPhoto != null)
           ))}
           onClick={(e) => operation == 'Добавить' ? submitAdd(e,
-            inputGuardPostNumber,
-            inputGuardPostCallsign,
-            inputGuardPostName,
-            inputGuardPostAddress,
-            inputGuardPostPhoto,
-            inputGuardPostManager,
-            inputGuardPostShifts,
-            inputGuardPostDescription,
-            inputGuardPostRate
+            inputProtectedObjectNumber,
+            // inputProtectedObjectCallsign,
+            inputProtectedObjectName,
+            inputProtectedObjectAddress,
+            inputProtectedObjectPhoto,
+            // inputProtectedObjectManager,
+            // inputProtectedObjectShifts,
+            inputProtectedObjectDescription,
+            // inputProtectedObjectRate
           ) : submitEdit(e,
-            inputGuardPostNumber,
-            inputGuardPostCallsign,
-            inputGuardPostName,
-            inputGuardPostAddress,
-            inputGuardPostPhoto,
-            inputGuardPostManager,
-            inputGuardPostShifts,
-            inputGuardPostDescription,
-            inputGuardPostRate
+            inputProtectedObjectNumber,
+            // inputProtectedObjectCallsign,
+            inputProtectedObjectName,
+            inputProtectedObjectAddress,
+            inputProtectedObjectPhoto,
+            // inputProtectedObjectManager,
+            // inputProtectedObjectShifts,
+            inputProtectedObjectDescription,
+            // inputProtectedObjectRate
           )}
         >
           {operation}

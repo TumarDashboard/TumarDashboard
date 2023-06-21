@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
-const minlength = process.env.NEXT_PUBLIC_MIN_LENGTH_NUMBER_INPUT;
-const maxlength = process.env.NEXT_PUBLIC_MAX_LENGTH_NUMBER_INPUT;
+const minlength = process.env.NEXT_PUBLIC_MIN_LENGTH_GUARD_POST_NUMBER_INPUT;
+const maxlength = process.env.NEXT_PUBLIC_MAX_LENGTH_GUARD_POST_NUMBER_INPUT;
 
-export function FInputNumber({ id, className, onChange, placeholder, ...props }) {
+export function FInputGuardPostNumber({ id, className, onChange, placeholder, ...props }) {
 
     const [isInputValidate, setInputValidate] = useState(true);
 

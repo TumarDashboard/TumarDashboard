@@ -24,4 +24,4 @@ export const MongooseSchema = new mongoose.Schema({
 
 }, { timestamps: true })
 
-export default mongoose.models == null ? mongoose.model('ProtectedObjects', MongooseSchema) : (mongoose.models.GuardPosts || mongoose.model('ProtectedObjects', MongooseSchema))
+export default mongoose.models == null ? mongoose.model('ProtectedObjects', MongooseSchema) : (mongoose.models.ProtectedObjects || mongoose.model('ProtectedObjects', MongooseSchema))

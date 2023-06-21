@@ -1,7 +1,7 @@
 import { XMarkIcon, PlusIcon } from '@heroicons/react/20/solid';
 import { FModalForm } from '../FModalForm';
 import { useState, useEffect, useRef } from 'react';
-import { FInputFile } from "../../levelE_low/FInputFile";
+import { FInputImageFile } from "../../levelE_low/FInputImageFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 import { FSelect } from "../../levelE_low/FSelect";

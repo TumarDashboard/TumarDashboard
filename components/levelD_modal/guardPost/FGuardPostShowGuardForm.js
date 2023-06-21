@@ -1,17 +1,8 @@
-import { FModalForm } from '../FModalForm';
-import { useState, useEffect } from 'react';
 import { PhoneIcon, UserIcon } from '@heroicons/react/24/solid';
+import { useEffect, useState } from 'react';
+import { FModalForm } from '../FModalForm';
 
-import { FInputNumber } from "../../levelE_low/FInputNumber";
-import { FTextArea } from "../../levelE_low/FTextArea";
-import { FInputFile } from "../../levelE_low/FInputFile";
-import { FButtonRed } from "../../levelE_low/FButtonRed";
-import { FButtonWhite } from "../../levelE_low/FButtonWhite";
-import { FSelect } from "../../levelE_low/FSelect";
-import { FSelectShifts } from "../../levelE_low/FSelectShifts";
 
-import { equalArrays } from '../../../src/utils/arrayUtils';
-import { FInputText } from '../../levelE_low/FInputText';
 import Image from "next/legacy/image";
 
 export function FGuardPostShowGuardForm({ accessRules, form, setForm, submitAdd, submitEdit, users }) {

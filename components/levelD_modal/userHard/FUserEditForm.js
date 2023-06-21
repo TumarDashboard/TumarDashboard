@@ -1,21 +1,17 @@
+import { useEffect, useState } from 'react';
 import { FModalForm } from '../FModalForm';
-import { useState, useEffect } from 'react';
 
 import Image from "next/legacy/image";
-import { FInputNumber } from "../../levelE_low/FInputNumber";
-import { FTextArea } from "../../levelE_low/FTextArea";
-import { FInputFile } from "../../levelE_low/FInputFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
+import { FInputImageFile } from "../../levelE_low/FInputImageFile";
 import { FSelect } from "../../levelE_low/FSelect";
-import { FSelectShifts } from "../../levelE_low/FSelectShifts";
 
 import { equalArrays } from '../../../src/utils/arrayUtils';
-import { FInputText } from '../../levelE_low/FInputText';
+import { getCurrentDateStamp } from '../../../src/utils/dateUtils';
+import { FInputEmail } from '../../levelE_low/FInputEmail';
 import { FInputInitials } from '../../levelE_low/FInputInitials';
 import FPositionItemList from '../../levelZ_variable/FPositionItemList';
-import { FInputEmail } from '../../levelE_low/FInputEmail';
-import { getCurrentDateStamp } from '../../../src/utils/dateUtils';
 
 export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
 
@@ -260,7 +256,7 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
         {/* {Ввод нового аватара} */}
         <div className="form-item">
           <label className="text-xl select-none">Фото</label>
-          <FInputFile
+          <FInputImageFile
             setUri={setUriAvatar}
           />
         </div>

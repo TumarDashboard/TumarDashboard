@@ -1,6 +1,6 @@
 import { FModalForm } from '../FModalForm';
 import { useState, useEffect } from 'react';
-import { FInputFile } from "../../levelE_low/FInputFile";
+import { FInputImageFile } from "../../levelE_low/FInputImageFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 import { FSelect } from "../../levelE_low/FSelect";
@@ -289,7 +289,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
         {/* Фото */}
         <div className="form-item flex items-center w-full mt-4">
           <label className="text-lg pr-4">Фото</label>
-          <FInputFile
+          <FInputImageFile
             setUri={setInputGuardUIAvatarsSrc}
             key={form.key}
           />

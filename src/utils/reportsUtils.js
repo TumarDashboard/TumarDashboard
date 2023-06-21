@@ -32,6 +32,21 @@ const reportColumnsForAllGuardPosts = {
   },
 }
 
+const reportColumnsForAllProtectedObjects = {
+  Index: {
+    width: 3.50,
+    text: '№ п.п.',
+  },
+  Number: {
+    width: 5.00,
+    text: '№ объекта',
+  },
+  NameAddress: {
+    width: 55.00,
+    text: 'Наименование и адрес',
+  },
+}
+
 const smallFontSize = 9;
 const mediumFontSize = 12;
 const defaultFontSize = 14;
@@ -75,7 +90,6 @@ export function reportForAllGuardPosts(responce) {
   // Переменные листа
   const date = new Date();
   const columns = 6;
-  const tableBodyStartRow = 4;
 
   // Workbook and worksheet create
   const ExcelJSWorkbook = new ExcelJS.Workbook();
@@ -233,50 +247,129 @@ export function reportForAllGuardPosts(responce) {
 
   });
 
-  // Низ таблицы
-  // try {
+  return ExcelJSWorkbook.xlsx;
 
-  //   var tableFooterRow = worksheet.addRow();
+}
 
-  //   tableFooterRow.height = 27;
+export function reportForAllProtectedObjects(responce) {
 
-  //   var keyIndex = 0;
+  // Переменные листа
+  const date = new Date();
+  const columns = 3;
 
-  //   mapValue(reportForAllGuardPosts, (value, key) => {
+  // Workbook and worksheet create
+  const ExcelJSWorkbook = new ExcelJS.Workbook();
 
-  //     keyIndex++;
+  const worksheet = ExcelJSWorkbook.addWorksheet("Список физ. постов", {
+    pageSetup: {
+      paperSize: 9,
+      orientation: 'portrait',
+      margins: {
+        left: 0.25, right: 0.25,
+        top: 0.6, bottom: 0.6,
+        header: 0.25, footer: 0.25
+      },
+    }
+  });
 
-  //     let tableCustomCell = tableFooterRow.getCell(keyIndex);
-  //     tableCustomCell.font = Style.FontSmallBold;
-  //     tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
-  //     tableCustomCell.fill = Style.FillYellow3;
-  //     tableCustomCell.border = Style.BorderThin;
+  //columns heights
+  try {
 
-  //   })
+    var keyIndex = 0;
 
-  //   tableFooterRow.getCell(2).value = "ИТОГО:"
+    mapValue(reportColumnsForAllProtectedObjects, (value, key) => {
 
-  //   tableFooterRow.getCell(5).value = {
-  //     formula: `SUM(${worksheet.getCell(5, 5).address}:${worksheet.getCell(indexEndRow, 5).address})`,
-  //     result: 0
-  //   };
+      keyIndex++;
 
-  //   tableFooterRow.getCell(6).value = {
-  //     formula: `SUM(${worksheet.getCell(5, 6).address}:${worksheet.getCell(indexEndRow, 6).address})`,
-  //     result: 0
-  //   };
+      worksheet.getColumn(keyIndex).width = reportColumnsForAllProtectedObjects[key].width;
 
-  //   tableFooterRow.getCell(7).value = {
-  //     formula: `SUM(${worksheet.getCell(5, 7).address}:${worksheet.getCell(indexEndRow, 7).address})`,
-  //     result: 0
-  //   };
+    })
 
-  //   tableFooterRow.getCell(8).value = {
-  //     formula: `SUM(${worksheet.getCell(5, 8).address}:${worksheet.getCell(indexEndRow, 8).address})`,
-  //     result: allSummFinish
-  //   };
+  } catch (error) { console.log(error) }
 
-  // } catch (error) { console.log(error) }
+  // Заголовок страницы 
+  try {
+
+    let customCell = worksheet.getCell(1, 1);
+    customCell.font = Style.FontDefaultBold;
+    customCell.alignment = Style.AlignmentMiddleCenter;
+    customCell.value = `ТОО "${companyName}"`;
+    worksheet.mergeCells(1, 1, 1, columns);
+
+    customCell = worksheet.getCell(2, 1);
+    customCell.font = Style.FontDefaultBold;
+    customCell.alignment = Style.AlignmentMiddleCenter;
+    customCell.value = `Список пультовых объектов`;
+    worksheet.mergeCells(2, 1, 2, columns);
+
+    customCell = worksheet.getCell(3, 1);
+    customCell.font = Style.FontDefault;
+    customCell.alignment = Style.AlignmentMiddleCenter;
+    customCell.value = `за ${date.toLocaleDateString('ru-KZ', { year: 'numeric', month: 'long' })}`;
+    worksheet.mergeCells(3, 1, 3, columns);
+
+  } catch (error) { console.log(error) }
+
+  // Заголовок таблицы
+  try {
+
+    var tableHeaderRow = worksheet.addRow();
+
+    tableHeaderRow.height = 27;
+
+    var keyIndex = 0;
+
+    mapValue(reportColumnsForAllProtectedObjects, (value, key) => {
+
+      keyIndex++;
+
+      let tableCustomCell = tableHeaderRow.getCell(keyIndex);
+      tableCustomCell.value = reportColumnsForAllProtectedObjects[key].text;
+      tableCustomCell.font = Style.FontSmallBold;
+      tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
+      tableCustomCell.fill = Style.FillYellow1;
+      tableCustomCell.border = Style.BorderThin;
+
+    })
+
+  } catch (error) { console.log(error) }
+
+  // Тело таблицы
+
+  responce.forEach((protectedObject, indexA) => {
+
+    // Переменные строки итогов
+    const bodyRowFillColor = indexA & 1 ? Style.FillYellow3 : Style.FillYellow4;
+
+    const tableBodyRow = worksheet.addRow();
+
+    // Index
+    var tableBodyCell = tableBodyRow.getCell( 1 );
+    tableBodyCell.value = indexA + 1;
+    tableBodyCell.font = Style.FontSmall;
+    tableBodyCell.numFmt = '#';
+    tableBodyCell.alignment = Style.AlignmentMiddleCenter;
+    tableBodyCell.border = Style.BorderThin;
+    tableBodyCell.fill = bodyRowFillColor;
+
+    // Number
+    tableBodyCell = tableBodyRow.getCell( 2 );
+    tableBodyCell.value = protectedObject.number ? parseInt(protectedObject.number) : '';
+    tableBodyCell.font = Style.FontSmallBold;
+    tableBodyCell.numFmt = '#';
+    tableBodyCell.alignment = Style.AlignmentMiddleCenter;
+    tableBodyCell.border = Style.BorderThin;
+    tableBodyCell.fill = bodyRowFillColor;
+
+    // Name address
+    tableBodyCell = tableBodyRow.getCell( 3 );
+    tableBodyCell.value = [protectedObject.name, protectedObject.address].filter(Boolean).join(', ');
+    tableBodyCell.font = Style.FontSmall;
+    tableBodyCell.alignment = Style.AlignmentMiddleCenterWrapText;
+    tableBodyCell.border = Style.BorderThin;
+    tableBodyCell.fill = bodyRowFillColor;
+
+  });
 
   return ExcelJSWorkbook.xlsx;
 
