@@ -62,7 +62,7 @@ export const validateYup = (dtoProtectedObject, options) => {
 
                 if (key === 'id' || key === '_id') {
                     return string()
-                        .required('Не указан id пользователя')
+                        .required('Не указан id пультового объекта')
                 }
 
                 if (key === 'number') {
@@ -71,6 +71,16 @@ export const validateYup = (dtoProtectedObject, options) => {
                         .integer('Для номера могут использоваться только цифры')
                         .min(minlengthNumber, `Кол-во цифр должно быть в диапозоне от ${minlengthNumber} до ${maxlengthNumber}`)
                         .max(maxlengthNumber, `Кол-во цифр должно быть в диапозоне от ${minlengthNumber} до ${maxlengthNumber}`)
+                }
+
+                if(key === 'obj_json'){
+                    return string()
+                        .trim()
+                        .matches(
+                            /^data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@/?%\s]*)$/i,
+                            'Некорректный файл obj_json',
+                        )
+                        .required('Отсутствуют данные файла obj_json')
                 }
 
                 // if (key === 'callsign') {
@@ -124,6 +134,6 @@ export const reportProtectedObjects = async () => {
     return await fetchAuthFileMethod('/method/protectedObject/reportProtectedObjects');
 }
 
-export const uploadJsonProtectedObjects = async () => {
-    return await fetchAuthFileMethod('/method/protectedObject/uploadJsonProtectedObjects');
+export const uploadJsonProtectedObjects = async (obj_json) => {
+    return await fetchAuthMethod('/method/protectedObject/uploadJsonProtectedObjects', { obj_json });
 }

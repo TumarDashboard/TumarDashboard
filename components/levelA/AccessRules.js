@@ -169,6 +169,12 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionING },
         ]
     },
+    {
+        url: '/api/method/protectedObject/uploadJsonProtectedObjects', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
 
     // Timesheet methods
     {

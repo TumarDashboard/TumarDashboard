@@ -1,13 +1,11 @@
-const fileToDataUri = async (file) => {
+const fileToDataUri = (file) => {
 
-  new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
     reader.onload = (event) => {
-      console.log("event.target.result %o", event.target.result);
       resolve(event.target.result);
     };
-
     reader.readAsDataURL(file);
   });
 
@@ -28,12 +26,11 @@ export function FInputBase64File({ setUri, ...props }) {
     if (file.size > 16777216) {
       alert("Размер файла не должен превышать 16mb");
       setUri(null);
-      target.value = null;
+      target.value = null;  
       return;
     }
 
-    await fileToDataUri(file).then((dataUri) => {
-      console.log("dataUri %o", dataUri);
+    fileToDataUri(file).then((dataUri) => {
       setUri(dataUri);
     });
 

@@ -20,17 +20,17 @@ import { FInputBase64File } from '../../levelE_low/FInputBase64File';
 const UDFromJsonFile = 'UDFromJsonFile';
 const UDFromExcelFile = 'UDFromExcelFile';
 
-const uploadOperation = async (operation) => {
+const uploadOperation = async (operation, data) => {
   switch (operation) {
 
     case UDFromJsonFile:
       return {
-        responce: await uploadJsonProtectedObjects()
+        responce: await uploadJsonProtectedObjects(data)
       };
 
     case UDFromExcelFile:
       return {
-        responce: await uploadJsonProtectedObjects()
+        responce: await uploadJsonProtectedObjects(data)
       };
 
     default:
@@ -72,7 +72,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
   /*--Функция загрузки данных----------------------------------------------------------------------------*/
 
-  const uploadJsonProtectedObjects = async (event) => {
+  const uploadDataProtectedObjects = async (event) => {
 
     setError('');
 
@@ -88,9 +88,9 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
       // console.log(inputProtectedObjectFile);
 
-      // const { responce } = await uploadOperation(selectedOperation);
+      const { responce } = await uploadOperation(selectedOperation, inputProtectedObjectFile);
 
-      // console.log(responce);
+      console.log(responce);
 
     } catch (error) {
 
@@ -156,7 +156,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
         <div className="ml-auto mt-4">
           <FButtonRed
             // disabled={inputProtectedObjectFile!=null}
-            onClick={uploadJsonProtectedObjects}
+            onClick={uploadDataProtectedObjects}
           >
             Загрузить
           </FButtonRed>
