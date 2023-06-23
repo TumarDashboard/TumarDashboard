@@ -296,22 +296,27 @@ class ProtectedObjectService {
 
     async uploadJsonProtectedObjects(inputData) {
 
-        let deleteProtectedObject;
-
         try {
 
             console.log('---------------uploadJsonProtectedObjects-----------------');
 
-            //Validate date
-            const { obj_json } = await validateYup(inputData, { deleteEmptyKey: true }).catch((e) => {
+            // Переменные------------------------------------------------------------------------------------------------
+            // const currentTimeStamp = getCurrentTimeStamp();
+
+            // reason: 'объект архивирован в ходе синхронизации данных с файлом obj_json ' + currentTimeStamp,
+            // userPerfomed: userPerfomed._id,
+            // userPerfomedSheme: 'User',
+
+            //Validate date----------------------------------------------------------------------------------------------
+            const { obj_json } = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
                 throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
 
             });
 
             // console.log('obj_json: %o', obj_json);
-
-            // Извлечение массива данных
+    
+            // Извлечение массива данных---------------------------------------------------------------------------------
             const stringProtectedObjects = new TextDecoder('windows-1251').decode(Buffer.from(obj_json.split(',')[1], 'base64'));
 
             // console.log('utf8ProtectedObjects: %o', utf8ProtectedObjects);
@@ -319,8 +324,8 @@ class ProtectedObjectService {
             const jsonProtectedObjects = JSON.parse(stringProtectedObjects);
 
             // console.log('requestJson: %o', requestJson);
-            
-            // Описание JSON документа
+
+            // Описание JSON документа-----------------------------------------------------------------------------------
             try {
                 // Старый формат
                 // 'ABIObjs',-
@@ -394,40 +399,29 @@ class ProtectedObjectService {
                 // 'm_bIs_Kommerce', почти везде undefined только на одном 136 и 171 - 1
                 // 'FIREMON', почти везде undefined только на одном 1300 - { lat: '0', lon: '0' }
                 // 'CID_TEMPLATE_ID', почти везде undefined только на одном 1300 - 4
-            } catch (error) {}
+            } catch (error) { }
 
-            //Проверка соединения с Монго
+            //Проверка соединения с Монго--------------------------------------------------------------------------------
             await mongoConnect();
 
-            // Выборка данных о пультовых объектах
+            // Выборка данных о пультовых объектах-----------------------------------------------------------------------
             var currentProtectedObjects = await mongoProtectedObjectsModel
                 .find({}, '-createdAt -updatedAt', { sort: { 'number': 1 } })
                 .lean();
 
             // console.log('currentProtectedObjects: %o', currentProtectedObjects);
 
-            // сюда записываются данные о том что надо удалить данные 
-            const bulkUpdateData = [];
+            // Формирование агрегационных и транзакционных данных--------------------------------------------------------
+            // сюда записываются данные об агрегации
+            const bulkData = [];
 
-            // сюда записываются данные о том что данные
-            const bulkDeleteData = [];
+            //сюда записываются данные о транзакциях
+            const transactionData = [];
 
-            //сюда записываются данные о том что 
-            const bulkWriteData = [];
-
-            // Просматриваем среди данных на изменение найденные в агрегации данные
-            // если есть - ни чего не делаем с bulkWriteData, из агрегационных данных убираем позицию
-            // если нет - добавляем в bulkWriteData
+            // Просматриваем среди данных на изменение найденные и подготовка к агрегации и транзакции
             for (const jsonProtectedObject of jsonProtectedObjects) {
 
-                // console.log("Номер: %o\r\n Наименование: %o\r\n Адресс: %o\r\n Описание: %o\r\n", 
-                // jsonProtectedObject.N, 
-                // jsonProtectedObject.CutName, 
-                // jsonProtectedObject.Address, 
-                // jsonProtectedObject.Describe,
-                // jsonProtectedObject.bObjectIsIgnored ? "Отключён" : null
-                // );
-
+                // проверка наличия в облаке данных с имеющимися номерами
                 let existProtectedObject;
 
                 if (currentProtectedObjects.length > 0) {
@@ -446,50 +440,180 @@ class ProtectedObjectService {
 
                 }
 
-                if( existProtectedObject ){
-                    console.log("Объект №%o\r\n, %o\r\n, %o\r\n есть в облаке", 
-                    jsonProtectedObject.N, 
-                    jsonProtectedObject.CutName, 
-                    jsonProtectedObject.Address,
-                    );
-                }else if( jsonProtectedObject.bObjectIsIgnored){
-                    console.log("Объект №%o\r\n, %o\r\n, %o\r\n отсутствует в облаке, и отмечен как отключенный", 
-                    jsonProtectedObject.N, 
-                    jsonProtectedObject.CutName, 
-                    jsonProtectedObject.Address,
-                    );
-                }else{
-                    bulkWriteData.push({ 
-                        insertOne: { document: {
+                // переменные
+                const photo = existProtectedObject?.photo ? existProtectedObject.photo : `https://ui-avatars.com/api/?name=${
+                    jsonProtectedObject.CutName ? jsonProtectedObject.CutName.replace(/ /ig, ',') : jsonProtectedObject.N
+                    }&size=256&font-size=0.33&length=3&background=random`;
+
+                const description = jsonProtectedObject.Describe?.replace(/^\d\!|---/gm, '');
+
+                // формирование агрегации и транзакции
+                if (existProtectedObject) {
+
+                    if (jsonProtectedObject.bObjectIsIgnored) {
+
+                        // console.log("Объект №%o, %o, %o есть в облаке, и отмечен как отключенный",
+                        //     jsonProtectedObject.N,
+                        //     jsonProtectedObject.CutName,
+                        //     jsonProtectedObject.Address,
+                        // );
+
+                        transactionData.push({
                             number: jsonProtectedObject.N,
-                            name: jsonProtectedObject.CutName,
-                            address: jsonProtectedObject.Address,
-                            description: jsonProtectedObject.Describe
-                        } } })
+                            log: `${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address} есть в облаке, и отмечен как отключенный`,
+                            operation: 'Архивация',
+                            archiveData: {
+                                document: {
+                                    _id: existProtectedObject._id,
+                                    number: existProtectedObject.N,
+                                    name: existProtectedObject.CutName,
+                                    address: existProtectedObject.Address,
+                                    description: existProtectedObject.description,
+                                    photo: existProtectedObject.photo
+                                }
+                            }
+                        })
+
+                    } else if (jsonProtectedObject.CutName == existProtectedObject.name
+                        && jsonProtectedObject.Address == existProtectedObject.address) {
+
+                        if (description == existProtectedObject.description 
+                            && photo == existProtectedObject.photo ) {
+
+                            // console.log("Объект №%o, %o, %o есть в облаке, и остается без изменений",
+                            //     jsonProtectedObject.N,
+                            //     jsonProtectedObject.CutName,
+                            //     jsonProtectedObject.Address,
+                            // );         
+
+                            transactionData.push({
+                                number: jsonProtectedObject.N,
+                                log: `${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address} есть в облаке, и остается без изменений`,
+                                operation: 'Без изменений',
+                            })
+
+                        } else {
+
+                            // console.log("Объект №%o, %o, %o есть в облаке, но его данные требуют изменений",
+                            //     jsonProtectedObject.N,
+                            //     jsonProtectedObject.CutName,
+                            //     jsonProtectedObject.Address,
+                            // );
+
+                            bulkData.push({
+                                updateOne: {
+                                    filter: {
+                                        number: jsonProtectedObject.N,
+                                    },
+                                    update: {
+                                        description: description,
+                                        photo: photo
+                                    }
+                                }
+                            })
+
+                            transactionData.push({
+                                number: jsonProtectedObject.N,
+                                log: `${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address} есть в облаке, но его данные были обновлены`,
+                                operation: 'Обновление',
+                            })
+                        }
+
+                    } else {
+
+                        // console.log("Объект №%o, но его данные не совпадают с данными загруженного файла\r\nНаименование: %o - %o\r\nАдрес: %o - %o",
+                        //     jsonProtectedObject.N,
+                        //     jsonProtectedObject.CutName,
+                        //     existProtectedObject.name,
+                        //     jsonProtectedObject.Address,
+                        //     existProtectedObject.address,
+                        // );
+
+                        transactionData.push({
+                            number: jsonProtectedObject.N,
+                            log: `есть в облаке, но его данные не совпадают с данными загруженного файла\r\nВ облаке: ${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address}\r\nВ файле:${existProtectedObject.name}, ${existProtectedObject.address}`,
+                            operation: 'Замена',
+                            insertData: {
+                                document: {
+                                    number: jsonProtectedObject.N,
+                                    name: jsonProtectedObject.CutName,
+                                    address: jsonProtectedObject.Address,
+                                    description: description,
+                                    photo: photo
+                                }
+                            },
+                            archiveData: {
+                                document: {
+                                    _id: existProtectedObject._id,
+                                    number: existProtectedObject.N,
+                                    name: existProtectedObject.CutName,
+                                    address: existProtectedObject.Address,
+                                    description: existProtectedObject.description,
+                                    photo: existProtectedObject.photo
+                                }
+                            }
+                        })
+
+                    }
+
+                } else if (jsonProtectedObject.bObjectIsIgnored) {
+
+                    // console.log("Объект №%o, %o, %o отсутствует в облаке, и отмечен как отключенный",
+                    //     jsonProtectedObject.N,
+                    //     jsonProtectedObject.CutName,
+                    //     jsonProtectedObject.Address,
+                    // );      
+
+                    transactionData.push({
+                        number: jsonProtectedObject.N,
+                        log: `${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address} отсутствует в облаке, и отмечен как отключенный`,
+                        operation: 'Игнорирование',
+                    })
+
+                } else {
+
+                    // console.log("Объект №%o, %o, %o отсутствует в облаке, и будет добавлен",
+                    //     jsonProtectedObject.N,
+                    //     jsonProtectedObject.CutName,
+                    //     jsonProtectedObject.Address,
+                    // );    
+
+                    bulkData.push({
+                        insertOne: {
+                            document: {
+                                number: jsonProtectedObject.N,
+                                name: jsonProtectedObject.CutName,
+                                address: jsonProtectedObject.Address,
+                                description: description,
+                                photo: photo
+                            }
+                        }
+                    })            
+
+                    transactionData.push({
+                        number: jsonProtectedObject.N,
+                        log: `${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address} отсутствует в облаке, и был добавлен`,
+                        operation: 'Добавление',
+                    })
                 }
             }
 
-            console.log('bulkWriteData: %o', bulkWriteData);
+            // Внесение агрегационных данных-----------------------------------------------------------------------------
+            // console.log('bulkWriteData: %o', bulkWriteData);
+            // если среди данных нет агрегата - добавить 
+            if (bulkData.length > 0) {
 
-            return { date: "validate" }
+                const responce = await mongoProtectedObjectsModel.bulkWrite(bulkData);
+
+                // console.log('bulkWrite: %o', responce);
+
+            }
+
+            return { transactionData }
 
         } catch (error) {
 
             console.log(error);
-
-            if (deleteProtectedObject) {
-
-                try {
-
-                    await mongoProtectedObjectsModel.deleteOne({ _id: deleteProtectedObject._id })
-
-                } catch (error) {
-
-                    throw error;
-
-                }
-
-            }
 
             throw error;
 

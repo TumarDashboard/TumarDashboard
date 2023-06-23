@@ -65,13 +65,13 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
     setError('');
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Файл Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Файл Формы редактирования--------------------------------------------------------------------------*/
   const [inputProtectedObjectFile, setInputProtectedObjectFile] = useState(null);
 
-  /*--Функция загрузки данных----------------------------------------------------------------------------*/
+  /*--Данные транзакции----------------------------------------------------------------------------------*/
+  const [transactionData, setTransactionData] = useState(null);
 
+  /*--Функция загрузки данных----------------------------------------------------------------------------*/
   const uploadDataProtectedObjects = async (event) => {
 
     setError('');
@@ -92,6 +92,10 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
       console.log(responce);
 
+      setTransactionData(responce.transactionData);
+
+      setInputProtectedObjectFile(null);
+
     } catch (error) {
 
       errorCallback(error, setForm);
@@ -110,6 +114,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
       setError(form.error);
     } else if (form.isOpen) {
       setError(null);
+      setInputProtectedObjectFile(null);
       if (FOperationItemList.length > 0 && !selectedOperation) {
         setSelectedOperation(FOperationItemList[0].value);
       }
@@ -127,40 +132,52 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
     >
       {FOperationItemList.length > 0 ? <>
 
-        {/* Форма проводимой операции */}
-        <div className="flex flex-row items-center form-item">
-          <label className="text-lg pr-4 select-none">Тип данных</label>
-          <FSelect
-            className='flex-1 pl-2 pr-8 py-0'
-            options={FOperationItemList}
-            onChange={selectedOperationChange}
-            value={selectedOperation}
-            disabled={FOperationItemList.length == 1}
-          />
-        </div>
 
         {/* Поле ввода файла */}
-        <div className="form-item flex items-center w-full mt-4">
+        <div className="form-item flex items-center w-full">
           <FInputBase64File
             accept={
               selectedOperation == UDFromJsonFile ? ".obj_json" :
-              selectedOperation == UDFromExcelFile ? ".xlsx" :
-              "image/*"
+                selectedOperation == UDFromExcelFile ? ".xlsx" :
+                  "image/*"
             }
             setUri={setInputProtectedObjectFile}
             key={form.key}
           />
         </div>
 
-        {/* Кнопки */}
-        <div className="ml-auto mt-4">
+        {/* Тип проводимой операции и кнопка загрузки*/}
+        <div className="flex flex-row w-full items-center form-item mt-2">
+          <label className="text-lg pr-4 select-none">Тип данных</label>
+          <FSelect
+            className='flex-1 pl-2 pr-8 py-0 mr-2'
+            options={FOperationItemList}
+            onChange={selectedOperationChange}
+            value={selectedOperation}
+            disabled={FOperationItemList.length == 1}
+          />
           <FButtonRed
-            // disabled={inputProtectedObjectFile!=null}
+            disabled={inputProtectedObjectFile == null}
             onClick={uploadDataProtectedObjects}
           >
             Загрузить
           </FButtonRed>
         </div>
+
+        {transactionData &&
+          <div className="flex w-full items-center form-item mt-2">
+
+<           table className="min-w-full border-collapse block">
+
+              <tbody className="block">
+                {/* {transactionData.map(value=>{
+                  return 
+                })} */}
+              </tbody>
+
+            </table>
+          </div>
+        }
 
       </> : <span className="text-color_C italic break-words">
         Отсутствуют права загрузки данных. Обратитесь к администратору.

@@ -75,6 +75,7 @@ export const validateYup = (dtoProtectedObject, options) => {
 
                 if(key === 'obj_json'){
                     return string()
+                        .nullable('Отсутствуют данные файла obj_json')
                         .trim()
                         .matches(
                             /^data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@/?%\s]*)$/i,
@@ -134,6 +135,6 @@ export const reportProtectedObjects = async () => {
     return await fetchAuthFileMethod('/method/protectedObject/reportProtectedObjects');
 }
 
-export const uploadJsonProtectedObjects = async (obj_json) => {
-    return await fetchAuthMethod('/method/protectedObject/uploadJsonProtectedObjects', { obj_json });
+export const uploadJsonProtectedObjects = async (obj_json, idUser) => {
+    return await fetchAuthMethod('/method/protectedObject/uploadJsonProtectedObjects', { obj_json, idUser });
 }

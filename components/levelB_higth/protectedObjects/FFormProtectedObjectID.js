@@ -278,7 +278,7 @@ export default function FFormProtectedObjectID({ accessRules, userData, protecte
           {/* Описание */}
           {protectedObjectData.description &&
             <div className='form-item w-full items-center p-2 bg-slate-200 rounded-md border-[1px] border-slate-600 text-neutral-800'>
-              <span className="break-all md:break-normal">{protectedObjectData.description}</span>
+              <p className="whitespace-pre-line">{protectedObjectData.description}</p>
             </div>}
 
         </div>

@@ -395,10 +395,10 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
         {/* Кнопка выгрузки табеля, кнопка создания пультовой объекта */}
         <div className='flex-1 md:order-last md:ml-2 w-full flex justify-end'>
 
-          {/* Кнопка выгрузки табеля */}
+          {/* Кнопка вызова окна отчётов */}
           {ARgetProtectedObjectPrint && tableProtectedObjects?.length > 0 && (<button
             className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
-            hover:bg-color_C active:bg-color_B mr-4"
+            hover:bg-color_C active:bg-color_B mr-2"
             onClick={() => {
               setProtectedObjectPrintForm({
                 isOpen: true,

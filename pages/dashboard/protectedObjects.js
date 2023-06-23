@@ -119,8 +119,14 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   // Выборка данных о пультовых объектах
   const protectedObjects = await mongoProtectedObjectsModel
-    .find({}, '-createdAt -updatedAt', { sort: { 'number': 1 } })
+    .find({}, '-createdAt -updatedAt')
     .lean();
+
+  protectedObjects.sort((a, b)=>{
+    if (a.number && b.number)
+      return (a.number - b.number);
+    else return -1;
+  });
 
   protectedObjects.forEach(value => {
 
@@ -135,10 +141,16 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   if (accessRules.includes('protectedObjects/archive$')) {
 
     protectedObjectsArchive = await mongoProtectedObjectsArchiveModel
-      .find({}, '-createdAt -updatedAt', { sort: { 'number': 1 } })
+      .find({}, '-createdAt -updatedAt')
       .populate('userPerfomed', 'surname firstName')
       .lean();
-      
+
+    protectedObjectsArchive.sort((a, b)=>{
+      if (a.number && b.number)
+        return (a.number - b.number);
+      else return -1;
+    });
+
     protectedObjectsArchive.forEach(value => {
 
       // Преобразование ID в строки
