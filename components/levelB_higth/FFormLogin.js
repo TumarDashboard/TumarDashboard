@@ -1,11 +1,11 @@
-import { FInputEmail } from "../levelE_low/FInputEmail";
-import { FInputPassword } from "../levelE_low/FInputPassword";
-import { useStore } from "../levelA/StoreProvider";
-import { ApiError } from "../../middleware/exceptions";
-import { useRouter } from "next/router";
-import { useState } from 'react'
 import { motion } from "framer-motion";
 import Link from 'next/link';
+import { useRouter } from "next/router";
+import { useState } from 'react';
+import { ApiError } from "../../middleware/exceptions";
+import { useStore } from "../levelA/StoreProvider";
+import { FInputEmail } from "../levelE_low/FInputEmail";
+import { FInputPassword } from "../levelE_low/FInputPassword";
 
 const inputs = {
     initial: { y: -20, opacity: 0 },
@@ -44,7 +44,7 @@ export default function FFormLogin( { redirectAuth } ) {
 
     const emailChange = (email, validate) => {
         setInputEmail(email);
-        setInputValidateEmail(validate)
+        setInputValidateEmail(validate);
     }
 
     const [inputPassword, setInputPassword] = useState('');
@@ -53,9 +53,8 @@ export default function FFormLogin( { redirectAuth } ) {
 
     const passwordChange = (email, validate) => {
         setInputPassword(email);
-        setInputValidatePassword(validate)
+        setInputValidatePassword(validate);
     }
-
 
     /*
         Функция регистрации

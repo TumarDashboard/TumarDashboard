@@ -547,7 +547,7 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
                 }}
               >
 
-                {/* {Фото, Номер, Кнопки управления мобильного устройства} */}
+                {/* {Фото, Номер} */}
                 <td className="px-2 md:border text-left block md:table-cell">
                   <div className="flex flex-row items-center justify-start">
 

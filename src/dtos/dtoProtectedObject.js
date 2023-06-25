@@ -135,6 +135,10 @@ export const reportProtectedObjects = async () => {
     return await fetchAuthFileMethod('/method/protectedObject/reportProtectedObjects');
 }
 
-export const uploadJsonProtectedObjects = async (obj_json, idUser) => {
-    return await fetchAuthMethod('/method/protectedObject/uploadJsonProtectedObjects', { obj_json, idUser });
+export const uploadJsonProtectedObjects = async (obj_json) => {
+    return await fetchAuthMethod('/method/protectedObject/uploadJsonProtectedObjects', { obj_json });
+}
+
+export const uploadFinishProtectedObjects = async (transactionData, idUser) => {
+    return await fetchAuthMethod('/method/protectedObject/uploadFinishProtectedObjects', { transactionData, idUser });
 }

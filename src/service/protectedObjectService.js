@@ -1,3 +1,11 @@
+import {
+    FUDTransactionArchive,
+    FUDTransactionNoChange,
+    FUDTransactionUpdate,
+    FUDTransactionReplacement,
+    FUDTransactionIgnore,
+    FUDTransactionAddition
+} from "../../components/levelZ_variable/FUploadDataTransactionList";
 import { ApiError } from "../../middleware/exceptions";
 import DTOProtectedObject, { DTOProtectedObjectArchive, validateYup } from "../dtos/dtoProtectedObject";
 import googleDrive from "../google/api/googleDrive";
@@ -179,11 +187,9 @@ class ProtectedObjectService {
         }
 
         //Google
-
         await googleDrive.deleteProtectedObjectAvatar(idProtectedObject);
 
         //Mongo
-
         await mongoConnect();
 
         const userPerfomed = await mongoUserModel.findById(idUser, 'surname firstName').lean();
@@ -303,10 +309,6 @@ class ProtectedObjectService {
             // Переменные------------------------------------------------------------------------------------------------
             // const currentTimeStamp = getCurrentTimeStamp();
 
-            // reason: 'объект архивирован в ходе синхронизации данных с файлом obj_json ' + currentTimeStamp,
-            // userPerfomed: userPerfomed._id,
-            // userPerfomedSheme: 'User',
-
             //Validate date----------------------------------------------------------------------------------------------
             const { obj_json } = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
@@ -315,7 +317,7 @@ class ProtectedObjectService {
             });
 
             // console.log('obj_json: %o', obj_json);
-    
+
             // Извлечение массива данных---------------------------------------------------------------------------------
             const stringProtectedObjects = new TextDecoder('windows-1251').decode(Buffer.from(obj_json.split(',')[1], 'base64'));
 
@@ -441,8 +443,7 @@ class ProtectedObjectService {
                 }
 
                 // переменные
-                const photo = existProtectedObject?.photo ? existProtectedObject.photo : `https://ui-avatars.com/api/?name=${
-                    jsonProtectedObject.CutName ? jsonProtectedObject.CutName.replace(/ /ig, ',') : jsonProtectedObject.N
+                const photo = existProtectedObject?.photo ? existProtectedObject.photo : `https://ui-avatars.com/api/?name=${jsonProtectedObject.CutName ? jsonProtectedObject.CutName.replace(/ /ig, ',') : jsonProtectedObject.N
                     }&size=256&font-size=0.33&length=3&background=random`;
 
                 const description = jsonProtectedObject.Describe?.replace(/^\d\!|---/gm, '');
@@ -461,7 +462,7 @@ class ProtectedObjectService {
                         transactionData.push({
                             number: jsonProtectedObject.N,
                             log: `${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address} есть в облаке, и отмечен как отключенный`,
-                            operation: 'Архивация',
+                            operation: FUDTransactionArchive,
                             archiveData: {
                                 document: {
                                     _id: existProtectedObject._id,
@@ -477,8 +478,8 @@ class ProtectedObjectService {
                     } else if (jsonProtectedObject.CutName == existProtectedObject.name
                         && jsonProtectedObject.Address == existProtectedObject.address) {
 
-                        if (description == existProtectedObject.description 
-                            && photo == existProtectedObject.photo ) {
+                        if (description == existProtectedObject.description
+                            && photo == existProtectedObject.photo) {
 
                             // console.log("Объект №%o, %o, %o есть в облаке, и остается без изменений",
                             //     jsonProtectedObject.N,
@@ -489,7 +490,7 @@ class ProtectedObjectService {
                             transactionData.push({
                                 number: jsonProtectedObject.N,
                                 log: `${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address} есть в облаке, и остается без изменений`,
-                                operation: 'Без изменений',
+                                operation: FUDTransactionNoChange,
                             })
 
                         } else {
@@ -515,7 +516,7 @@ class ProtectedObjectService {
                             transactionData.push({
                                 number: jsonProtectedObject.N,
                                 log: `${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address} есть в облаке, но его данные были обновлены`,
-                                operation: 'Обновление',
+                                operation: FUDTransactionUpdate,
                             })
                         }
 
@@ -531,8 +532,8 @@ class ProtectedObjectService {
 
                         transactionData.push({
                             number: jsonProtectedObject.N,
-                            log: `есть в облаке, но его данные не совпадают с данными загруженного файла\r\nВ облаке: ${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address}\r\nВ файле:${existProtectedObject.name}, ${existProtectedObject.address}`,
-                            operation: 'Замена',
+                            log: `есть в облаке, но его данные не совпадают с данными загруженного файла\r\nВ облаке: ${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address}\r\nВ файле: ${existProtectedObject.name}, ${existProtectedObject.address}`,
+                            operation: FUDTransactionReplacement,
                             insertData: {
                                 document: {
                                     number: jsonProtectedObject.N,
@@ -567,7 +568,7 @@ class ProtectedObjectService {
                     transactionData.push({
                         number: jsonProtectedObject.N,
                         log: `${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address} отсутствует в облаке, и отмечен как отключенный`,
-                        operation: 'Игнорирование',
+                        operation: FUDTransactionIgnore,
                     })
 
                 } else {
@@ -588,12 +589,12 @@ class ProtectedObjectService {
                                 photo: photo
                             }
                         }
-                    })            
+                    })
 
                     transactionData.push({
                         number: jsonProtectedObject.N,
-                        log: `${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address} отсутствует в облаке, и был добавлен`,
-                        operation: 'Добавление',
+                        log: `${jsonProtectedObject.CutName}, ${jsonProtectedObject.Address} отсутствовал в облаке, и был добавлен`,
+                        operation: FUDTransactionAddition,
                     })
                 }
             }
@@ -609,7 +610,175 @@ class ProtectedObjectService {
 
             }
 
+            transactionData.sort((a, b) => {
+                if ([FUDTransactionReplacement, FUDTransactionArchive].includes(a.operation)) {
+                    if (a.number && b.number && [FUDTransactionReplacement, FUDTransactionArchive].includes(b.operation))
+                        return (a.number - b.number);
+                    else return -1;
+                } else if (a.number && b.number)
+                    return (a.number - b.number);
+                else return -1;
+            })
+
             return { transactionData }
+
+        } catch (error) {
+
+            console.log(error);
+
+            throw error;
+
+        }
+
+    }
+
+    async uploadFinishProtectedObjects(inputData) {
+
+        try {
+            console.log('---------------uploadFinishProtectedObjects-----------------');
+            // Переменные------------------------------------------------------------------------------------------------
+            const currentTimeStamp = getCurrentTimeStamp();
+
+            // reason: 'объект архивирован в ходе синхронизации данных с файлом obj_json ' + currentTimeStamp,
+            // userPerfomed: userPerfomed._id,
+            // userPerfomedSheme: 'User',
+
+            //Validate date----------------------------------------------------------------------------------------------
+            const { transactionData, idUser } = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
+
+                throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
+
+            });
+
+            console.log('transactionData: %o, idUser: %o', transactionData, idUser);
+
+            if (!transactionData || !Array.isArray(transactionData) || transactionData.length == 0) {
+                throw ApiError.BadRequest("Не указаны данные операции завершения загрузки данных");
+            }
+
+            if (!idUser) {
+                throw ApiError.BadRequest("Не указан ID Пользователя, проводящего операцию завершения загрузки данных");
+            }
+
+            //Проверка соединения с Монго--------------------------------------------------------------------------------
+            await mongoConnect();
+
+            //Проверка данных о пользователе-----------------------------------------------------------------------------
+            const userPerfomed = await mongoUserModel.findById(idUser, 'surname firstName').lean();
+
+            if (!userPerfomed) {
+                throw ApiError.BadRequest("Не найден ID Пользователя, проводящего операцию удаления");
+            }
+
+            // Формирование агрегационных и транзакционных данных--------------------------------------------------------
+            // сюда записываются данные об агрегации
+            const bulkWriteData = [];
+
+            // сюда записываются данные об агрегации
+            const bulkDeleteData = [];
+
+            // сюда записываются данные об агрегации
+            const bulkArchiveData = [];
+
+            //Удаление данных в гугл облаке-------------------------------------------------------------------------------
+            await transactionData.forEach(async element => {
+                switch (element.operation) {
+
+                    case FUDTransactionReplacement:
+                        if (element.insertData?.document?._id && element.archiveData?.document?._id) {
+
+                            bulkWriteData.push({ insertOne: element.insertData });
+
+                            bulkDeleteData.push[element.archiveData.document._id];
+
+                            bulkArchiveData.push({ insertOne: {
+                                reason: 'объект архивирован в ходе синхронизации данных с файлом obj_json ' + currentTimeStamp,
+                                userPerfomed: userPerfomed._id,
+                                userPerfomedSheme: 'User',
+                                ...element.archiveData,
+                            } });
+
+                            //Удаление данных в гугл облаке-------------------------------------------------------------------------------
+                            await googleDrive.deleteProtectedObjectAvatar(element.archiveData.document._id);
+
+                        }
+                        break;
+
+                    case FUDTransactionUpdate:
+                        if (element.insertData?.document?._id && element.archiveData?.document?._id) {
+
+                            bulkWriteData.push({
+                                updateOne: {
+                                    filter: {
+                                        _id: element.archiveData.document._id,
+                                    },
+                                    update: {
+                                        name: element.insertData.document.name,
+                                        address: element.insertData.document.address,
+                                        description: element.insertData.document.description,
+                                    }
+                                }
+                            })
+
+                        }
+                        break;
+
+                    case FUDTransactionArchive:
+                        if (element.archiveData?.document?._id) {
+
+                            bulkDeleteData.push[element.archiveData.document._id];
+
+                            bulkArchiveData.push({ insertOne: {
+                                reason: 'объект архивирован в ходе синхронизации данных с файлом obj_json ' + currentTimeStamp,
+                                userPerfomed: userPerfomed._id,
+                                userPerfomedSheme: 'User',
+                                ...element.archiveData,
+                            } });
+
+                            //Удаление данных в гугл облаке-------------------------------------------------------------------------------
+                            await googleDrive.deleteProtectedObjectAvatar(element.archiveData.document._id);
+
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+            });
+
+            // Внесение агрегационных данных-----------------------------------------------------------------------------
+            console.log('bulkDeleteData: %o', bulkDeleteData);
+            if (bulkDeleteData.length > 0) {
+                bulkWriteData.unshift({
+                    deleteOne: {
+                        filter: {
+                            _id: { $in: bulkDeleteData.map(element => mongoose.Types.ObjectId(element)) }
+                        }
+                    }
+                });
+            }
+
+            console.log('bulkWriteData: %o', bulkWriteData);
+            // если среди данных нет агрегата - добавить 
+            if (bulkWriteData.length > 0) {
+
+                // const responce = await mongoProtectedObjectsModel.bulkWrite(bulkWriteData);
+
+                // console.log('bulkWrite: %o', responce);
+
+            }
+
+            console.log('bulkArchiveData: %o', bulkArchiveData);
+            // если среди данных нет агрегата - добавить 
+            if (bulkArchiveData.length > 0) {
+
+                // const responce = await mongoProtectedObjectsArchiveModel.bulkWrite(bulkArchiveData);
+
+                // console.log('bulkWrite: %o', responce);
+
+            }
+
+            return { validate: 'finish' };
 
         } catch (error) {
 
