@@ -16,7 +16,14 @@ import {
 } from '../../../src/dtos/dtoTimesheet';
 import { getCurrentDateStamp, getCurrentMonth } from '../../../src/utils/dateUtils';
 import { FInputBase64File } from '../../levelE_low/FInputBase64File';
-import { FUDTransactionArchive, FUDTransactionIgnore, FUDTransactionReplacement, FUDTransactionUpdate, getBGColorWithAction } from '../../levelZ_variable/FUploadDataTransactionList';
+import {
+  FUDTransactionAddition,
+  FUDTransactionArchive,
+  FUDTransactionIgnore,
+  FUDTransactionReplacement,
+  FUDTransactionUpdate,
+  getBGColorWithAction
+} from '../../levelZ_variable/FUploadDataTransactionList';
 import { FButtonWhite } from '../../levelE_low/FButtonWhite';
 import { FButtonSlateSmall } from '../../levelE_low/FButtonSlateSmall';
 import { FButtonWhiteSmall } from '../../levelE_low/FButtonWhiteSmall';
@@ -77,7 +84,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
   const [selectedView, setSelectedView] = useState({});
 
-  const [selectedTransactionResult, setSelectedTransactionResult] = useState({count: 0});
+  const [selectedTransactionResult, setSelectedTransactionResult] = useState({ count: 0 });
 
   /*--Функция загрузки данных----------------------------------------------------------------------------*/
   const uploadDataProtectedObjects = async (event) => {
@@ -107,6 +114,10 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
       setInputProtectedObjectFile(null);
 
+      setSelectedTransactionResult({ count: 0 });
+
+      setSelectedView({});
+
     } catch (error) {
 
       errorCallback(error, setForm);
@@ -135,51 +146,58 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
     try {
 
       // console.log(inputProtectedObjectFile);
-      const transaction = transactionData.filter((value, index)=> {
-        if(selectedTransactionResult[index] > 0){
-          value.operation = selectedTransactionResult[index];
-          return true;
-        }else false;
-      } );
+      const transaction = transactionData.reduce((result, value, index) => {
+        if (selectedTransactionResult[index] > 0) {
+          result.push({
+            ...value,
+            operation: selectedTransactionResult[index]
+          })
+        }
+        return result
+      }, []);
+
+      // console.log(transaction);
 
       const { responce } = await uploadFinishProtectedObjects(transaction, MOBXuser?.user?.id);
 
       console.log(responce);
 
-      // setTransactionData(result=>{
-      //   return result.map((value, index)=>{
-      //     if(selectedTransactionResult[index] > 0){
-      //       switch (selectedTransactionResult[index]) {
-            
-      //         case FUDTransactionReplacement:
-      //           value.operation = FUDTransactionAddition;
-      //           value.log = `${value.insertData?.document?.name}, ${value.insertData?.document?.address} отсутствовал в облаке, и был добавлен\r\n${value.archiveData?.document?.name}, ${value.archiveData?.document?.address} архивирован в облаке`;
-      //           delete value.insertData;
-      //           delete value.archiveData;
-      //           break;
+      setTransactionData(result => {
+        return result.map((value, index) => {
+          if (selectedTransactionResult[index] > 0) {
+            switch (selectedTransactionResult[index]) {
 
-      //         case FUDTransactionUpdate:
-      //           value.operation = FUDTransactionUpdate;
-      //           value.log = `${value.insertData?.document?.name}, ${value.insertData?.document?.address} есть в облаке, но его данные были обновлены`;
-      //           delete value.insertData;
-      //           delete value.archiveData;
-      //           break;
+              case FUDTransactionReplacement:
+                value.operation = FUDTransactionAddition;
+                value.log = `${value.insertData?.document?.name}, ${value.insertData?.document?.address} отсутствовал в облаке, и был добавлен\r\n${value.archiveData?.document?.name}, ${value.archiveData?.document?.address} архивирован в облако`;
+                delete value.insertData;
+                delete value.archiveData;
+                break;
 
-      //         case FUDTransactionArchive:
-      //           value.operation = FUDTransactionIgnore;
-      //           value.log = `${value.archiveData?.document?.name}, ${value.archiveData?.document?.address} архивирован в облаке, и отмечен как отключенный`;
-      //           delete value.archiveData;
-      //           break;
+              case FUDTransactionUpdate:
+                value.operation = FUDTransactionUpdate;
+                value.log = `${value.insertData?.document?.name}, ${value.insertData?.document?.address} есть в облаке, но его данные были обновлены`;
+                delete value.insertData;
+                delete value.archiveData;
+                break;
 
-      //         default:
-      //           break;
-      //       }
-      //     }
-      //     return value;
-      //   })
-      // });
+              case FUDTransactionArchive:
+                value.operation = FUDTransactionIgnore;
+                value.log = `${value.archiveData?.document?.name}, ${value.archiveData?.document?.address} архивирован в облако`;
+                delete value.archiveData;
+                break;
 
-      // setSelectedTransactionResult({count: 0});
+              default:
+                break;
+            }
+          }
+          return value;
+        })
+      });
+
+      setSelectedTransactionResult({ count: 0 });
+
+      setSelectedView({});
 
     } catch (error) {
 
@@ -209,10 +227,11 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
   return (
     <FModalForm
+      widthForm='lg:w-1/2 mx-6'
       title={`Загрузка данных пультовых объектов`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
-      className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
+      className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[80vh]"
     >
       {FOperationItemList.length > 0 ? <>
 
@@ -248,13 +267,20 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
           </FButtonRed>
         </div>
 
+        {/* Статус ошибки */}
+        <div className="form-item">
+          <span className="text-color_C italic break-words">
+            {error}
+          </span>
+        </div>
+
         {/* {Тело} */}
         {(transactionData && Array.isArray(transactionData) && transactionData.length > 0) &&
           <div className="flex flex-col w-full items-center form-item mt-2">
-            
+
             <FButtonWhiteSmall
               className={'w-full mb-1'}
-              disabled={selectedTransactionResult.count==0}
+              disabled={selectedTransactionResult.count == 0}
               onClick={transactionFinishProtectedObjects}
             >
               Завершить транзакцию
@@ -265,15 +291,14 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
                 {transactionData.map((value, index) => {
                   return (
                     <tr
-                      className={`rounded-md flex flex-col border mb-1 ${
-                        selectedTransactionResult[index] == FUDTransactionReplacement
-                        ? 'bg-orange-100'
-                        : selectedTransactionResult[index] == FUDTransactionUpdate
-                        ? 'bg-green-100'
-                        : selectedTransactionResult[index] == FUDTransactionArchive
-                        ? 'bg-red-100'
-                        : getBGColorWithAction(value.operation)
-                      }`}
+                      className={`rounded-md flex flex-col border mb-1 ${selectedTransactionResult[index] == FUDTransactionReplacement
+                          ? 'bg-orange-100'
+                          : selectedTransactionResult[index] == FUDTransactionUpdate
+                            ? 'bg-green-100'
+                            : selectedTransactionResult[index] == FUDTransactionArchive
+                              ? 'bg-red-100'
+                              : getBGColorWithAction(value.operation)
+                        }`}
                       key={index}
                     >
 
@@ -341,7 +366,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
                                 })
                               }}
                             >
-                              Новый объект 
+                              Новый объект
                             </FButtonSlateSmall>}
 
                           {value.operation == FUDTransactionReplacement &&
@@ -374,18 +399,18 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
                               Архивировать
                             </FButtonSlateSmall>}
 
-                            {selectedTransactionResult[index] > 0 &&
-                              <FButtonSlateSmall
-                                onClick={(e) => {
-                                  setSelectedTransactionResult({
-                                    ...selectedTransactionResult,
-                                    [index]: 0,
-                                    count: selectedTransactionResult.count - 1
-                                  })
-                                }}
-                              >
-                                Отмена
-                              </FButtonSlateSmall>}
+                          {selectedTransactionResult[index] > 0 &&
+                            <FButtonSlateSmall
+                              onClick={(e) => {
+                                setSelectedTransactionResult({
+                                  ...selectedTransactionResult,
+                                  [index]: 0,
+                                  count: selectedTransactionResult.count - 1
+                                })
+                              }}
+                            >
+                              Отмена
+                            </FButtonSlateSmall>}
 
                         </td>}
 
@@ -406,13 +431,6 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
       </> : <span className="text-color_C italic break-words">
         Отсутствуют права загрузки данных. Обратитесь к администратору.
       </span>}
-
-      {/* Статус ошибки */}
-      <div className="form-item">
-        <span className="text-color_C italic break-words">
-          {error}
-        </span>
-      </div>
 
     </FModalForm>
   )
