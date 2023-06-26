@@ -673,7 +673,9 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
         MOBXui={MOBXui}
         MOBXuser={MOBXuser}
         errorCallback={errorCallback}
-        protectedObjects={tableProtectedObjects}
+        setTableProtectedObjects={setTableProtectedObjects}
+        setTableProtectedObjectsArchive={setTableProtectedObjectsArchive}
+        setRenderTableProtectedObjects={setRenderTableProtectedObjects}
       />
 
       {/* {Подсказка таблицы} */}

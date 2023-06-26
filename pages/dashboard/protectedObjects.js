@@ -119,7 +119,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   // Выборка данных о пультовых объектах
   const protectedObjects = await mongoProtectedObjectsModel
-    .find({}, '-createdAt -updatedAt')
+    .find({}, '-createdAt -updatedAt -description')
     .lean();
 
   protectedObjects.sort((a, b)=>{
@@ -141,7 +141,7 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   if (accessRules.includes('protectedObjects/archive$')) {
 
     protectedObjectsArchive = await mongoProtectedObjectsArchiveModel
-      .find({}, '-createdAt -updatedAt')
+      .find({}, '-createdAt -updatedAt -description')
       .populate('userPerfomed', 'surname firstName')
       .lean();
 

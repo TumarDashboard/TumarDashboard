@@ -12,6 +12,7 @@ export default catchErrorsApi( async (req, res) => {
 
     const data = await service.uploadFinishProtectedObjects( req.body );
 
+    // console.log(data);
     return res.json(data);
 
 })

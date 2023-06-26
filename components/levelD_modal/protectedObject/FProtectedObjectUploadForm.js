@@ -35,24 +35,19 @@ const uploadOperation = async (operation, data) => {
   switch (operation) {
 
     case UDFromJsonFile:
-      return {
-        responce: await uploadJsonProtectedObjects(data)
-      };
+      return await uploadJsonProtectedObjects(data);
 
     case UDFromExcelFile:
-      return {
-        responce: await uploadJsonProtectedObjects(data)
-      };
+      return await uploadJsonProtectedObjects(data);
 
     default:
-      return {
-        responce: null
-      };
+      return null;
 
   }
 }
 
-export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui, MOBXuser, errorCallback, protectedObjects }) {
+export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui, MOBXuser, errorCallback,
+  setTableProtectedObjects, setTableProtectedObjectsArchive, setRenderTableProtectedObjects }) {
 
   /*----Определение правил доступа-----------------------------------------------------------------------*/
   const ARuploadJsonProtectedObject = true;// accessRules.includes('getTimesheetPrintForDay');
@@ -103,12 +98,17 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
       // console.log(inputProtectedObjectFile);
 
-      const { responce } = await uploadOperation(selectedOperation, inputProtectedObjectFile);
+      const responce = await uploadOperation(selectedOperation, inputProtectedObjectFile);
 
       // console.log(responce);
 
       if (!responce.transactionData || !Array.isArray(responce.transactionData) || responce.transactionData.length == 0)
         throw new ApiError(500, "Сервер вернул пустой ответ, сообщите администратору");
+
+      if( responce.protectedObjects ){
+        setTableProtectedObjects(responce.protectedObjects);
+        setRenderTableProtectedObjects(responce.protectedObjects);
+      }
 
       setTransactionData(responce.transactionData);
 
@@ -158,9 +158,16 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
       // console.log(transaction);
 
-      const { responce } = await uploadFinishProtectedObjects(transaction, MOBXuser?.user?.id);
+      const responce = await uploadFinishProtectedObjects(transaction, MOBXuser?.user?.id);
 
-      console.log(responce);
+      if( responce?.protectedObjects ){
+        setTableProtectedObjects(responce.protectedObjects);
+        setRenderTableProtectedObjects(responce.protectedObjects);
+      }
+
+      if( responce?.protectedObjectsArchive ){
+        setTableProtectedObjectsArchive(responce.protectedObjectsArchive);
+      }
 
       setTransactionData(result => {
         return result.map((value, index) => {
@@ -176,7 +183,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
               case FUDTransactionUpdate:
                 value.operation = FUDTransactionUpdate;
-                value.log = `${value.insertData?.document?.name}, ${value.insertData?.document?.address} есть в облаке, но его данные были обновлены`;
+                value.log = `${value.insertData?.document?.name}, ${value.insertData?.document?.address} был обновлен`;
                 delete value.insertData;
                 delete value.archiveData;
                 break;

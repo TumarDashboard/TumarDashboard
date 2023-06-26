@@ -36,7 +36,7 @@ export function FProtectedObjectDeleteForm({ form, setForm, submit }) {
     >
 
       <FTextArea
-        id='text'
+        id='reason'
         className="mb-4 w-full"
         placeholder='Укажите причину'
         value={inputReason}
@@ -48,7 +48,7 @@ export function FProtectedObjectDeleteForm({ form, setForm, submit }) {
       </span>
 
       <input
-        id="text"
+        id="validate"
         type="text"
         name="text"
         placeholder="Введите подтверждение"

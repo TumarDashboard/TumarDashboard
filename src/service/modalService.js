@@ -23,17 +23,11 @@ function managerEquals(a, b) {
     return Boolean(a.toString().localeCompare(b.toString()));
 }
 
-class GuardPostService {
+class ModalService {
 
     async getGuardEditForm(inputData) {
 
         try {
-
-            // console.log('-------------------------------------');
-            const month = new Date(getCurrentMonth());
-            const day = (new Date()).getDate() - 1;
-
-            // console.log('getTimesheetToday: %o', day);
 
             //Check initials condition
             await mongoConnect();
@@ -69,6 +63,24 @@ class GuardPostService {
         }
     }
 
+    async getProtectedObjectEditForm(inputData) {
+
+        try {
+
+            // console.log('-------------------------------------');
+
+            //Check initials condition
+            await mongoConnect();
+
+            // console.log('responceAggregateUpdateData: %o', responceAggregateUpdateData);
+            return responceAggregateUpdateData;
+
+        } catch (error) {
+            console.log(error);
+
+            throw error;
+        }
+    }
 }
 
-export default new GuardPostService();
+export default new ModalService();

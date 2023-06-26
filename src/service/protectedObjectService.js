@@ -447,7 +447,7 @@ class ProtectedObjectService {
                 const photo = existProtectedObject?.photo ? existProtectedObject.photo : `https://ui-avatars.com/api/?name=${jsonProtectedObject.CutName ? jsonProtectedObject.CutName.replace(/ /ig, ',') : jsonProtectedObject.N
                     }&size=256&font-size=0.33&length=3&background=random`;
 
-                const description = jsonProtectedObject.Describe?.replace(/^\d\!|---/gm, '');
+                const description = jsonProtectedObject.Describe ? jsonProtectedObject.Describe.replace(/^\d\!|---/gm, '') : null;
 
                 // формирование агрегации и транзакции
                 if (existProtectedObject) {
@@ -587,6 +587,7 @@ class ProtectedObjectService {
             }
 
             // Внесение агрегационных данных-----------------------------------------------------------------------------
+            var protectedObjects;
             // console.log('bulkWriteData: %o', bulkWriteData);
             // если среди данных нет агрегата - добавить 
             if (bulkData.length > 0) {
@@ -595,6 +596,16 @@ class ProtectedObjectService {
 
                 // console.log('bulkWrite: %o', responce);
 
+                // Выборка данных о пультовых объектах
+                protectedObjects = await mongoProtectedObjectsModel
+                    .find({}, '-createdAt -updatedAt -description')
+                    .lean();
+
+                protectedObjects.sort((a, b) => {
+                        if (a.number && b.number)
+                            return (a.number - b.number);
+                        else return -1;
+                    });
             }
 
             transactionData.sort((a, b) => {
@@ -607,7 +618,7 @@ class ProtectedObjectService {
                 else return -1;
             })
 
-            return { transactionData }
+            return { transactionData, protectedObjects }
 
         } catch (error) {
 
@@ -704,9 +715,9 @@ class ProtectedObjectService {
                                         _id: element.archiveData.document._id,
                                     },
                                     update: {
-                                        name: element.insertData.document.name,
-                                        address: element.insertData.document.address,
-                                        description: element.insertData.document.description,
+                                        name: element.insertData.document.name ? element.insertData.document.name : null,
+                                        address: element.insertData.document.address ? element.insertData.document.address : null,
+                                        description: element.insertData.document.description ? element.insertData.document.description : null,
                                     }
                                 }
                             })
@@ -754,27 +765,60 @@ class ProtectedObjectService {
                 mongoProtectedObjectsModel.deleteMany
             }
 
+            var protectedObjects;
             // console.log('bulkWriteData: %o', bulkWriteData);
             // если среди данных нет агрегата - добавить 
             if (bulkWriteData.length > 0) {
 
                 const responce = await mongoProtectedObjectsModel.bulkWrite(bulkWriteData);
 
-                console.log('bulkWrite: %o', responce);
+                // console.log('bulkWrite: %o', responce);
 
+                // Выборка данных о пультовых объектах
+                protectedObjects = await mongoProtectedObjectsModel
+                    .find({}, '-createdAt -updatedAt -description')
+                    .lean();
+
+                protectedObjects.sort((a, b) => {
+                    if (a.number && b.number)
+                        return (a.number - b.number);
+                    else return -1;
+                });
             }
 
-            console.log('bulkArchiveData: %o', bulkArchiveData);
+            var protectedObjectsArchive;
+            // console.log('bulkArchiveData: %o', bulkArchiveData);
             // если среди данных нет агрегата - добавить 
             if (bulkArchiveData.length > 0) {
 
                 const responce = await mongoProtectedObjectsArchiveModel.bulkWrite(bulkArchiveData);
 
-                console.log('bulkArchiveData: %o', responce);
+                // console.log('bulkArchiveData: %o', responce);
 
+                protectedObjectsArchive = await mongoProtectedObjectsArchiveModel
+                    .find({}, '-createdAt -updatedAt -description')
+                    .populate('userPerfomed', 'surname firstName')
+                    .lean();
+
+                protectedObjectsArchive.sort((a, b) => {
+                    if (a.number && b.number)
+                        return (a.number - b.number);
+                    else return -1;
+                });
+
+                protectedObjectsArchive.forEach(value => {
+
+                    // Преобразование ID в строки
+                    value._id = value._id.toString();
+
+                    if (value.userPerfomed) {
+                        value.userPerfomed._id = value.userPerfomed._id.toString();
+                    }
+
+                });
             }
 
-            return { validate: 'finish' };
+            return { protectedObjects, protectedObjectsArchive};
 
         } catch (error) {
 

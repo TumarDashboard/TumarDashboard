@@ -204,14 +204,15 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
                 && isInputValidateGuardfirstName
                 && isInputValidateGuardPatronymic
                 && isInputValidateGuardTelephone) :
-              (isInputValidateGuardSurname
+              (!isMutatingFromServer && ( 
+                isInputValidateGuardSurname
                 || isInputValidateGuardfirstName
                 || isInputValidateGuardPatronymic
                 || isInputValidateGuardTelephone
                 || isInputValidateGuardIIN
                 || (!equalArrays(inputGuardGuardPosts, form.guard?.guardPosts))
                 || inputGuardUIAvatarsSrc != null
-              )
+              ))
             ))}
             onClick={(e) => operation == 'Добавить' ? submitAdd(e,
               inputGuardSurname,
