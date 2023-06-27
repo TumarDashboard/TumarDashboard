@@ -182,6 +182,77 @@ export const FApiMethodAccessRules = [
         ]
     },
 
+    // SimCard methods
+    {
+        url: '/dashboard/simCards\$', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/dashboard/simCards/archive\$', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: /^\/dashboard\/simCards(?=.)/, access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/simCard/createSimCard', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/simCard/editSimCard', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/simCard/getSimCard', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/simCard/deleteSimCard', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/simCard/recoverSimCard', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/simCard/reportSimCards', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/simCard/uploadJsonSimCards', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
+        url: '/api/method/simCard/uploadFinishSimCards', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+
     // Timesheet methods
     {
         url: '/api/method/timesheet/changeTimesheet', access: [
@@ -332,7 +403,12 @@ export const FApiMethodAccessRules = [
         url: '/api/method/modal/getGuardEditForm', access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
-            // { position: positions.FPositionNSO }
+        ]
+    },
+    {
+        url: '/api/method/modal/getProtectedObjectEditForm', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
         ]
     },
 ];
@@ -410,6 +486,7 @@ export function getApiMethodAccesRules(positions) {
         '/api/method/guard/',
         '/api/method/guardPost/',
         '/api/method/protectedObject/',
+        '/api/method/simCard/',
         '/api/method/timesheet/',
         '/api/method/user/',
         '/api/method/userHard/',

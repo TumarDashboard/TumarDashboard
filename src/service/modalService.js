@@ -12,6 +12,7 @@ import { getCurrentMonth } from "../utils/dateUtils";
 import mongoTimesheetsGuardPostModel from "../mongo/models/mongoTimesheetsGuardPostModel";
 import mongoTimesheetsGuardsModel from "../mongo/models/mongoTimesheetsGuardsModel";
 import mongoUserArchiveModel from "../mongo/models/mongoUserArchiveModel";
+import mongoProtectedObjectsModel from "../mongo/models/mongoProtectedObjectsModel";
 
 function managerEquals(a, b) {
     if (!a && !b) {
@@ -67,13 +68,28 @@ class ModalService {
 
         try {
 
-            // console.log('-------------------------------------');
+            console.log('---------------getProtectedObjectEditForm-----------------');
 
-            //Check initials condition
+            //Validate date----------------------------------------------------------------------------------------------
+
+            const protectedObjectID = inputData.arg;
+
+            if (!protectedObjectID) {
+                throw ApiError.BadRequest("Не указан ID пультового объекта");
+            }
+
+            //Проверка соединения с Монго--------------------------------------------------------------------------------
             await mongoConnect();
 
-            // console.log('responceAggregateUpdateData: %o', responceAggregateUpdateData);
-            return responceAggregateUpdateData;
+            const responce = await mongoProtectedObjectsModel
+            .findById(protectedObjectID)
+            .lean();
+
+            if (!responce) {
+                throw ApiError.BadRequest("Не найден ID пультового объекта");
+            }
+            
+            return responce
 
         } catch (error) {
             console.log(error);

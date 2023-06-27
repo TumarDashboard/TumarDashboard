@@ -47,6 +47,25 @@ const reportColumnsForAllProtectedObjects = {
   },
 }
 
+const reportColumnsForAllSimCards = {
+  Index: {
+    width: 3.50,
+    text: '№ п.п.',
+  },
+  MSISDN: {
+    width: 5.00,
+    text: 'Абон. номер',
+  },
+  ICCID: {
+    width: 55.00,
+    text: 'Серийный номер',
+  },
+  Provider: {
+    width: 5.00,
+    text: 'Провайдер',
+  },
+}
+
 const smallFontSize = 9;
 const mediumFontSize = 12;
 const defaultFontSize = 14;
@@ -366,6 +385,139 @@ export function reportForAllProtectedObjects(responce) {
     tableBodyCell.value = [protectedObject.name, protectedObject.address].filter(Boolean).join(', ');
     tableBodyCell.font = Style.FontSmall;
     tableBodyCell.alignment = Style.AlignmentMiddleCenterWrapText;
+    tableBodyCell.border = Style.BorderThin;
+    tableBodyCell.fill = bodyRowFillColor;
+
+  });
+
+  return ExcelJSWorkbook.xlsx;
+
+}
+
+export function reportForAllSimCards(responce) {
+
+  // Переменные листа
+  const date = new Date();
+  const columns = 4;
+
+  // Workbook and worksheet create
+  const ExcelJSWorkbook = new ExcelJS.Workbook();
+
+  const worksheet = ExcelJSWorkbook.addWorksheet("Список сим-карт", {
+    pageSetup: {
+      paperSize: 9,
+      orientation: 'portrait',
+      margins: {
+        left: 0.25, right: 0.25,
+        top: 0.6, bottom: 0.6,
+        header: 0.25, footer: 0.25
+      },
+    }
+  });
+
+  //columns heights
+  try {
+
+    var keyIndex = 0;
+
+    mapValue(reportColumnsForAllProtectedObjects, (value, key) => {
+
+      keyIndex++;
+
+      worksheet.getColumn(keyIndex).width = reportColumnsForAllProtectedObjects[key].width;
+
+    })
+
+  } catch (error) { console.log(error) }
+
+  // Заголовок страницы 
+  try {
+
+    let customCell = worksheet.getCell(1, 1);
+    customCell.font = Style.FontDefaultBold;
+    customCell.alignment = Style.AlignmentMiddleCenter;
+    customCell.value = `ТОО "${companyName}"`;
+    worksheet.mergeCells(1, 1, 1, columns);
+
+    customCell = worksheet.getCell(2, 1);
+    customCell.font = Style.FontDefaultBold;
+    customCell.alignment = Style.AlignmentMiddleCenter;
+    customCell.value = `Список сим-карт`;
+    worksheet.mergeCells(2, 1, 2, columns);
+
+    customCell = worksheet.getCell(3, 1);
+    customCell.font = Style.FontDefault;
+    customCell.alignment = Style.AlignmentMiddleCenter;
+    customCell.value = `за ${date.toLocaleDateString('ru-KZ', { year: 'numeric', month: 'long' })}`;
+    worksheet.mergeCells(3, 1, 3, columns);
+
+  } catch (error) { console.log(error) }
+
+  // Заголовок таблицы
+  try {
+
+    var tableHeaderRow = worksheet.addRow();
+
+    tableHeaderRow.height = 27;
+
+    var keyIndex = 0;
+
+    mapValue(reportColumnsForAllProtectedObjects, (value, key) => {
+
+      keyIndex++;
+
+      let tableCustomCell = tableHeaderRow.getCell(keyIndex);
+      tableCustomCell.value = reportColumnsForAllProtectedObjects[key].text;
+      tableCustomCell.font = Style.FontSmallBold;
+      tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
+      tableCustomCell.fill = Style.FillYellow1;
+      tableCustomCell.border = Style.BorderThin;
+
+    })
+
+  } catch (error) { console.log(error) }
+
+  // Тело таблицы
+
+  responce.forEach((protectedObject, indexA) => {
+
+    // Переменные строки итогов
+    const bodyRowFillColor = indexA & 1 ? Style.FillYellow3 : Style.FillYellow4;
+
+    const tableBodyRow = worksheet.addRow();
+
+    // Index
+    var tableBodyCell = tableBodyRow.getCell( 1 );
+    tableBodyCell.value = indexA + 1;
+    tableBodyCell.font = Style.FontSmall;
+    tableBodyCell.numFmt = '#';
+    tableBodyCell.alignment = Style.AlignmentMiddleCenter;
+    tableBodyCell.border = Style.BorderThin;
+    tableBodyCell.fill = bodyRowFillColor;
+
+    // MSISDN
+    tableBodyCell = tableBodyRow.getCell( 2 );
+    tableBodyCell.value = protectedObject.msisdn ? parseInt(protectedObject.msisdn) : '';
+    tableBodyCell.font = Style.FontSmallBold;
+    tableBodyCell.numFmt = '#';
+    tableBodyCell.alignment = Style.AlignmentMiddleCenter;
+    tableBodyCell.border = Style.BorderThin;
+    tableBodyCell.fill = bodyRowFillColor;
+
+    // ICCID
+    tableBodyCell = tableBodyRow.getCell( 3 );
+    tableBodyCell.value = protectedObject.iccid ? parseInt(protectedObject.iccid) : '';
+    tableBodyCell.font = Style.FontSmall;
+    tableBodyCell.numFmt = '#';
+    tableBodyCell.alignment = Style.AlignmentMiddleCenterWrapText;
+    tableBodyCell.border = Style.BorderThin;
+    tableBodyCell.fill = bodyRowFillColor;
+
+    // Provider
+    tableBodyCell = tableBodyRow.getCell( 2 );
+    tableBodyCell.value = protectedObject.provider;
+    tableBodyCell.font = Style.FontSmall;
+    tableBodyCell.alignment = Style.AlignmentMiddleCenter;
     tableBodyCell.border = Style.BorderThin;
     tableBodyCell.fill = bodyRowFillColor;
 

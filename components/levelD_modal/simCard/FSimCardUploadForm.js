@@ -6,7 +6,7 @@ import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FSelect } from "../../levelE_low/FSelect";
 
 import { ApiError } from '../../../middleware/exceptions';
-import { uploadJsonProtectedObjects, uploadFinishProtectedObjects } from '../../../src/dtos/dtoProtectedObject';
+import { uploadJsonSimCards, uploadFinishSimCards } from '../../../src/dtos/dtoSimCard';
 import {
   getTimesheetPrint,
   getTimesheetPrintForDay,
@@ -35,10 +35,10 @@ const uploadOperation = async (operation, data) => {
   switch (operation) {
 
     case UDFromJsonFile:
-      return await uploadJsonProtectedObjects(data);
+      return await uploadJsonSimCards(data);
 
     case UDFromExcelFile:
-      return await uploadJsonProtectedObjects(data);
+      return await uploadJsonSimCards(data);
 
     default:
       return null;
@@ -46,20 +46,20 @@ const uploadOperation = async (operation, data) => {
   }
 }
 
-export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui, MOBXuser, errorCallback,
-  setTableProtectedObjects, setTableProtectedObjectsArchive, setRenderTableProtectedObjects }) {
+export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuser, errorCallback,
+  setTableSimCards, setTableSimCardsArchive, setRenderTableSimCards }) {
 
   /*----Определение правил доступа-----------------------------------------------------------------------*/
-  const ARuploadJsonProtectedObject = true;// accessRules.includes('getTimesheetPrintForDay');
-  const ARuploadExcelProtectedObject = true; // accessRules.includes('getTimesheetPrintForMonthPart');
+  const ARuploadJsonSimCard = true;// accessRules.includes('getTimesheetPrintForDay');
+  const ARuploadExcelSimCard = true; // accessRules.includes('getTimesheetPrintForMonthPart');
 
   /*--Операция-------------------------------------------------------------------------------------------*/
   const [error, setError] = useState('');
 
   /*--Данные по типу проводимой операции-----------------------------------------------------------------*/
   const FOperationItemList = [
-    ARuploadJsonProtectedObject ? { label: "JSON файл", value: UDFromJsonFile } : null,
-    ARuploadExcelProtectedObject ? { label: "Excel файл", value: UDFromExcelFile } : null,
+    ARuploadJsonSimCard ? { label: "JSON файл", value: UDFromJsonFile } : null,
+    ARuploadExcelSimCard ? { label: "Excel файл", value: UDFromExcelFile } : null,
   ].filter(Boolean);
 
   const [selectedOperation, setSelectedOperation] = useState();
@@ -72,7 +72,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
   }
 
   /*--Файл Формы редактирования--------------------------------------------------------------------------*/
-  const [inputProtectedObjectFile, setInputProtectedObjectFile] = useState(null);
+  const [inputSimCardFile, setInputSimCardFile] = useState(null);
 
   /*--Данные транзакции----------------------------------------------------------------------------------*/
   const [transactionData, setTransactionData] = useState(null);
@@ -82,7 +82,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
   const [selectedTransactionResult, setSelectedTransactionResult] = useState({ count: 0 });
 
   /*--Функция загрузки данных----------------------------------------------------------------------------*/
-  const uploadDataProtectedObjects = async (event) => {
+  const uploadDataSimCards = async (event) => {
 
     setError('');
 
@@ -96,23 +96,23 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
     try {
 
-      // console.log(inputProtectedObjectFile);
+      // console.log(inputSimCardFile);
 
-      const responce = await uploadOperation(selectedOperation, inputProtectedObjectFile);
+      const responce = await uploadOperation(selectedOperation, inputSimCardFile);
 
       // console.log(responce);
 
       if (!responce.transactionData || !Array.isArray(responce.transactionData) || responce.transactionData.length == 0)
         throw new ApiError(500, "Сервер вернул пустой ответ, сообщите администратору");
 
-      if( responce.protectedObjects ){
-        setTableProtectedObjects(responce.protectedObjects);
-        setRenderTableProtectedObjects(responce.protectedObjects);
+      if( responce.simCards ){
+        setTableSimCards(responce.simCards);
+        setRenderTableSimCards(responce.simCards);
       }
 
       setTransactionData(responce.transactionData);
 
-      setInputProtectedObjectFile(null);
+      setInputSimCardFile(null);
 
       setSelectedTransactionResult({ count: 0 });
 
@@ -131,7 +131,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
   }
 
   /*--Функция загрузки данных----------------------------------------------------------------------------*/
-  const transactionFinishProtectedObjects = async (event) => {
+  const transactionFinishSimCards = async (event) => {
 
     setError('');
 
@@ -145,7 +145,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
     try {
 
-      // console.log(inputProtectedObjectFile);
+      // console.log(inputSimCardFile);
       const transaction = transactionData.reduce((result, value, index) => {
         if (selectedTransactionResult[index] > 0) {
           result.push({
@@ -158,15 +158,15 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
       // console.log(transaction);
 
-      const responce = await uploadFinishProtectedObjects(transaction, MOBXuser?.user?.id);
+      const responce = await uploadFinishSimCards(transaction, MOBXuser?.user?.id);
 
-      if( responce?.protectedObjects ){
-        setTableProtectedObjects(responce.protectedObjects);
-        setRenderTableProtectedObjects(responce.protectedObjects);
+      if( responce?.simCards ){
+        setTableSimCards(responce.simCards);
+        setRenderTableSimCards(responce.simCards);
       }
 
-      if( responce?.protectedObjectsArchive ){
-        setTableProtectedObjectsArchive(responce.protectedObjectsArchive);
+      if( responce?.simCardsArchive ){
+        setTableSimCardsArchive(responce.simCardsArchive);
       }
 
       setTransactionData(result => {
@@ -223,7 +223,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
       setError(form.error);
     } else if (form.isOpen) {
       setError(null);
-      setInputProtectedObjectFile(null);
+      setInputSimCardFile(null);
       if (FOperationItemList.length > 0 && !selectedOperation) {
         setSelectedOperation(FOperationItemList[0].value);
       }
@@ -251,7 +251,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
                 selectedOperation == UDFromExcelFile ? ".xlsx" :
                   "image/*"
             }
-            setUri={setInputProtectedObjectFile}
+            setUri={setInputSimCardFile}
             key={form.key}
           />
         </div>
@@ -267,8 +267,8 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
             disabled={FOperationItemList.length == 1}
           />
           <FButtonRed
-            disabled={inputProtectedObjectFile == null}
-            onClick={uploadDataProtectedObjects}
+            disabled={inputSimCardFile == null}
+            onClick={uploadDataSimCards}
           >
             Загрузить
           </FButtonRed>
@@ -288,7 +288,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
             <FButtonWhiteSmall
               className={'w-full mb-1'}
               disabled={selectedTransactionResult.count == 0}
-              onClick={transactionFinishProtectedObjects}
+              onClick={transactionFinishSimCards}
             >
               Завершить транзакцию
             </FButtonWhiteSmall>

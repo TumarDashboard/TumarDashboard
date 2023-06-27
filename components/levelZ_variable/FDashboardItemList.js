@@ -8,6 +8,7 @@ const FDashboardItemList = [
     { id: 3, text: 'Физ. посты', url: '/dashboard/guardPosts', icon: <BuildingOfficeIcon className="h-6 w-6" /> },
     { id: 4, text: 'Охранники', url: '/dashboard/guards', icon: <UserGroupIcon className="h-6 w-6" /> },
     { id: 5, text: 'Пультовые объекты', url: '/dashboard/protectedObjects', icon: <BuildingStorefrontIcon className="h-6 w-6" /> },
+    { id: 5, text: 'Сим-карты', url: '/dashboard/simCards', icon: <BuildingStorefrontIcon className="h-6 w-6" /> },
 ];
 
 const getDashboardItemList = (positions) => {

@@ -9,13 +9,13 @@ import { useStore } from "../../levelA/StoreProvider";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 
-import { createProtectedObject, deleteProtectedObject, editProtectedObject } from '../../../src/dtos/dtoProtectedObject';
-import { FProtectedObjectDeleteForm } from '../../levelD_modal/protectedObject/FProtectedObjectDeleteForm';
-import { FProtectedObjectEditForm } from '../../levelD_modal/protectedObject/FProtectedObjectEditForm';
-import { FProtectedObjectPrintForm } from '../../levelD_modal/protectedObject/FProtectedObjectPrintForm';
+import { createSimCard, deleteSimCard, editSimCard } from '../../../src/dtos/dtoSimCard';
+import { FSimCardDeleteForm } from '../../levelD_modal/simCard/FSimCardDeleteForm';
+import { FSimCardEditForm } from '../../levelD_modal/simCard/FSimCardEditForm';
+import { FSimCardPrintForm } from '../../levelD_modal/simCard/FSimCardPrintForm';
 import { FFilterText } from '../../levelE_low/FFilterText';
 import { FTooltip } from '../../levelE_low/FTooltip';
-import { FProtectedObjectUploadForm } from '../../levelD_modal/protectedObject/FProtectedObjectUploadForm';
+import { FSimCardUploadForm } from '../../levelD_modal/simCard/FSimCardUploadForm';
 
 const inputs = {
   initial: {
@@ -50,24 +50,26 @@ const sortingTableCallback = (a, b, rule, invert) => {
 
   switch (rule) {
 
-    case 'number':
-      if (a.number && b.number)
-        return (a.number - b.number) * invert;
+    case 'msisdn':
+      if (a.msisdn && b.msisdn)
+        return (a.msisdn - b.msisdn) * invert;
       else return -1;
 
-    case 'name':
-      return (a.name?.localeCompare(b.name)) * invert;
+    case 'iccid':
+      if (a.iccid && b.iccid)
+        return (a.iccid - b.iccid) * invert;
+      else return -1;
 
-    case 'address':
-      return (a.address?.localeCompare(b.address)) * invert;
+    case 'provider':
+      return (a.provider?.localeCompare(b.provider)) * invert;
       
     default:
       break;
   }
 }
 
-export default function FFormProtectedObjects({ accessRules, userData, tableProtectedObjects, 
-  setTableProtectedObjects, setTableProtectedObjectsArchive }) {
+export default function FFormSimCards({ accessRules, userData, tableSimCards, 
+  setTableSimCards, setTableSimCardsArchive }) {
   /*----Использование глобальных данных-------------------------------------------------------------------------------*/
   const router = useRouter();
 
@@ -76,41 +78,34 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
   // const [error, setError] = useState('');
 
   /*----Определение правил доступа------------------------------------------------------------------------------------*/
-  const ARcreateProtectedObject = accessRules.includes('createProtectedObject');
-  const AReditProtectedObject = accessRules.includes('editProtectedObject');
-  const ARdeleteProtectedObject = accessRules.includes('deleteProtectedObject');
-  const ARgetProtectedObjectPrint = accessRules.includes('reportProtectedObjects');
-  const ARgetProtectedObjectID = accessRules.includes('protectedObjects(?=.)/');
-  const ARloadProtectedObjectData = true;
+  const ARcreateSimCard = accessRules.includes('createSimCard');
+  const AReditSimCard = accessRules.includes('editSimCard');
+  const ARdeleteSimCard = accessRules.includes('deleteSimCard');
+  const ARgetSimCardPrint = accessRules.includes('reportSimCards');
+  const ARgetSimCardID = accessRules.includes('simCards(?=.)/');
+  const ARloadSimCardData = true;
   // console.log('accessRules %o',accessRules);
 
   /*----Заголовки таблицы------------------------------------------------------------------------------------------------*/
   const constTableHead = [
-    { value: 'number', label: '№' },
-    { value: 'name', label: 'Наименование' },
-    { value: 'address', label: 'Адрес' },
+    { value: 'msisdn', label: 'Абон. номер' },
+    { value: 'iccid', label: 'Серийный номер' },
+    { value: 'provider', label: 'Провайдер' },
   ].filter(Boolean);
 
   /*----Данные таблицы------------------------------------------------------------------------------------------------*/
-  const [renderTableProtectedObjects, setRenderTableProtectedObjects] = useState(tableProtectedObjects ? [...tableProtectedObjects] : []);
+  const [renderTableSimCards, setRenderTableSimCards] = useState(tableSimCards ? [...tableSimCards] : []);
 
   /*----Сортировка таблицы--------------------------------------------------------------------------------------------*/
   const [sortingRule, setSortingRule] = useState();
 
   const sortingTable = (rule) => {
 
-    // if (rule == constTableHeadControl.value) {
-    //   setRenderTableProtectedObjects(array => {
-    //     return [...array.sort((a, b) => {
-    //       return (a.manager?._id === MOBXuser?.user?.id) * -1;
-    //     })];
-    //   });
-    // } else {
-      const invert = rule == sortingRule ? -1 : 1;
-      setRenderTableProtectedObjects(array => {
-        return [...array.sort((a, b) => sortingTableCallback(a, b, rule, invert))];
-      });
-    // }
+    const invert = rule == sortingRule ? -1 : 1;
+
+    setRenderTableSimCards(array => {
+      return [...array.sort((a, b) => sortingTableCallback(a, b, rule, invert))];
+    });
 
     setSortingRule(rule == sortingRule ? '!' + rule : rule);
 
@@ -124,14 +119,14 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
 
     const filtersArray = text.toLowerCase().split(' ');
 
-    setRenderTableProtectedObjects(
+    setRenderTableSimCards(
 
-      tableProtectedObjects.filter(value => {
+      tableSimCards.filter(value => {
 
         const parametrsArray = [
-          value.number,
-          value.name,
-          value.address,
+          value.msisdn,
+          value.iccid,
+          value.provider,
         ].filter(Boolean);
 
         for (const parametr of parametrsArray) {
@@ -154,17 +149,15 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
   }
 
   /*----Модальное окно Формы редактирования---------------------------------------------------------------------------*/
-  const [protectedObjectEditForm, setProtectedObjectEditForm] = useState({
+  const [simCardEditForm, setSimCardEditForm] = useState({
     isOpen: false
   });
 
   /*----Создание пультовой объекта Формы редактирования----------------------------------------------------------------------*/
-  const protectedObjectAdd = async (event,
-    inputProtectedObjectNumber,
-    inputProtectedObjectName,
-    inputProtectedObjectAddress,
-    inputProtectedObjectPhoto,
-    inputProtectedObjectDescription
+  const simCardAdd = async (event,
+    inputSimCardMSISDN,
+    inputSimCardICCID,
+    inputSimCardProvider
     ) => {
 
     event.preventDefault();
@@ -174,32 +167,30 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
     try {
 
       // Отправляем запрос на сервер
-      const responce = await createProtectedObject(
-        inputProtectedObjectNumber,
-        inputProtectedObjectName,
-        inputProtectedObjectAddress,
-        inputProtectedObjectPhoto,
-        inputProtectedObjectDescription
+      const responce = await createSimCard(
+        inputSimCardMSISDN,
+        inputSimCardICCID,
+        inputSimCardProvider
       );
 
       // Обновляем таблицу в памяти
-      setTableProtectedObjects(array => {
-        array.unshift(responce.protectedObject);
+      setTableSimCards(array => {
+        array.unshift(responce.simCard);
         return array;
       });
 
       // Обновляем отображаемую таблицу
-      setRenderTableProtectedObjects(array => {
-        array.unshift(responce.protectedObject);
+      setRenderTableSimCards(array => {
+        array.unshift(responce.simCard);
         return array;
       });
 
       // Закрываем модальное окно
-      setProtectedObjectEditForm({ isOpen: false });
+      setSimCardEditForm({ isOpen: false });
 
     } catch (error) {
 
-      errorCallback(error, setProtectedObjectEditForm);
+      errorCallback(error, setSimCardEditForm);
 
     } finally {
 
@@ -209,12 +200,10 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
   }
 
   /*----Изменение пультовой объекта Формы редактирования---------------------------------------------------------------------*/
-  const protectedObjectEdit = async (event,
-    inputProtectedObjectNumber,
-    inputProtectedObjectName,
-    inputProtectedObjectAddress,
-    inputProtectedObjectPhoto,
-    inputProtectedObjectDescription
+  const simCardEdit = async (event,
+    inputSimCardMSISDN,
+    inputSimCardICCID,
+    inputSimCardProvider
     ) => {
 
     event.preventDefault();
@@ -224,38 +213,36 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
     try {
 
       // Отправляем запрос на сервер
-      const responce = await editProtectedObject(
-        protectedObjectEditForm.protectedObject._id,
-        inputProtectedObjectNumber,
-        inputProtectedObjectName,
-        inputProtectedObjectAddress,
-        inputProtectedObjectPhoto,
-        inputProtectedObjectDescription
+      const responce = await editSimCard(
+        simCardEditForm.simCard._id,
+        inputSimCardMSISDN,
+        inputSimCardICCID,
+        inputSimCardProvider
       );
 
       // Обновляем таблицу в памяти
-      setTableProtectedObjects(array => {
+      setTableSimCards(array => {
         const index = array.findIndex(element => {
-          return element._id == responce.protectedObject._id
+          return element._id == responce.simCard._id
         });
         if (index) {
-          array[index] = responce.protectedObject;
+          array[index] = responce.simCard;
         }
         return array;
       });
 
       // Обновляем отображаемую таблицу
-      setRenderTableProtectedObjects(array => {
-        array[protectedObjectEditForm.index] = responce.protectedObject;
+      setRenderTableSimCards(array => {
+        array[simCardEditForm.index] = responce.simCard;
         return array;
       });
 
       // Закрываем модальное окно
-      setProtectedObjectEditForm({ isOpen: false });
+      setSimCardEditForm({ isOpen: false });
 
     } catch (error) {
 
-      errorCallback(error, setProtectedObjectEditForm);
+      errorCallback(error, setSimCardEditForm);
 
     } finally {
 
@@ -265,12 +252,12 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
   }
 
   /*----Модальное окно Формы удаления-------------------------------------------------------------------------------*/
-  const [protectedObjectDeleteForm, setProtectedObjectDeleteForm] = useState({
+  const [simCardDeleteForm, setSimCardDeleteForm] = useState({
     isOpen: false
   });
 
   /*----Функция удаления поста Формы удаления-------------------------------------------------------------------------*/
-  const protectedObjectDeleteFormSubmit = async (event, reason) => {
+  const simCardDeleteFormSubmit = async (event, reason) => {
 
     event.preventDefault();
 
@@ -281,41 +268,41 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
       if (MOBXuser.user && MOBXuser.user.id) {
 
         // Отправляем запрос на сервер
-        const responce = await deleteProtectedObject(
-          protectedObjectDeleteForm.protectedObjectId,
+        const responce = await deleteSimCard(
+          simCardDeleteForm.simCardId,
           MOBXuser.user.id,
           reason
         );
 
         // Обновляем таблицу в памяти
-        setTableProtectedObjects(array => {
+        setTableSimCards(array => {
           const result = array.filter(value => {
-            return responce.protectedObject._id != value._id;
+            return responce.simCard._id != value._id;
           })
           return result
         });
 
         // Обновляем отображаемую таблицу
-        setRenderTableProtectedObjects(array => {
+        setRenderTableSimCards(array => {
           const result = array.filter(value => {
-            return responce.protectedObject._id != value._id;
+            return responce.simCard._id != value._id;
           })
           return result
         });
 
         // Обнавляем таблицу архива
-        setTableProtectedObjectsArchive(array => {
-          array.unshift(responce.protectedObject);
+        setTableSimCardsArchive(array => {
+          array.unshift(responce.simCard);
           return array;
         });
 
         // Закрываем модальное окно
-        setProtectedObjectDeleteForm({ isOpen: false });
+        setSimCardDeleteForm({ isOpen: false });
       }
 
     } catch (error) {
 
-      errorCallback(error, setProtectedObjectDeleteForm);
+      errorCallback(error, setSimCardDeleteForm);
 
     } finally {
 
@@ -325,12 +312,12 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
   }
 
   /*----Модальное окно Формы выгрузки отчётов пультовых объектов-------------------------------------------------------*/
-  const [protectedObjectPrintForm, setProtectedObjectPrintForm] = useState({
+  const [simCardPrintForm, setSimCardPrintForm] = useState({
     isOpen: false
   });
 
   /*----Модальное окно Формы загрузки данных пультовых объектов--------------------------------------------------------*/
-  const [protectedObjectUploadForm, setProtectedObjectUploadForm] = useState({
+  const [simCardUploadForm, setSimCardUploadForm] = useState({
     isOpen: false
   });
 
@@ -362,7 +349,7 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
   }
 
   /*----Референс подсказки--------------------------------------------------------------------------------------------*/
-  const getProtectedObjectIDtimeout = useRef();
+  const getSimCardIDtimeout = useRef();
   const [tooltipReference, setTooltipReference] = useState(null);
 
   /*------------------------------------------------------------------------------------------------------------------*/
@@ -370,7 +357,7 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
 
     return () => {
       filterringTimeout.current && clearTimeout(filterringTimeout.current);
-      getProtectedObjectIDtimeout.current && clearInterval(getProtectedObjectIDtimeout.current);
+      getSimCardIDtimeout.current && clearInterval(getSimCardIDtimeout.current);
 
       MOBXui.setUpdateState(false);
     }
@@ -390,15 +377,15 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
         pt-2 pb-4"
       >
 
-        {/* Кнопка выгрузки отчётов, кнопка создания */}
+        {/* Кнопка выгрузки отчетов, кнопка создания */}
         <div className='flex-1 md:order-last md:ml-2 w-full flex justify-end'>
 
           {/* Кнопка вызова окна отчётов */}
-          {ARgetProtectedObjectPrint && tableProtectedObjects?.length > 0 && (<button
+          {ARgetSimCardPrint && tableSimCards?.length > 0 && (<button
             className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
             hover:bg-color_C active:bg-color_B mr-2"
             onClick={() => {
-              setProtectedObjectPrintForm({
+              setSimCardPrintForm({
                 isOpen: true,
                 key: Math.random().toString(36)
               })
@@ -411,11 +398,11 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
           </button>)}
 
           {/* Кнопка загрузки данных */}
-          {ARloadProtectedObjectData && <button
+          {ARloadSimCardData && <button
             className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
             hover:bg-color_C active:bg-color_B mr-2"
             onClick={() => {
-              setProtectedObjectUploadForm({
+              setSimCardUploadForm({
                 isOpen: true,
                 key: Math.random().toString(36)
               })
@@ -428,11 +415,11 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
           </button>}
 
           {/* Кнопка создания */}
-          {ARcreateProtectedObject && <button
+          {ARcreateSimCard && <button
             className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
             hover:bg-color_C active:bg-color_B"
             onClick={() => {
-              setProtectedObjectEditForm({
+              setSimCardEditForm({
                 isOpen: true,
                 operation: 'Добавить',
                 key: Math.random().toString(36)
@@ -462,7 +449,7 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
             }}
             onClear={() => {
               setInputFilterText('');
-              setRenderTableProtectedObjects([...tableProtectedObjects]);
+              setRenderTableSimCards([...tableSimCards]);
             }}
           />
 
@@ -500,7 +487,7 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
             })}
 
             {/* Заголовок управления*/}
-            {(AReditProtectedObject || ARdeleteProtectedObject) &&
+            {(AReditSimCard || ARdeleteSimCard) &&
               <th
                 className="block md:table-cell md:border bg-color_B p-2"
                 onClick={(e) => sortingTable(constTableHeadControl.value)}
@@ -518,84 +505,71 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
         {/* {Тело} */}
         <tbody className="block md:table-row-group">
 
-          {renderTableProtectedObjects.map((protectedObject, index) => {
+          {renderTableSimCards.map((simCard, index) => {
             return (
 
               <tr
-                className={`rounded-md md:border-none block md:table-row bg-color_G mb-2 ${ARgetProtectedObjectID && 'cursor-pointer'}`}
-                key={protectedObject._id}
+                className={`rounded-md md:border-none block md:table-row bg-color_G mb-2 ${ARgetSimCardID && 'cursor-pointer'}`}
+                key={simCard._id}
                 onPointerDown={(event) => {
-                  if (ARgetProtectedObjectID) {
+                  if (ARgetSimCardID) {
                     event.stopPropagation();
-                    getProtectedObjectIDtimeout.current && clearTimeout(getProtectedObjectIDtimeout.current);
-                    getProtectedObjectIDtimeout.current = setTimeout(() => {
-                      router.push(`/dashboard/protectedObjects/${protectedObject._id}`);
-                      getProtectedObjectIDtimeout.current && clearTimeout(getProtectedObjectIDtimeout.current);
+                    getSimCardIDtimeout.current && clearTimeout(getSimCardIDtimeout.current);
+                    getSimCardIDtimeout.current = setTimeout(() => {
+                      router.push(`/dashboard/simCards/${simCard._id}`);
+                      getSimCardIDtimeout.current && clearTimeout(getSimCardIDtimeout.current);
                     }, 1000);
                   }
                 }}
                 onPointerUp={(event) => {
-                  getProtectedObjectIDtimeout.current && clearTimeout(getProtectedObjectIDtimeout.current);
+                  getSimCardIDtimeout.current && clearTimeout(getSimCardIDtimeout.current);
                 }}
                 onPointerLeave={(event) => {
-                  getProtectedObjectIDtimeout.current && clearTimeout(getProtectedObjectIDtimeout.current);
+                  getSimCardIDtimeout.current && clearTimeout(getSimCardIDtimeout.current);
                 }}
                 onPointerCancel={(event) => {
-                  getProtectedObjectIDtimeout.current && clearTimeout(getProtectedObjectIDtimeout.current);
+                  getSimCardIDtimeout.current && clearTimeout(getSimCardIDtimeout.current);
                 }}
               >
 
-                {/* {Фото, Номер} */}
+                {/* { Номер} */}
                 <td className="px-2 md:border text-left block md:table-cell">
                   <div className="flex flex-row items-center justify-start">
 
-                    {/* {Фото} */}
-                    {protectedObject.photo && <div
-                      className="h-8 w-8"
-                    >
-                      <Image
-                        className="rounded-full"
-                        width={32}
-                        height={32}
-                        src={protectedObject.photo}
-                        alt=""
-                      />
-                    </div>}
-
                     {/* {Номер} */}
-                    <p className="text-black ml-1 text-xl font-bold">{protectedObject.number}</p>
+                    <p className="text-black ml-1 text-xl font-bold">{simCard.msisdn}</p>
 
                   </div>
                 </td>
 
-                {/* {Наименование} */}
+                {/* {Серийный номер} */}
                 <td className="px-1 md:p-2 md:border text-left block md:table-cell">
-                  {protectedObject.name && <span>{protectedObject.name}</span>}
+                  {simCard.iccid && <span>{simCard.iccid}</span>}
                 </td>
 
-                {/* {Адрес} */}
-                <td className="px-1 md:p-2 md:border text-left block md:table-cell items-center">
-                  {protectedObject.address && <span><b className='md:hidden'>Адрес</b> {protectedObject.address}</span>}
+                {/* {Провайдер} */}
+                <td className="px-1 md:p-2 md:border text-left block md:table-cell">
+                  {simCard.provider && <span>{simCard.provider}</span>}
                 </td>
 
                 {/* {Кнопки управления компьютера} */}
-                {(AReditProtectedObject || ARdeleteProtectedObject ) &&
+                {(AReditSimCard || ARdeleteSimCard ) &&
                   <td className="p-2 md:border text-left block md:table-cell md:w-1">
                     <div className='flex justify-end space-x-2'>
 
-                      {AReditProtectedObject &&
+                      {AReditSimCard &&
                         <FButtonRed
                           className="flex"
-                          onPointerEnter={event => setTooltipReference({ target: event.currentTarget, text: `Редактировать пультовой объект - ${[protectedObject.number, protectedObject.name].join(' ')}` })}
+                          onPointerEnter={event => setTooltipReference({ target: event.currentTarget, text: `Редактировать сим-карту - ${simCard.iccid}` })}
                           onPointerLeave={() => setTooltipReference(null)}
                           onClick={(event) => {
                             event.stopPropagation();
-                            setProtectedObjectEditForm({
+                            setSimCardEditForm({
                               isOpen: true,
                               index: index,
                               operation: 'Изменить',
                               key: Math.random().toString(36),
-                              protectedObject: protectedObject
+                              simCard: simCard
                             })
                           }}
                         >
@@ -604,18 +578,18 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
                           />
                         </FButtonRed>}
 
-                      {ARdeleteProtectedObject &&
+                      {ARdeleteSimCard &&
                         <FButtonWhite
                           className="flex"
-                          onPointerEnter={event => setTooltipReference({ target: event.currentTarget, text: `Удалить пультовой объект - ${[protectedObject.number, protectedObject.name].join(' ')}` })}
+                          onPointerEnter={event => setTooltipReference({ target: event.currentTarget, text: `Удалить сим карту - ${simCard.iccid}` })}
                           onPointerLeave={() => setTooltipReference(null)}
                           onClick={(event) => {
                             event.stopPropagation();
-                            setProtectedObjectDeleteForm({
+                            setSimCardDeleteForm({
                               isOpen: true,
                               key: Math.random().toString(36),
-                              protectedObjectNumber: protectedObject.number,
-                              protectedObjectId: protectedObject._id,
+                              simCardNumber: simCard.iccid,
+                              simCardId: simCard._id,
                             })
                           }}
                         >
@@ -636,44 +610,44 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
 
       </table>
 
-      {/* {Форма добавления/редактирования пультовой объекта} */}
-      <FProtectedObjectEditForm
+      {/* {Форма добавления/редактирования} */}
+      <FSimCardEditForm
         accessRules={accessRules}
-        form={protectedObjectEditForm}
-        setForm={setProtectedObjectEditForm}
-        submitAdd={protectedObjectAdd}
-        submitEdit={protectedObjectEdit}
+        form={simCardEditForm}
+        setForm={setSimCardEditForm}
+        submitAdd={simCardAdd}
+        submitEdit={simCardEdit}
       />
 
-      {/* {Форма удаления пультовой объекта} */}
-      <FProtectedObjectDeleteForm
-        form={protectedObjectDeleteForm}
-        setForm={setProtectedObjectDeleteForm}
-        submit={protectedObjectDeleteFormSubmit}
+      {/* {Форма удаления} */}
+      <FSimCardDeleteForm
+        form={simCardDeleteForm}
+        setForm={setSimCardDeleteForm}
+        submit={simCardDeleteFormSubmit}
       />
 
-      {/* {Форма выгрузки отчётов пультовых объектов} */}
-      <FProtectedObjectPrintForm
+      {/* {Форма выгрузки отчётов} */}
+      <FSimCardPrintForm
         accessRules={accessRules}
-        form={protectedObjectPrintForm}
-        setForm={setProtectedObjectPrintForm}
+        form={simCardPrintForm}
+        setForm={setSimCardPrintForm}
         MOBXui={MOBXui}
         MOBXuser={MOBXuser}
         errorCallback={errorCallback}
-        protectedObjects={tableProtectedObjects}
+        simCards={tableSimCards}
       />
 
-      {/* {Форма загрузки данных пультовых объектов} */}
-      <FProtectedObjectUploadForm
+      {/* {Форма загрузки данных} */}
+      <FSimCardUploadForm
         accessRules={accessRules}
-        form={protectedObjectUploadForm}
-        setForm={setProtectedObjectUploadForm}
+        form={simCardUploadForm}
+        setForm={setSimCardUploadForm}
         MOBXui={MOBXui}
         MOBXuser={MOBXuser}
         errorCallback={errorCallback}
-        setTableProtectedObjects={setTableProtectedObjects}
-        setTableProtectedObjectsArchive={setTableProtectedObjectsArchive}
-        setRenderTableProtectedObjects={setRenderTableProtectedObjects}
+        setTableSimCards={setTableSimCards}
+        setTableSimCardsArchive={setTableSimCardsArchive}
+        setRenderTableSimCards={setRenderTableSimCards}
       />
 
       {/* {Подсказка таблицы} */}
