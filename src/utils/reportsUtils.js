@@ -53,7 +53,7 @@ const reportColumnsForAllSimCards = {
     text: '№ п.п.',
   },
   MSISDN: {
-    width: 5.00,
+    width: 15.00,
     text: 'Абон. номер',
   },
   ICCID: {
@@ -61,7 +61,7 @@ const reportColumnsForAllSimCards = {
     text: 'Серийный номер',
   },
   Provider: {
-    width: 5.00,
+    width: 10.00,
     text: 'Провайдер',
   },
 }
@@ -420,11 +420,11 @@ export function reportForAllSimCards(responce) {
 
     var keyIndex = 0;
 
-    mapValue(reportColumnsForAllProtectedObjects, (value, key) => {
+    mapValue(reportColumnsForAllSimCards, (value, key) => {
 
       keyIndex++;
 
-      worksheet.getColumn(keyIndex).width = reportColumnsForAllProtectedObjects[key].width;
+      worksheet.getColumn(keyIndex).width = reportColumnsForAllSimCards[key].width;
 
     })
 
@@ -462,12 +462,12 @@ export function reportForAllSimCards(responce) {
 
     var keyIndex = 0;
 
-    mapValue(reportColumnsForAllProtectedObjects, (value, key) => {
+    mapValue(reportColumnsForAllSimCards, (value, key) => {
 
       keyIndex++;
 
       let tableCustomCell = tableHeaderRow.getCell(keyIndex);
-      tableCustomCell.value = reportColumnsForAllProtectedObjects[key].text;
+      tableCustomCell.value = reportColumnsForAllSimCards[key].text;
       tableCustomCell.font = Style.FontSmallBold;
       tableCustomCell.alignment = Style.AlignmentMiddleCenterWrapText;
       tableCustomCell.fill = Style.FillYellow1;
@@ -479,7 +479,7 @@ export function reportForAllSimCards(responce) {
 
   // Тело таблицы
 
-  responce.forEach((protectedObject, indexA) => {
+  responce.forEach((element, indexA) => {
 
     // Переменные строки итогов
     const bodyRowFillColor = indexA & 1 ? Style.FillYellow3 : Style.FillYellow4;
@@ -497,25 +497,25 @@ export function reportForAllSimCards(responce) {
 
     // MSISDN
     tableBodyCell = tableBodyRow.getCell( 2 );
-    tableBodyCell.value = protectedObject.msisdn ? parseInt(protectedObject.msisdn) : '';
+    tableBodyCell.value = element.msisdn ? element.msisdn : '';
     tableBodyCell.font = Style.FontSmallBold;
-    tableBodyCell.numFmt = '#';
+    // tableBodyCell.numFmt = '#';
     tableBodyCell.alignment = Style.AlignmentMiddleCenter;
     tableBodyCell.border = Style.BorderThin;
     tableBodyCell.fill = bodyRowFillColor;
 
     // ICCID
     tableBodyCell = tableBodyRow.getCell( 3 );
-    tableBodyCell.value = protectedObject.iccid ? parseInt(protectedObject.iccid) : '';
+    tableBodyCell.value = element.iccid ? element.iccid : '';
     tableBodyCell.font = Style.FontSmall;
-    tableBodyCell.numFmt = '#';
+    // tableBodyCell.numFmt = '#';
     tableBodyCell.alignment = Style.AlignmentMiddleCenterWrapText;
     tableBodyCell.border = Style.BorderThin;
     tableBodyCell.fill = bodyRowFillColor;
 
     // Provider
-    tableBodyCell = tableBodyRow.getCell( 2 );
-    tableBodyCell.value = protectedObject.provider;
+    tableBodyCell = tableBodyRow.getCell( 4 );
+    tableBodyCell.value = element.provider;
     tableBodyCell.font = Style.FontSmall;
     tableBodyCell.alignment = Style.AlignmentMiddleCenter;
     tableBodyCell.border = Style.BorderThin;

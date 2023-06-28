@@ -6,7 +6,7 @@ import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FSelect } from "../../levelE_low/FSelect";
 
 import { ApiError } from '../../../middleware/exceptions';
-import { uploadJsonSimCards, uploadFinishSimCards } from '../../../src/dtos/dtoSimCard';
+import { uploadJsonSimCards, uploadFinishSimCards, uploadExcellSimCards } from '../../../src/dtos/dtoSimCard';
 import {
   getTimesheetPrint,
   getTimesheetPrintForDay,
@@ -27,24 +27,12 @@ import {
 import { FButtonWhite } from '../../levelE_low/FButtonWhite';
 import { FButtonSlateSmall } from '../../levelE_low/FButtonSlateSmall';
 import { FButtonWhiteSmall } from '../../levelE_low/FButtonWhiteSmall';
+import FProviderItemList, { FProviderEMPTY } from '../../levelZ_variable/FProviderItemList';
+import { FInputText } from '../../levelE_low/FInputText';
 
 const UDFromJsonFile = 'UDFromJsonFile';
 const UDFromExcelFile = 'UDFromExcelFile';
 
-const uploadOperation = async (operation, data) => {
-  switch (operation) {
-
-    case UDFromJsonFile:
-      return await uploadJsonSimCards(data);
-
-    case UDFromExcelFile:
-      return await uploadJsonSimCards(data);
-
-    default:
-      return null;
-
-  }
-}
 
 export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuser, errorCallback,
   setTableSimCards, setTableSimCardsArchive, setRenderTableSimCards }) {
@@ -58,8 +46,8 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
 
   /*--Данные по типу проводимой операции-----------------------------------------------------------------*/
   const FOperationItemList = [
-    ARuploadJsonSimCard ? { label: "JSON файл", value: UDFromJsonFile } : null,
     ARuploadExcelSimCard ? { label: "Excel файл", value: UDFromExcelFile } : null,
+    ARuploadJsonSimCard ? { label: "JSON файл", value: UDFromJsonFile } : null,
   ].filter(Boolean);
 
   const [selectedOperation, setSelectedOperation] = useState();
@@ -71,8 +59,56 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
     setError('');
   }
 
-  /*--Файл Формы редактирования--------------------------------------------------------------------------*/
+  /*--Файл Формы загрузки--------------------------------------------------------------------------------*/
   const [inputSimCardFile, setInputSimCardFile] = useState(null);
+
+  /*--Абонентский номер------ Формы загрузки-------------------------------------------------------------*/
+  const [inputSimCardColumnMSISDN, setInputSimCardColumnMSISDN] = useState();
+
+  /*--Серийный номер Формы загрузки------------------------------------------------------------------------*/
+  const [inputSimCardColumnICCID, setInputSimCardColumnICCID] = useState();
+
+  /*--Провайдер Формы загрузки---------------------------------------------------------------------------*/
+  const [inputSimCardProvider, setInputSimCardProvider] = useState();
+
+  const selectedInputSimCardProvider = (e) => {
+
+    setInputSimCardProvider(e.target.value);
+
+    setError('');
+  }
+
+  /*--выбор опреации загрузки Формы загрузки---------------------------------------------------------------------------*/
+  const validateOperation = () => {
+    switch (selectedOperation) {
+  
+      case UDFromJsonFile:
+        return false;
+  
+      case UDFromExcelFile:
+        return inputSimCardFile == null || !inputSimCardColumnMSISDN || !inputSimCardColumnICCID || inputSimCardProvider;
+  
+      default:
+        return false;
+  
+    }
+  }
+
+  /*--выбор опреации загрузки Формы загрузки---------------------------------------------------------------------------*/
+  const uploadOperation = async (operation, data) => {
+    switch (operation) {
+  
+      case UDFromJsonFile:
+        return await uploadJsonSimCards(data);
+  
+      case UDFromExcelFile:
+        return await uploadExcellSimCards(data, inputSimCardColumnMSISDN, inputSimCardColumnICCID, inputSimCardProvider);
+  
+      default:
+        return null;
+  
+    }
+  }
 
   /*--Данные транзакции----------------------------------------------------------------------------------*/
   const [transactionData, setTransactionData] = useState(null);
@@ -83,7 +119,6 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
 
   /*--Функция загрузки данных----------------------------------------------------------------------------*/
   const uploadDataSimCards = async (event) => {
-
     setError('');
 
     setForm(form => {
@@ -105,7 +140,7 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
       if (!responce.transactionData || !Array.isArray(responce.transactionData) || responce.transactionData.length == 0)
         throw new ApiError(500, "Сервер вернул пустой ответ, сообщите администратору");
 
-      if( responce.simCards ){
+      if (responce.simCards) {
         setTableSimCards(responce.simCards);
         setRenderTableSimCards(responce.simCards);
       }
@@ -129,7 +164,6 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
     }
 
   }
-
   /*--Функция загрузки данных----------------------------------------------------------------------------*/
   const transactionFinishSimCards = async (event) => {
 
@@ -160,12 +194,12 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
 
       const responce = await uploadFinishSimCards(transaction, MOBXuser?.user?.id);
 
-      if( responce?.simCards ){
+      if (responce?.simCards) {
         setTableSimCards(responce.simCards);
         setRenderTableSimCards(responce.simCards);
       }
 
-      if( responce?.simCardsArchive ){
+      if (responce?.simCardsArchive) {
         setTableSimCardsArchive(responce.simCardsArchive);
       }
 
@@ -235,7 +269,7 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
   return (
     <FModalForm
       widthForm='w-full lg:w-1/2 mx-6'
-      title={`Загрузка данных пультовых объектов`}
+      title={`Загрузка данных сим-карт`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
       className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[80vh]"
@@ -256,6 +290,42 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
           />
         </div>
 
+        {selectedOperation == UDFromExcelFile &&
+          <div className='flex flex-row w-full space-x-4 mt-2'>
+
+            {/* <div className="form-item min-w-fit flex items-center">
+              <label className="text-lg pr-4 select-none">Провайдер</label>
+              <FSelect
+                className='flex-1 pl-2 pr-8 py-0 mr-2 min-w-fit'
+                options={FProviderItemList}
+                onChange={selectedInputSimCardProvider}
+                value={inputSimCardProvider}
+                disabled={FProviderItemList.length == 1}
+              />
+            </div> */}
+
+            <div className="form-item w-full flex items-center">
+              <label className="text-lg pr-4 select-none">Колонки</label>
+              <FInputText
+                placeholder='абон. номера'
+                minlength="1" 
+                maxlength="1"
+                value={inputSimCardColumnMSISDN ? inputSimCardColumnMSISDN : ''}
+                onChange={setInputSimCardColumnMSISDN}
+                className="font-bold"
+              />
+              <FInputText
+                placeholder='серийного номера'
+                minlength="1" 
+                maxlength="1"
+                value={inputSimCardColumnICCID ? inputSimCardColumnICCID : ''}
+                onChange={setInputSimCardColumnICCID}
+                className="font-bold"
+              />
+            </div>
+
+          </div>}
+
         {/* Тип проводимой операции и кнопка загрузки*/}
         <div className="flex flex-row w-full items-center form-item mt-2">
           <label className="text-lg pr-4 select-none">Тип данных</label>
@@ -267,7 +337,13 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
             disabled={FOperationItemList.length == 1}
           />
           <FButtonRed
-            disabled={inputSimCardFile == null}
+            disabled={
+              selectedOperation == UDFromExcelFile
+              ? !(inputSimCardFile != null && inputSimCardColumnMSISDN && inputSimCardColumnICCID && inputSimCardProvider != FProviderEMPTY)
+              : selectedOperation == UDFromJsonFile
+              ? true
+              : true
+            }
             onClick={uploadDataSimCards}
           >
             Загрузить
@@ -299,12 +375,12 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
                   return (
                     <tr
                       className={`rounded-md flex flex-col border mb-1 ${selectedTransactionResult[index] == FUDTransactionReplacement
-                          ? 'bg-orange-100'
-                          : selectedTransactionResult[index] == FUDTransactionUpdate
-                            ? 'bg-green-100'
-                            : selectedTransactionResult[index] == FUDTransactionArchive
-                              ? 'bg-red-100'
-                              : getBGColorWithAction(value.operation)
+                        ? 'bg-orange-100'
+                        : selectedTransactionResult[index] == FUDTransactionUpdate
+                          ? 'bg-green-100'
+                          : selectedTransactionResult[index] == FUDTransactionArchive
+                            ? 'bg-red-100'
+                            : getBGColorWithAction(value.operation)
                         }`}
                       key={index}
                     >

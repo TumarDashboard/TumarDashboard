@@ -1,4 +1,4 @@
-import { UsersIcon, UserCircleIcon, BuildingOfficeIcon, UserGroupIcon, BuildingStorefrontIcon } from '@heroicons/react/24/solid';
+import { UsersIcon, UserCircleIcon, BuildingOfficeIcon, UserGroupIcon, BuildingStorefrontIcon, CreditCardIcon } from '@heroicons/react/24/solid';
 import { intersectArraysPositions } from '../../src/utils/arrayUtils';
 import { FApiMethodAccessRules } from '../levelA/AccessRules';
 
@@ -8,7 +8,7 @@ const FDashboardItemList = [
     { id: 3, text: 'Физ. посты', url: '/dashboard/guardPosts', icon: <BuildingOfficeIcon className="h-6 w-6" /> },
     { id: 4, text: 'Охранники', url: '/dashboard/guards', icon: <UserGroupIcon className="h-6 w-6" /> },
     { id: 5, text: 'Пультовые объекты', url: '/dashboard/protectedObjects', icon: <BuildingStorefrontIcon className="h-6 w-6" /> },
-    { id: 5, text: 'Сим-карты', url: '/dashboard/simCards', icon: <BuildingStorefrontIcon className="h-6 w-6" /> },
+    { id: 6, text: 'Сим-карты', url: '/dashboard/simCards', icon: <CreditCardIcon className="h-6 w-6" /> },
 ];
 
 const getDashboardItemList = (positions) => {

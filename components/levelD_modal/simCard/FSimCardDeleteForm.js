@@ -44,7 +44,7 @@ export function FSimCardDeleteForm({ form, setForm, submit }) {
       />
 
       <span>
-        Для подтверждения действия введите <b>{form.simCardNumber}</b> в поле ниже:
+        Для подтверждения действия введите <b>{form.formValidate}</b> в поле ниже:
       </span>
 
       <input
@@ -70,7 +70,7 @@ export function FSimCardDeleteForm({ form, setForm, submit }) {
 
         <FButtonRed
           className=""
-          disabled={inputValidate.localeCompare(form.simCardNumber, undefined, { sensitivity: 'base', ignorePunctuation: true })}
+          disabled={inputValidate.localeCompare(form.formValidate, undefined, { sensitivity: 'base', ignorePunctuation: true })}
           onClick={(e)=>submit( e, inputReason )}
         >
           Удалить

@@ -1,7 +1,6 @@
 import { FModalForm } from '../FModalForm';
 import { useState, useEffect } from 'react';
 
-import { FInputSimCardNumber } from "../../levelE_low/FInputSimCardNumber";
 import { FTextArea } from "../../levelE_low/FTextArea";
 import { FInputImageFile } from "../../levelE_low/FInputImageFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
@@ -15,6 +14,7 @@ import { equalArrays } from '../../../src/utils/arrayUtils';
 import { FInputText } from '../../levelE_low/FInputText';
 import { FInputIIN } from '../../levelE_low/FInputIIN';
 import { FInputTelephone } from '../../levelE_low/FInputTelephone';
+import { FInputICCID } from '../../levelE_low/FInputICCID';
 
 export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submitEdit, users }) {
 
@@ -26,20 +26,26 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
   // const AReditSimCardManager = !accessRules.includes('editSimCard/editBlock/manager');
   // const AReditSimCardRate = !accessRules.includes('editSimCard/editBlock/rate');
 
+  /*--Провайдер Формы редактирования-------------------------------------------------------------------------*/
+  const [inputSimCardProvider, setInputSimCardProvider] = useState();
+
   /*--Абонентский номер------ Формы редактирования-------------------------------------------------------*/
   const [inputSimCardMSISDN, setInputSimCardMSISDN] = useState('');
 
   const [isInputValidateSimCardMSISDN, setInputValidateSimCardMSISDN] = useState(true);
 
-  const SimCardMSISDNChange = (value, validate) => {
+  const SimCardMSISDNChange = (value, validate, provider) => {
     setInputSimCardMSISDN(value);
+
+    setInputSimCardProvider(provider);
+
     if (operation == 'Добавить') {
       if (value)
         setInputValidateSimCardMSISDN(validate);
       else
         setInputValidateSimCardMSISDN(true);
     } else {
-      setInputValidateSimCardMSISDN(validate && (value != form.simCard?.number));
+      setInputValidateSimCardMSISDN(validate && (value != form.simCard?.msisdn));
     }
   }
 
@@ -56,12 +62,9 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
       else
         setInputValidateSimCardICCID(true);
     } else {
-      setInputValidateSimCardICCID(validate && (value != form.guard?.IIN));
+      setInputValidateSimCardICCID(validate && (value != form.guard?.iccid));
     }
   }
-
-  /*--Провайдер Формы редактирования-------------------------------------------------------------------------*/
-  const [inputSimCardProvider, setInputSimCardProvider] = useState('');
 
   /*-------------------------------------------------------------------------------------------------------
       Чистка/Обновление инпутов
@@ -93,26 +96,22 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
       className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
     >
       {/* Абон. номер */}
-      <div className='flex flex-col xl:flex-row w-full'>
-
-        {/* Абон. номер */}
-        <div className="form-item flex items-center xl:mr-4 min-w-[150px]">
-          <label className="text-lg pr-4">Абон. номер</label>
-          <FInputTelephone
-            placeholder='Телефон'
-            value={inputSimCardMSISDN ? inputSimCardMSISDN : ''}
-            onChange={SimCardMSISDNChange}
-            key={form.key}
-          />
-        </div>
-
+      
+      <div className="form-item flex items-center">
+        <label className="text-lg flex-none pr-2">Абон. номер</label>
+        <FInputTelephone
+          placeholder='Телефон'
+          value={inputSimCardMSISDN ? inputSimCardMSISDN : ''}
+          onChange={SimCardMSISDNChange}
+          key={form.key}
+        />
       </div>
 
       {/* Серийный номер */}
-      <div className="form-item w-full mt-4">
-        <label className="text-lg">Серийный номер</label>
-        <FInputIIN
-          placeholder='ИИН'
+      <div className="form-item flex items-center mt-4 w-full">
+        <label className="text-lg flex-none pr-2">Серийный номер</label>
+        <FInputICCID
+          placeholder='Серийный номер'
           value={inputSimCardICCID ? inputSimCardICCID : ''}
           onChange={SimCardICCIDChange}
           key={form.key}
@@ -120,16 +119,10 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
       </div>
 
       {/* Провайдер */}
+      {inputSimCardProvider && 
       <div className="form-item w-full mt-4">
-        <label className="text-lg">Провайдер</label>
-        <FTextArea
-          id='address'
-          placeholder='Адрес'
-          value={inputSimCardProvider ? inputSimCardProvider : ''}
-          onChange={setInputSimCardProvider}
-          key={form.key}
-        />
-      </div>
+        <label className="text-lg">Провайдер <b>{inputSimCardProvider}</b></label>
+      </div>}
 
       {/* Статус ошибки */}
       <div className="form-item">
@@ -145,10 +138,10 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
           className=""
           disabled={!(form.isOpen && (operation == 'Добавить' ?
             (isInputValidateSimCardMSISDN
-              && inputSimCardICCID) :
+              && isInputValidateSimCardICCID) :
             (isInputValidateSimCardMSISDN
-              || (inputSimCardICCID != form.simCard?.name)
-              || (inputSimCardProvider != form.simCard?.address)
+              || isInputValidateSimCardMSISDN
+              || (inputSimCardProvider != form.simCard?.provider)
             )
           ))}
           onClick={(e) => operation == 'Добавить' ? submitAdd(e,

@@ -34,19 +34,19 @@ export function FSimCardRecoverForm({ form, setForm, submit }) {
       className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
     >
 
-      {form?.simCardUserPerfomed && <span className="mb-2">
+      {form?.formUserPerformed && <span className="mb-2">
         Пользователь, удаливший пультовой объект: <b>{[
-          form.simCardUserPerfomed.surname ? form.simCardUserPerfomed.surname : null,
-          form.simCardUserPerfomed.firstName ? form.simCardUserPerfomed.firstName : null
+          form.formUserPerformed.surname ? form.formUserPerformed.surname : null,
+          form.formUserPerformed.firstName ? form.formUserPerformed.firstName : null
           ].filter(Boolean).join(' ')}</b>
       </span>}
 
-      {form?.simCardReason && <span className="mb-2">
-        Причина удаления: <b>{form.simCardReason}</b>
+      {form?.formReason && <span className="mb-2">
+        Причина удаления: <b>{form.formReason}</b>
       </span>}
 
       <span>
-        Для подтверждения действия введите <b>{form.simCardNumber}</b> в поле ниже:
+        Для подтверждения действия введите <b>{form.formValidate}</b> в поле ниже:
       </span>
 
       <input
@@ -72,7 +72,7 @@ export function FSimCardRecoverForm({ form, setForm, submit }) {
 
         <FButtonRed
           className=""
-          disabled={inputValidate.localeCompare(form.simCardNumber, undefined, { sensitivity: 'base', ignorePunctuation: true })}
+          disabled={inputValidate.localeCompare(form.formValidate, undefined, { sensitivity: 'base', ignorePunctuation: true })}
           onClick={(e)=>submit( e )}
         >
           Восстановить

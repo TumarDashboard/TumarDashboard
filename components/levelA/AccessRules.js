@@ -247,6 +247,12 @@ export const FApiMethodAccessRules = [
         ]
     },
     {
+        url: '/api/method/simCard/uploadExcellSimCards', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
         url: '/api/method/simCard/uploadFinishSimCards', access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionING },

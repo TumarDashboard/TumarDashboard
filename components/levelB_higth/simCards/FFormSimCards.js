@@ -269,7 +269,7 @@ export default function FFormSimCards({ accessRules, userData, tableSimCards,
 
         // Отправляем запрос на сервер
         const responce = await deleteSimCard(
-          simCardDeleteForm.simCardId,
+          simCardDeleteForm.formID,
           MOBXuser.user.id,
           reason
         );
@@ -588,8 +588,8 @@ export default function FFormSimCards({ accessRules, userData, tableSimCards,
                             setSimCardDeleteForm({
                               isOpen: true,
                               key: Math.random().toString(36),
-                              simCardNumber: simCard.iccid,
-                              simCardId: simCard._id,
+                              formValidate: simCard.msisdn,
+                              formID: simCard._id,
                             })
                           }}
                         >

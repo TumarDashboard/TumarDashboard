@@ -85,7 +85,7 @@ const getTimesheet = async (operation, simCards, date, manager) => {
     case PRForAllSimCards:
       return {
         responce: await reportSimCards(),
-        documentName: 'Список пультовых объектов -' + date + '.xlsx'
+        documentName: 'Список сим-карт - ' + date + '.xlsx'
       };
 
     default:

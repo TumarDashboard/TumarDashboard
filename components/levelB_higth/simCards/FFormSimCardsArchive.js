@@ -151,7 +151,7 @@ export default function FFormSimCardsArchive({ accessRules, userData, tableSimCa
 
         // Отправляем запрос на сервер
         const responce = await recoverSimCard(
-          simCardRecoverForm.simCardId
+          simCardRecoverForm.formID
         );
 
         // Обновляем таблицу в памяти
@@ -354,10 +354,10 @@ export default function FFormSimCardsArchive({ accessRules, userData, tableSimCa
                             setSimCardRecoverForm({
                               isOpen: true,
                               key: Math.random().toString(36),
-                              simCardNumber: simCard.number,
-                              simCardReason: simCard.reason,
-                              simCardUserPerfomed: simCard.userPerfomed,
-                              simCardId: simCard._id,
+                              formValidate: simCard.msisdn,
+                              formReason: simCard.reason,
+                              formUserPerformed: simCard.userPerfomed,
+                              formID: simCard._id,
                             })
                           }}
                         >

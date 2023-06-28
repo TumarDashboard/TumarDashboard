@@ -72,7 +72,8 @@ export function FProtectedObjectEditForm({ accessRules, form, setForm, submitAdd
       setError(form.error);
     } else if (form.isOpen) {
 
-      triggerFromServer(form.protectedObject?._id);
+      if (form.operation != 'Добавить')
+        triggerFromServer(form.protectedObject?._id);
 
       setOperation(form.operation);
       setInputProtectedObjectNumber(form.protectedObject?.number);
@@ -82,7 +83,7 @@ export function FProtectedObjectEditForm({ accessRules, form, setForm, submitAdd
       setInputProtectedObjectDescription(form.protectedObject?.description);
       setInputProtectedObjectPhoto(null);
       setError(null);
-    }else{
+    } else {
       resetServerData();
     }
   }, [form])
@@ -149,15 +150,7 @@ export function FProtectedObjectEditForm({ accessRules, form, setForm, submitAdd
       </div>
 
       {/* Описание */}
-      {isMutatingFromServer || !serverData ?
-        <div className="form-item w-full mt-4 flex justify-center">
-          <svg fill='none' className="w-24 h-24 animate-spin" viewBox="0 0 32 32" xmlns='http://www.w3.org/2000/svg'>
-            <path clipRule='evenodd'
-              d='M15.165 8.53a.5.5 0 01-.404.58A7 7 0 1023 16a.5.5 0 011 0 8 8 0 11-9.416-7.874.5.5 0 01.58.404z'
-              fill='currentColor' fillRule='evenodd' />
-          </svg>
-        </div>
-        :
+      {form.operation == 'Добавить' || (serverData && !isMutatingFromServer) ?
         <div className="form-item w-full mt-4">
           <label className="text-lg">Описание</label>
           <FTextArea
@@ -167,6 +160,14 @@ export function FProtectedObjectEditForm({ accessRules, form, setForm, submitAdd
             onChange={setInputProtectedObjectDescription}
             key={form.key}
           />
+        </div>
+        :
+        <div className="form-item w-full mt-4 flex justify-center">
+          <svg fill='none' className="w-24 h-24 animate-spin" viewBox="0 0 32 32" xmlns='http://www.w3.org/2000/svg'>
+            <path clipRule='evenodd'
+              d='M15.165 8.53a.5.5 0 01-.404.58A7 7 0 1023 16a.5.5 0 011 0 8 8 0 11-9.416-7.874.5.5 0 01.58.404z'
+              fill='currentColor' fillRule='evenodd' />
+          </svg>
         </div>
       }
 
