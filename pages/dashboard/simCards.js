@@ -119,14 +119,14 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   // Выборка данных о пультовых объектах
   const simCards = await mongoSimCardsModel
-    .find({}, '-createdAt -updatedAt')
+    .find({}, '-createdAt -updatedAt -protectedObjects', { sort: { provider: 1, msisdn: 1 } })
     .lean();
 
-  simCards.sort((a, b)=>{
-    if (a.number && b.number)
-      return (a.number - b.number);
-    else return -1;
-  });
+  // simCards.sort((a, b)=>{
+  //   if (a.number && b.number)
+  //     return (a.number - b.number);
+  //   else return -1;
+  // });
 
   simCards.forEach(value => {
 
@@ -141,15 +141,15 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   if (accessRules.includes('simCards/archive$')) {
 
     simCardsArchive = await mongoSimCardsArchiveModel
-      .find({}, '-createdAt -updatedAt')
+      .find({}, '-createdAt -updatedAt -protectedObjects', { sort: { provider: 1, msisdn: 1 } })
       .populate('userPerfomed', 'surname firstName')
       .lean();
 
-    simCardsArchive.sort((a, b)=>{
-      if (a.number && b.number)
-        return (a.number - b.number);
-      else return -1;
-    });
+    // simCardsArchive.sort((a, b)=>{
+    //   if (a.number && b.number)
+    //     return (a.number - b.number);
+    //   else return -1;
+    // });
 
     simCardsArchive.forEach(value => {
 

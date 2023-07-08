@@ -1,7 +1,7 @@
 // import ms from 'ms';
 import checkCors from '../../../../middleware/cors';
 import { catchErrorsApi } from '../../../../middleware/exceptions';
-import service from '../../../../src/service/guardPostService';
+import service from '../../../../src/service/modalService';
 // import { setCookies } from '../../../middleware/cookies';
 
 export default catchErrorsApi( async (req, res) => {
@@ -10,7 +10,7 @@ export default catchErrorsApi( async (req, res) => {
         methods: ['POST']
       });
 
-    const data = await service.getGuardPost( req.body );
+    const data = await service.getSimCardFindForm( req.body );
 
     return res.json(data);
 

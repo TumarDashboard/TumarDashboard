@@ -22,6 +22,14 @@ export const MongooseSchema = new mongoose.Schema({
     type: String
   },
 
+  sim1:{
+    type: String,
+  },
+
+  sim2:{
+    type: String,
+  },
+
 }, { timestamps: true })
 
 export default mongoose.models == null ? mongoose.model('ProtectedObjects', MongooseSchema) : (mongoose.models.ProtectedObjects || mongoose.model('ProtectedObjects', MongooseSchema))

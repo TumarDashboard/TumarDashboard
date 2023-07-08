@@ -82,8 +82,8 @@ export default function FFormSimCards({ accessRules, userData, tableSimCards,
   const AReditSimCard = accessRules.includes('editSimCard');
   const ARdeleteSimCard = accessRules.includes('deleteSimCard');
   const ARgetSimCardPrint = accessRules.includes('reportSimCards');
-  const ARgetSimCardID = accessRules.includes('simCards(?=.)/');
-  const ARloadSimCardData = true;
+  const ARgetSimCardID = false;// accessRules.includes('simCards(?=.)/');
+  const ARloadSimCardData = accessRules.includes('uploadJsonSimCards');
   // console.log('accessRules %o',accessRules);
 
   /*----Заголовки таблицы------------------------------------------------------------------------------------------------*/
@@ -117,7 +117,7 @@ export default function FFormSimCards({ accessRules, userData, tableSimCards,
 
   const filteringTable = (text) => {
 
-    const filtersArray = text.toLowerCase().split(' ');
+    const filter = text.toLowerCase().replaceAll(/[^\w]/g, '');
 
     setRenderTableSimCards(
 
@@ -130,11 +130,9 @@ export default function FFormSimCards({ accessRules, userData, tableSimCards,
         ].filter(Boolean);
 
         for (const parametr of parametrsArray) {
-          const lowerParametr = parametr.toLowerCase();
-          for (const filter of filtersArray) {
-            if (lowerParametr.includes(filter)) {
-              return true;
-            }
+          const lowerParametr = parametr.toLowerCase().replaceAll(/[^\w]/g, '');
+          if (lowerParametr.includes(filter)) {
+            return true;
           }
         }
 

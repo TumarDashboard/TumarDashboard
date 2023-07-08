@@ -236,60 +236,60 @@ class GuardPostService {
         }
     }
 
-    async getGuardPost(inputData) {
+    // async getGuardPost(inputData) {
 
-        try {
+    //     try {
 
-            // console.log('-------------------------------------');
-            const month = new Date(getCurrentMonth());
-            const day = (new Date()).getDate() - 1;
+    //         // console.log('-------------------------------------');
+    //         const month = new Date(getCurrentMonth());
+    //         const day = (new Date()).getDate() - 1;
 
-            // console.log('getTimesheetToday: %o', day);
+    //         // console.log('getTimesheetToday: %o', day);
 
-            //Check initials condition
-            await mongoConnect();
+    //         //Check initials condition
+    //         await mongoConnect();
 
-            //Запустить агрегат на посты
-            const responceAggregateUpdateData = await mongoTimesheetsGuardsModel.aggregate([
-                {
-                    $match: {
-                        month: month,
-                        timesheetDays: day
-                    }
-                },
-                {
-                    $project: {
-                        guardPost: 1,
-                        guard: 1,
-                    }
-                },
-                {
-                    $group: {
-                        _id: '$guardPost',
-                        today: {
-                            $push: {
-                                guard: "$guard",
-                            }
-                        }
-                    }
-                },
-            ]).then(responce => responce.map(element => {
-                //Результат - все посты имеющие охранников за сегодня
-                return {
-                    _id: element._id.toString(),
-                    today: element.today.map(value => value.guard.toString()),
-                }
-            }));
+    //         //Запустить агрегат на посты
+    //         const responceAggregateUpdateData = await mongoTimesheetsGuardsModel.aggregate([
+    //             {
+    //                 $match: {
+    //                     month: month,
+    //                     timesheetDays: day
+    //                 }
+    //             },
+    //             {
+    //                 $project: {
+    //                     guardPost: 1,
+    //                     guard: 1,
+    //                 }
+    //             },
+    //             {
+    //                 $group: {
+    //                     _id: '$guardPost',
+    //                     today: {
+    //                         $push: {
+    //                             guard: "$guard",
+    //                         }
+    //                     }
+    //                 }
+    //             },
+    //         ]).then(responce => responce.map(element => {
+    //             //Результат - все посты имеющие охранников за сегодня
+    //             return {
+    //                 _id: element._id.toString(),
+    //                 today: element.today.map(value => value.guard.toString()),
+    //             }
+    //         }));
 
-            // console.log('responceAggregateUpdateData: %o', responceAggregateUpdateData);
-            return responceAggregateUpdateData;
+    //         // console.log('responceAggregateUpdateData: %o', responceAggregateUpdateData);
+    //         return responceAggregateUpdateData;
 
-        } catch (error) {
-            console.log(error);
+    //     } catch (error) {
+    //         console.log(error);
 
-            throw error;
-        }
-    }
+    //         throw error;
+    //     }
+    // }
 
     async deleteGuardPost(inputData) {
         const { idGuardPost, idUser, reason } = inputData;

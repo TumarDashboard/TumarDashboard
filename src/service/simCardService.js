@@ -18,6 +18,8 @@ import { UnicodeToWin1251 } from "../utils/dataUtils";
 import { getCurrentTimeStamp } from "../utils/dateUtils";
 import { reportForAllSimCards } from "../utils/reportsUtils";
 import mongoose from "mongoose";
+import ExcelJS from "exceljs";
+import { getFormatedTelephoneNumberAndProvider, isNumberICCID, isNumberMSISDN } from "../../components/levelZ_variable/FProviderItemList";
 
 function managerEquals(a, b) {
     if (!a && !b) {
@@ -232,10 +234,9 @@ class SimCardService {
             await mongoConnect();
 
             // Сначала запрашиваем данные----------------------------------------------------------------------------
-            const responceSimCards = await mongoSimCardsModel.find({},
-                '-createdAt -updatedAt -description',
-                { sort: { 'number': 1 } })
-                .lean();
+            const responceSimCards = await mongoSimCardsModel
+            .find({}, '-createdAt -updatedAt', { sort: { provider: 1, msisdn: 1 } })
+            .lean();
 
             // console.log('responceSimCards: %o', responceSimCards);
 
@@ -522,32 +523,93 @@ class SimCardService {
             console.log('---------------uploadExcellSimCards-----------------');
 
             //Validate date----------------------------------------------------------------------------------------------
-            const { document, columnMSISDN, columnICCID, provider } = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
+            var { document, columnMSISDN, columnICCID } = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
                 throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
 
             });
 
-            // console.log('document: %o', document, columnMSISDN, columnICCID, provider);
+            // console.log('document: %o', document, columnMSISDN, columnICCID);
 
             // Извлечение массива данных---------------------------------------------------------------------------------
-            const stringSimCards = new TextDecoder('windows-1251').decode(Buffer.from(obj_json.split(',')[1], 'base64'));
+            const ExcelJSWorkbook = new ExcelJS.Workbook();
 
-            // console.log('utf8SimCards: %o', utf8SimCards);
+            await ExcelJSWorkbook.xlsx.load( Buffer.from(document.split(',')[1], 'base64') );
+            
+            const worksheet = ExcelJSWorkbook.getWorksheet(1);
 
-            const jsonSimCards = JSON.parse(stringSimCards);
+            const parsingData = [];
 
-            // console.log('requestJson: %o', requestJson);
+            for (let indexRow = 1; indexRow < worksheet.rowCount; indexRow++) {
+
+                const row = worksheet.getRow(indexRow);
+
+                var msisdn, provider, iccid;
+
+                var ceil = row.getCell(columnMSISDN).text;
+
+                if( isNumberMSISDN(ceil) ){
+
+                    [ msisdn, provider ] = getFormatedTelephoneNumberAndProvider(ceil);
+                    
+                }
+
+                ceil = row.getCell(columnICCID).text;
+
+                if( isNumberICCID(ceil) ){
+
+                    iccid = ceil;
+
+                }
+                
+                if( !msisdn || !iccid ){
+
+                    for (let indexCeil = 1; indexCeil < row.cellCount; indexCeil++) {
+
+                        ceil = row.getCell(indexCeil).text;
+
+                        if( !msisdn && isNumberMSISDN(ceil) ){
+
+                            columnMSISDN = indexCeil;
+
+                            [ msisdn, provider ] = getFormatedTelephoneNumberAndProvider(ceil);
+
+                            if (iccid) break;
+
+                        }else if( !iccid && isNumberICCID(ceil) ){
+
+                            columnICCID  = indexCeil;
+
+                            iccid = ceil;
+
+                            if (msisdn) break;
+                        }
+                        
+                    }
+
+                }
+
+                if( msisdn ){
+                    parsingData.push({
+                        msisdn: msisdn,
+                        iccid: iccid,
+                        provider: provider
+                    })
+                }
+
+            }
+
+            // console.log('parsingData: %o', parsingData);
 
             //Проверка соединения с Монго--------------------------------------------------------------------------------
             await mongoConnect();
 
             // Выборка данных о пультовых объектах-----------------------------------------------------------------------
-            var currentSimCards = await mongoSimCardsModel
-                .find({}, '-createdAt -updatedAt', { sort: { 'number': 1 } })
+            var currentData = await mongoSimCardsModel
+                .find({}, '-createdAt -updatedAt')
                 .lean();
 
-            // console.log('currentSimCards: %o', currentSimCards);
+            // console.log('currentSimCards: %o', currentData);
 
             // Формирование агрегационных и транзакционных данных--------------------------------------------------------
             // сюда записываются данные об агрегации
@@ -557,17 +619,17 @@ class SimCardService {
             const transactionData = [];
 
             // Просматриваем среди данных на изменение найденные и подготовка к агрегации и транзакции
-            for (const jsonSimCard of jsonSimCards) {
+            for (const elementData of parsingData) {
 
                 // проверка наличия в облаке данных с имеющимися номерами
-                let existSimCard;
+                let existsData;
 
-                if (currentSimCards.length > 0) {
+                if (currentData.length > 0) {
 
-                    currentSimCards = currentSimCards.reduce((data, valueB) => {
+                    currentData = currentData.reduce((data, valueB) => {
 
-                        if (valueB.number == jsonSimCard.N) {
-                            existSimCard = valueB;
+                        if (valueB.msisdn == elementData.msisdn) {
+                            existsData = valueB;
                         } else {
                             data.push(valueB)
                         }
@@ -579,75 +641,72 @@ class SimCardService {
                 }
 
                 // переменные
-                const photo = existSimCard?.photo ? existSimCard.photo : `https://ui-avatars.com/api/?name=${jsonSimCard.CutName ? jsonSimCard.CutName.replace(/ /ig, ',') : jsonSimCard.N
-                    }&size=256&font-size=0.33&length=3&background=random`;
-
-                const description = jsonSimCard.Describe ? jsonSimCard.Describe.replace(/^\d\!|---/gm, '') : null;
 
                 // формирование агрегации и транзакции
-                if (existSimCard) {
+                if (existsData) {
 
-                    if (jsonSimCard.bObjectIsIgnored) {
+                    // if (elementData.bObjectIsIgnored) {
 
-                        // console.log("Объект №%o, %o, %o есть в облаке, и отмечен как отключенный",
-                        //     jsonSimCard.N,
-                        //     jsonSimCard.CutName,
-                        //     jsonSimCard.Address,
-                        // );
+                    //     // console.log("Объект №%o, %o, %o есть в облаке, и отмечен как отключенный",
+                    //     //     jsonSimCard.N,
+                    //     //     jsonSimCard.CutName,
+                    //     //     jsonSimCard.Address,
+                    //     // );
 
-                        transactionData.push({
-                            number: jsonSimCard.N,
-                            log: `${jsonSimCard.CutName}, ${jsonSimCard.Address} есть в облаке, и отмечен как отключенный`,
-                            operation: FUDTransactionArchive,
-                            archiveData: {
-                                document: existSimCard
-                            }
-                        })
+                    //     transactionData.push({
+                    //         number: elementData.N,
+                    //         log: `${elementData.CutName}, ${elementData.Address} есть в облаке, и отмечен как отключенный`,
+                    //         operation: FUDTransactionArchive,
+                    //         archiveData: {
+                    //             document: existsData
+                    //         }
+                    //     })
 
-                    } else if (jsonSimCard.CutName == existSimCard.name
-                        && jsonSimCard.Address == existSimCard.address) {
+                    // } else 
+                    if (elementData.provider == existsData.provider
+                        && elementData.iccid == existsData.iccid) {
 
-                        if (description == existSimCard.description
-                            && photo == existSimCard.photo) {
+                        // if (description == existsData.description
+                        //     && photo == existsData.photo) {
 
                             // console.log("Объект №%o, %o, %o есть в облаке, и остается без изменений",
-                            //     jsonSimCard.N,
-                            //     jsonSimCard.CutName,
-                            //     jsonSimCard.Address,
+                            //     elementData.N,
+                            //     elementData.CutName,
+                            //     elementData.Address,
                             // );         
 
                             transactionData.push({
-                                number: jsonSimCard.N,
-                                log: `${jsonSimCard.CutName}, ${jsonSimCard.Address} есть в облаке, и остается без изменений`,
+                                msisdn: elementData.msisdn,
+                                log: `${elementData.provider}, ${elementData.iccid} есть в облаке, и остается без изменений`,
                                 operation: FUDTransactionNoChange,
                             })
 
-                        } else {
+                        // } else {
 
-                            // console.log("Объект №%o, %o, %o есть в облаке, но его данные требуют изменений",
-                            //     jsonSimCard.N,
-                            //     jsonSimCard.CutName,
-                            //     jsonSimCard.Address,
-                            // );
+                        //     // console.log("Объект №%o, %o, %o есть в облаке, но его данные требуют изменений",
+                        //     //     jsonSimCard.N,
+                        //     //     jsonSimCard.CutName,
+                        //     //     jsonSimCard.Address,
+                        //     // );
 
-                            bulkData.push({
-                                updateOne: {
-                                    filter: {
-                                        number: jsonSimCard.N,
-                                    },
-                                    update: {
-                                        description: description,
-                                        photo: photo
-                                    }
-                                }
-                            })
+                        //     bulkData.push({
+                        //         updateOne: {
+                        //             filter: {
+                        //                 number: elementData.N,
+                        //             },
+                        //             update: {
+                        //                 description: description,
+                        //                 photo: photo
+                        //             }
+                        //         }
+                        //     })
 
-                            transactionData.push({
-                                number: jsonSimCard.N,
-                                log: `${jsonSimCard.CutName}, ${jsonSimCard.Address} есть в облаке, но его данные были обновлены`,
-                                operation: FUDTransactionUpdate,
-                            })
-                        }
+                        //     transactionData.push({
+                        //         number: elementData.N,
+                        //         log: `${elementData.CutName}, ${elementData.Address} есть в облаке, но его данные были обновлены`,
+                        //         operation: FUDTransactionUpdate,
+                        //     })
+                        // }
 
                     } else {
 
@@ -660,40 +719,40 @@ class SimCardService {
                         // );
 
                         transactionData.push({
-                            number: jsonSimCard.N,
-                            log: `есть в облаке, но его данные не совпадают с данными загруженного файла\r\nВ облаке: ${existSimCard.name}, ${existSimCard.address}\r\nВ файле: ${jsonSimCard.CutName}, ${jsonSimCard.Address}`,
+                            msisdn: elementData.msisdn,
+                            log: `есть в облаке, но его данные не совпадают с данными загруженного файла\r\nВ облаке: ${existsData.provider}, ${existsData.iccid}\r\nВ файле: ${elementData.provider}, ${elementData.iccid}`,
                             operation: FUDTransactionReplacement,
                             insertData: {
                                 document: {
-                                    number: jsonSimCard.N,
-                                    name: jsonSimCard.CutName,
-                                    address: jsonSimCard.Address,
-                                    description: description,
-                                    photo: photo
+                                    msisdn: elementData.msisdn,
+                                    iccid: elementData.iccid,
+                                    provider: elementData.provider
                                 }
                             },
                             archiveData: {
-                                document: existSimCard
+                                document: existsData
                             }
                         })
 
                     }
 
-                } else if (jsonSimCard.bObjectIsIgnored) {
+                } 
+                // else if (elementData.bObjectIsIgnored) {
 
-                    // console.log("Объект №%o, %o, %o отсутствует в облаке, и отмечен как отключенный",
-                    //     jsonSimCard.N,
-                    //     jsonSimCard.CutName,
-                    //     jsonSimCard.Address,
-                    // );      
+                //     // console.log("Объект №%o, %o, %o отсутствует в облаке, и отмечен как отключенный",
+                //     //     jsonSimCard.N,
+                //     //     jsonSimCard.CutName,
+                //     //     jsonSimCard.Address,
+                //     // );      
 
-                    transactionData.push({
-                        number: jsonSimCard.N,
-                        log: `${jsonSimCard.CutName}, ${jsonSimCard.Address} отсутствует в облаке, и отмечен как отключенный`,
-                        operation: FUDTransactionIgnore,
-                    })
+                //     transactionData.push({
+                //         number: elementData.N,
+                //         log: `${elementData.CutName}, ${elementData.Address} отсутствует в облаке, и отмечен как отключенный`,
+                //         operation: FUDTransactionIgnore,
+                //     })
 
-                } else {
+                // } 
+                else {
 
                     // console.log("Объект №%o, %o, %o отсутствует в облаке, и будет добавлен",
                     //     jsonSimCard.N,
@@ -704,18 +763,16 @@ class SimCardService {
                     bulkData.push({
                         insertOne: {
                             document: {
-                                number: jsonSimCard.N,
-                                name: jsonSimCard.CutName,
-                                address: jsonSimCard.Address,
-                                description: description,
-                                photo: photo
+                                msisdn: elementData.msisdn,
+                                iccid: elementData.iccid,
+                                provider: elementData.provider
                             }
                         }
                     })
 
                     transactionData.push({
-                        number: jsonSimCard.N,
-                        log: `${jsonSimCard.CutName}, ${jsonSimCard.Address} отсутствовал в облаке, и был добавлен`,
+                        msisdn: elementData.msisdn,
+                        log: `${elementData.provider}, ${elementData.iccid} отсутствовал в облаке, и был добавлен`,
                         operation: FUDTransactionAddition,
                     })
                 }
@@ -733,23 +790,23 @@ class SimCardService {
 
                 // Выборка данных о пультовых объектах
                 simCards = await mongoSimCardsModel
-                    .find({}, '-createdAt -updatedAt -description')
+                    .find({}, '-createdAt -updatedAt', { sort: { provider: 1, msisdn: 1 } })
                     .lean();
 
-                simCards.sort((a, b) => {
-                        if (a.number && b.number)
-                            return (a.number - b.number);
-                        else return -1;
-                    });
+                // simCards.sort((a, b) => {
+                //         if (a.number && b.number)
+                //             return (a.number - b.number);
+                //         else return -1;
+                //     });
             }
 
             transactionData.sort((a, b) => {
                 if ([FUDTransactionReplacement, FUDTransactionArchive].includes(a.operation)) {
-                    if (a.number && b.number && [FUDTransactionReplacement, FUDTransactionArchive].includes(b.operation))
-                        return (a.number - b.number);
+                    if (a.msisdn && b.msisdn && [FUDTransactionReplacement, FUDTransactionArchive].includes(b.operation))
+                        return (a.msisdn - b.msisdn);
                     else return -1;
-                } else if (a.number && b.number)
-                    return (a.number - b.number);
+                } else if (a.msisdn && b.msisdn)
+                    return (a.msisdn - b.msisdn);
                 else return -1;
             })
 
@@ -769,14 +826,8 @@ class SimCardService {
 
         try {
             console.log('---------------uploadFinishSimCards-----------------');
-            console.log(inputData);
-            return {validate: 'finish'};
             // Переменные------------------------------------------------------------------------------------------------
             const currentTimeStamp = new Date().toLocaleString("ru-RU");
-
-            // reason: 'объект архивирован в ходе синхронизации данных с файлом obj_json ' + currentTimeStamp,
-            // userPerfomed: userPerfomed._id,
-            // userPerfomedSheme: 'User',
 
             //Validate date----------------------------------------------------------------------------------------------
             const { transactionData, idUser } = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
@@ -784,7 +835,6 @@ class SimCardService {
                 throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
 
             });
-
             // console.log('transactionData: %o, idUser: %o', transactionData, idUser);
 
             if (!transactionData || !Array.isArray(transactionData) || transactionData.length == 0) {
@@ -829,16 +879,13 @@ class SimCardService {
                             bulkArchiveData.push({
                                 insertOne: {
                                     document: {
-                                        reason: 'объект архивирован в ходе синхронизации данных с файлом obj_json ' + currentTimeStamp,
+                                        reason: 'сим-карта архивирована в ходе синхронизации данных с файлом excel ' + currentTimeStamp,
                                         userPerfomed: userPerfomed._id,
                                         userPerfomedSheme: 'User',
                                         ...element.archiveData.document,
                                     }
                                 }
                             });
-
-                            //Удаление данных в гугл облаке-------------------------------------------------------------------------------
-                            await googleDrive.deleteSimCardAvatar(element.archiveData.document._id);
 
                         }
                         break;
@@ -852,9 +899,9 @@ class SimCardService {
                                         _id: element.archiveData.document._id,
                                     },
                                     update: {
-                                        name: element.insertData.document.name ? element.insertData.document.name : null,
-                                        address: element.insertData.document.address ? element.insertData.document.address : null,
-                                        description: element.insertData.document.description ? element.insertData.document.description : null,
+                                        name: element.insertData.document.msisdn ? element.insertData.document.msisdn : null,
+                                        address: element.insertData.document.iccid ? element.insertData.document.iccid : null,
+                                        description: element.insertData.document.provider ? element.insertData.document.provider : null,
                                     }
                                 }
                             })
@@ -878,9 +925,6 @@ class SimCardService {
                                 }
                             });
 
-                            //Удаление данных в гугл облаке-------------------------------------------------------------------------------
-                            await googleDrive.deleteSimCardAvatar(element.archiveData.document._id);
-
                         }
                         break;
 
@@ -899,7 +943,6 @@ class SimCardService {
                         }
                     }
                 });
-                mongoSimCardsModel.deleteMany
             }
 
             var simCards;
@@ -909,18 +952,18 @@ class SimCardService {
 
                 const responce = await mongoSimCardsModel.bulkWrite(bulkWriteData);
 
-                // console.log('bulkWrite: %o', responce);
+                console.log('bulkWrite: %o', responce);
 
                 // Выборка данных о пультовых объектах
                 simCards = await mongoSimCardsModel
-                    .find({}, '-createdAt -updatedAt -description')
+                    .find({}, '-createdAt -updatedAt', { sort: { provider: 1, msisdn: 1 } })
                     .lean();
 
-                simCards.sort((a, b) => {
-                    if (a.number && b.number)
-                        return (a.number - b.number);
-                    else return -1;
-                });
+                // simCards.sort((a, b) => {
+                //     if (a.number && b.number)
+                //         return (a.number - b.number);
+                //     else return -1;
+                // });
             }
 
             var simCardsArchive;
@@ -933,15 +976,9 @@ class SimCardService {
                 // console.log('bulkArchiveData: %o', responce);
 
                 simCardsArchive = await mongoSimCardsArchiveModel
-                    .find({}, '-createdAt -updatedAt -description')
+                    .find({}, '-createdAt -updatedAt', { sort: { provider: 1, msisdn: 1 } })
                     .populate('userPerfomed', 'surname firstName')
                     .lean();
-
-                simCardsArchive.sort((a, b) => {
-                    if (a.number && b.number)
-                        return (a.number - b.number);
-                    else return -1;
-                });
 
                 simCardsArchive.forEach(value => {
 

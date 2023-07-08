@@ -23,8 +23,8 @@ export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, subm
   /*-------------------------------------------------------------------------------------------------------
       Определение правил доступа
   -------------------------------------------------------------------------------------------------------*/
-  const AReditGuardPostManager = !accessRules.includes('editGuardPost/editBlock/manager');
-  const AReditGuardPostRate = !accessRules.includes('editGuardPost/editBlock/rate');
+  const AReditGuardPostManager = !accessRules.includes('editGuardPost/apiBlock/manager');
+  const AReditGuardPostRate = !accessRules.includes('editGuardPost/apiBlock/rate');
 
   /*-------------------------------------------------------------------------------------------------------
       Номер физ. поста Формы редактирования
@@ -164,8 +164,8 @@ export function FGuardPostEditForm({ accessRules, form, setForm, submitAdd, subm
               value={inputGuardPostManager ? inputGuardPostManager : 'EMPTY'}
               key={form.key}
             />
-            {!AReditGuardPostManager && form.guardPost?.manager &&
-              <label className="text-lg pr-4">{[form.guardPost?.manager?.surname, form.guardPost?.manager?.firstName].join(' ')}</label>}
+            {/* {!AReditGuardPostManager && form.guardPost?.manager &&
+              <label className="text-lg pr-4">{[form.guardPost?.manager?.surname, form.guardPost?.manager?.firstName].join(' ')}</label>} */}
           </div>}
 
       </div>

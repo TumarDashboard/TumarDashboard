@@ -120,8 +120,8 @@ export const uploadJsonSimCards = async (obj_json) => {
     return await fetchAuthMethod('/method/simCard/uploadJsonSimCards', { obj_json });
 }
 
-export const uploadExcellSimCards = async (document, columnMSISDN, columnICCID, provider) => {
-    return await fetchAuthMethod('/method/simCard/uploadExcellSimCards', { document, columnMSISDN, columnICCID, provider });
+export const uploadExcellSimCards = async (document, columnMSISDN, columnICCID) => {
+    return await fetchAuthMethod('/method/simCard/uploadExcellSimCards', { document, columnMSISDN, columnICCID });
 }
 
 export const uploadFinishSimCards = async (transactionData, idUser) => {

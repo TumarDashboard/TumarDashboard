@@ -14,7 +14,9 @@ export default async function checkCors(req, res, options) {
 
     // console.log('-------end checkCors------');
 
-    if( res.getHeaders()['checkrefreshtoken'] ){
+    const headers = res.getHeaders();
+
+    if( headers['checkrefreshtoken'] ){
 
         const refreshToken = req.cookies['refreshToken'];
 
@@ -25,6 +27,8 @@ export default async function checkCors(req, res, options) {
         }
         
     }
+
+    req.body.apiBlock = headers['apiblock'];
 
     // Initializing the cors middleware
     const middleware = Cors(options)

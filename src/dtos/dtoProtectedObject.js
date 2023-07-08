@@ -15,6 +15,8 @@ export default class DTOProtectedObject {
     address;
     photo;
     description;
+    sim1;
+    sim2;
 
     constructor(model) {
         this._id = model._id;
@@ -23,6 +25,8 @@ export default class DTOProtectedObject {
         this.address = model.address;
         this.photo = model.photo;
         this.description = model.description;
+        this.sim1 = model.sim1;
+        this.sim2 = model.sim2;
     }
 
 }
@@ -36,6 +40,8 @@ export class DTOProtectedObjectArchive {
     address;
     photo;
     description;
+    sim1;
+    sim2;
 
     constructor(model) {
         this._id = model._id;
@@ -45,6 +51,8 @@ export class DTOProtectedObjectArchive {
         this.address = model.address;
         this.photo = model.photo;
         this.description = model.description;
+        this.sim1 = model.sim1;
+        this.sim2 = model.sim2;
     }
 
 }
@@ -115,12 +123,12 @@ export const validateYup = (dtoProtectedObject, options) => {
 
 }
 
-export const createProtectedObject = async (number, name, address, photo, description) => {
-    return await fetchAuthMethod('/method/protectedObject/createProtectedObject', { number, name, address, photo, description });
+export const createProtectedObject = async (number, name, address, photo, description, sim1, sim2) => {
+    return await fetchAuthMethod('/method/protectedObject/createProtectedObject', { number, name, address, photo, description, sim1, sim2});
 }
 
-export const editProtectedObject = async (id, number, name, address, photo, description ) => {
-    return await fetchAuthMethod('/method/protectedObject/editProtectedObject', { id, number, name, address, photo, description });
+export const editProtectedObject = async (id, number, name, address, photo, description, sim1, sim2 ) => {
+    return await fetchAuthMethod('/method/protectedObject/editProtectedObject', { id, number, name, address, photo, description, sim1, sim2 });
 }
 
 export const deleteProtectedObject = async (idProtectedObject, idUser, reason) => {

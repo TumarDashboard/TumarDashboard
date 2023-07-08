@@ -35,7 +35,7 @@ export default function FFormGuardPostID({ accessRules, userData, guardPost, gua
       Определение правил доступа
   -------------------------------------------------------------------------------------------------------*/
   const AReditGuardPost = accessRules.includes('editGuardPost');
-  const AReditGuardPostRate = !accessRules.includes('editGuardPost/editBlock/rate');
+  const AReditGuardPostRate = !accessRules.includes('editGuardPost/apiBlock/rate');
   const AReditGuardPostAll = !accessRules.includes('editGuardPost/userCompare/manager');
   const ARdeleteGuardPost = accessRules.includes('deleteGuardPost');
   const ARgetTimesheet = accessRules.includes('getTimesheet');

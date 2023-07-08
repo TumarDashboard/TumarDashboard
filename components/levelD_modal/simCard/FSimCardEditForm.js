@@ -23,8 +23,8 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
   const [error, setError] = useState('');
 
   /*--Определение правил доступа-------------------------------------------------------------------------*/
-  // const AReditSimCardManager = !accessRules.includes('editSimCard/editBlock/manager');
-  // const AReditSimCardRate = !accessRules.includes('editSimCard/editBlock/rate');
+  // const AReditSimCardManager = !accessRules.includes('editSimCard/apiBlock/manager');
+  // const AReditSimCardRate = !accessRules.includes('editSimCard/apiBlock/rate');
 
   /*--Провайдер Формы редактирования-------------------------------------------------------------------------*/
   const [inputSimCardProvider, setInputSimCardProvider] = useState();
@@ -89,7 +89,7 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
 
   return (
     <FModalForm
-      title={`${operation} пультовой объект`}
+      title={`${operation} сим-карту`}
       widthForm='w-full lg:w-1/2 mx-6'
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
@@ -140,7 +140,7 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
             (isInputValidateSimCardMSISDN
               && isInputValidateSimCardICCID) :
             (isInputValidateSimCardMSISDN
-              || isInputValidateSimCardMSISDN
+              || isInputValidateSimCardICCID
               || (inputSimCardProvider != form.simCard?.provider)
             )
           ))}

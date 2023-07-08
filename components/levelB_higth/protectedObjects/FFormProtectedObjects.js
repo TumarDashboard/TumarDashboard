@@ -1,4 +1,4 @@
-import { CalendarIcon, ChevronDownIcon, ChevronUpIcon, PencilSquareIcon, PlusIcon, TrashIcon, CloudArrowUpIcon } from '@heroicons/react/24/solid';
+import { CalendarIcon, ChevronDownIcon, ChevronUpIcon, PencilSquareIcon, PlusIcon, TrashIcon, CloudArrowUpIcon, CreditCardIcon } from '@heroicons/react/24/solid';
 import { motion } from "framer-motion";
 import Image from "next/legacy/image";
 import { useRouter } from "next/router";
@@ -60,13 +60,13 @@ const sortingTableCallback = (a, b, rule, invert) => {
 
     case 'address':
       return (a.address?.localeCompare(b.address)) * invert;
-      
+
     default:
       break;
   }
 }
 
-export default function FFormProtectedObjects({ accessRules, userData, tableProtectedObjects, 
+export default function FFormProtectedObjects({ accessRules, userData, tableProtectedObjects,
   setTableProtectedObjects, setTableProtectedObjectsArchive }) {
   /*----Использование глобальных данных-------------------------------------------------------------------------------*/
   const router = useRouter();
@@ -80,8 +80,9 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
   const AReditProtectedObject = accessRules.includes('editProtectedObject');
   const ARdeleteProtectedObject = accessRules.includes('deleteProtectedObject');
   const ARgetProtectedObjectPrint = accessRules.includes('reportProtectedObjects');
-  const ARgetProtectedObjectID = accessRules.includes('protectedObjects(?=.)/');
-  const ARloadProtectedObjectData = true;
+  const ARgetProtectedObjectID = false;// accessRules.includes('protectedObjects(?=.)/');
+  const ARloadProtectedObjectData = accessRules.includes('uploadJsonProtectedObjects');
+  const ARworkProtectedObjectSimCard = true;
   // console.log('accessRules %o',accessRules);
 
   /*----Заголовки таблицы------------------------------------------------------------------------------------------------*/
@@ -106,10 +107,10 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
     //     })];
     //   });
     // } else {
-      const invert = rule == sortingRule ? -1 : 1;
-      setRenderTableProtectedObjects(array => {
-        return [...array.sort((a, b) => sortingTableCallback(a, b, rule, invert))];
-      });
+    const invert = rule == sortingRule ? -1 : 1;
+    setRenderTableProtectedObjects(array => {
+      return [...array.sort((a, b) => sortingTableCallback(a, b, rule, invert))];
+    });
     // }
 
     setSortingRule(rule == sortingRule ? '!' + rule : rule);
@@ -164,8 +165,10 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
     inputProtectedObjectName,
     inputProtectedObjectAddress,
     inputProtectedObjectPhoto,
-    inputProtectedObjectDescription
-    ) => {
+    inputProtectedObjectDescription,
+    inputProtectedObjectSim1,
+    inputProtectedObjectSim2,
+  ) => {
 
     event.preventDefault();
 
@@ -179,7 +182,9 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
         inputProtectedObjectName,
         inputProtectedObjectAddress,
         inputProtectedObjectPhoto,
-        inputProtectedObjectDescription
+        inputProtectedObjectDescription,
+        inputProtectedObjectSim1,
+        inputProtectedObjectSim2,
       );
 
       // Обновляем таблицу в памяти
@@ -214,8 +219,10 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
     inputProtectedObjectName,
     inputProtectedObjectAddress,
     inputProtectedObjectPhoto,
-    inputProtectedObjectDescription
-    ) => {
+    inputProtectedObjectDescription,
+    inputProtectedObjectSim1,
+    inputProtectedObjectSim2,
+  ) => {
 
     event.preventDefault();
 
@@ -230,7 +237,9 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
         inputProtectedObjectName,
         inputProtectedObjectAddress,
         inputProtectedObjectPhoto,
-        inputProtectedObjectDescription
+        inputProtectedObjectDescription,
+        inputProtectedObjectSim1,
+        inputProtectedObjectSim2,
       );
 
       // Обновляем таблицу в памяти
@@ -579,9 +588,30 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
                 </td>
 
                 {/* {Кнопки управления компьютера} */}
-                {(AReditProtectedObject || ARdeleteProtectedObject ) &&
+                {(AReditProtectedObject || ARdeleteProtectedObject) &&
                   <td className="p-2 md:border text-left block md:table-cell md:w-1">
                     <div className='flex justify-end space-x-2'>
+
+                      {/* {ARworkProtectedObjectSimCard &&
+                        <FButtonWhite
+                          className="flex"
+                          onPointerEnter={event => setTooltipReference({ target: event.currentTarget, text: ` - ${[protectedObject.number, protectedObject.name].join(' ')}` })}
+                          onPointerLeave={() => setTooltipReference(null)}
+                          // onClick={(event) => {
+                          //   event.stopPropagation();
+                          //   setGuardPostSelectGuardForm({
+                          //     isOpen: true,
+                          //     key: Math.random().toString(36),
+                          //     index: index,
+                          //     guardPost: guardPost,
+                          //     guardsToday: guardPost.guardsToday
+                          //   })
+                          // }}
+                        >
+                          <CreditCardIcon
+                            className="h-4 w-4"
+                          />
+                        </FButtonWhite>} */}
 
                       {AReditProtectedObject &&
                         <FButtonRed
@@ -680,7 +710,8 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
       <FTooltip
         reference={tooltipReference}
       />
-    </motion.div>
+      
+  </motion.div>
   )
 
 };

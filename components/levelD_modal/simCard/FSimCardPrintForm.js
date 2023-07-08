@@ -92,7 +92,7 @@ const getTimesheet = async (operation, simCards, date, manager) => {
       if (!simCards) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о пультовой объектах');
       return {
         responce: await getTimesheetPrint(simCards.map(value => value._id), date),
-        documentName: 'Табель-' + date + '.xlsx'
+        documentName: 'Список-' + date + '.xlsx'
       };
 
   }
@@ -116,7 +116,7 @@ export function FSimCardPrintForm({ accessRules, form, setForm, MOBXui, MOBXuser
     // ARgetTimesheetPrintForMonthPart ? { label: "Отчёт за месяц - частичный", value: DTForMonthPart } : null,
     // ARgetTimesheetPrintForMonthFull ? { label: "Отчёт за месяц - полный", value: DTForMonthFull } : null,
     // ARgetTimesheetPrintForMonthFullBuh ? { label: "Платёжная ведомость", value: DTForMonthBuh } : null,
-    ARreportSimCards ? { label: "Список пультовых объектов", value: PRForAllSimCards } : null,
+    ARreportSimCards ? { label: "Список сим-карт", value: PRForAllSimCards } : null,
   ].filter(Boolean);
 
   const [selectedOperation, setSelectedOperation] = useState();
@@ -212,7 +212,7 @@ export function FSimCardPrintForm({ accessRules, form, setForm, MOBXui, MOBXuser
 
   return (
     <FModalForm
-      title={`Формирование отчётов для пультовых объектов`}
+      title={`Формирование отчётов для сим-карт`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
       className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"

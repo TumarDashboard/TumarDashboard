@@ -28,6 +28,21 @@ export const MongooseSchema = new mongoose.Schema({
     type: String,
   },
 
+  protectedObjects: [{
+    protectedObject:{
+      type: mongoose.Schema.Types.ObjectId,
+      refPath: 'protectedObjects.protectedObjectSheme'
+    },
+    protectedObjectSheme:{
+      type: String,
+      default: 'ProtectedObjects',
+      enum: ['ProtectedObjects', 'ProtectedObjectsArchive', null]
+    },
+    inProtectedObject: Boolean,
+    mounted: Date,
+    unmounted: Date,
+  }],
+
 }, { timestamps: true })
 
 export default mongoose.models == null ? mongoose.model('SimCardsArchive', MongooseSchema) : (mongoose.models.SimCardsArchive || mongoose.model('SimCardsArchive', MongooseSchema))

@@ -37,8 +37,8 @@ const uploadOperation = async (operation, data) => {
     case UDFromJsonFile:
       return await uploadJsonProtectedObjects(data);
 
-    case UDFromExcelFile:
-      return await uploadJsonProtectedObjects(data);
+    // case UDFromExcelFile:
+    //   return await uploadJsonProtectedObjects(data);
 
     default:
       return null;
@@ -50,8 +50,8 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
   setTableProtectedObjects, setTableProtectedObjectsArchive, setRenderTableProtectedObjects }) {
 
   /*----Определение правил доступа-----------------------------------------------------------------------*/
-  const ARuploadJsonProtectedObject = true;// accessRules.includes('getTimesheetPrintForDay');
-  const ARuploadExcelProtectedObject = true; // accessRules.includes('getTimesheetPrintForMonthPart');
+  const ARuploadJsonProtectedObject = accessRules.includes('uploadJsonProtectedObjects');
+  // const ARuploadExcelProtectedObject = accessRules.includes('getTimesheetPrintForMonthPart');
 
   /*--Операция-------------------------------------------------------------------------------------------*/
   const [error, setError] = useState('');
@@ -59,7 +59,7 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
   /*--Данные по типу проводимой операции-----------------------------------------------------------------*/
   const FOperationItemList = [
     ARuploadJsonProtectedObject ? { label: "JSON файл", value: UDFromJsonFile } : null,
-    ARuploadExcelProtectedObject ? { label: "Excel файл", value: UDFromExcelFile } : null,
+    // ARuploadExcelProtectedObject ? { label: "Excel файл", value: UDFromExcelFile } : null,
   ].filter(Boolean);
 
   const [selectedOperation, setSelectedOperation] = useState();

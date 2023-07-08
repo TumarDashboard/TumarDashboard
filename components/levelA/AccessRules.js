@@ -84,13 +84,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/guardPost/editGuardPost', access: [
             { position: positions.FPositionZDIR },
-            { position: positions.FPositionNSO, editBlock: ['rate', 'manager'], userCompare: ['manager'] }
-        ]
-    },
-    {
-        url: '/api/method/guardPost/getGuardPost', access: [
-            { position: positions.FPositionZDIR },
-            { position: positions.FPositionNSO, editBlock: ['rate', 'manager'], userCompare: ['manager'] }
+            { position: positions.FPositionNSO, apiBlock: ['rate', 'manager'], userCompare: ['manager'] }
         ]
     },
     {
@@ -117,6 +111,7 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
             { position: positions.FPositionING },
+            { position: positions.FPositionTHN },
         ]
     },
     {
@@ -124,6 +119,7 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
             { position: positions.FPositionING },
+            { position: positions.FPositionTHN },
         ]
     },
     {
@@ -131,6 +127,7 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
             { position: positions.FPositionING },
+            { position: positions.FPositionTHN },
         ]
     },
     {
@@ -141,16 +138,17 @@ export const FApiMethodAccessRules = [
     },
     {
         url: '/api/method/protectedObject/editProtectedObject', access: [
-            { position: positions.FPositionZDIR },
+            { position: positions.FPositionZDIR }, 
             { position: positions.FPositionING },
+            { position: positions.FPositionTHN, apiBlock: ['number', 'name', 'address', 'photo', 'description'] },
         ]
     },
-    {
-        url: '/api/method/protectedObject/getProtectedObject', access: [
-            { position: positions.FPositionZDIR },
-            { position: positions.FPositionING },
-        ]
-    },
+    // {
+    //     url: '/api/method/protectedObject/getProtectedObject', access: [
+    //         { position: positions.FPositionZDIR },
+    //         { position: positions.FPositionING },
+    //     ]
+    // },
     {
         url: '/api/method/protectedObject/deleteProtectedObject', access: [
             { position: positions.FPositionZDIR },
@@ -216,12 +214,12 @@ export const FApiMethodAccessRules = [
             { position: positions.FPositionING },
         ]
     },
-    {
-        url: '/api/method/simCard/getSimCard', access: [
-            { position: positions.FPositionZDIR },
-            { position: positions.FPositionING },
-        ]
-    },
+    // {
+    //     url: '/api/method/simCard/getSimCard', access: [
+    //         { position: positions.FPositionZDIR },
+    //         { position: positions.FPositionING },
+    //     ]
+    // },
     {
         url: '/api/method/simCard/deleteSimCard', access: [
             { position: positions.FPositionZDIR },
@@ -263,8 +261,8 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/timesheet/changeTimesheet', access: [
             { position: positions.FPositionZDIR },
-            { position: positions.FPositionHRM, editBlock: ['rate', 'manager'] },
-            { position: positions.FPositionNSO, editBlock: ['rate', 'manager'], userCompare: ['guardPostManager'] }
+            { position: positions.FPositionHRM, apiBlock: ['rate', 'manager'] },
+            { position: positions.FPositionNSO, apiBlock: ['rate', 'manager'], userCompare: ['guardPostManager'] }
         ]
     },
     {
@@ -352,7 +350,7 @@ export const FApiMethodAccessRules = [
         url: '/api/method/user/changeUser', access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
-            { position: '', editBlock: ['positions'], userCompare: ['id'] }
+            { position: '', apiBlock: ['positions'], userCompare: ['id'] }
         ]
     },
     {
@@ -415,6 +413,14 @@ export const FApiMethodAccessRules = [
         url: '/api/method/modal/getProtectedObjectEditForm', access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionING },
+            { position: positions.FPositionTHN },
+        ]
+    },
+    {
+        url: '/api/method/modal/getSimCardFindForm', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionING },
+            { position: positions.FPositionTHN },
         ]
     },
 ];
@@ -424,6 +430,7 @@ export async function getApiMethodAccess(req, userData) {
     const findedRule = FApiMethodAccessRules.find((rule) => {
         return req.nextUrl.pathname.search(rule.url + '\$') > -1
     });
+
     if (findedRule) {
 
         if (!userData.positions || userData.positions.length === 0) {
@@ -436,7 +443,9 @@ export async function getApiMethodAccess(req, userData) {
 
             if (!access.position || userData.positions.includes(access.position)) {
 
-                if (access.editBlock || access.userCompare) {
+                const result = {};
+                
+                if (access.apiBlock || access.userCompare) {
 
                     const requestJson = await req.json();
                     var userCompare = {};
@@ -447,13 +456,13 @@ export async function getApiMethodAccess(req, userData) {
                             if (Array.isArray(requestJson[userIdKey])) {
 
                                 if (requestJson[userIdKey].length == 0)
-                                    return 'Вам отказано в доступе к выполняемой операции';
+                                    return {error: 'Вам отказано в доступе к выполняемой операции'};
 
                                 if (requestJson[userIdKey].filter(element => element != userData.id).length > 0)
-                                    return 'Вам отказано в доступе к выполняемой операции';
+                                    return {error: 'Вам отказано в доступе к выполняемой операции'};
 
                             } else if (requestJson[userIdKey] != userData.id) {
-                                return 'Вам отказано в доступе к выполняемой операции';
+                                return {error: 'Вам отказано в доступе к выполняемой операции'};
                             }
 
                             userCompare[userIdKey] = true;
@@ -461,28 +470,31 @@ export async function getApiMethodAccess(req, userData) {
                         }
                     }
 
-                    if (access.editBlock) {
-                        for (const editRule of access.editBlock) {
+                    if (access.apiBlock) {
+                        for (const editRule of access.apiBlock) {
                             if (requestJson[editRule] && !userCompare[editRule]) {
-                                return `Отсутсвует право доступа на редкатирование поля "${editRule}"`;
+                                return {error: `Отсутсвует право доступа на редкатирование поля "${editRule}"`};
                             } else {
                                 delete requestJson[editRule];
                             }
                         }
+
+                        result.apiBlock = access.apiBlock.join(' ');
+
                     }
 
                 }
 
-                return null;
+                return result;
 
             }
         }
 
-        return 'Вашей должности отказано в праве доступа к операции';
+        return {error: 'Вашей должности отказано в праве доступа к операции'};
 
     }
 
-    return 'Отсуствует правило доступа к ресурсу';
+    return {error: 'Отсуствует правило доступа к ресурсу'};
 
 }
 

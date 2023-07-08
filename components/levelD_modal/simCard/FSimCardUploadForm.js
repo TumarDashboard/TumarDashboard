@@ -38,8 +38,8 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
   setTableSimCards, setTableSimCardsArchive, setRenderTableSimCards }) {
 
   /*----Определение правил доступа-----------------------------------------------------------------------*/
-  const ARuploadJsonSimCard = true;// accessRules.includes('getTimesheetPrintForDay');
-  const ARuploadExcelSimCard = true; // accessRules.includes('getTimesheetPrintForMonthPart');
+  // const ARuploadJsonSimCard = accessRules.includes('getTimesheetPrintForDay');
+  const ARuploadExcelSimCard = accessRules.includes('uploadExcellSimCards');
 
   /*--Операция-------------------------------------------------------------------------------------------*/
   const [error, setError] = useState('');
@@ -47,13 +47,12 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
   /*--Данные по типу проводимой операции-----------------------------------------------------------------*/
   const FOperationItemList = [
     ARuploadExcelSimCard ? { label: "Excel файл", value: UDFromExcelFile } : null,
-    ARuploadJsonSimCard ? { label: "JSON файл", value: UDFromJsonFile } : null,
+    // ARuploadJsonSimCard ? { label: "JSON файл", value: UDFromJsonFile } : null,
   ].filter(Boolean);
 
   const [selectedOperation, setSelectedOperation] = useState();
 
   const selectedOperationChange = (e) => {
-
     setSelectedOperation(e.target.value);
 
     setError('');
@@ -69,30 +68,30 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
   const [inputSimCardColumnICCID, setInputSimCardColumnICCID] = useState();
 
   /*--Провайдер Формы загрузки---------------------------------------------------------------------------*/
-  const [inputSimCardProvider, setInputSimCardProvider] = useState();
+  // const [inputSimCardProvider, setInputSimCardProvider] = useState();
 
-  const selectedInputSimCardProvider = (e) => {
+  // const selectedInputSimCardProvider = (e) => {
 
-    setInputSimCardProvider(e.target.value);
+  //   setInputSimCardProvider(e.target.value);
 
-    setError('');
-  }
+  //   setError('');
+  // }
 
   /*--выбор опреации загрузки Формы загрузки---------------------------------------------------------------------------*/
-  const validateOperation = () => {
-    switch (selectedOperation) {
+  // const validateOperation = () => {
+  //   switch (selectedOperation) {
   
-      case UDFromJsonFile:
-        return false;
+  //     case UDFromJsonFile:
+  //       return false;
   
-      case UDFromExcelFile:
-        return inputSimCardFile == null || !inputSimCardColumnMSISDN || !inputSimCardColumnICCID || inputSimCardProvider;
+  //     case UDFromExcelFile:
+  //       return inputSimCardFile == null || !inputSimCardColumnMSISDN || !inputSimCardColumnICCID ;
   
-      default:
-        return false;
+  //     default:
+  //       return false;
   
-    }
-  }
+  //   }
+  // }
 
   /*--выбор опреации загрузки Формы загрузки---------------------------------------------------------------------------*/
   const uploadOperation = async (operation, data) => {
@@ -102,7 +101,7 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
         return await uploadJsonSimCards(data);
   
       case UDFromExcelFile:
-        return await uploadExcellSimCards(data, inputSimCardColumnMSISDN, inputSimCardColumnICCID, inputSimCardProvider);
+        return await uploadExcellSimCards(data, inputSimCardColumnMSISDN, inputSimCardColumnICCID);
   
       default:
         return null;
@@ -112,8 +111,6 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
 
   /*--Данные транзакции----------------------------------------------------------------------------------*/
   const [transactionData, setTransactionData] = useState(null);
-
-  const [selectedView, setSelectedView] = useState({});
 
   const [selectedTransactionResult, setSelectedTransactionResult] = useState({ count: 0 });
 
@@ -150,8 +147,6 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
       setInputSimCardFile(null);
 
       setSelectedTransactionResult({ count: 0 });
-
-      setSelectedView({});
 
     } catch (error) {
 
@@ -210,21 +205,21 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
 
               case FUDTransactionReplacement:
                 value.operation = FUDTransactionAddition;
-                value.log = `${value.insertData?.document?.name}, ${value.insertData?.document?.address} отсутствовал в облаке, и был добавлен\r\n${value.archiveData?.document?.name}, ${value.archiveData?.document?.address} архивирован в облако`;
+                value.log = `${value.insertData?.document?.provider}, ${value.insertData?.document?.iccid} отсутствовал в облаке, и был добавлен\r\n${value.archiveData?.document?.provider}, ${value.archiveData?.document?.iccid} архивирован в облако`;
                 delete value.insertData;
                 delete value.archiveData;
                 break;
 
               case FUDTransactionUpdate:
                 value.operation = FUDTransactionUpdate;
-                value.log = `${value.insertData?.document?.name}, ${value.insertData?.document?.address} был обновлен`;
+                value.log = `${value.insertData?.document?.provider}, ${value.insertData?.document?.iccid} был обновлен`;
                 delete value.insertData;
                 delete value.archiveData;
                 break;
 
               case FUDTransactionArchive:
                 value.operation = FUDTransactionIgnore;
-                value.log = `${value.archiveData?.document?.name}, ${value.archiveData?.document?.address} архивирован в облако`;
+                value.log = `${value.archiveData?.document?.provider}, ${value.archiveData?.document?.iccid} архивирован в облако`;
                 delete value.archiveData;
                 break;
 
@@ -238,8 +233,6 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
 
       setSelectedTransactionResult({ count: 0 });
 
-      setSelectedView({});
-
     } catch (error) {
 
       errorCallback(error, setForm);
@@ -251,6 +244,7 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
     }
 
   }
+
   /*--Чистка/Обновление инпутов--------------------------------------------------------------------------*/
   useEffect(() => {
     if (form.error) {
@@ -308,16 +302,16 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
               <label className="text-lg pr-4 select-none">Колонки</label>
               <FInputText
                 placeholder='абон. номера'
-                minlength="1" 
-                maxlength="1"
+                minLength="1" 
+                maxLength="1"
                 value={inputSimCardColumnMSISDN ? inputSimCardColumnMSISDN : ''}
                 onChange={setInputSimCardColumnMSISDN}
                 className="font-bold"
               />
               <FInputText
                 placeholder='серийного номера'
-                minlength="1" 
-                maxlength="1"
+                minLength="1" 
+                maxLength="1"
                 value={inputSimCardColumnICCID ? inputSimCardColumnICCID : ''}
                 onChange={setInputSimCardColumnICCID}
                 className="font-bold"
@@ -339,7 +333,7 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
           <FButtonRed
             disabled={
               selectedOperation == UDFromExcelFile
-              ? !(inputSimCardFile != null && inputSimCardColumnMSISDN && inputSimCardColumnICCID && inputSimCardProvider != FProviderEMPTY)
+              ? !(inputSimCardFile != null && inputSimCardColumnMSISDN && inputSimCardColumnICCID)
               : selectedOperation == UDFromJsonFile
               ? true
               : true
@@ -387,7 +381,7 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
 
                       {/* { Номер и лог} */}
                       <td className="flex">
-                        <p className="text-left px-2 text-sm font-bold text-black">{value.number}</p>
+                        <p className="text-left px-2 text-sm font-bold text-black min-w-fit">{value.msisdn}</p>
                         {value.log && <span
                           className="text-left px-1 text-sm text-black whitespace-pre-line"
                         >{value.log}</span>}
@@ -395,47 +389,6 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
 
                       {(value.operation == FUDTransactionReplacement || value.operation == FUDTransactionArchive) &&
                         <td className="flex p-2 w-full">
-
-                          {value.archiveData?.document?.description &&
-                            <FButtonSlateSmall
-                              className={'mr-2'}
-                              disabled={selectedView[index] == 1}
-                              onClick={(e) => {
-                                setSelectedView({
-                                  ...selectedView,
-                                  [index]: selectedView[index] == 1 ? 0 : 1
-                                })
-                              }}
-                            >
-                              Облако
-                            </FButtonSlateSmall>}
-
-                          {value.insertData?.document?.description &&
-                            <FButtonSlateSmall
-                              className={'mr-2'}
-                              disabled={selectedView[index] == 2}
-                              onClick={(e) => {
-                                setSelectedView({
-                                  ...selectedView,
-                                  [index]: selectedView[index] == 2 ? 0 : 2
-                                })
-                              }}
-                            >
-                              Файл
-                            </FButtonSlateSmall>}
-
-                          {selectedView[index] > 0 &&
-                            <FButtonSlateSmall
-                              className={'mr-2'}
-                              onClick={(e) => {
-                                setSelectedView({
-                                  ...selectedView,
-                                  [index]: 0
-                                })
-                              }}
-                            >
-                              X
-                            </FButtonSlateSmall>}
 
                           {value.operation == FUDTransactionReplacement &&
                             <FButtonSlateSmall
@@ -449,7 +402,7 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
                                 })
                               }}
                             >
-                              Новый объект
+                              Новая сим-карта
                             </FButtonSlateSmall>}
 
                           {value.operation == FUDTransactionReplacement &&
@@ -464,7 +417,7 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
                                 })
                               }}
                             >
-                              Тот же объект
+                              Та же сим-карта
                             </FButtonSlateSmall>}
 
                           {value.operation == FUDTransactionArchive &&
@@ -495,12 +448,6 @@ export function FSimCardUploadForm({ accessRules, form, setForm, MOBXui, MOBXuse
                               Отмена
                             </FButtonSlateSmall>}
 
-                        </td>}
-
-                      {selectedView[index] > 0 &&
-                        <td
-                          className='fles mx-2 mb-2 p-2 bg-color_G rounded-md border-[1px] border-slate-300'>
-                          <p className="whitespace-pre-line text-xs">{selectedView[index] == 1 ? value.archiveData?.document?.description : value.insertData?.document?.description}</p>
                         </td>}
 
                     </tr>

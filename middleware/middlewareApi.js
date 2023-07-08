@@ -45,11 +45,15 @@ export async function middlewareApi(request) {
       }
 
       const apiMethodAccessBlock = await getApiMethodAccess(request, userData);
-      
-      if (apiMethodAccessBlock) {
 
-        return MiddlewareError.BadRequest(apiMethodAccessBlock);
+      if (apiMethodAccessBlock.error) {
 
+        return MiddlewareError.BadRequest(apiMethodAccessBlock.error);
+
+      }
+
+      if (apiMethodAccessBlock.apiBlock) {
+        responce.headers.set('apiblock', apiMethodAccessBlock.apiBlock);
       }
 
       return responce;

@@ -84,7 +84,7 @@ export default function FFormGuardPostsArchive({ accessRules, userData, tableGua
 
   /*----Определение правил доступа------------------------------------------------------------------------------------*/
   // const AReditGuardPost = false; //accessRules.includes('editGuardPost');
-  // const AReditGuardPostRate = false; //!accessRules.includes('editGuardPost/editBlock/rate');
+  // const AReditGuardPostRate = false; //!accessRules.includes('editGuardPost/apiBlock/rate');
   // const AReditGuardPostAll = false; //!accessRules.includes('editGuardPost/userCompare/manager');
   // const ARdeleteGuardPost = false; //accessRules.includes('deleteGuardPost');
   // const ARchangeTimesheetToday = false; //accessRules.includes('changeTimesheetToday');

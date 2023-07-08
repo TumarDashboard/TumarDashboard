@@ -1,3 +1,4 @@
+import { isUndefined } from "swr/_internal";
 import {
     FUDTransactionArchive,
     FUDTransactionNoChange,
@@ -11,6 +12,7 @@ import DTOProtectedObject, { DTOProtectedObjectArchive, validateYup } from "../d
 import googleDrive from "../google/api/googleDrive";
 import mongoProtectedObjectsArchiveModel from "../mongo/models/mongoProtectedObjectsArchiveModel";
 import mongoProtectedObjectsModel from "../mongo/models/mongoProtectedObjectsModel";
+import mongoSimCardsModel from "../mongo/models/mongoSimCardsModel";
 import mongoUserModel from "../mongo/models/mongoUserModel";
 import mongoConnect from "../mongo/mongoConnect";
 import { mapValue } from "../utils/arrayUtils";
@@ -29,6 +31,173 @@ function managerEquals(a, b) {
     return Boolean(a.toString().localeCompare(b.toString()));
 }
 
+async function checkAndAddSimCardToProtectedObject(newData, mongoData) {
+
+    console.log('-----------------------checkAndAddSimCardToProtectedObject-------------------');
+
+    /*--Формирование фильтров для поиска---------------------------------------------------------------------------------------------------------*/
+    var regExpSim1 = newData.sim1 && (newData.sim1 != mongoData?.sim1)
+        ? newData.sim1.toLowerCase().replaceAll(/[^\w]/g, '').split('').join('[\\(\\)\\+\\-\\s]{0,1}')
+        : null;
+
+    var regExpSim2 = newData.sim2 && (newData.sim2 != mongoData?.sim2)
+        ? newData.sim2.toLowerCase().replaceAll(/[^\w]/g, '').split('').join('[\\(\\)\\+\\-\\s]{0,1}')
+        : null;
+
+    var filterSim = [regExpSim1, regExpSim2].filter(Boolean);
+
+    console.log('filterSim %o', filterSim);
+
+    /*--Если произошла изменение и пользователь ввёл новые данные---------------------------------------------------------------------------------*/
+    if (filterSim.length > 0) {
+
+        /*--Доработка фильтра---------------------------------------------------------------------------------------------------------------------*/
+        let filter = '.*(' + filterSim.join(')|(') + ').*';
+
+        /*--Поиск данных указанных пользователем--------------------------------------------------------------------------------------------------*/
+        const simCards = await mongoSimCardsModel.find({ msisdn: { $regex: filter, $options: "i" } }).populate('protectedObjects.protectedObject');
+
+        // console.log('simCards %o', simCards);
+
+        /*--Формирование ошибки в случае если количество найденных экземпляров данных не совпадает------------------------------------------------*/
+        if (simCards.length != filterSim.length) {
+
+            const uncknowSimCards = [];
+
+            // сверка - что же именно не было найдено
+            filterSim.forEach(value => {
+
+                let regExpSimCard = new RegExp('.*' + value + '.*');
+                let exist = true;
+
+                for (let i = 0; i < simCards.length; i++) {
+                    if (regExpSimCard.test(simCards[i].msisdn)) {
+                        exist = false;
+                        break;
+                    }
+                }
+
+                if (exist) {
+                    if (regExpSim1 == value)
+                        uncknowSimCards.push(newData.sim1)
+                    else if (regExpSim2 == value)
+                        uncknowSimCards.push(newData.sim2)
+                }
+
+            })
+
+            throw ApiError.BadRequest(`Ошибка регистрации сим-карт для пультового объекта - в базе данных отсутствуют номера: ${uncknowSimCards.join(', ')}`);
+
+        }
+
+        /*--Обновление найденных данных-----------------------------------------------------------------------------------------------------------*/
+        for (let i = 0; i < simCards.length; i++) {
+
+            const simCard = simCards[i];
+
+            if (!simCard.protectedObjects || !Array.isArray(simCard.protectedObjects)) {
+                // Создание новой истории
+                simCard.protectedObjects = [];
+            } else if (simCard.protectedObjects.length > 0) {
+                // Обновление данных и пультовых объектов в старой истории
+                for (let k = 0; k < simCard.protectedObjects.length; k++) {
+
+                    const protectedObjectRecord = simCard.protectedObjects[k];
+
+                    if( protectedObjectRecord.inProtectedObject ){
+
+                        let exist = {};
+                        
+                        if (simCard.msisdn == protectedObjectRecord.protectedObject.sim1) exist.sim1 = 1;
+                        if (simCard.msisdn == protectedObjectRecord.protectedObject.sim2) exist.sim2 = 1;
+
+                        if (exist.sim1 || exist.sim2) {
+
+                            protectedObjectRecord.inProtectedObject = false;
+                            protectedObjectRecord.unmounted = new Date();
+
+                            await mongoProtectedObjectsModel.updateOne({ _id: protectedObjectRecord.protectedObject._id }, { $unset: exist });
+
+                        }
+                    }
+                }
+            }
+
+            // Добавление данных о пультовом объекте историю
+            simCard.protectedObjects.push({
+                protectedObject: mongoData._id,
+                protectedObjectSheme: 'ProtectedObjects',
+                inProtectedObject: true,
+                mounted: new Date(),
+            })
+
+            // console.log('simCards %o', simCard);
+
+            await simCard.save();
+
+        }
+    }
+}
+
+async function checkAndUnsetSimCardFromProtectedObject(newData, mongoData) {
+
+    // console.log('-----------------------checkAndUnsetSimCardFromProtectedObject-------------------');
+
+    /*--Формирование фильтров для поиска---------------------------------------------------------------------------------------------------------*/
+    var regExpSim1 = !newData.sim1 && ( mongoData.sim1 !== '' )
+        ? mongoData.sim1
+        : null;
+
+    var regExpSim2 = !newData.sim2 && ( mongoData.sim2 !== '' )
+        ? mongoData.sim2
+        : null;
+
+    var filterSim = [regExpSim1, regExpSim2].filter(Boolean);
+
+    // console.log('filterSim %o', filterSim);
+
+    /*--Если произошла изменение и пользователь удалил старые данные-----------------------------------------------------------------------------*/
+    if (filterSim.length > 0) {
+
+        //--Поиск данных указанных пользователем--------------------------------------------------------------------------------------------------
+        const simCards = await mongoSimCardsModel.find({ msisdn: { $in: filterSim } }).populate('protectedObjects.protectedObject');
+
+        // console.log('simCards %o', simCards);
+
+        //--Формирование ошибки в случае если количество найденных экземпляров данных не совпадает------------------------------------------------
+        if (simCards.length != filterSim.length) {
+
+            // сверка - что же именно не было найдено
+            simCards.forEach( value => {
+                
+                filterSim = filterSim.filter( filter => value != filter.msisdn );
+
+            })
+
+            throw ApiError.BadRequest(`Ошибка удаления данных сим-карты для пультового объекта - в базе данных отсутствуют номера: ${filterSim.join(', ')}, сообщите администратору`);
+
+        }
+
+        //--Обновление найденных данных-----------------------------------------------------------------------------------------------------------
+        for (let i = 0; i < simCards.length; i++) {
+
+            const simCard = simCards[i];
+
+            if( Array.isArray(simCard.protectedObjects) && (simCard.protectedObjects.length > 0) ){
+
+                const protectedObjectRecord = simCard.protectedObjects[simCard.protectedObjects.length-1];
+
+                protectedObjectRecord.inProtectedObject = false;
+                protectedObjectRecord.unmounted = new Date();
+
+                await simCard.save();
+
+            }
+
+        }
+    }
+}
+
 class ProtectedObjectService {
 
     async createProtectedObject(inputData) {
@@ -37,7 +206,9 @@ class ProtectedObjectService {
 
         try {
 
-            //Validate date
+            console.log('-----------------------createProtectedObject-------------------');
+
+            /*--Валидация данных---------------------------------------------------------------------------------------------------------*/
             if (inputData.number) {
                 inputData.number = parseInt(inputData.number);
             } else {
@@ -49,33 +220,39 @@ class ProtectedObjectService {
                 throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
 
             });
+            console.log('protectedObjectData %o', protectedObjectData);
 
-            //break image
+            /*--Разрушение изображения--------------------------------------------------------------------------------------------------*/
             let photo;
             if (protectedObjectData.photo) {
                 photo = protectedObjectData.photo;
                 delete protectedObjectData['photo'];
             } else {
 
-                protectedObjectData.photo = `https://ui-avatars.com/api/?name=${protectedObjectData.number ? protectedObjectData.number : protectedObjectData.name?.replace(/ /ig, ',')
+                protectedObjectData.photo = `https://ui-avatars.com/api/?name=${
+                    protectedObjectData.number ? protectedObjectData.number : protectedObjectData.name?.replace(/ /ig, ',')
                     }&size=256&font-size=0.33&length=3&background=random`;
 
             }
 
-            //Проверка соединения с Монго
+            /*--Проверка соединения с Mongo----------------------------------------------------------------------------------------------*/
             await mongoConnect();
 
+            /*--Проверка существующего объекта в базе данных-----------------------------------------------------------------------------*/
             const candidate = await mongoProtectedObjectsModel.findOne({ number: protectedObjectData.number }).lean();
 
             if (candidate) {
                 throw ApiError.BadRequest(`Пультовой объект с номером ${protectedObjectData.number} уже существует`);
             }
 
-            //Create model
+            /*--Создание данных самого пультового объекта--------------------------------------------------------------------------------*/
             let mongoProtectedObject = await mongoProtectedObjectsModel.create(protectedObjectData);
             deleteProtectedObject = mongoProtectedObject;
 
-            //Google
+            /*--Проверка в базе данных операций добавлений СимКарт-----------------------------------------------------------------------*/
+            await checkAndAddSimCardToProtectedObject(protectedObjectData, {_id: mongoProtectedObject._id});
+
+            /*--Загрузка данных в Google-------------------------------------------------------------------------------------------------*/
             if (photo) {
 
                 const googleDriveFileID = await googleDrive.uploadProtectedObjectPhoto(mongoProtectedObject._id.toString(), photo);
@@ -87,8 +264,10 @@ class ProtectedObjectService {
 
             }
 
+            /*--Формирование DTO---------------------------------------------------------------------------------------------------------*/
             const dtoProtectedObject = new DTOProtectedObject(mongoProtectedObject);
 
+            /*--Возврат результата-------------------------------------------------------------------------------------------------------*/
             return { protectedObject: dtoProtectedObject }
 
         } catch (error) {
@@ -115,14 +294,17 @@ class ProtectedObjectService {
 
     async editProtectedObject(inputData) {
         try {
-            // console.log('-----------------------editProtectedObject-------------------');
 
-            //Validate date 
+            console.log('-----------------------editProtectedObject-------------------');
+
+            /*--Валидация данных---------------------------------------------------------------------------------------------------------*/
             if (inputData.number) {
                 inputData.number = parseInt(inputData.number);
-            } else {
+            } else if (!isUndefined(inputData.number)) {
                 inputData.number = null;
             }
+
+            // console.log('inputData %o', inputData);
 
             const protectedObjectData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
@@ -130,7 +312,9 @@ class ProtectedObjectService {
 
             });
 
-            //Google
+            // console.log('protectedObjectData %o', protectedObjectData);
+
+            /*--Загрузка данных в Google-------------------------------------------------------------------------------------------------*/
             if (protectedObjectData.photo) {
 
                 const googleDriveFileID = await googleDrive.uploadProtectedObjectPhoto(protectedObjectData.id, protectedObjectData.photo);
@@ -142,34 +326,44 @@ class ProtectedObjectService {
                 delete protectedObjectData['photo'];
             }
 
-            //Mongo
+            /*--Проверка соединения с Mongo----------------------------------------------------------------------------------------------*/
             await mongoConnect();
 
+            /*--Проверка существующего объекта в базе данных-----------------------------------------------------------------------------*/
             var mongoProtectedObject = await mongoProtectedObjectsModel.findById(protectedObjectData.id);
 
             if (!mongoProtectedObject) {
                 throw ApiError.BadRequest(`Пультовой объект с id: ${protectedObjectData.id} не найден`);
             }
 
-            if (mongoProtectedObject.photo.startsWith('https://ui-avatars.com/api/?name=') &&
-                !protectedObjectData.photo &&
-                (mongoProtectedObject.number != protectedObjectData.number)) {
+            /*--Проверка в базе данных операций добавлений или удаления СимКарт----------------------------------------------------------*/
+            await checkAndUnsetSimCardFromProtectedObject(protectedObjectData, mongoProtectedObject);
+            await checkAndAddSimCardToProtectedObject(protectedObjectData, mongoProtectedObject);
 
-                protectedObjectData.photo = `https://ui-avatars.com/api/?name=${protectedObjectData.number
+            /*--Проверка на изменение UI-аватара-----------------------------------------------------------------------------------------*/
+            // console.log('mongoProtectedObject.number %o', mongoProtectedObject.number);
+            // console.log('!isUndefined(mongoProtectedObject.number) %o', !isUndefined(mongoProtectedObject.number));
+            if (mongoProtectedObject.photo.startsWith('https://ui-avatars.com/api/?name=')
+                && !protectedObjectData.photo
+                && (mongoProtectedObject.number != protectedObjectData.number)
+                && !isUndefined(protectedObjectData.number)) {
+
+                protectedObjectData.photo = `https://ui-avatars.com/api/?name=${
+                    protectedObjectData.number ? protectedObjectData.number : protectedObjectData.name?.replace(/ /ig, ',')
                     }&size=256&font-size=0.33&length=3&background=random`;
 
             }
 
-            // Обновляем данные в самого пультового объекта---------------------------------------------------------------------------------------------------------------------
+            /*--Обновляем данные самого пультового объекта-------------------------------------------------------------------------------*/
             mongoProtectedObject = await mongoProtectedObjectsModel.
                 findByIdAndUpdate(protectedObjectData.id, protectedObjectData, { new: true }).lean();
 
-            //DTO
+            /*--Формирование DTO---------------------------------------------------------------------------------------------------------*/
             const dtoProtectedObject = new DTOProtectedObject(mongoProtectedObject);
 
-            //Result
-
+            /*--Возврат результата-------------------------------------------------------------------------------------------------------*/
             return { protectedObject: dtoProtectedObject }
+
         } catch (error) {
             console.log(error);
             throw error;
@@ -409,7 +603,7 @@ class ProtectedObjectService {
 
             // Выборка данных о пультовых объектах-----------------------------------------------------------------------
             var currentProtectedObjects = await mongoProtectedObjectsModel
-                .find({}, '-createdAt -updatedAt', { sort: { 'number': 1 } })
+                .find({}, '-createdAt -updatedAt')
                 .lean();
 
             // console.log('currentProtectedObjects: %o', currentProtectedObjects);
@@ -444,7 +638,10 @@ class ProtectedObjectService {
                 }
 
                 // переменные
-                const photo = existProtectedObject?.photo ? existProtectedObject.photo : `https://ui-avatars.com/api/?name=${jsonProtectedObject.CutName ? jsonProtectedObject.CutName.replace(/ /ig, ',') : jsonProtectedObject.N
+                const photo = existProtectedObject?.photo 
+                ? existProtectedObject.photo 
+                : `https://ui-avatars.com/api/?name=${
+                    jsonProtectedObject.N ? jsonProtectedObject.N : jsonProtectedObject.CutName.replace(/ /ig, ',')
                     }&size=256&font-size=0.33&length=3&background=random`;
 
                 const description = jsonProtectedObject.Describe ? jsonProtectedObject.Describe.replace(/^\d\!|---/gm, '') : null;
@@ -598,14 +795,14 @@ class ProtectedObjectService {
 
                 // Выборка данных о пультовых объектах
                 protectedObjects = await mongoProtectedObjectsModel
-                    .find({}, '-createdAt -updatedAt -description')
+                    .find({}, '-createdAt -updatedAt -description -sim1 -sim2')
                     .lean();
 
                 protectedObjects.sort((a, b) => {
-                        if (a.number && b.number)
-                            return (a.number - b.number);
-                        else return -1;
-                    });
+                    if (a.number && b.number)
+                        return (a.number - b.number);
+                    else return -1;
+                });
             }
 
             transactionData.sort((a, b) => {
@@ -636,10 +833,6 @@ class ProtectedObjectService {
             console.log('---------------uploadFinishProtectedObjects-----------------');
             // Переменные------------------------------------------------------------------------------------------------
             const currentTimeStamp = new Date().toLocaleString("ru-RU");
-
-            // reason: 'объект архивирован в ходе синхронизации данных с файлом obj_json ' + currentTimeStamp,
-            // userPerfomed: userPerfomed._id,
-            // userPerfomedSheme: 'User',
 
             //Validate date----------------------------------------------------------------------------------------------
             const { transactionData, idUser } = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
@@ -762,7 +955,6 @@ class ProtectedObjectService {
                         }
                     }
                 });
-                mongoProtectedObjectsModel.deleteMany
             }
 
             var protectedObjects;
@@ -772,11 +964,11 @@ class ProtectedObjectService {
 
                 const responce = await mongoProtectedObjectsModel.bulkWrite(bulkWriteData);
 
-                // console.log('bulkWrite: %o', responce);
+                console.log('bulkWrite: %o', responce);
 
                 // Выборка данных о пультовых объектах
                 protectedObjects = await mongoProtectedObjectsModel
-                    .find({}, '-createdAt -updatedAt -description')
+                    .find({}, '-createdAt -updatedAt -description -sim1 -sim2')
                     .lean();
 
                 protectedObjects.sort((a, b) => {
@@ -796,7 +988,7 @@ class ProtectedObjectService {
                 // console.log('bulkArchiveData: %o', responce);
 
                 protectedObjectsArchive = await mongoProtectedObjectsArchiveModel
-                    .find({}, '-createdAt -updatedAt -description')
+                    .find({}, '-createdAt -updatedAt -description -sim1 -sim2')
                     .populate('userPerfomed', 'surname firstName')
                     .lean();
 
@@ -818,7 +1010,7 @@ class ProtectedObjectService {
                 });
             }
 
-            return { protectedObjects, protectedObjectsArchive};
+            return { protectedObjects, protectedObjectsArchive };
 
         } catch (error) {
 

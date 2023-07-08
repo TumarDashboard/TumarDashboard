@@ -32,8 +32,8 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
     || (letARchangeTimesheet && guardPost.manager._id === MOBXuser.user.id)
     || (letARchangeTimesheet && guardPost.manager._id === userData.id));
 
-  const ARchangeTimesheetManager = !accessRules.includes('changeTimesheet/editBlock/manager');
-  const ARchangeTimesheetRate = !accessRules.includes('changeTimesheet/editBlock/rate');
+  const ARchangeTimesheetManager = !accessRules.includes('changeTimesheet/apiBlock/manager');
+  const ARchangeTimesheetRate = !accessRules.includes('changeTimesheet/apiBlock/rate');
 
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных

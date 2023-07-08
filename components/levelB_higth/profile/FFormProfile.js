@@ -42,7 +42,7 @@ const FFormProfile = observer(function FFormProfile({userData, accessRules}) {
   /*-------------------------------------------------------------------------------------------------------
       Определение правил доступа
   -------------------------------------------------------------------------------------------------------*/
-  const ARchangeUserPositions = !accessRules.includes('changeUser/editBlock/positions');
+  const ARchangeUserPositions = !accessRules.includes('changeUser/apiBlock/positions');
   const ARdeleteUser = accessRules.includes('deleteUser');
   const ARchangeUser = accessRules.includes('changeUser');
 

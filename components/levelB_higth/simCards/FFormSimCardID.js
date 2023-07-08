@@ -250,12 +250,6 @@ export default function FFormSimCardID({ accessRules, userData, simCard, guardsD
         {/* {Панель информации} */}
         <div className='w-full flex flex-col bg-white p-2 rounded-md'>
 
-          {/* Абонентский номер */}
-          {simCardData.msisdn &&
-            <div className='form-item w-full items-center'>
-              <span className="break-all md:break-normal"><b className='hidden md:inline-block'>Абонентский номер</b> {simCardData.msisdn}</span>
-            </div>}
-
           {/* Серийный номер */}
           {simCardData.iccid &&
             <div className='form-item w-full items-center'>

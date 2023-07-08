@@ -102,11 +102,11 @@ export default function FFormSimCardsArchive({ accessRules, userData, tableSimCa
 
   const filteringTable = (text) => {
 
-    const filtersArray = text.toLowerCase().split(' ');
+    const filter = text.toLowerCase().replaceAll(/[^\w]/g, '');
 
     setRenderTableSimCards(
 
-      tableSimCardsArchive.filter(value => {
+      tableSimCards.filter(value => {
 
         const parametrsArray = [
           value.msisdn,
@@ -115,11 +115,9 @@ export default function FFormSimCardsArchive({ accessRules, userData, tableSimCa
         ].filter(Boolean);
 
         for (const parametr of parametrsArray) {
-          const lowerParametr = parametr.toLowerCase();
-          for (const filter of filtersArray) {
-            if (lowerParametr.includes(filter)) {
-              return true;
-            }
+          const lowerParametr = parametr.toLowerCase().replaceAll(/[^\w]/g, '');
+          if (lowerParametr.includes(filter)) {
+            return true;
           }
         }
 
