@@ -33,7 +33,7 @@ function managerEquals(a, b) {
 
 async function checkAndAddSimCardToProtectedObject(newData, mongoData) {
 
-    console.log('-----------------------checkAndAddSimCardToProtectedObject-------------------');
+    // console.log('-----------------------checkAndAddSimCardToProtectedObject-------------------');
 
     /*--Формирование фильтров для поиска---------------------------------------------------------------------------------------------------------*/
     var regExpSim1 = newData.sim1 && (newData.sim1 != mongoData?.sim1)
@@ -46,7 +46,7 @@ async function checkAndAddSimCardToProtectedObject(newData, mongoData) {
 
     var filterSim = [regExpSim1, regExpSim2].filter(Boolean);
 
-    console.log('filterSim %o', filterSim);
+    // console.log('filterSim %o', filterSim);
 
     /*--Если произошла изменение и пользователь ввёл новые данные---------------------------------------------------------------------------------*/
     if (filterSim.length > 0) {
