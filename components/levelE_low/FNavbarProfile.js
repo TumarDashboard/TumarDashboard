@@ -14,7 +14,7 @@ export default function FNavbarProfile({ uiAvatarsSrc, logout }) {
       {({ open }) => (
         <Menu as="div" className="ml-3 relative items-center content-center">
           <Menu.Button
-            className="bg-color_A flex text-sm rounded-full 
+            className="bg-color_A flex text-sm rounded-full border-2 border-color_C
               focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-color_A focus:ring-white">
             <span className="sr-only">Open user menu</span>
             <Image

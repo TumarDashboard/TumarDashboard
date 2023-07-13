@@ -77,6 +77,8 @@ class UserService {
 
         } catch (error) {
 
+            console.log(error);
+
             try {
 
                 await mongoUserModel.deleteOne({

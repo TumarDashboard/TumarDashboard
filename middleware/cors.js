@@ -28,7 +28,11 @@ export default async function checkCors(req, res, options) {
         
     }
 
-    req.body.apiBlock = headers['apiblock'];
+    if ( headers['apiblock'] && req.body ) {
+
+        req.body.apiBlock = headers['apiblock'];
+
+    }
 
     // Initializing the cors middleware
     const middleware = Cors(options)
