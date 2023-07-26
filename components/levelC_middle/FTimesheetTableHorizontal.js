@@ -14,7 +14,7 @@ import { FSelect } from '../levelE_low/FSelect';
 
 var pointTimeout = null;
 
-const defaultDayShift = 8;
+const defaultDayShift = process.env.NEXT_PUBLIC_DEFAULT_DAY_SHIFT;
 
 const currentMonth = getCurrentMonth();
 

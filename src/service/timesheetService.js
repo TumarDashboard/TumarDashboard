@@ -422,7 +422,7 @@ class TimesheetService {
     async changeTimesheetToday2(inputData) {
 
         try {
-            console.log('------------------changeTimesheetToday2-----------------------');
+            // console.log('------------------changeTimesheetToday2-----------------------');
             //Validate date-------------------------------------------------------------------------------------------
             const timesheetsData = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
 
@@ -431,7 +431,7 @@ class TimesheetService {
             });
 
             const { guardPost, guardPostManager, guardsToday } = timesheetsData;
-            console.log('guardsToday', guardsToday);
+            // console.log('guardsToday', guardsToday);
             const guardPostID = mongoose.Types.ObjectId(guardPost);
 
             const month = new Date(getCurrentMonth());
@@ -1676,6 +1676,7 @@ class TimesheetService {
                             number: "$guardPost.number",
                             callsign: "$guardPost.callsign",
                             rate: "$guardPost.rate",
+                            shifts: "$guardPost.shifts",
                             element: "$element"
                         }
                     }

@@ -34,7 +34,7 @@ const text = {
   },
 };
 
-export default function Custom500() {
+export default function Custom504() {
   
   return (
     <div className="m-auto">
@@ -53,7 +53,7 @@ export default function Custom500() {
         >
 
           <motion.h1 variants={title} className="text-color_B text-6xl sm:text-9xl font-font_B">
-            500
+            504
           </motion.h1>
 
           <motion.h2 variants={text} className="text-color_B text-2xl sm:text-3xl font-font_B">

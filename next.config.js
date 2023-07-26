@@ -41,6 +41,9 @@ module.exports = async (phase, { defaultConfig }) => {
 
             // #Max count for shifts
             NEXT_PUBLIC_MAX_COUNT_SHIFTS: '20',
+
+            // #Max count for shifts
+            NEXT_PUBLIC_DEFAULT_DAY_SHIFT: 8,
             
             // #Mail options for send activate link
             NEXT_PUBLIC_MAIL_ACTIVATE_LINK_SMTP_HOST: 'smtp-relay.sendinblue.com',

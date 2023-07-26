@@ -5,6 +5,8 @@ import { FPositionBUH, FPositionHRM, FPositionZDIR } from "../../components/leve
 import { isFloat, ceil10, round10 } from "./mathUtils";
 import { mapValue } from "./arrayUtils";
 
+const defaultDayShift = process.env.NEXT_PUBLIC_DEFAULT_DAY_SHIFT;
+
 const reportFullTableHeader = {
   Index: {
     width: 3.5,
@@ -165,6 +167,34 @@ const Style = {
   FillGreen1: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'C6E0B4' }, },
   FillBlue1: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'B4C6E7' }, },
   FillGrey1: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'F2F2F2' }, },
+
+
+  FillRose200: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'fecdd3' }, },
+  FillRose300: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'fda4af' }, },
+  FillRose700: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'be123c' }, },
+  FillRose900: { type: 'pattern', pattern: 'solid', fgColor: { argb: '881337' }, },
+  FillOrange200: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'fed7aa' }, },
+  FillOrange300: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'fdba74' }, },
+  FillOrange700: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'c2410c' }, },
+  FillOrange900: { type: 'pattern', pattern: 'solid', fgColor: { argb: '7c2d12' }, },
+  FillEmerald200: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'a7f3d0' }, },
+  FillEmerald300: { type: 'pattern', pattern: 'solid', fgColor: { argb: '6ee7b7' }, },
+  FillAmber100: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'fef3c7' }, },
+  FillStone50: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'fafaf9' }, },
+
+  FontSmallRose200: { name: "Calibri", family: 1, size: smallFontSize, color: { argb: 'fecdd3' }, },
+  FontSmallRose300: { name: "Calibri", family: 1, size: smallFontSize, color: { argb: 'fda4af' }, },
+  FontSmallRose700: { name: "Calibri", family: 1, size: smallFontSize, color: { argb: 'be123c' }, },
+  FontSmallRose900: { name: "Calibri", family: 1, size: smallFontSize, color: { argb: '881337' }, },
+  FontSmallOrange200: { name: "Calibri", family: 1, size: smallFontSize, color: { argb: 'fed7aa' }, },
+  FontSmallOrange300: { name: "Calibri", family: 1, size: smallFontSize, color: { argb: 'fdba74' }, },
+  FontSmallOrange700: { name: "Calibri", family: 1, size: smallFontSize, color: { argb: 'c2410c' }, },
+  FontSmallOrange900: { name: "Calibri", family: 1, size: smallFontSize, color: { argb: '7c2d12' }, },
+  FontSmallEmerald200: { name: "Calibri", family: 1, size: smallFontSize, color: { argb: 'a7f3d0' }, },
+  FontSmallEmerald300: { name: "Calibri", family: 1, size: smallFontSize, color: { argb: '6ee7b7' }, },
+  FontSmallAmber100: { name: "Calibri", family: 1, size: smallFontSize, color: { argb: 'fef3c7' }, },
+  FontSmallStone50: { name: "Calibri", family: 1, size: smallFontSize, color: { argb: 'fafaf9' }, },
+
   FillNone: { type: 'pattern', pattern: 'none', },
   BorderThin: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
 }
@@ -1496,9 +1526,22 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
 
         // Строка итогов
         try {
-
           // Переменные строки итогов
           const bodyFooterFillColor = guardPost.element.length & 1 ? Style.FillYellow3 : Style.FillYellow4;
+
+          const summGuardPostShifts = guardPost.shifts?.length > 0 ?
+            guardPost.shifts.reduce((result, value) => {
+              let shiftHours = parseInt(value);
+              if (shiftHours > 0) {
+                result += shiftHours;
+              }
+              return result;
+            }, 0) : defaultDayShift;
+
+          // console.log('guardPost: %o, summGuardPostShifts: %o',
+          //     [guardPost.number ? '№' + guardPost.number : null, guardPost.callsign, guardPost.name, guardPost.address].filter(Boolean).join(', '),
+          //     summGuardPostShifts
+          //     );
 
           // Добавление Строки итогов
           const tableFooterRow = worksheet.addRow();
@@ -1520,14 +1563,41 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
           // Дни
           for (let i = 0; i < daysCount; i++) {
 
+            const isDayOff = daysTimesheet[i] == "сб" || daysTimesheet[i] == "вс";
+            const value = totalDaysHoursCount[i] > 0 ? totalDaysHoursCount[i] : '';
+            // Style.Fill 
+            const bodyFooterCellFillColor = value > 0 ? (
+              value < summGuardPostShifts ?
+                (isDayOff ? Style.FillRose300 : Style.FillRose200)
+                : (
+                  value > summGuardPostShifts ?
+                    (isDayOff ? Style.FillOrange300 : Style.FillOrange200)
+                    :
+                    (isDayOff ? Style.FillEmerald300 : Style.FillEmerald200)
+                )
+            ) : ( isDayOff ? Style.FillAmber100 : Style.FillStone50 )
+
+            const bodyFooterCellFont = value > 0 ? (
+              value < summGuardPostShifts ?
+                (isDayOff ? Style.FontSmallOrange900 : Style.FontSmallOrange700)
+                : (
+                  value > summGuardPostShifts ?
+                    (isDayOff ? Style.FontSmallRose900 : Style.FontSmallRose700)
+                    :
+                    (isDayOff ? Style.FontSmallOrange900 : Style.FontSmallOrange700)
+                )
+            ) : (
+              isDayOff ? Style.FontSmallOrange900 : Style.FontSmallOrange700
+            )
+
             tableFooterCell = tableFooterRow.getCell(3 + i);
-            tableFooterCell.font = Style.FontSmall;
+            tableFooterCell.font = bodyFooterCellFont;
             tableFooterCell.alignment = Style.AlignmentMiddleCenter;
             tableFooterCell.border = Style.BorderThin;
-            tableFooterCell.fill = bodyFooterFillColor;
+            tableFooterCell.fill = bodyFooterCellFillColor;
             tableFooterCell.value = {
               formula: `SUM(${totalDaysHoursCountAddressStart[i]}:${totalDaysHoursCountAddressFinish[i]})`,
-              result: totalDaysHoursCount[i] > 0 ? totalDaysHoursCount[i] : '',
+              result: value,
             };
             tableFooterCell.numFmt = isFloat(totalDaysHoursCount[i]) ? '#.####' : '#';
 
