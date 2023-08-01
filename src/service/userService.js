@@ -20,9 +20,8 @@ import { equalArrays } from "../utils/arrayUtils";
 
 class UserService {
 
-    /*-------------------------------------------------------------------------------------------------------
-        Self функции
-    -------------------------------------------------------------------------------------------------------*/
+    /*---Self функции--------------------------------------------------------------------------------------*/
+
     async registration(surname, firstName, patronymic, email, password) {
 
         try {
@@ -409,9 +408,8 @@ class UserService {
 
     }
 
-    /*-------------------------------------------------------------------------------------------------------
-        Hard функции
-    -------------------------------------------------------------------------------------------------------*/
+    /*---Hard функции--------------------------------------------------------------------------------------*/
+
     async createUserHard(inputData) {
 
         let deleteUser;
@@ -501,7 +499,7 @@ class UserService {
 
             //prepare responce
             const dtoUser = new DTOUser(mongoUser);
-            console.log(dtoUser,mongoUser);
+            // console.log(dtoUser,mongoUser);
             dtoUser._id = mongoUser._id.toString();
 
             if(dtoUser.positions){
@@ -589,72 +587,6 @@ class UserService {
 
     }
 
-    async deleteUserHard(inputData) {
-
-        // const { id, reason } = requestData;
-        const { id, idHard, reason } = inputData;
-
-        //Validate date
-        if (!id) {
-            throw ApiError.BadRequest("Не указан ID пользователя для проведения операции удаления");
-        }
-
-        if( !idHard ){
-            throw ApiError.BadRequest("Не указан ID Пользователя, проводящего операцию удаления");
-        }
-
-        //Google
-        await googleDrive.deleteUserAvatar(id);
-
-        //Mongo
-        await mongoConnect();
-
-        //Delete model
-        const mongoUser = await mongoUserModel.findById(id);
-
-        if(!mongoUser){
-            throw ApiError.BadRequest("Не найдены данные пользователя для проведения операции удаления");
-        }
-
-        const mongoUserArchive = await mongoUserArchiveModel.create(mongoUser.toJSON());
-
-        mongoUserArchive.reason = reason;
-        mongoUserArchive.userPerfomed = new mongoose.mongo.ObjectId(idHard);
-        mongoUserArchive.userPerfomedSheme = 'User';
-
-        await mongoUserArchive.save();
-
-        await mongoUser.delete();
-
-        // await mongoUserArchive.delete();
-        
-        // Rewrite sheme for all dependencies
-        await mongoUserArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'UserArchive'}).lean();
-
-        await mongoGuardPostsModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
-
-        await mongoGuardPostsArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'UserArchive'}).lean();
-
-        await mongoGuardPostsArchiveModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
-
-        await mongoGuardsModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
-
-        await mongoGuardsArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'UserArchive'}).lean();
-
-        await mongoGuardsArchiveModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
-
-        await mongoTimesheetsGuardPostModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
-
-        //Remove tokens
-        await tokenService.removeTokenByID(id);
-
-        //prepare responce
-        const dtoUser = new DTOUser(mongoUserArchive);
-
-        //return responce
-        return { user: dtoUser };
-    }
-
     async registrationEnd(activatelink, password ) {
 
         await mongoConnect();
@@ -736,6 +668,132 @@ class UserService {
             throw ApiError.BadRequest(`Произошла ошибка отправки письма для активации на почту ${email}( ${e.response} )`);
 
         });
+    }
+
+    async deleteUserHard(inputData) {
+
+        // const { id, reason } = requestData;
+        const { id, idHard, reason } = inputData;
+
+        //Validate date
+        if (!id) {
+            throw ApiError.BadRequest("Не указан ID пользователя для проведения операции удаления");
+        }
+
+        if( !idHard ){
+            throw ApiError.BadRequest("Не указан ID Пользователя, проводящего операцию удаления");
+        }
+
+        //Google
+        await googleDrive.deleteUserAvatar(id);
+
+        //Mongo
+        await mongoConnect();
+
+        //Delete model
+        const mongoUser = await mongoUserModel.findById(id);
+
+        if(!mongoUser){
+            throw ApiError.BadRequest("Не найдены данные пользователя для проведения операции удаления");
+        }
+
+        const mongoUserArchive = await mongoUserArchiveModel.create(mongoUser.toJSON());
+
+        mongoUserArchive.reason = reason;
+        mongoUserArchive.userPerfomed = new mongoose.mongo.ObjectId(idHard);
+        mongoUserArchive.userPerfomedSheme = 'User';
+
+        await mongoUserArchive.save();
+
+        await mongoUser.delete();
+
+        // await mongoUserArchive.delete();
+        
+        // Rewrite sheme for all dependencies
+        await mongoUserArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'UserArchive'}).lean();
+
+        await mongoGuardPostsModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
+
+        await mongoGuardPostsArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'UserArchive'}).lean();
+
+        await mongoGuardPostsArchiveModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
+
+        await mongoGuardsModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
+
+        await mongoGuardsArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'UserArchive'}).lean();
+
+        await mongoGuardsArchiveModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
+
+        await mongoTimesheetsGuardPostModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'UserArchive'}).lean();
+
+        //Remove tokens
+        await tokenService.removeTokenByID(id);
+
+        //prepare responce
+        const dtoUser = new DTOUser(mongoUserArchive);
+
+        dtoUser._id = mongoUserArchive._id.toString();
+
+        if(dtoUser.positions){
+            dtoUser.positionsText = getPositionWithCodeList(dtoUser.positions);
+        }
+
+        //return responce
+        return { user: dtoUser };
+    }
+
+    async recoverUserHard(inputData) {
+
+        const { idUser } = inputData;
+
+        if( !idUser ){
+            throw ApiError.BadRequest("Не указан ID пользователя для проведения операции восстановления");
+        }
+
+        //Mongo 
+        await mongoConnect();
+
+        //Delete model
+        const mongoUserArchive = await mongoUserArchiveModel.findById(idUser);
+
+        if(!mongoUserArchive){
+            throw ApiError.BadRequest("Не найдены данные пользователя для проведения операции восстановления");
+        }
+
+        if(mongoUserArchive['reason']) delete mongoUserArchive['reason'];
+        if(mongoUserArchive['userPerfomed']) delete mongoUserArchive['userPerfomed'];
+        if(mongoUserArchive['userPerfomedSheme']) delete mongoUserArchive['userPerfomedSheme'];
+
+        const mongoUser = await mongoUserModel.create(mongoUserArchive.toJSON());
+
+        await mongoUserArchive.delete();
+        
+        // Rewrite sheme for all dependencies
+        await mongoUserArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'User'}).lean();
+
+        await mongoGuardPostsModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'User'}).lean();
+
+        await mongoGuardPostsArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'User'}).lean();
+
+        await mongoGuardPostsArchiveModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'User'}).lean();
+
+        await mongoGuardsModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'User'}).lean();
+
+        await mongoGuardsArchiveModel.updateMany({userPerfomed: mongoUserArchive.id}, {userPerfomedSheme:'User'}).lean();
+
+        await mongoGuardsArchiveModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'User'}).lean();
+
+        await mongoTimesheetsGuardPostModel.updateMany({manager: mongoUserArchive.id}, {managerSheme:'User'}).lean();
+        
+        const dtoUser = new DTOUser(mongoUser);
+
+        dtoUser._id = mongoUser._id.toString();
+
+        if(dtoUser.positions){
+            dtoUser.positionsText = getPositionWithCodeList(dtoUser.positions);
+        }
+
+        return { user: dtoUser }
     }
 }
 

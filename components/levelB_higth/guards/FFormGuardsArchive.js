@@ -68,19 +68,14 @@ const sortingTableCallback = (a, b, rule, invert) => {
   }
 }
 
-export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, setTableGuards, 
-  setTableGuardsArchive }) {
-  /*-------------------------------------------------------------------------------------------------------
-      Использование глобальных данных
-  -------------------------------------------------------------------------------------------------------*/
+export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, setTableGuards, setTableGuardsArchive }) {
+  /*--Использование глобальных данных--------------------------------------------------------------------*/
   const { MOBXuser, MOBXui } = useStore();
 
-  /*-------------------------------------------------------------------------------------------------------
-      Определение правил доступа
-  -------------------------------------------------------------------------------------------------------*/
-  const ARcreateGuard = false;//accessRules.includes('createGuard');
-  const AReditGuard = false;//accessRules.includes('editGuard');
-  const ARdeleteGuard = false;//accessRules.includes('deleteGuard');
+  /*--Определение правил доступа-------------------------------------------------------------------------*/
+  // const ARcreateGuard = false;//accessRules.includes('createGuard');
+  // const AReditGuard = false;//accessRules.includes('editGuard');
+  // const ARdeleteGuard = false;//accessRules.includes('deleteGuard');
   const ARrecoverGuard = accessRules.includes('recoverGuard');
 
   /*--Данные таблицы-------------------------------------------------------------------------------------*/
@@ -142,182 +137,182 @@ export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, se
   }
 
   /*--Модальное окно Формы редактирования----------------------------------------------------------------*/
-  const [guardEditForm, setGuardEditForm] = useState({
-    isOpen: false
-  });
+  // const [guardEditForm, setGuardEditForm] = useState({
+  //   isOpen: false
+  // });
 
   /*--Добавление охранника Формой редактирования---------------------------------------------------------*/
-  const guardAdd = async (event,
-    inputGuardSurname,
-    inputGuardFirstName,
-    inputGuardPatronymic,
-    inputGuardUIAvatarsSrc,
-    inputGuardTelephone,
-    inputGuardIIN,
-    inputGuardGuardPosts) => {
+  // const guardAdd = async (event,
+  //   inputGuardSurname,
+  //   inputGuardFirstName,
+  //   inputGuardPatronymic,
+  //   inputGuardUIAvatarsSrc,
+  //   inputGuardTelephone,
+  //   inputGuardIIN,
+  //   inputGuardGuardPosts) => {
 
-    event.preventDefault();
+  //   event.preventDefault();
 
-    MOBXui.setLoading();
+  //   MOBXui.setLoading();
 
-    try {
+  //   try {
 
-      // Отправляем запрос на сервер
-      const responce = await createGuard(
-        inputGuardSurname,
-        inputGuardFirstName,
-        inputGuardPatronymic,
-        inputGuardUIAvatarsSrc,
-        inputGuardTelephone,
-        inputGuardIIN,
-        inputGuardGuardPosts
-      );
+  //     // Отправляем запрос на сервер
+  //     const responce = await createGuard(
+  //       inputGuardSurname,
+  //       inputGuardFirstName,
+  //       inputGuardPatronymic,
+  //       inputGuardUIAvatarsSrc,
+  //       inputGuardTelephone,
+  //       inputGuardIIN,
+  //       inputGuardGuardPosts
+  //     );
 
-      // Обновляем таблицу в памяти
-      setTableGuards(array => {
-        array.unshift(responce.guard);
-        return array;
-      });
+  //     // Обновляем таблицу в памяти
+  //     setTableGuards(array => {
+  //       array.unshift(responce.guard);
+  //       return array;
+  //     });
 
-      // Обновляем отображаемую таблицу
-      setRenderTableGuards(array => {
-        array.unshift(responce.guard);
-        return array;
-      });
+  //     // Обновляем отображаемую таблицу
+  //     setRenderTableGuards(array => {
+  //       array.unshift(responce.guard);
+  //       return array;
+  //     });
 
-      // Закрываем модальное окно
-      setGuardEditForm({ isOpen: false });
+  //     // Закрываем модальное окно
+  //     setGuardEditForm({ isOpen: false });
 
-    } catch (error) {
+  //   } catch (error) {
 
-      errorCallback(error, setGuardEditForm);
+  //     errorCallback(error, setGuardEditForm);
 
-    } finally {
+  //   } finally {
 
-      MOBXui.setLoading();
+  //     MOBXui.setLoading();
 
-    }
+  //   }
 
-  }
+  // }
 
   /*--Изменение охранника Формой редактирования----------------------------------------------------------*/
-  const guardEdit = async (event,
-    inputGuardSurname,
-    inputGuardFirstName,
-    inputGuardPatronymic,
-    inputGuardUIAvatarsSrc,
-    inputGuardTelephone,
-    inputGuardIIN,
-    inputGuardGuardPosts) => {
+  // const guardEdit = async (event,
+  //   inputGuardSurname,
+  //   inputGuardFirstName,
+  //   inputGuardPatronymic,
+  //   inputGuardUIAvatarsSrc,
+  //   inputGuardTelephone,
+  //   inputGuardIIN,
+  //   inputGuardGuardPosts) => {
 
-    event.preventDefault();
+  //   event.preventDefault();
 
-    MOBXui.setLoading();
+  //   MOBXui.setLoading();
 
-    try {
-      // console.log('inputGuardIIN', inputGuardIIN);
-      // Отправляем запрос на сервер
-      const responce = await editGuard(
-        guardEditForm.guard._id,
-        inputGuardSurname,
-        inputGuardFirstName,
-        inputGuardPatronymic,
-        inputGuardUIAvatarsSrc,
-        inputGuardTelephone,
-        inputGuardIIN,
-        inputGuardGuardPosts
-      );
+  //   try {
+  //     // console.log('inputGuardIIN', inputGuardIIN);
+  //     // Отправляем запрос на сервер
+  //     const responce = await editGuard(
+  //       guardEditForm.guard._id,
+  //       inputGuardSurname,
+  //       inputGuardFirstName,
+  //       inputGuardPatronymic,
+  //       inputGuardUIAvatarsSrc,
+  //       inputGuardTelephone,
+  //       inputGuardIIN,
+  //       inputGuardGuardPosts
+  //     );
 
-      // Обновляем таблицу в памяти
-      setTableGuards(array => {
-        const index = array.findIndex(element => {
-          return element._id == responce.guard._id
-        });
+  //     // Обновляем таблицу в памяти
+  //     setTableGuards(array => {
+  //       const index = array.findIndex(element => {
+  //         return element._id == responce.guard._id
+  //       });
 
-        if (index)
-          array[index] = responce.guard;
-        return array;
-      });
+  //       if (index)
+  //         array[index] = responce.guard;
+  //       return array;
+  //     });
 
-      // Обновляем отображаемую таблицу
-      setRenderTableGuards(array => {
-        array[guardEditForm.index] = responce.guard;
-        return array;
-      });
+  //     // Обновляем отображаемую таблицу
+  //     setRenderTableGuards(array => {
+  //       array[guardEditForm.index] = responce.guard;
+  //       return array;
+  //     });
 
-      // Закрываем модальное окно
-      setGuardEditForm({ isOpen: false });
+  //     // Закрываем модальное окно
+  //     setGuardEditForm({ isOpen: false });
 
-    } catch (error) {
+  //   } catch (error) {
 
-      errorCallback(error, setGuardEditForm);
+  //     errorCallback(error, setGuardEditForm);
 
-    } finally {
+  //   } finally {
 
-      MOBXui.setLoading();
+  //     MOBXui.setLoading();
 
-    }
-  }
+  //   }
+  // }
 
   /*--Модальное окно Формы удаления----------------------------------------------------------------------*/
-  const [guardDeleteForm, setGuardDeleteForm] = useState({
-    isOpen: false
-  });
+  // const [guardDeleteForm, setGuardDeleteForm] = useState({
+  //   isOpen: false
+  // });
 
   /*--Функция удаления поста Формы удаления--------------------------------------------------------------*/
-  const guardDeleteFormSubmit = async (event, reason) => {
+  // const guardDeleteFormSubmit = async (event, reason) => {
 
-    event.preventDefault();
+  //   event.preventDefault();
 
-    MOBXui.setLoading();
+  //   MOBXui.setLoading();
 
-    try {
+  //   try {
 
-      if (MOBXuser.user && MOBXuser.user.id) {
+  //     if (MOBXuser.user && MOBXuser.user.id) {
 
-        // Отправляем запрос на сервер
-        const responce = await deleteGuard(
-          guardDeleteForm.guardId,
-          MOBXuser.user.id,
-          reason
-        );
+  //       // Отправляем запрос на сервер
+  //       const responce = await deleteGuard(
+  //         guardDeleteForm.guardId,
+  //         MOBXuser.user.id,
+  //         reason
+  //       );
 
-        // Обновляем таблицу в памяти
-        setTableGuards(array => {
-          const result = array.filter(value => {
-            return responce.guard._id != value._id;
-          })
-          return result
-        });
+  //       // Обновляем таблицу в памяти
+  //       setTableGuards(array => {
+  //         const result = array.filter(value => {
+  //           return responce.guard._id != value._id;
+  //         })
+  //         return result
+  //       });
 
-        // Обновляем отображаемую таблицу
-        setRenderTableGuards(array => {
-          const result = array.filter(value => {
-            return responce.guard._id != value._id;
-          })
-          return result
-        });
+  //       // Обновляем отображаемую таблицу
+  //       setRenderTableGuards(array => {
+  //         const result = array.filter(value => {
+  //           return responce.guard._id != value._id;
+  //         })
+  //         return result
+  //       });
 
-        // Обнавляем таблицу архива
-        setTableGuardsArchive(array => {
-          array.unshift(responce.guard);
-          return array;
-        });
+  //       // Обнавляем таблицу архива
+  //       setTableGuardsArchive(array => {
+  //         array.unshift(responce.guard);
+  //         return array;
+  //       });
 
-        // Закрываем модальное окно
-        setGuardDeleteForm({ isOpen: false });
-      }
+  //       // Закрываем модальное окно
+  //       setGuardDeleteForm({ isOpen: false });
+  //     }
 
-    } catch (error) {
+  //   } catch (error) {
 
-      errorCallback(error, setGuardDeleteForm);
+  //     errorCallback(error, setGuardDeleteForm);
 
-    } finally {
+  //   } finally {
 
-      MOBXui.setLoading();
+  //     MOBXui.setLoading();
 
-    }
-  }
+  //   }
+  // }
 
   /*----Модальное окно Формы восстановления-------------------------------------------------------------------------------*/
   const [guardRecoverForm, setGuardRecoverForm] = useState({
@@ -425,11 +420,11 @@ export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, se
         pt-2 pb-4"
       >
 
-        {/* Кнопка создания охранника */}
+        {/* Кнопки управления страницей */}
         <div className='flex-1 md:order-last md:ml-2 w-full flex justify-end'>
 
           {/* Кнопка создания охранника */}
-          {ARcreateGuard && <button
+          {/* {ARcreateGuard && <button
             className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
             hover:bg-color_C active:bg-color_B"
             onClick={() => {
@@ -444,7 +439,7 @@ export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, se
               className="h-8 w-8 fill-color_C
               hover:fill-color_F"
             />
-          </button>}
+          </button>} */}
 
         </div>
 
@@ -501,7 +496,8 @@ export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, se
             })}
 
             {/* Заголовок управления*/}
-            {(AReditGuard || ARdeleteGuard || ARrecoverGuard) &&
+            {/* {(AReditGuard || ARdeleteGuard || ARrecoverGuard) && */}
+            {ARrecoverGuard &&
               <th className="block md:table-cell md:border bg-color_B p-2" />}
 
           </tr>
@@ -543,12 +539,13 @@ export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, se
                 </td>
 
                 {/* {Кнопки управления компьютера} */}
-                {(AReditGuard || ARdeleteGuard || ARrecoverGuard) &&
+                {/* {(AReditGuard || ARdeleteGuard || ARrecoverGuard) && */}
+                {ARrecoverGuard &&
                   <td className="p-2 md:border text-left block md:table-cell md:w-1">
                     <div className='flex justify-end space-x-2'>
 
                       {/* {Кнопка редактирования охранника} */}
-                      {AReditGuard &&
+                      {/* {AReditGuard &&
                         <FButtonRed
                           className="mr-2 flex"
                           onClick={() => {
@@ -565,10 +562,10 @@ export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, se
                             className="h-4 w-4"
                           />
                           <span className='hidden lg:block'>Изменить</span>
-                        </FButtonRed>}
+                        </FButtonRed>} */}
 
                       {/* {Кнопка удаления охранника} */}
-                      {ARdeleteGuard &&
+                      {/* {ARdeleteGuard &&
                         <FButtonWhite
                           className="flex"
                           onClick={() => setGuardDeleteForm({
@@ -582,7 +579,7 @@ export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, se
                             className="h-4 w-4"
                           />
                           <span className='hidden lg:block'>Удалить</span>
-                        </FButtonWhite>}
+                        </FButtonWhite>} */}
 
                       {/* {Кнопка восстановления охранника} */}
                       {ARrecoverGuard &&
@@ -619,19 +616,19 @@ export default function FFormGuardsArchive({ accessRules, tableGuardsArchive, se
       </table>
 
       {/* {Форма добавления/редактирования охранника} */}
-      <FGuardEditForm
+      {/* <FGuardEditForm
         form={guardEditForm}
         setForm={setGuardEditForm}
         submitAdd={guardAdd}
         submitEdit={guardEdit}
-      />
+      /> */}
 
       {/* {Форма удаления охранника} */}
-      <FGuardDeleteForm
+      {/* <FGuardDeleteForm
         form={guardDeleteForm}
         setForm={setGuardDeleteForm}
         submit={guardDeleteFormSubmit}
-      />
+      /> */}
 
       {/* {Форма восстановления охранника} */}
       <FGuardRecoverForm

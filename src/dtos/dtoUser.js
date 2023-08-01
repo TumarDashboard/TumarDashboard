@@ -163,3 +163,7 @@ export const activateUserHard = async (idHard, id) => {
 export const resetUserPasswordHard = async (idHard, id) => {
     return await fetchAuthMethod('/method/userHard/resetUserPasswordHard', { idHard, id });
 }
+
+export const recoverUserHard = async (idUser) => {
+    return await fetchAuthMethod('/method/userHard/recoverUserHard', { idUser });
+}

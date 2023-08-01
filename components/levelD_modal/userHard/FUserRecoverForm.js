@@ -6,7 +6,7 @@ import { FTextArea } from "../../levelE_low/FTextArea";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 
-export function FGuardRecoverForm({ form, setForm, submit }) {
+export function FUserRecoverForm({ form, setForm, submit }) {
 
   /*-------------------------------------------------------------------------------------------------------
       Статусы инпутов Формы удаления
@@ -29,25 +29,25 @@ export function FGuardRecoverForm({ form, setForm, submit }) {
 
   return (
     <FModalForm
-      title={"Восстановление данных охранника"}
+      title={"Восстановление данных пользователя"}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
       className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
     >
 
-      {form?.guardUserPerfomed && <span className="mb-2">
-        Пользователь, удаливший данные охранника: <b>{[
-          form.guardUserPerfomed.surname ? form.guardUserPerfomed.surname : null,
-          form.guardUserPerfomed.firstName ? form.guardUserPerfomed.firstName : null
+      {form?.userUserPerfomed && <span className="mb-2">
+        Пользователь, удаливший данные пользователя: <b>{[
+          form.userUserPerfomed.surname ? form.userUserPerfomed.surname : null,
+          form.userUserPerfomed.firstName ? form.userUserPerfomed.firstName : null
           ].filter(Boolean).join(' ')}</b>
       </span>}
 
-      {form?.guardReason && <span className="mb-2">
-        Причина удаления: <b>{form.guardReason}</b>
+      {form?.userReason && <span className="mb-2">
+        Причина удаления: <b>{form.userReason}</b>
       </span>}
 
       <span>
-        Для подтверждения действия введите <b>{form.guardInitials}</b> в поле ниже:
+        Для подтверждения действия введите <b>{form.userInitials}</b> в поле ниже:
       </span>
 
       <input
@@ -73,7 +73,7 @@ export function FGuardRecoverForm({ form, setForm, submit }) {
 
         <FButtonRed
           className=""
-          disabled={inputValidate.localeCompare(form.guardInitials, undefined, { sensitivity: 'base', ignorePunctuation: true })}
+          disabled={inputValidate.localeCompare(form.userInitials, undefined, { sensitivity: 'base', ignorePunctuation: true })}
           onClick={(e)=>submit( e )}
         >
           Восстановить

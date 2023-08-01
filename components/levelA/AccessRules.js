@@ -373,6 +373,13 @@ export const FApiMethodAccessRules = [
         ]
     },
     {
+        url: '/dashboard/users/archive', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+        ]
+    },
+    {
         url: '/api/method/userHard/createUserHard', access: [
             { position: positions.FPositionZDIR, userCompare: ['idHard'] },
             { position: positions.FPositionHRM, userCompare: ['idHard'] }
@@ -399,6 +406,11 @@ export const FApiMethodAccessRules = [
         url: '/api/method/userHard/resetUserPasswordHard', access: [
             { position: positions.FPositionZDIR, userCompare: ['idHard'] },
             { position: positions.FPositionHRM, userCompare: ['idHard'] }
+        ]
+    },
+    {
+        url: '/api/method/userHard/recoverUserHard', access: [
+            { position: positions.FPositionZDIR }
         ]
     },
 

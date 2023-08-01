@@ -245,7 +245,7 @@ export function reportForAllGuardPosts(responce) {
     tableBodyCell = tableBodyRow.getCell( 5 );
     tableBodyCell.value = guardPost.rate;
     tableBodyCell.font = Style.FontSmall;
-    tableBodyCell.numFmt = '#.####';
+    tableBodyCell.numFmt = isFloat(guardPost.rate) ? '#.####' : '#';
     tableBodyCell.alignment = Style.AlignmentMiddleCenter;
     tableBodyCell.border = Style.BorderThin;
     tableBodyCell.fill = bodyRowFillColor;

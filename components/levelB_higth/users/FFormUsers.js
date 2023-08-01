@@ -3,21 +3,21 @@ import Image from "next/legacy/image";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { ChevronDownIcon, ChevronUpIcon, PlusIcon, PencilSquareIcon, TrashIcon, ShieldCheckIcon, LockClosedIcon } from '@heroicons/react/24/solid';
 import { NoSymbolIcon } from '@heroicons/react/24/outline';
-import { FFilterText } from "../levelE_low/FFilterText";
-import { FButtonRed } from "../levelE_low/FButtonRed";
-import { FButtonWhite } from "../levelE_low/FButtonWhite";
-import { FUserEditForm } from "../levelD_modal/userHard/FUserEditForm";
-import { FUserDeleteForm } from "../levelD_modal/userHard/FUserDeleteForm";
-import { ApiError } from "../../middleware/exceptions";
-import { useStore } from "../levelA/StoreProvider";
-import { createUserHard, editUserHard, deleteUserHard, activateUserHard, resetUserPasswordHard } from "../../src/dtos/dtoUser";
-import { FButtonYellow } from "../levelE_low/FButtonYellow";
-import { FUserActivationForm } from "../levelD_modal/userHard/FUserActivationForm";
+import { FFilterText } from "../../levelE_low/FFilterText";
+import { FButtonRed } from "../../levelE_low/FButtonRed";
+import { FButtonWhite } from "../../levelE_low/FButtonWhite";
+import { FUserEditForm } from "../../levelD_modal/userHard/FUserEditForm";
+import { FUserDeleteForm } from "../../levelD_modal/userHard/FUserDeleteForm";
+import { ApiError } from "../../../middleware/exceptions";
+import { useStore } from "../../levelA/StoreProvider";
+import { createUserHard, editUserHard, deleteUserHard, activateUserHard, resetUserPasswordHard } from "../../../src/dtos/dtoUser";
+import { FButtonYellow } from "../../levelE_low/FButtonYellow";
+import { FUserActivationForm } from "../../levelD_modal/userHard/FUserActivationForm";
 // import { Tooltip, TooltipWrapper } from 'react-tooltip';
 // import 'react-tooltip/dist/react-tooltip.css';
-import { FUserResetPasswordForm } from "../levelD_modal/userHard/FUserResetPasswordForm";
+import { FUserResetPasswordForm } from "../../levelD_modal/userHard/FUserResetPasswordForm";
 import { usePopper } from 'react-popper';
-import { FTooltip } from "../levelE_low/FTooltip";
+import { FTooltip } from "../../levelE_low/FTooltip";
 
 const inputs = {
   initial: {
@@ -73,30 +73,21 @@ const sortingTableCallback = (a, b, rule, invert) => {
   }
 }
 
-export default function FFormUsers({ accessRules, users }) {
-  /*-------------------------------------------------------------------------------------------------------
-      Использование глобальных данных
-  -------------------------------------------------------------------------------------------------------*/
+export default function FFormUsers({ accessRules, tableUsers, setTableUsers, setTableUsersArchive }) {
+  /*--Использование глобальных данных--------------------------------------------------------------------*/
   const { MOBXuser, MOBXui } = useStore();
 
-  /*-------------------------------------------------------------------------------------------------------
-      Определение правил доступа
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Определение правил доступа-------------------------------------------------------------------------*/
   const ARcreateUserHard = accessRules.includes('createUserHard');
   const AReditUserHard = accessRules.includes('editUserHard');
   const ARdeleteUserHard = accessRules.includes('deleteUserHard');
   const ARactivateUserHard = accessRules.includes('activateUserHard');
   const ARresetUserPasswordHard = accessRules.includes('resetUserPasswordHard');
-  /*-------------------------------------------------------------------------------------------------------
-      Данные таблицы
-  -------------------------------------------------------------------------------------------------------*/
-  const [tableUsers, setTableUsers] = useState(users ? [...users] : []);
 
-  const [renderTableUsers, setRenderTableUsers] = useState(users ? [...users] : []);
+  /*--Данные таблицы-------------------------------------------------------------------------------------*/
+  const [renderTableUsers, setRenderTableUsers] = useState(tableUsers ? [...tableUsers] : []);
 
-  /*-------------------------------------------------------------------------------------------------------
-      Сортировка таблицы
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Сортировка таблицы---------------------------------------------------------------------------------*/
   const [sortingRule, setSortingRule] = useState();
 
   const sortingTable = (rule) => {
@@ -111,9 +102,7 @@ export default function FFormUsers({ accessRules, users }) {
 
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Фильтрация таблицы
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Фильтрация таблицы---------------------------------------------------------------------------------*/
   const [inputFilterText, setInputFilterText] = useState([]);
   const filterringTimeout = useRef();
 
@@ -152,16 +141,12 @@ export default function FFormUsers({ accessRules, users }) {
 
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Модальное окно Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*---Модальное окно Формы редактирования---------------------------------------------------------------*/
   const [userEditForm, setUserEditForm] = useState({
     isOpen: false
   });
 
-  /*-------------------------------------------------------------------------------------------------------
-      Создание физ. поста Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*---Создание Формой редактирования--------------------------------------------------------------------*/
   const userAdd = async (event,
     inputUserAvatarSrc,
     inputUserEmail,
@@ -215,9 +200,7 @@ export default function FFormUsers({ accessRules, users }) {
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Изменение физ. поста Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*---Изменение Формой редактирования-------------------------------------------------------------------*/
   const userEdit = async (event,
     inputUserAvatarSrc,
     inputUserEmail,
@@ -276,16 +259,12 @@ export default function FFormUsers({ accessRules, users }) {
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Модальное окно Формы удаления
-  -------------------------------------------------------------------------------------------------------*/
+  /*---Модальное окно Формы удаления---------------------------------------------------------------------*/
   const [userDeleteForm, setUserDeleteForm] = useState({
     isOpen: false
   });
 
-  /*-------------------------------------------------------------------------------------------------------
-      Функция удаления поста Формы удаления
-  -------------------------------------------------------------------------------------------------------*/
+  /*---Функция удаления Формы удаления-------------------------------------------------------------------*/
   const userDeleteFormSubmit = async (event, reason) => {
 
     event.preventDefault();
@@ -319,6 +298,12 @@ export default function FFormUsers({ accessRules, users }) {
           return result
         });
 
+        // Обнавляем таблицу архива
+        setTableUsersArchive(array => {
+          array.unshift(responce.user);
+          return array;
+        });
+
         // Закрываем модальное окно
         setUserDeleteForm({ isOpen: false });
       }
@@ -334,16 +319,12 @@ export default function FFormUsers({ accessRules, users }) {
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Модальное окно Формы удаления
-  -------------------------------------------------------------------------------------------------------*/
+  /*---Модальное окно Формы активации--------------------------------------------------------------------*/
   const [userActivationForm, setUserActivationForm] = useState({
     isOpen: false
   });
 
-  /*-------------------------------------------------------------------------------------------------------
-      Функция удаления поста Формы удаления
-  -------------------------------------------------------------------------------------------------------*/
+  /*---Функция активации Формы активации-----------------------------------------------------------------*/
   const userActivationFormSubmit = async (event) => {
 
     event.preventDefault();
@@ -391,16 +372,12 @@ export default function FFormUsers({ accessRules, users }) {
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Модальное окно Формы удаления
-  -------------------------------------------------------------------------------------------------------*/
+  /*---Модальное окно Формы сброса пароля----------------------------------------------------------------*/
   const [userResetPasswordForm, setUserResetPasswordForm] = useState({
     isOpen: false
   });
 
-  /*-------------------------------------------------------------------------------------------------------
-      Функция удаления поста Формы удаления
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Функция сброса пароля Формы сброса пароля----------------------------------------------------------*/
   const userResetPasswordFormSubmit = async (event) => {
 
     event.preventDefault();
@@ -432,9 +409,7 @@ export default function FFormUsers({ accessRules, users }) {
     }
   }
 
-  /*----------------------------------------------------------------------------------------------------------------------------
-    Переиспользование функции обработок ошибок
-  ----------------------------------------------------------------------------------------------------------------------------*/
+  /*---Переиспользование функции обработок ошибок--------------------------------------------------------*/
   const errorCallback = (error, callback) => {
     if (error.statusCode == 404)
       throw error
@@ -460,20 +435,17 @@ export default function FFormUsers({ accessRules, users }) {
     }
   }
 
-  /*----------------------------------------------------------------------------------------------------------------------------
-    Референс подсказки
-  ----------------------------------------------------------------------------------------------------------------------------*/
+  /*---Референс подсказки--------------------------------------------------------------------------------*/
   const [tooltipReference, setTooltipReference] = useState(null);
 
-  /*------------------------------------------------------------------------------------------------------------------*/
+  /*-----------------------------------------------------------------------------------------------------*/
   useEffect(()=>{
     return ()=>{
       filterringTimeout.current && clearTimeout(filterringTimeout.current);
     }
   }, []);
 
-  /*----------------------------------------------------------------------------------------------------------------------------
-  ----------------------------------------------------------------------------------------------------------------------------*/
+  /*-----------------------------------------------------------------------------------------------------*/
 
   return (
     <motion.div
@@ -561,7 +533,7 @@ export default function FFormUsers({ accessRules, users }) {
             })}
 
             {/* Заголовок управления*/}
-            {(AReditUserHard || ARdeleteUserHard) &&
+            {(AReditUserHard || ARdeleteUserHard || ARactivateUserHard || ARresetUserPasswordHard) &&
               <th className="block md:table-cell md:border bg-color_B p-2" />}
 
           </tr>
@@ -615,10 +587,11 @@ export default function FFormUsers({ accessRules, users }) {
                 </td>
 
                 {/* {Кнопки управления компьютера} */}
-                {(AReditUserHard || ARdeleteUserHard || ARactivateUserHard) &&
+                {(AReditUserHard || ARdeleteUserHard || ARactivateUserHard || ARresetUserPasswordHard) &&
                   <td className="p-2 md:border text-left block md:table-cell md:w-1">
                     <div className='flex justify-end space-x-2'>
 
+                      {/* {Кнопка активации} */}
                       {ARactivateUserHard && !user.isActivated &&
                         <FButtonYellow
                           className="flex"
@@ -639,10 +612,10 @@ export default function FFormUsers({ accessRules, users }) {
                           <ShieldCheckIcon
                             className="h-4 w-4"
                           />
-                          {/* <span className='hidden 2xl:block text-xs'>Активировать</span> */}
                         </FButtonYellow>
                       }
 
+                      {/* {Кнопка редактирования} */}
                       {AReditUserHard &&
                         <FButtonRed
                           className="flex"
@@ -662,10 +635,10 @@ export default function FFormUsers({ accessRules, users }) {
                           <PencilSquareIcon
                             className="h-4 w-4"
                           />
-                          {/* <span className='hidden 2xl:block'>Изменить</span> */}
                         </FButtonRed>
                       }
 
+                      {/* {Кнопка удаления} */}
                       {ARdeleteUserHard &&
                         <FButtonWhite
                           className="flex"
@@ -684,10 +657,10 @@ export default function FFormUsers({ accessRules, users }) {
                           <TrashIcon
                             className="h-4 w-4"
                           />
-                          {/* <span className='hidden 2xl:block'>Удалить</span> */}
                         </FButtonWhite>
                       }
 
+                      {/* {Кнопка сброса пароля} */}
                       {ARresetUserPasswordHard &&
                         <FButtonRed
                           className="flex"

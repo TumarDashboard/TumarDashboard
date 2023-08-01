@@ -2,7 +2,7 @@ import React from "react";
 import { FModalForm } from '../FModalForm'
 import { useState, useEffect } from 'react';;
 
-import { getDateStamp } from "../../../src/utils/dateUtils";
+import { getDateStamp, getCurrentDateStamp } from "../../../src/utils/dateUtils";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 import { FButtonYellow } from "../../levelE_low/FButtonYellow";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
@@ -25,7 +25,7 @@ export function FUserResetPasswordForm({ form, setForm, submit }) {
         <ul className="list-disc list-inside text-left">
           <li>Будет автоматически установлен следующий пароль:
             {form?.createdAt
-              ? <b className="text-blue-700"> State{getDateStamp(new Date(form?.createdAt))}</b>
+              ? <b className="text-blue-700"> State{getCurrentDateStamp()}</b>
               : <p className="text-blue-700"> State<b>ГодМесяцДата</b>, где ГодМесяцДата - дата текущая дата</p>
             }
           </li>

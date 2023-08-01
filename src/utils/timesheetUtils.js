@@ -1029,10 +1029,10 @@ export function timesheetExcellForMonthPart(NSOinitials, guardPosts, usersData, 
         }
 
         // Сумма Тариф*часы
-        let rateSumm = round10(guard.hoursCount * rate);
+        let rateSumm = round10(guard.hoursCount * rate, 2);
         tableBodyCell = guard.tableBodyRow.getCell(5 + daysCount);
         tableBodyCell.value = {
-          formula: `ROUND(PRODUCT(${guard.tableBodyRow.getCell(3 + daysCount).address}:${guard.tableBodyRow.getCell(4 + daysCount).address}), -1)`,
+          formula: `ROUND(PRODUCT(${guard.tableBodyRow.getCell(3 + daysCount).address}:${guard.tableBodyRow.getCell(4 + daysCount).address}), -2)`,
           result: rateSumm
         };
         tableBodyCell.numFmt = '#';
@@ -1493,10 +1493,11 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
           }
 
           // Сумма Тариф*часы
-          let rateSumm = round10(guard.hoursCount * rate);
+          let rateSumm = round10(guard.hoursCount * rate, 2);
+
           tableBodyCell = guard.tableBodyRow.getCell(5 + daysCount);
           tableBodyCell.value = {
-            formula: `ROUND(PRODUCT(${guard.tableBodyRow.getCell(3 + daysCount).address}:${guard.tableBodyRow.getCell(4 + daysCount).address}), -1)`,
+            formula: `ROUND(PRODUCT(${guard.tableBodyRow.getCell(3 + daysCount).address}:${guard.tableBodyRow.getCell(4 + daysCount).address}), -2)`,
             result: rateSumm
           };
           tableBodyCell.numFmt = '#';
@@ -1810,7 +1811,7 @@ export function timesheetExcellForMonthBuh(responce, date, overRate) {
         }
       }
 
-      let guardPostSumm = round10(totalHoursCount * rate);
+      let guardPostSumm = round10(totalHoursCount * rate, 2);
       isOverRate = isOverRate && guardPostSumm && isFinished;
       allSumm += guardPostSumm ? guardPostSumm : 0;
 

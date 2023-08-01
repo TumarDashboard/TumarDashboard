@@ -799,7 +799,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
                   return <th
                     key={i}
                     className={`p-2 font-bold text-center table-cell min-w-[35px]
-                    border-b-[1px] border-r-[1px] ${value == "сб" || value == "вс" ? "bg-amber-100 text-orange-900" : "bg-stone-50 text-orange-700"}
+                    border-b-[1px] border-r-[1px] ${value == "сб" || value == "вс" ? "bg-amber-200 text-orange-900" : "bg-green-100 text-orange-700"}
                     ${currentMove == i ? 'saturate-200 drop-shadow-lg ring-1 rounded-sm ring-offset-2' : ''}
                     `}>
                     <p className='text-sm'>{value}</p>
@@ -1033,12 +1033,12 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
                     })}
 
                     {/* Колличество смен */}
-                    <td className="text-center font-bold table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none">
+                    <td className="text-center font-bold table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none bg-green-100 text-orange-700">
                       {shiftsCount > 0 ? shiftsCount : null}
                     </td>
 
                     {/* Колличество часов */}
-                    <td className="text-center font-bold table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none">
+                    <td className="text-center font-bold table-cell border-b-[1px] border-r-[1px] last:border-r-[0px] select-none bg-green-100 text-orange-700">
                       {hoursCount > 0 ? hoursCount : null}
                     </td>
                   </tr>
@@ -1093,7 +1093,7 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
                                 (isDayOff ? " bg-emerald-300 text-orange-900" : " bg-emerald-200 text-orange-700")
                             )
                         ) : (
-                          isDayOff ? " bg-amber-100 text-orange-900" : " bg-stone-50 text-orange-700"
+                          isDayOff ? " bg-amber-100 text-orange-900" : " bg-green-100 text-orange-700"
                         )}`}>
                       <p>{value > 0 ? value : ''}</p>
                     </td>;

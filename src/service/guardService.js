@@ -274,7 +274,7 @@ class GuardService {
         const { idGuard } = inputData;
 
         if( !idGuard ){
-            throw ApiError.BadRequest("Не указан ID охранника для проведения операции удаления");
+            throw ApiError.BadRequest("Не указан ID охранника для проведения операции восстановления");
         }
 
         //Mongo 
@@ -284,7 +284,7 @@ class GuardService {
         const mongoGuardArchive = await mongoGuardsArchiveModel.findById(idGuard);
 
         if(!mongoGuardArchive){
-            throw ApiError.BadRequest("Не найдены данные охранника для проведения операции удаления");
+            throw ApiError.BadRequest("Не найдены данные охранника для проведения операции восстановления");
         }
 
         if(mongoGuardArchive['reason']) delete mongoGuardArchive['reason'];

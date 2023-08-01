@@ -71,8 +71,7 @@ const sortingTableCallback = (a, b, rule, invert) => {
   }
 }
 
-export default function FFormGuards({ accessRules, tableGuards, setTableGuards, 
-  setTableGuardsArchive }) {
+export default function FFormGuards({ accessRules, tableGuards, setTableGuards, setTableGuardsArchive }) {
   /*--Использование глобальных данных--------------------------------------------------------------------*/
   const { MOBXuser, MOBXui } = useStore();
 
