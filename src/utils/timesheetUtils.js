@@ -1150,6 +1150,8 @@ export function timesheetExcellForMonthPart(NSOinitials, guardPosts, usersData, 
 
 }
 
+
+
 export function timesheetExcellForMonthFull(responce, usersData, date) {  
 
   // Переменные книги
@@ -1657,7 +1659,7 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
 
 }
 
-export function timesheetExcellForMonthBuh(responce, date, overRate) {
+export function timesheetExcellForMonthBuh(responce, date) {
 
   // Переменные листа
   const columns = 11;
@@ -1800,15 +1802,12 @@ export function timesheetExcellForMonthBuh(responce, date, overRate) {
       tableBodyCell.fill = bodyRowFillColor;
 
       // Calculate Summ
-      let totalHoursCount = guardPost.timesheetShifts.reduce((partialSum, a) => partialSum + (isNaN(a) ? 0 : parseInt(a)), 0);
+      let totalHoursCount = guardPost.timesheetShifts.reduce((partialSum, a) => partialSum + (isNaN(a) || !a ? 0 : parseInt(a)), 0);
       let rate = guardPost.rate;
-      let isFinished = true;
+      let isFinished = guardPost.isFinished;
 
-      for (const iterator of overRate) {
-        if( guardPost._id.equals(iterator._id)){
-          rate = iterator.rate;
-          isFinished = iterator.isFinished;
-        }
+      if (!totalHoursCount) {
+        console.log('%o', guardPost.timesheetShifts);
       }
 
       let guardPostSumm = round10(totalHoursCount * rate, 2);
@@ -1818,7 +1817,7 @@ export function timesheetExcellForMonthBuh(responce, date, overRate) {
       // Summ
       tableBodyCell = worksheet.getCell(indexStartRow + indexB, 4);
       tableBodyCell.value = guardPostSumm ? {
-        formula: `ROUND(${guardPostSumm}, -1)`,
+        formula: `ROUND(${guardPostSumm}, -2)`,
         result: guardPostSumm
       } : (totalHoursCount ? totalHoursCount + "ч" : "?");
       tableBodyCell.numFmt = '#';

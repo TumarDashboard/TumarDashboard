@@ -1864,7 +1864,7 @@ class TimesheetService {
             await mongoConnect();
 
             // Сначала запрашиваем данные из таблицы с ГРАФИКАМИ СМЕН
-            const responceTimesheetsGuards = await mongoTimesheetsGuardsModel.aggregate([
+            const {responceTimesheetsGuards, responceGuardPostsTimesheets} = (await mongoTimesheetsGuardsModel.aggregate([
                 {
                     $match: {
                         month: date
@@ -1912,110 +1912,88 @@ class TimesheetService {
                 },
                 { $unwind: { path: "$guard" } },
                 { $unwind: { path: "$guardPost" } },
-                {
-                    $group: {
-                        _id: "$guard._id",
-                        surname: { $first: "$guard.surname" },
-                        firstName: { $first: "$guard.firstName" },
-                        patronymic: { $first: "$guard.patronymic" },
-                        element: {
-                            $push: {
-                                _id: '$guardPost._id',
-                                name: "$guardPost.name",
-                                address: "$guardPost.address",
-                                number: "$guardPost.number",
-                                callsign: "$guardPost.callsign",
-                                rate: "$guardPost.rate",
-                                timesheetDays: "$timesheetDays",
-                                timesheetShifts: "$timesheetShifts",
+                { $facet:{
+                    responceTimesheetsGuards: [
+                        {
+                            $group: {
+                                _id: "$guard._id",
+                                surname: { $first: "$guard.surname" },
+                                firstName: { $first: "$guard.firstName" },
+                                patronymic: { $first: "$guard.patronymic" },
+                                element: {
+                                    $push: {
+                                        _id: {
+                                            $toString: "$guardPost._id"
+                                          },
+                                        name: "$guardPost.name",
+                                        address: "$guardPost.address",
+                                        number: "$guardPost.number",
+                                        callsign: "$guardPost.callsign",
+                                        rate: "$guardPost.rate",
+                                        timesheetDays: "$timesheetDays",
+                                        timesheetShifts: "$timesheetShifts",
+                                    }
+                                }
                             }
-                        }
-                    }
-                },
-                { $sort: { surname: 1, firstName: 1, patronymic: 1 } }
-            ]);
+                        },
+                        { $sort: { surname: 1, firstName: 1, patronymic: 1 } }
+                    ],
+                    responceGuardPostsTimesheets: [
+                        {
+                            $group: {
+                                _id: {
+                                    $toString: "$guardPost._id"
+                                  },
+                                element: {
+                                    $push: {
+                                        timesheetDays: "$timesheetDays",
+                                        timesheetShifts: "$timesheetShifts",
+                                    }
+                                }
+                            }
+                        },
+                    ],
+                }},
+            ]))[0];
 
             // console.log('responceTimesheetsGuards: %o', responceTimesheetsGuards);
+            // console.log('responceGuardPostsRate: %o', responceGuardPostsTimesheets);
 
             // Проверка на наличие данных
-            if (responceTimesheetsGuards.length == 0) {
+            if (!responceTimesheetsGuards || !Array.isArray(responceTimesheetsGuards) || responceTimesheetsGuards.length == 0){
                 throw ApiError.FileCreateError('Данные отсутствуют')
             }
 
+            // Запрашиваем данные физ поста на искомый ПЕРИОД по данным ФИЗ. ПОСТОВ
+            const responceTimesheetsGuardPostRate = await mongoTimesheetsGuardPostModel
+            .find({ month: date }, '-_id guardPost rate')
+            .lean();
+
+            // console.log('responceTimesheetsGuardPostRate: %o', responceTimesheetsGuardPostRate);
+
             // Формируем переменные для пересчёта овер тарифов
             const maxRateCalc = process.env.NEXT_PUBLIC_OVER_RATE_CALC;
+            const daysTimesheet = getDaysFromMonth(date);
+            const daysCount = daysTimesheet.length;
+            const selectedMonth = date.getMonth();
+            const currentMonth = new Date().getMonth();
+            const currentDay = new Date().getDate();
 
-            // Запрашиваем данные о физ постах с овер тарифами
-            var responceGuardPostsOverRate = await mongoGuardPostsModel.find({ rate: { $gt: maxRateCalc } }, '_id').lean();
+            // Переписываем тарифы в данных охранников и пересчитываем овер тарифы
+            responceTimesheetsGuardPostRate.forEach(guardPostRate=>{
+                // console.log(guardPostRate);
+                var actualRate = guardPostRate.rate;
+                var actualIsFinished = true;
+                var actualID = guardPostRate.guardPost.toString();
 
-            // console.log('responceGuardPostsOverRate: %o', responceGuardPostsOverRate);
+                if( actualRate > maxRateCalc ){
 
-            // Если есть физ посты с овер тарифами
-            if (responceGuardPostsOverRate.length > 0) {
-                
-                // Формируем переменные для пересчёта овер тарифов
-                const daysTimesheet = getDaysFromMonth(date);
-                const daysCount = daysTimesheet.length;
-                const selectedMonth = date.getMonth();
-                const currentMonth = new Date().getMonth();
-                const currentDay = new Date().getDate();
-
-                // Формируем список физических постов с данными по сменам на них
-                responceGuardPostsOverRate = await mongoTimesheetsGuardsModel.aggregate([
-                    {
-                        $match: {
-                            guardPost: { $in: responceGuardPostsOverRate.map(guardPost => guardPost._id) },
-                            month: date
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: mongoGuardPostsModel.collection.name,
-                            localField: 'guardPost',
-                            foreignField: '_id',
-                            as: 'guardPost'
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: mongoGuardPostsArchiveModel.collection.name,
-                            localField: 'guardPost',
-                            foreignField: '_id',
-                            as: 'guardPostArchive'
-                        }
-                    },
-                    {
-                        $project: {
-                            timesheetDays: 1,
-                            timesheetShifts: 1,
-                            guardPost: { $setUnion: ["$guardPost", "$guardPostArchive"] },
-                        }
-                    },
-                    { $unwind: { path: "$guardPost" } },
-                    {
-                        $group: {
-                            _id: "$guardPost._id",
-                            rate: { $first: "$guardPost.rate" },
-                            element: {
-                                $push: {
-                                    timesheetDays: "$timesheetDays",
-                                    timesheetShifts: "$timesheetShifts",
-                                }
-                            }
-                        }
-                    },
-                ]);
-
-                // console.log('responceGuardPostsOverRate: %o', responceGuardPostsOverRate);
-
-                // Выполняем подсчёт часов и формируем ориентировочные тарифы
-                for (const timesheetGuardsOverRate of responceGuardPostsOverRate) {
-
+                    var responceGuardPostTimesheets = responceGuardPostsTimesheets.find(value => value._id == actualID);
                     var totalHoursCount = 0;
                     var totalDaysCount = 0;
                     const totalDaysCalcCount = new Array(daysCount).fill(0);
 
-                    for (const element of timesheetGuardsOverRate.element) {
+                    for (const element of responceGuardPostTimesheets.element) {
 
                         for (let i = 0; i < element.timesheetDays.length; i++) {
 
@@ -2044,19 +2022,26 @@ class TimesheetService {
 
                     }
 
-                    timesheetGuardsOverRate.rate = (timesheetGuardsOverRate.rate * totalDaysCount) / (totalHoursCount * daysCount);
-                    timesheetGuardsOverRate.isFinished = daysCount == totalDaysCount;
-                    timesheetGuardsOverRate._id = timesheetGuardsOverRate._id.toString();
+                    actualRate = (actualRate * totalDaysCount) / (totalHoursCount * daysCount);
+                    actualIsFinished = daysCount == totalDaysCount;
+
+                    // console.log(actualRate, actualIsFinished);
                     
-                    delete timesheetGuardsOverRate.element;
                 }
 
-                // console.log('responceGuardPostsOverRate: %o', responceGuardPostsOverRate);
+                responceTimesheetsGuards.forEach(timesheetsGuards=>{
+                    timesheetsGuards.element?.forEach(guardPost=>{
+                        if(guardPost._id==actualID){
+                            guardPost.rate = actualRate;
+                            guardPost.isFinished = actualIsFinished;
+                        }
+                    })
+                })
 
-            }
+            })
 
             // Формируем документ из полученных данных
-            const document = timesheetExcellForMonthBuh(responceTimesheetsGuards, date, responceGuardPostsOverRate);
+            const document = timesheetExcellForMonthBuh(responceTimesheetsGuards, date);
 
             const documentName = `Ведомость-${month}-${getCurrentTimeStamp()}.xlsx`;
 

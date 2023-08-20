@@ -32,4 +32,6 @@ export const MongooseSchema = new mongoose.Schema({
 
 }, { timestamps: true })
 
+MongooseSchema.index({'$**': 'text'});
+
 export default mongoose.models == null ? mongoose.model('ProtectedObjects', MongooseSchema) : (mongoose.models.ProtectedObjects || mongoose.model('ProtectedObjects', MongooseSchema))

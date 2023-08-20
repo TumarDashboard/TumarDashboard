@@ -1,4 +1,4 @@
-import { CalendarIcon, ChevronDownIcon, ChevronUpIcon, PencilSquareIcon, PlusIcon, TrashIcon, CloudArrowUpIcon, CreditCardIcon } from '@heroicons/react/24/solid';
+import { CalendarIcon, ChevronDownIcon, ChevronUpIcon, PencilSquareIcon, PlusIcon, TrashIcon, CloudArrowUpIcon, CreditCardIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { motion } from "framer-motion";
 import Image from "next/legacy/image";
 import { useRouter } from "next/router";
@@ -9,7 +9,7 @@ import { useStore } from "../../levelA/StoreProvider";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 
-import { createProtectedObject, deleteProtectedObject, editProtectedObject } from '../../../src/dtos/dtoProtectedObject';
+import { createProtectedObject, deleteProtectedObject, editProtectedObject, searchProtectedObject } from '../../../src/dtos/dtoProtectedObject';
 import { FProtectedObjectDeleteForm } from '../../levelD_modal/protectedObject/FProtectedObjectDeleteForm';
 import { FProtectedObjectEditForm } from '../../levelD_modal/protectedObject/FProtectedObjectEditForm';
 import { FProtectedObjectPrintForm } from '../../levelD_modal/protectedObject/FProtectedObjectPrintForm';
@@ -82,7 +82,6 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
   const ARgetProtectedObjectPrint = accessRules.includes('reportProtectedObjects');
   const ARgetProtectedObjectID = false;// accessRules.includes('protectedObjects(?=.)/');
   const ARloadProtectedObjectData = accessRules.includes('uploadJsonProtectedObjects');
-  const ARworkProtectedObjectSimCard = true;
   // console.log('accessRules %o',accessRules);
 
   /*----Заголовки таблицы------------------------------------------------------------------------------------------------*/
@@ -118,7 +117,7 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
   }
 
   /*----Фильтрация таблицы--------------------------------------------------------------------------------------------*/
-  const [inputFilterText, setInputFilterText] = useState([]);
+  const [inputFilterText, setInputFilterText] = useState('');
   const filterringTimeout = useRef();
 
   const filteringTable = (text) => {
@@ -151,6 +150,41 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
     );
 
     setSortingRule(null);
+
+  }
+
+  /*----Расширенный поиск---------------------------------------------------------------------------------------------*/
+  const searchInTable = async (event) => {
+
+    event.preventDefault();
+
+    MOBXui.setLoading();
+
+    try {
+
+      // Отправляем запрос на сервер
+      const responce = await searchProtectedObject(inputFilterText);
+
+      if (responce.search && Array.isArray(responce.search) && responce.search.length > 0) {
+
+          setRenderTableProtectedObjects(
+    
+            tableProtectedObjects.filter(value => responce.search.includes(value.number))
+      
+          );
+      }
+
+      console.log(responce);
+
+    } catch (error) {
+
+      errorCallback(error, setProtectedObjectEditForm);
+
+    } finally {
+
+      MOBXui.setLoading();
+
+    }
 
   }
 
@@ -401,6 +435,19 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
 
         {/* Кнопка выгрузки отчётов, кнопка создания */}
         <div className='flex-1 md:order-last md:ml-2 w-full flex justify-end'>
+
+          {/* Расширенный поиск */}
+          <button
+            className="bg-color_F h-10 w-10 flex justify-center items-center rounded-full
+            hover:bg-color_C active:bg-color_B mr-2 disabled:bg-color_E"
+            disabled={inputFilterText.trim().length < 3}
+            onClick={searchInTable}
+          >
+            <MagnifyingGlassIcon
+              className={`h-8 w-8 fill-color_C
+              hover:${inputFilterText.trim().length < 3 ? '' : 'fill-color_F' } disabled:fill-color_D`}
+            />
+          </button>
 
           {/* Кнопка вызова окна отчётов */}
           {ARgetProtectedObjectPrint && tableProtectedObjects?.length > 0 && (<button
@@ -711,7 +758,7 @@ export default function FFormProtectedObjects({ accessRules, userData, tableProt
         reference={tooltipReference}
       />
       
-  </motion.div>
+    </motion.div>
   )
 
 };

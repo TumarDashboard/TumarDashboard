@@ -162,6 +162,13 @@ export const FApiMethodAccessRules = [
         ]
     },
     {
+        url: '/api/method/protectedObject/searchProtectedObject', access: [
+            { position: positions.FPositionZDIR }, 
+            { position: positions.FPositionING },
+            { position: positions.FPositionTHN },
+        ]
+    },
+    {
         url: '/api/method/protectedObject/reportProtectedObjects', access: [
             { position: positions.FPositionZDIR },
             { position: positions.FPositionING },

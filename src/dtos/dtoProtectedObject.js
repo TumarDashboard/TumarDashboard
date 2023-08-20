@@ -139,6 +139,10 @@ export const recoverProtectedObject = async (idProtectedObject) => {
     return await fetchAuthMethod('/method/protectedObject/recoverProtectedObject', { idProtectedObject });
 }
 
+export const searchProtectedObject = async ( text ) => {
+    return await fetchAuthMethod('/method/protectedObject/searchProtectedObject', { text });
+}
+
 export const reportProtectedObjects = async () => {
     return await fetchAuthFileMethod('/method/protectedObject/reportProtectedObjects');
 }

@@ -459,6 +459,40 @@ class ProtectedObjectService {
         return { protectedObject: dtoProtectedObject }
     }
 
+    async searchProtectedObject(inputData) {
+        try {
+
+            console.log('-----------------------searchProtectedObject-------------------');
+
+            /*--Валидация данных---------------------------------------------------------------------------------------------------------*/
+
+            const {text} = await validateYup(inputData, { deleteEmptyKey: false }).catch((e) => {
+
+                throw ApiError.BadRequest(`Произошла ошибка валидации введёных данных: ${e.errors.join(", ")}`);
+
+            });
+
+            if (!text) {
+                throw ApiError.BadRequest(`Отсутствуют данные для поиска`);
+            }
+            console.log('text %o', text);
+
+            /*--Проверка соединения с Mongo----------------------------------------------------------------------------------------------*/
+            await mongoConnect();
+
+            /*--Поиск данных объектов в базе данных--------------------------------------------------------------------------------------*/
+            var mongoProtectedObject = await mongoProtectedObjectsModel.find({$text: {$search: text}})
+            // console.log('mongoProtectedObject %o', mongoProtectedObject);
+
+            /*--Возврат результата-------------------------------------------------------------------------------------------------------*/
+            return { search: mongoProtectedObject.map( protectedObject => protectedObject.number ) }
+
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
     async reportProtectedObjects() {
 
         try {
