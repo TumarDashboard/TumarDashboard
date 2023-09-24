@@ -1,3 +1,4 @@
+import { getObjFromPath, unsetObjFromPath } from '../../src/utils/dataUtils';
 import * as positions from '../levelZ_variable/FPositionItemList';
 
 export const FApiMethodAccessRules = [
@@ -7,6 +8,7 @@ export const FApiMethodAccessRules = [
         url: '/dashboard/guards', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             { position: positions.FPositionBUH },
             { position: positions.FPositionNSO },
@@ -16,6 +18,7 @@ export const FApiMethodAccessRules = [
         url: '/dashboard/guards/archive', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             { position: positions.FPositionNSO }
         ]
@@ -23,6 +26,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/guard/createGuard', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             // { position: positions.FPositionNSO }
         ]
@@ -30,6 +34,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/guard/editGuard', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             // { position: positions.FPositionNSO }
         ]
@@ -37,6 +42,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/guard/deleteGuard', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             // { position: positions.FPositionNSO }
         ]
@@ -44,6 +50,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/guard/recoverGuard', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             // { position: positions.FPositionNSO }
         ]
@@ -54,6 +61,7 @@ export const FApiMethodAccessRules = [
         url: '/dashboard/guardPosts\$', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             { position: positions.FPositionBUH },
             { position: positions.FPositionNSO },
@@ -63,13 +71,15 @@ export const FApiMethodAccessRules = [
     {
         url: '/dashboard/guardPosts/archive\$', access: [
             { position: positions.FPositionDIR },
-            { position: positions.FPositionZDIR }
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
         ]
     },
     {
         url: /^\/dashboard\/guardPosts(?=.)/, access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             { position: positions.FPositionBUH },
             { position: positions.FPositionNSO },
@@ -79,27 +89,32 @@ export const FApiMethodAccessRules = [
         url: '/api/method/guardPost/createGuardPost', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
         ]
     },
     {
         url: '/api/method/guardPost/editGuardPost', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionNSO, apiBlock: ['rate', 'manager'], userCompare: ['manager'] }
         ]
     },
     {
         url: '/api/method/guardPost/deleteGuardPost', access: [
-            { position: positions.FPositionZDIR }
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
         ]
     },
     {
         url: '/api/method/guardPost/recoverGuardPost', access: [
-            { position: positions.FPositionZDIR }
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
         ]
     },
     {
         url: '/api/method/guardPost/reportGuardPosts', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             { position: positions.FPositionBUH},
         ]
@@ -110,6 +125,7 @@ export const FApiMethodAccessRules = [
         url: '/dashboard/protectedObjects\$', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
             { position: positions.FPositionTHN },
         ]
@@ -118,6 +134,7 @@ export const FApiMethodAccessRules = [
         url: '/dashboard/protectedObjects/archive\$', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
             { position: positions.FPositionTHN },
         ]
@@ -126,6 +143,7 @@ export const FApiMethodAccessRules = [
         url: /^\/dashboard\/protectedObjects(?=.)/, access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
             { position: positions.FPositionTHN },
         ]
@@ -133,12 +151,14 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/protectedObject/createProtectedObject', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
     {
         url: '/api/method/protectedObject/editProtectedObject', access: [
-            { position: positions.FPositionZDIR }, 
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS }, 
             { position: positions.FPositionING },
             { position: positions.FPositionTHN, apiBlock: ['number', 'name', 'address', 'photo', 'description'] },
         ]
@@ -152,18 +172,21 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/protectedObject/deleteProtectedObject', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
     {
         url: '/api/method/protectedObject/recoverProtectedObject', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
     {
         url: '/api/method/protectedObject/searchProtectedObject', access: [
-            { position: positions.FPositionZDIR }, 
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS }, 
             { position: positions.FPositionING },
             { position: positions.FPositionTHN },
         ]
@@ -171,18 +194,21 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/protectedObject/reportProtectedObjects', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
     {
         url: '/api/method/protectedObject/uploadJsonProtectedObjects', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
     {
         url: '/api/method/protectedObject/uploadFinishProtectedObjects', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
@@ -192,6 +218,7 @@ export const FApiMethodAccessRules = [
         url: '/dashboard/simCards\$', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
@@ -199,6 +226,7 @@ export const FApiMethodAccessRules = [
         url: '/dashboard/simCards/archive\$', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
@@ -206,18 +234,21 @@ export const FApiMethodAccessRules = [
         url: /^\/dashboard\/simCards(?=.)/, access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
     {
         url: '/api/method/simCard/createSimCard', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
     {
         url: '/api/method/simCard/editSimCard', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
@@ -230,36 +261,42 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/simCard/deleteSimCard', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
     {
         url: '/api/method/simCard/recoverSimCard', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
     {
         url: '/api/method/simCard/reportSimCards', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
     {
         url: '/api/method/simCard/uploadJsonSimCards', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
     {
         url: '/api/method/simCard/uploadExcellSimCards', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
     {
         url: '/api/method/simCard/uploadFinishSimCards', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
         ]
     },
@@ -268,6 +305,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/timesheet/changeTimesheet', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM, apiBlock: ['rate', 'manager'] },
             { position: positions.FPositionNSO, apiBlock: ['rate', 'manager'], userCompare: ['guardPostManager'] }
         ]
@@ -275,6 +313,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/timesheet/changeTimesheetToday', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             { position: positions.FPositionOPR },
             { position: positions.FPositionNSO, userCompare: ['guardPostManagers'] },
@@ -283,6 +322,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/timesheet/changeTimesheetToday2', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             { position: positions.FPositionOPR },
             { position: positions.FPositionNSO, userCompare: ['guardPostManager'] },
@@ -292,6 +332,7 @@ export const FApiMethodAccessRules = [
         url: '/api/method/timesheet/getTimesheetToday', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             { position: positions.FPositionBUH },
             { position: positions.FPositionNSO },
@@ -302,6 +343,7 @@ export const FApiMethodAccessRules = [
         url: '/api/method/timesheet/getTimesheet', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             { position: positions.FPositionBUH },
             { position: positions.FPositionNSO, userCompare: ['guardPostManager'] }
@@ -311,6 +353,7 @@ export const FApiMethodAccessRules = [
         url: '/api/method/timesheet/getTimesheetPrint', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             { position: positions.FPositionBUH },
             { position: positions.FPositionNSO },
@@ -320,6 +363,7 @@ export const FApiMethodAccessRules = [
         url: '/api/method/timesheet/getTimesheetPrintForDay', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             { position: positions.FPositionBUH },
             { position: positions.FPositionOPR },
@@ -334,6 +378,7 @@ export const FApiMethodAccessRules = [
         url: '/api/method/timesheet/getTimesheetPrintForMonthFull', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             { position: positions.FPositionBUH },
         ]
@@ -342,6 +387,7 @@ export const FApiMethodAccessRules = [
         url: '/api/method/timesheet/getTimesheetPrintForMonthBuh', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionBUH },
         ]
     },
@@ -356,6 +402,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/user/changeUser', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
             { position: '', apiBlock: ['positions'], userCompare: ['id'] }
         ]
@@ -367,7 +414,8 @@ export const FApiMethodAccessRules = [
     },
     {
         url: '/api/method/user/deleteUser', access: [
-            { position: positions.FPositionZDIR }
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
         ]
     },
 
@@ -376,6 +424,7 @@ export const FApiMethodAccessRules = [
         url: '/dashboard/users', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
         ]
     },
@@ -383,63 +432,115 @@ export const FApiMethodAccessRules = [
         url: '/dashboard/users/archive', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
         ]
     },
     {
         url: '/api/method/userHard/createUserHard', access: [
             { position: positions.FPositionZDIR, userCompare: ['idHard'] },
+            { position: positions.FPositionSYS, userCompare: ['idHard'] },
             { position: positions.FPositionHRM, userCompare: ['idHard'] }
         ]
     },
     {
         url: '/api/method/userHard/editUserHard', access: [
             { position: positions.FPositionZDIR, userCompare: ['idHard'] },
+            { position: positions.FPositionSYS, userCompare: ['idHard'] },
             { position: positions.FPositionHRM, userCompare: ['idHard'] }
         ]
     },
     {
         url: '/api/method/userHard/deleteUserHard', access: [
-            { position: positions.FPositionZDIR, userCompare: ['idHard'] }
+            { position: positions.FPositionZDIR, userCompare: ['idHard'] },
+            { position: positions.FPositionSYS, userCompare: ['idHard'] },
         ]
     },
     {
         url: '/api/method/userHard/activateUserHard', access: [
             { position: positions.FPositionZDIR, userCompare: ['idHard'] },
+            { position: positions.FPositionSYS, userCompare: ['idHard'] },
             { position: positions.FPositionHRM, userCompare: ['idHard'] }
         ]
     },
     {
         url: '/api/method/userHard/resetUserPasswordHard', access: [
             { position: positions.FPositionZDIR, userCompare: ['idHard'] },
+            { position: positions.FPositionSYS, userCompare: ['idHard'] },
             { position: positions.FPositionHRM, userCompare: ['idHard'] }
         ]
     },
     {
         url: '/api/method/userHard/recoverUserHard', access: [
-            { position: positions.FPositionZDIR }
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
         ]
     },
 
     // Modal methods
     {
+        url: '/api/method/modal/getGuardPostEditForm', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
+            { position: positions.FPositionNSO, apiBlock: ['rate'], userCompare: ['arg.manager'] }
+        ]
+    },
+    {
         url: '/api/method/modal/getGuardEditForm', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionHRM },
         ]
     },
     {
         url: '/api/method/modal/getProtectedObjectEditForm', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
             { position: positions.FPositionTHN },
         ]
     },
     {
+        url: '/api/method/modal/getUserHardEditForm', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
+            { position: positions.FPositionTHN },
+        ]
+    },
+    {
+        url: '/api/method/modal/getSimCardEditForm', access: [
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
+            { position: positions.FPositionING },
+        ]
+    },
+    {
         url: '/api/method/modal/getSimCardFindForm', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
             { position: positions.FPositionING },
             { position: positions.FPositionTHN },
+        ]
+    },
+
+    // Modal methods
+    {
+        url: '/api/method/pages/getGuardPosts', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionBUH },
+            { position: positions.FPositionNSO },
+            { position: positions.FPositionOPR }
+        ]
+    },
+    
+    {
+        url: '/api/method/pages/getGuardPostsArchive', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionSYS },
         ]
     },
 ];
@@ -472,29 +573,37 @@ export async function getApiMethodAccess(req, userData) {
                     if (access.userCompare) {
                         for (const userIdKey of access.userCompare) {
 
-                            if (Array.isArray(requestJson[userIdKey])) {
+                            let userId = getObjFromPath(requestJson, userIdKey);
 
-                                if (requestJson[userIdKey].length == 0)
+                            if (Array.isArray(userId)) {
+
+                                if (userId.length == 0)
                                     return {error: 'Вам отказано в доступе к выполняемой операции'};
 
-                                if (requestJson[userIdKey].filter(element => element != userData.id).length > 0)
+                                if (userId.filter(element => element != userData.id).length > 0)
                                     return {error: 'Вам отказано в доступе к выполняемой операции'};
 
-                            } else if (requestJson[userIdKey] != userData.id) {
+                            } else if (userId != userData.id) {
                                 return {error: 'Вам отказано в доступе к выполняемой операции'};
                             }
 
                             userCompare[userIdKey] = true;
 
                         }
+
+                        result.userCompare = access.userCompare.join(' ');
+
                     }
 
                     if (access.apiBlock) {
-                        for (const editRule of access.apiBlock) {
-                            if (requestJson[editRule] && !userCompare[editRule]) {
-                                return {error: `Отсутсвует право доступа на редкатирование поля "${editRule}"`};
+                        for (const blockRuleKey of access.apiBlock) {
+
+                            let blockRule = getObjFromPath(requestJson, blockRuleKey);
+
+                            if (blockRule && !userCompare[blockRuleKey]) {
+                                return {error: `Отсутсвует право доступа на редкатирование поля "${blockRuleKey}"`};
                             } else {
-                                delete requestJson[editRule];
+                                unsetObjFromPath(requestJson, blockRuleKey);
                             }
                         }
 

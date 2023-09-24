@@ -21,7 +21,7 @@ const content = (isFirstMount) => ({
   }
 });
 
-export default function GuardPosts({ isFirstMount, accessRules, userData, guardPosts, guardPostsArchive, guards, users }) {
+export default function GuardPosts({ isFirstMount, accessRules, userData, guardPosts, guardPostsArchive, guards }) {
 
   const ARgetGuardPostsArchive = accessRules.includes('guardPosts/archive$');
 
@@ -39,7 +39,6 @@ export default function GuardPosts({ isFirstMount, accessRules, userData, guardP
           setTableGuardPosts={setTableGuardPosts}
           setTableGuardPostsArchive={setTableGuardPostsArchive}
           guardsData={guards}
-          users={users}
         />
     },
     ARgetGuardPostsArchive ? {
@@ -52,7 +51,6 @@ export default function GuardPosts({ isFirstMount, accessRules, userData, guardP
           setTableGuardPosts={setTableGuardPosts}
           setTableGuardPostsArchive={setTableGuardPostsArchive}
           guardsData={guards}
-          users={users}
         />
     } : null,
   ].filter(Boolean);
@@ -177,13 +175,6 @@ export const getServerSideProps = catchAuthServer(async (context) => {
 
   }
 
-  // Выборка данных об НСО
-  const users = await mongoUserModel.find({ positions: FPositionNSO }, 'surname firstName').lean();
-
-  users.forEach(value => {
-    value._id = value._id.toString();
-  })
-
   // Выборка данных о физ. постах в Архиве
   var guardPostsArchive = '';
 
@@ -213,7 +204,10 @@ export const getServerSideProps = catchAuthServer(async (context) => {
   }
 
   return {
-    props: { accessRules, userData, guardPosts, guardPostsArchive, guards, users, initialState: { checkAuth: true } }
+    props: { 
+      accessRules, userData, 
+      guardPosts, guardPostsArchive, guards, 
+      initialState: { checkAuth: true } }
   }
 
 })

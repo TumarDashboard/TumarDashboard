@@ -56,30 +56,28 @@ module.exports = async (phase, { defaultConfig }) => {
             // #JWT config for redirect auth token
             NEXT_PUBLIC_JWT_REDIRECT_AUTH_EXPIRES_IN: '5m',
             
-            // #Google Drive info for image
-            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_DASHBOARD: '1s2KFHjOhXQ9kQ8QcGGofR47PeFNwhD2j',
-            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS: '1oWbuTn70nfV9UMQ90KrIKO4yKbmm4nH0',
-            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS: '16VCgeX_BbwS5UpWdhO0o8loLSPafBPCL',
-            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_PROTECTEDOBJECTS: '1zEUDiK63E7YGHHAV5onX75b2FcDxfA2L',
-            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDS: '1efI0RWRTXHfz4pMz5Nvjna4HFc4ULlmq',
+            // #Google Drive info for image--------------------------------------------------------------------------------------------------------------
+            // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_DASHBOARD: '1s2KFHjOhXQ9kQ8QcGGofR47PeFNwhD2j',
+            // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS: '1oWbuTn70nfV9UMQ90KrIKO4yKbmm4nH0',
+            // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS: '16VCgeX_BbwS5UpWdhO0o8loLSPafBPCL',
+            // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_PROTECTEDOBJECTS: '1zEUDiK63E7YGHHAV5onX75b2FcDxfA2L',
+            // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDS: '1efI0RWRTXHfz4pMz5Nvjna4HFc4ULlmq',
 
-            // #Google Drive info for excel
-            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_DAY: '1QpNbsuqoSXogZOopyOCRhOPLTU380oHj',
-            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_PART: '1w81XJFdlgtqpTH6Dj9FjcPLI63chEQR9',
-            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_FULL: '13nNbh8tsyo-MHAbcLFfdEveO6MW-Dt7r',
-            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_BUH: '1Tiqp50Yt2a5KTgdFeG4wClsP9hvA1gxR',
-            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_GUARD_POSTS: '1KaF67tYa7oEMcU-gaBM0mPsi5W39F3BG',
-            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_PROTECTED_OBJECTS: '1RVLbfkZFipIEZ_b-VRJr81PoQyFBPVMs',
-            NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_SIM_CARDS: '1DTkc0WsdNQiX5XK6TdNjqIZSHa4PlLqa',
-
-            // // #Google Drive info for image
             // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_DASHBOARD: '1_gr5F4glCtnrPAfUGPK4E9hESaKa0sZ9',
             // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS: '1PQBgYBV2dIW7oBxJfWjVcsAGGS2BlbCD',
             // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS: '10T-X5wlGZyNl9cSlXLbnOAgsrMLW047X',
             // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_PROTECTEDOBJECTS: '1JLoK-fZapAgkqtJtNXPdB02JY5kEwnzq',
             // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDS: '1tCxWkXMiHyMIP5cQuPoGAmKQAgfNjHeg',
 
-            // // #Google Drive info for excel
+            // #Google Drive info for excel--------------------------------------------------------------------------------------------------------------
+            // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_DAY: '1QpNbsuqoSXogZOopyOCRhOPLTU380oHj',
+            // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_PART: '1w81XJFdlgtqpTH6Dj9FjcPLI63chEQR9',
+            // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_FULL: '13nNbh8tsyo-MHAbcLFfdEveO6MW-Dt7r',
+            // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_BUH: '1Tiqp50Yt2a5KTgdFeG4wClsP9hvA1gxR',
+            // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_GUARD_POSTS: '1KaF67tYa7oEMcU-gaBM0mPsi5W39F3BG',
+            // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_PROTECTED_OBJECTS: '1RVLbfkZFipIEZ_b-VRJr81PoQyFBPVMs',
+            // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_SIM_CARDS: '1DTkc0WsdNQiX5XK6TdNjqIZSHa4PlLqa',
+
             // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_DAY: '1p1emTP-QG3QOu-fmIaIexUaBZvvrrk35',
             // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_PART: '1WMOYK2hi8JYxbkH7zkNlbmf86e7K496-',
             // NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_FULL: '1N3YVzEDvS6kBJPRL1gZiKJPgZfhd9jJR',
@@ -100,13 +98,45 @@ module.exports = async (phase, { defaultConfig }) => {
         nextConfig.env.NEXT_PUBLIC_API_URL = 'http://localhost:3000';
         nextConfig.env.NEXT_PUBLIC_CLIENT_URL = 'http://localhost:3000';
 
+        // #Google Drive info for image dasboard.app.activate@gmail.com----------------------------------------------------------------------------------
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_DASHBOARD = '1_gr5F4glCtnrPAfUGPK4E9hESaKa0sZ9';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS = '1PQBgYBV2dIW7oBxJfWjVcsAGGS2BlbCD';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS = '10T-X5wlGZyNl9cSlXLbnOAgsrMLW047X';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_PROTECTEDOBJECTS = '1JLoK-fZapAgkqtJtNXPdB02JY5kEwnzq';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDS = '1tCxWkXMiHyMIP5cQuPoGAmKQAgfNjHeg';
+
+        // #Google Drive info for excel dasboard.app.activate@gmail.com-----------------------------------------------------------------------------------
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_DAY = '1p1emTP-QG3QOu-fmIaIexUaBZvvrrk35';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_PART = '1WMOYK2hi8JYxbkH7zkNlbmf86e7K496-';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_FULL = '1N3YVzEDvS6kBJPRL1gZiKJPgZfhd9jJR';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_BUH = '1SoIWv2J2Up4Wuo9XLPvLmaRHdLMnPgpp';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_GUARD_POSTS = '1lyMPq4hMzNibHIo3FFmp9OSkCLGic_FA';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_PROTECTED_OBJECTS = '1w608yRoCDzlSTebt9d2nxUI0ZWjZvZjV';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_SIM_CARDS = '1jjbJAp6E-KUR1ug1_NTsNkNjgwdT55Xv';
     } else {
 
+        // public url-------------------------------------------------------------------------------------------------------------------------------------
         nextConfig.env.NEXT_PUBLIC_API_URL = 'https://tumar-dashboard.vercel.app';
         nextConfig.env.NEXT_PUBLIC_CLIENT_URL = 'https://tumar-dashboard.vercel.app';
         // nextConfig.env.NEXT_PUBLIC_API_URL = 'https://mtmdashboard.vercel.app';
         // nextConfig.env.NEXT_PUBLIC_CLIENT_URL = 'https://mtmdashboard.vercel.app';
+        // nextConfig.env.NEXT_PUBLIC_API_URL = 'http://localhost:3000';
+        // nextConfig.env.NEXT_PUBLIC_CLIENT_URL = 'http://localhost:3000';
 
+        // #Google Drive info for image tumar.g.s@gmail.com-----------------------------------------------------------------------------------------------
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_USERS = '1oWbuTn70nfV9UMQ90KrIKO4yKbmm4nH0';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS = '16VCgeX_BbwS5UpWdhO0o8loLSPafBPCL';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_PROTECTEDOBJECTS = '1zEUDiK63E7YGHHAV5onX75b2FcDxfA2L';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDS = '1efI0RWRTXHfz4pMz5Nvjna4HFc4ULlmq';
+
+        // #Google Drive info for excel tumar.g.s@gmail.com------------------------------------------------------------------------------------------------
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_DAY = '1QpNbsuqoSXogZOopyOCRhOPLTU380oHj';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_PART = '1w81XJFdlgtqpTH6Dj9FjcPLI63chEQR9';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_FULL = '13nNbh8tsyo-MHAbcLFfdEveO6MW-Dt7r';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_TIMESHEET_PRINT_FOR_MONTH_BUH = '1Tiqp50Yt2a5KTgdFeG4wClsP9hvA1gxR';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_GUARD_POSTS = '1KaF67tYa7oEMcU-gaBM0mPsi5W39F3BG';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_PROTECTED_OBJECTS = '1RVLbfkZFipIEZ_b-VRJr81PoQyFBPVMs';
+        nextConfig.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_REPORT_PRINT_FOR_ALL_SIM_CARDS = '1DTkc0WsdNQiX5XK6TdNjqIZSHa4PlLqa';
     }
 
     nextConfig.headers = async() => {

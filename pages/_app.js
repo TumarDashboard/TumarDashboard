@@ -42,6 +42,7 @@ export default function App({ Component, pageProps, router }) {
     <StoreProvider
       isFirstMount={isFirstMount}
       {...pageProps}
+
     >
 
       <FLoadingScreen

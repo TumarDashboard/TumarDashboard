@@ -1,6 +1,7 @@
 export const FPositionEMPTY = 'FPEMP';
 export const FPositionDIR = 'FPDIR';
 export const FPositionZDIR = 'FPZDIR';
+export const FPositionSYS = 'FPSYS';
 export const FPositionNSO = 'FPNSO';
 export const FPositionHRM = 'FPHRM';
 export const FPositionOPR = 'FPOPR';
@@ -12,6 +13,7 @@ const FPositionItemList = [
     { label: "Отсутствует", value: FPositionEMPTY },
     { label: "Директор", value: FPositionDIR },
     { label: "Зам. директора", value: FPositionZDIR },
+    { label: "Системный администратор", value: FPositionSYS },
     { label: "Начальник службы охраны", value: FPositionNSO },
     { label: "Сотрудник отдела кадров", value: FPositionHRM },
     { label: "Дежурный оператор", value: FPositionOPR },

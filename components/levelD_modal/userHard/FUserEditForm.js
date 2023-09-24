@@ -1,36 +1,32 @@
-import { useEffect, useState } from 'react';
 import { FModalForm } from '../FModalForm';
+import { useEffect, useState } from 'react';
+import useSWRMutation from 'swr/mutation';
 
-import Image from "next/legacy/image";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 import { FInputImageFile } from "../../levelE_low/FInputImageFile";
 import { FSelect } from "../../levelE_low/FSelect";
+import { FInputEmail } from '../../levelE_low/FInputEmail';
+import { FInputInitials } from '../../levelE_low/FInputInitials';
+import Image from "next/legacy/image";
 
 import { equalArrays } from '../../../src/utils/arrayUtils';
 import { getCurrentDateStamp } from '../../../src/utils/dateUtils';
-import { FInputEmail } from '../../levelE_low/FInputEmail';
-import { FInputInitials } from '../../levelE_low/FInputInitials';
 import FPositionItemList from '../../levelZ_variable/FPositionItemList';
+import { fetchAuthMethod } from "../../../middleware/requests";
 
 export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
 
-  /*-------------------------------------------------------------------------------------------------------
-      Использование глобальных данных
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Использование глобальных данных--------------------------------------------------------------------*/
   const [operation, setOperation] = useState('');
   const [error, setError] = useState('');
 
   const [currentUser, setCurrentUser] = useState({});
 
-  /*----------------------------------------------------------------------------------------------------------------------------
-      Фото
-  ----------------------------------------------------------------------------------------------------------------------------*/
+  /*--Фото--------------------------------------------------------------------------------------------------------------------*/
   const [uriAvatar, setUriAvatar] = useState(null);
 
-  /*-------------------------------------------------------------------------------------------------------
-      Email Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Email Формы редактирования-------------------------------------------------------------------------*/
   const [inputEmail, setInputEmail] = useState('');
 
   const [isInputValidateEmail, setInputValidateEmail] = useState(false);
@@ -43,80 +39,70 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
       else
         setInputValidateEmail(false);
     } else {
-      setInputValidateEmail(validate && value != currentUser?.email);
+      setInputValidateEmail(validate && (value != serverData?.user?.email));
     }
     setError('');
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Фамилия Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Фамилия Формы редактирования-----------------------------------------------------------------------*/
   const [inputSurname, setInputSurname] = useState('');
 
   const [isInputValidateSurname, setInputValidateSurname] = useState(false);
 
-  const surnameChange = (surname, validate) => {
-    setInputSurname(surname);
+  const surnameChange = (value, validate) => {
+    setInputSurname(value);
     if (operation == 'Добавить') {
-      if (surname)
+      if (value)
         setInputValidateSurname(validate);
       else
         setInputValidateSurname(false);
     } else {
-      setInputValidateSurname(validate && surname != currentUser?.surname);
+      setInputValidateSurname(validate && (value != serverData?.user?.surname));
     }
     setError('');
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Имя Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Имя Формы редактирования---------------------------------------------------------------------------*/
   const [inputFirstName, setInputFirstName] = useState('');
 
   const [isInputValidateFirstName, setInputValidateFirstName] = useState(false);
 
-  const firstNameChange = (firstName, validate) => {
-    setInputFirstName(firstName);
+  const firstNameChange = (value, validate) => {
+    setInputFirstName(value);
     if (operation == 'Добавить') {
-      if (firstName)
+      if (value)
         setInputValidateFirstName(validate);
       else
         setInputValidateFirstName(false);
     } else {
-      setInputValidateFirstName(validate && firstName != currentUser?.firstName);
+      setInputValidateFirstName(validate && (value != serverData?.user?.firstName));
     }
     setError('');
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Отчество Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Отчество Формы редактирования----------------------------------------------------------------------*/
   const [inputPatronymic, setInputPatronymic] = useState('');
 
   const [isInputValidatePatronymic, setInputValidatePatronymic] = useState(false);
 
-  const patronymicChange = (patronymic, validate) => {
-    setInputPatronymic(patronymic);
+  const patronymicChange = (value, validate) => {
+    setInputPatronymic(value);
     if (operation == 'Добавить') {
-      if (patronymic)
+      if (value)
         setInputValidatePatronymic(validate);
       else
         setInputValidatePatronymic(true);
     } else {
-      if (patronymic)
-        setInputValidatePatronymic(validate && patronymic != currentUser?.patronymic);
+      if (value)
+        setInputValidatePatronymic(validate && (value != serverData?.user?.patronymic));
       else
-        setInputValidatePatronymic(patronymic != currentUser?.patronymic);
+        setInputValidatePatronymic(value != serverData?.user?.patronymic);
     }
     setError('');
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Должность Формы редактирования
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Должность Формы редактирования---------------------------------------------------------------------*/
   const [inputPositions, setInputPositions] = useState([]);
-
-  // const [isInputValidatePositions, setInputValidatePositions] = useState(false);
 
   const positionsChange = (e) => {
 
@@ -133,125 +119,89 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
     setError('');
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Чистка/Обновление инпутов
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Запрос данных на сервере---------------------------------------------------------------------------*/
+  const {
+    data: serverData,
+    isMutating: isMutatingFromServer,
+    trigger: triggerFromServer,
+    reset: resetServerData
+  } = useSWRMutation('/method/modal/getUserHardEditForm', fetchAuthMethod, {
+    onError: (e) => setError(e)
+  });
+
+  useEffect(() => {
+    if (serverData?.user) {
+      setInputEmail(serverData.user.email)
+      setInputSurname(serverData.user.surname)
+      setInputFirstName(serverData.user.firstName);
+      setInputPatronymic(serverData.user.patronymic);
+      setInputPositions(serverData.user.positions || []);
+    }else{
+      setInputValidatePatronymic(operation == 'Добавить');
+    }
+    return () => {
+      setInputEmail(null)
+      setInputValidateEmail(false);
+      setInputSurname(null)
+      setInputValidateSurname(false);
+      setInputFirstName(null);
+      setInputValidateFirstName(false);
+      setInputPatronymic(null);
+      setInputValidatePatronymic(false);
+      setUriAvatar(null)
+      setInputPositions([]);
+    }
+  }, [serverData]);
+
+  /*--Чистка/Обновление инпутов--------------------------------------------------------------------------*/
   useEffect(() => {
     if (form.error) {
       setError(form.error);
     } else if (form.isOpen) {
-      setOperation(form.operation);
-      setCurrentUser(form.user || {});
-      setInputEmail(form.user?.email || '')
-      setInputValidateEmail(false);
-      setInputSurname(form.user?.surname || '')
-      setInputValidateSurname(false);
-      setInputFirstName(form.user?.firstName || '');
-      setInputValidateFirstName(false);
-      setInputPatronymic(form.user?.patronymic || '');
-      setInputValidatePatronymic(form.operation == 'Добавить');
-      setUriAvatar(null)
-      setInputPositions(form.user?.positions || []);
+
       setError(null);
+
+      triggerFromServer({
+        _id: form.user?._id
+      });
+
+      setOperation(form.operation);
+
+    }else{
+      resetServerData();
     }
   }, [form])
 
-  /*-------------------------------------------------------------------------------------------------------
-  -------------------------------------------------------------------------------------------------------*/
-
+  /*-----------------------------------------------------------------------------------------------------*/
   return (
     <FModalForm
-      title={`${operation} данные сотрудника`}
+      title={operation == 'Добавить' ? 'Добавить данные сотрудника' : 'Данные сотрудника'}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
-      className=" 
-      w-full flex flex-col md:flex-row
-      p-4 items-center
-      overflow-y-auto max-h-[90vh]"
+      isModalFormLoading={!serverData || isMutatingFromServer}
+      isModalFormError={error}
+      className="flex flex-col items-center md:flex-row md:items-stretch p-4 w-full overflow-y-auto max-h-[90vh]"
+      widthForm='min-w-min'
     >
-      {/* {Изображение аватара, емайл, кнопки управления} */}
-      <div
-        className="flex-none md:order-last md:ml-4 rounded-t-md
-        flex flex-col"
-      >
-
-        {/* {Изображение аватара} */}
-        {(uriAvatar || currentUser.uiAvatarsSrc) && <div
-          className="w-full flex items-center justify-center p-4 select-none"
-        >
-          <Image
-            className="object-cover w-44 h-44 rounded-full"
-            width={176}
-            height={176}
-            src={uriAvatar ? uriAvatar : currentUser.uiAvatarsSrc}
-            alt=""
-          />
-        </div>}
-
-        {/* {Кнопки управления для компьютера} */}
-        <div
-          className="flex-1 p-4 hidden md:inline-flex flex-col select-none
-          items-center justify-center"
-        >
-
-          <FButtonRed
-            className="hidden md:inline-flex m-4"
-            disabled={!(form.isOpen && (operation == 'Добавить' ?
-              (isInputValidateEmail
-                && isInputValidateSurname
-                && isInputValidateFirstName
-                && isInputValidatePatronymic) :
-              (isInputValidateEmail
-                || isInputValidateSurname
-                || isInputValidateFirstName
-                || isInputValidatePatronymic
-                || (!equalArrays(inputPositions, currentUser?.positions))
-                || uriAvatar != null
-              )
-            ))}
-            onClick={(e) => {
-              if (operation == 'Добавить') {
-                submitAdd(e,
-                  uriAvatar,
-                  inputEmail,
-                  inputSurname,
-                  inputFirstName,
-                  inputPatronymic,
-                  inputPositions,
-                )
-              } else {
-                if (!equalArrays(inputPositions, currentUser?.positions)
-                  && !confirm('После проведения данной операции потребуется повторная авторизация пользователя'))
-                  return;
-                submitEdit(e,
-                  uriAvatar,
-                  inputEmail,
-                  inputSurname,
-                  inputFirstName,
-                  inputPatronymic,
-                  inputPositions,
-                )
-              }
-            }}
-          >
-            {operation}
-          </FButtonRed>
-
-          <FButtonWhite
-            className="hidden md:inline-flex m-4"
-            onClick={() => setForm({ isOpen: false })}
-          >
-            Закрыть
-          </FButtonWhite>
-
-        </div>
-
-      </div>
 
       {/* {Панель информации} */}
       <div
-        className="flex-initial flex flex-col space-y-2 w-full rounded-md"
+        className="flex-initial flex flex-col space-y-4 w-full md:max-w-xl bg-white rounded-md"
       >
+        {/* {Изображение аватара для мобильного} */}
+        {(uriAvatar || serverData?.user?.uiAvatarsSrc) &&
+          <div
+            className="w-full flex md:hidden items-center justify-center mb-4 select-none"
+          >
+            <Image
+              className="object-cover w-44 h-44 rounded-full"
+              width={176}
+              height={176}
+              src={uriAvatar ? uriAvatar : serverData?.user?.uiAvatarsSrc}
+              alt=""
+            />
+          </div>
+        }
 
         {/* {Ввод нового аватара} */}
         <div className="form-item">
@@ -265,7 +215,7 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
         <div className="form-item">
           <label className="text-xl select-none">Email</label>
           <FInputEmail
-            value={inputEmail}
+            value={inputEmail ? inputEmail : ''}
             onEmailChange={emailChange}
           />
         </div>
@@ -276,7 +226,7 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
           <FInputInitials
             id='family-name'
             placeholder='Фамилия'
-            value={inputSurname}
+            value={inputSurname ? inputSurname : ''}
             onChange={surnameChange}
           />
         </div>
@@ -287,7 +237,7 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
           <FInputInitials
             id='FullName'
             placeholder='Имя'
-            value={inputFirstName}
+            value={inputFirstName ? inputFirstName : ''}
             onChange={firstNameChange}
           />
         </div>
@@ -298,7 +248,7 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
           <FInputInitials
             id='additional-name'
             placeholder='Отчество'
-            value={inputPatronymic}
+            value={inputPatronymic ? inputPatronymic : ''}
             onChange={patronymicChange}
           />
         </div>
@@ -309,8 +259,8 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
           <FSelect
             options={FPositionItemList}
             onChange={positionsChange}
-            value={inputPositions}
-            defaultValue={currentUser.positions}
+            value={inputPositions ? inputPositions : []}
+            defaultValue={serverData?.user.positions}
             multiple
           />
         </div>
@@ -329,12 +279,35 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
           </span>
         </div>
 
-        {/* {Кнопки управления для телефона} */}
+      </div>
+      
+      {/* {Изображение аватара, емайл, кнопки управления} */}
+      <div
+        className="flex flex-col select-none items-end w-full justify-between md:items-center md:w-fit md:p-4"
+      >
+
+        {/* {Изображение аватара} */}
         <div
-          className="form-item md:hidden self-end flex flex-col space-y-2 select-none"
+          className="w-full hidden md:flex items-center justify-center mb-4 select-none"
+        >
+          {(uriAvatar || serverData?.user?.uiAvatarsSrc) &&
+            <Image
+              className="object-cover w-44 h-44 rounded-full"
+              width={176}
+              height={176}
+              src={uriAvatar ? uriAvatar : serverData?.user?.uiAvatarsSrc}
+              alt=""
+            />
+          }
+        </div>
+
+        {/* {Кнопки управления} */}
+        <div
+          className="flex flex-col"
         >
 
           <FButtonRed
+            className="mb-4"
             disabled={!(form.isOpen && (operation == 'Добавить' ?
               (isInputValidateEmail
                 && isInputValidateSurname
@@ -344,7 +317,7 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
                 || isInputValidateSurname
                 || isInputValidateFirstName
                 || isInputValidatePatronymic
-                || (!equalArrays(inputPositions, currentUser?.positions))
+                || (!equalArrays(inputPositions, serverData?.user?.positions))
                 || uriAvatar != null
               )
             ))}
@@ -359,7 +332,7 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
                   inputPositions,
                 )
               } else {
-                if (!equalArrays(inputPositions, currentUser?.positions)
+                if (!equalArrays(inputPositions, serverData?.user?.positions)
                   && !confirm('После проведения данной операции потребуется повторная авторизация пользователя'))
                   return;
                 submitEdit(e,
@@ -377,6 +350,7 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
           </FButtonRed>
 
           <FButtonWhite
+            className=""
             onClick={() => setForm({ isOpen: false })}
           >
             Закрыть
@@ -385,6 +359,7 @@ export function FUserEditForm({ form, setForm, submitAdd, submitEdit }) {
         </div>
 
       </div>
+
     </FModalForm>
   )
 }

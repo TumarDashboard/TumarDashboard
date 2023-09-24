@@ -8,12 +8,6 @@ import userService from '../src/service/userService';
 export default async function checkCors(req, res, options) {
     // console.log('-------start checkCors------');
 
-    // console.log("checkrefreshtoken", res.getHeaders()['checkrefreshtoken']);
-
-    // console.log("refreshToken", req.cookies['refreshToken']);
-
-    // console.log('-------end checkCors------');
-
     const headers = res.getHeaders();
 
     if( headers['checkrefreshtoken'] ){
@@ -27,12 +21,20 @@ export default async function checkCors(req, res, options) {
         }
         
     }
+    
+    if( req.body ){
 
-    if ( headers['apiblock'] && req.body ) {
+        headers['apiblock'] && ( req.body.apiBlock = headers['apiblock'] );
 
-        req.body.apiBlock = headers['apiblock'];
+        headers['usercompare'] && ( req.body.userCompare = headers['usercompare'] );
+
+        headers['userdataid'] && ( req.body.userDataID = headers['userdataid'] );
+
+        headers['userdatapositions'] && ( req.body.userDataPositions = headers['userdatapositions'] );
 
     }
+
+    // console.log('-------end checkCors------');
 
     // Initializing the cors middleware
     const middleware = Cors(options)

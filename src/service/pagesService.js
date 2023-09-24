@@ -368,6 +368,73 @@ class ModalService {
             throw error;
         }
     }
+
+    async getGuardPosts(inputData) {
+
+        try {
+
+            // console.log('---------------getGuardPostEditForm-----------------');
+
+            //Validate date----------------------------------------------------------------------------------------------
+            const { apiBlock, userCompare, userDataID, userDataPositions } = inputData;
+
+            const guardPostID = inputData.arg._id;
+            // await new Promise(resolve=>setTimeout(()=>resolve(), 1000))
+            // throw new ApiError(500,'dsdsd2222222222222222222222222222222222222222222222222 32ычффффффффффффффффффффффффффффффффффф1 12ывфыв')
+            //Проверка соединения с Монго--------------------------------------------------------------------------------
+            await mongoConnect();
+
+            // Выборка данных о физ. посте----------------------------------------------------------------------------------
+            var dtoGuardPost;
+            
+            if (guardPostID) {
+
+                //Запрос данных из Монго-------------------------------------------------------------------------------------
+                const mongoGuardPost = await mongoGuardPostsModel
+                    .findById(guardPostID)
+                    .lean();
+    
+                if (!mongoGuardPost) {
+                    throw ApiError.BadRequest("Не найдены данные физ. поста по указанному ID");
+                }
+    
+                //Сверка с доступом к данным---------------------------------------------------------------------------------
+                if (userCompare && mongoGuardPost.manager.toString() != userDataID ){
+                    throw ApiError.BadRequest("Вы не имеете право доступа к данным физ. поста");
+                }
+    
+                //Удаление данных apiBlock------------------------------------------------------------------------------------
+                if (apiBlock) {
+                    for (const block of apiBlock.split(' ')) {
+                        delete mongoGuardPost[block];
+                    }
+                }
+
+                //Форматированние данных для возврата-------------------------------------------------------------------------
+                dtoGuardPost = new DTOGuardPost(mongoGuardPost);
+            }
+
+            // Выборка данных об НСО--------------------------------------------------------------------------------------
+            const mongoUsers = await mongoUserModel.find({ positions: FPositionNSO }, 'surname firstName').lean();
+
+            const optionsGuardPostManagers = [{
+                label: 'Отсутствует', value: 'EMPTY'
+              }, ...mongoUsers?.map((user) => {
+                return {
+                  label: [user.surname, user.firstName].join(' '),
+                  value: user._id.toString()
+                }
+              })]
+
+            //Возврат данных----------------------------------------------------------------------------------------------
+            return { guardPost: dtoGuardPost, optionsGuardPostManagers }
+
+        } catch (error) {
+            console.log(error);
+
+            throw error;
+        }
+    }  
 }
 
 export default new ModalService();

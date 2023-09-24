@@ -1,22 +1,19 @@
 import { FModalForm } from '../FModalForm';
 import { useState, useEffect } from 'react';
+import useSWRMutation from 'swr/mutation';
+import { CreditCardIcon } from '@heroicons/react/24/solid';
+import { isUndefined } from 'swr/_internal';
 
 import { FInputProtectedObjectNumber } from "../../levelE_low/FInputProtectedObjectNumber";
 import { FTextArea } from "../../levelE_low/FTextArea";
 import { FInputImageFile } from "../../levelE_low/FInputImageFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
-import { FSelect } from "../../levelE_low/FSelect";
-import { FSelectShifts } from "../../levelE_low/FSelectShifts";
-import useSWRMutation from 'swr/mutation';
-import { fetchAuthMethod } from "../../../middleware/requests";
-
-import { equalArrays } from '../../../src/utils/arrayUtils';
-import { FInputText } from '../../levelE_low/FInputText';
 import { FInputTelephone } from '../../levelE_low/FInputTelephone';
-import { CreditCardIcon } from '@heroicons/react/24/solid';
 import { FSimCardFindForm } from '../simCard/FSimCardFindForm';
-import { isUndefined } from 'swr/_internal';
+import Image from "next/legacy/image";
+
+import { fetchAuthMethod } from "../../../middleware/requests";
 
 export function FProtectedObjectEditForm({ accessRules, form, setForm, submitAdd, submitEdit, users }) {
 
@@ -50,7 +47,7 @@ export function FProtectedObjectEditForm({ accessRules, form, setForm, submitAdd
       if (operation == 'Добавить')
         setInputValidateProtectedObjectNumber(validate);
       else
-        setInputValidateProtectedObjectNumber(validate && (value != form.protectedObject?.number));
+        setInputValidateProtectedObjectNumber(validate && (value != serverData?.protectedObject?.number));
     }
     else
       setInputValidateProtectedObjectNumber(false);
@@ -77,19 +74,19 @@ export function FProtectedObjectEditForm({ accessRules, form, setForm, submitAdd
     setInputProtectedObjectSim1(value);
 
     let competitor = isUndefined(inputProtectedObjectSim2) ? serverData?.sim2 : inputProtectedObjectSim2;
-    
-    let dublicateSim =  competitor ? value == competitor : false ;
 
-    setErrorProtectedObjectDublicateSim( dublicateSim );
+    let dublicateSim = competitor ? value == competitor : false;
 
-    if (dublicateSim){
-      setInputValidateProtectedObjectSim1( false );
-    }else if (!value || value==''){
-      setInputValidateProtectedObjectSim1( !isUndefined(serverData?.sim1) );
-    }else if (operation == 'Добавить') {
-      setInputValidateProtectedObjectSim1( validate );
+    setErrorProtectedObjectDublicateSim(dublicateSim);
+
+    if (dublicateSim) {
+      setInputValidateProtectedObjectSim1(false);
+    } else if (!value || value == '') {
+      setInputValidateProtectedObjectSim1(!isUndefined(serverData?.sim1));
+    } else if (operation == 'Добавить') {
+      setInputValidateProtectedObjectSim1(validate);
     } else {
-      setInputValidateProtectedObjectSim1( validate && (value != serverData?.sim1) );
+      setInputValidateProtectedObjectSim1(validate && (value != serverData?.sim1));
     }
   }
 
@@ -103,19 +100,19 @@ export function FProtectedObjectEditForm({ accessRules, form, setForm, submitAdd
     setInputProtectedObjectSim2(value);
 
     let competitor = isUndefined(inputProtectedObjectSim1) ? serverData?.sim1 : inputProtectedObjectSim1;
-    
-    let dublicateSim =  competitor ? value == competitor : false ;
 
-    setErrorProtectedObjectDublicateSim( dublicateSim );
-    
-    if (dublicateSim){
-      setInputValidateProtectedObjectSim1( false );
-    }else if (!value || value==''){
-      setInputValidateProtectedObjectSim2( !isUndefined(serverData?.sim2) );
-    }else if (operation == 'Добавить') {
-      setInputValidateProtectedObjectSim2( validate );
+    let dublicateSim = competitor ? value == competitor : false;
+
+    setErrorProtectedObjectDublicateSim(dublicateSim);
+
+    if (dublicateSim) {
+      setInputValidateProtectedObjectSim1(false);
+    } else if (!value || value == '') {
+      setInputValidateProtectedObjectSim2(!isUndefined(serverData?.sim2));
+    } else if (operation == 'Добавить') {
+      setInputValidateProtectedObjectSim2(validate);
     } else {
-      setInputValidateProtectedObjectSim2( validate && (value != serverData?.sim2) );
+      setInputValidateProtectedObjectSim2(validate && (value != serverData?.sim2));
     }
   }
 
@@ -159,268 +156,319 @@ export function FProtectedObjectEditForm({ accessRules, form, setForm, submitAdd
     reset: resetServerData
   } = useSWRMutation('/method/modal/getProtectedObjectEditForm', fetchAuthMethod);
 
-  /*-------------------------------------------------------------------------------------------------------
-      Чистка/Обновление инпутов
-  -------------------------------------------------------------------------------------------------------*/
+  useEffect(() => {
+    if (serverData?.protectedObject) {
+      setInputProtectedObjectNumber(serverData.protectedObject.number);
+      setInputProtectedObjectName(serverData.protectedObject.name);
+      setInputProtectedObjectAddress(serverData.protectedObject.address);
+      setInputProtectedObjectDescription(serverData.protectedObject.description);
+      setInputProtectedObjectSim1(serverData.protectedObject.sim1);
+      setInputProtectedObjectSim2(serverData.protectedObject.sim2);
+    }else{
+      setInputValidateProtectedObjectNumber(operation == 'Добавить');
+      setInputValidateProtectedObjectSim1(operation == 'Добавить');
+      setInputValidateProtectedObjectSim2(operation == 'Добавить');
+    }
+    return () => {
+      setInputProtectedObjectNumber(null);
+      setInputValidateProtectedObjectNumber(false);
+      setInputProtectedObjectName(null);
+      setInputProtectedObjectAddress(null);
+      setInputProtectedObjectDescription(null);
+      setInputProtectedObjectPhoto(null);
+      setInputProtectedObjectSim1(null);
+      setInputValidateProtectedObjectSim1(false);
+      setInputProtectedObjectSim2(null);
+      setInputValidateProtectedObjectSim2(false);
+    }
+  }, [serverData]);
+
+  /*--Чистка/Обновление инпутов--------------------------------------------------------------------------*/
   useEffect(() => {
     if (form.error) {
       setError(form.error);
     } else if (form.isOpen) {
 
-      if (form.operation != 'Добавить')
-        triggerFromServer(form.protectedObject?._id);
+      setError(null);
+      
+      triggerFromServer({
+        _id: form.protectedObject?._id
+      });
 
       setOperation(form.operation);
-      setInputProtectedObjectNumber(form.protectedObject?.number);
-      setInputValidateProtectedObjectNumber(form.operation == 'Добавить');
-      setInputProtectedObjectName(form.protectedObject?.name);
-      setInputProtectedObjectAddress(form.protectedObject?.address);
-      setInputProtectedObjectDescription(form.protectedObject?.description);
-      setInputProtectedObjectPhoto(null);
 
-      // setInputProtectedObjectSim1(form.protectedObject?.sim1);
-      // setInputValidateProtectedObjectSim1(form.operation == 'Добавить');
-      // setInputProtectedObjectSim2(form.protectedObject?.sim2);
-      // setInputValidateProtectedObjectSim2(form.operation == 'Добавить');
-
-      setInputProtectedObjectSim1();
-      setInputValidateProtectedObjectSim1(false);
-      setInputProtectedObjectSim2();
-      setInputValidateProtectedObjectSim2(false);
-
-      setError(null);
-    } else {
+    }else{
       resetServerData();
     }
   }, [form])
 
-  /*-------------------------------------------------------------------------------------------------------
-  -------------------------------------------------------------------------------------------------------*/
-
+  /*-----------------------------------------------------------------------------------------------------*/
   return (
     <FModalForm
-      title={operation == 'Добавить' ? 'Добавить пультовой объект' : 'Данные пультового объекта'}
-      widthForm='w-full lg:w-1/2 mx-6'
+      title={operation == 'Добавить' ? 'Добавить данные пультового объекта' : 'Данные пультового объекта'}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
-      className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
+      isModalFormLoading={!serverData || isMutatingFromServer}
+      isModalFormError={error}
+      className="flex flex-col items-center md:flex-row md:items-stretch p-4 w-full overflow-y-auto max-h-[90vh]"
+      widthForm='min-w-min'
     >
-      {/* Номер */}
-      <div className='flex w-full form-item items-center min-w-[150px] max-w-[150px]'>
 
-        <label className="text-lg pr-2">Номер</label>
+      {/* {Панель информации} */}
+      <div
+        className="flex-initial flex flex-col space-y-4 w-full min-w-max md:max-w-xl bg-white rounded-md"
+      >
 
-        {AReditProtectedObjectNumber || form.operation == 'Добавить'
-          ? <FInputProtectedObjectNumber
-            id='guard-post-number'
-            placeholder='###'
-            value={inputProtectedObjectNumber ? inputProtectedObjectNumber : ''}
-            onChange={ProtectedObjectNumberChange}
-            key={form.key}
-          />
-          : <p className="text-black text-xl font-bold">{inputProtectedObjectNumber}</p>}
-
-      </div>
-
-      {/* Наименование */}
-      <div className="form-item w-full mt-2 flex flex-col sm:flex-row">
-        <label className="text-lg pr-2">Наименование</label>
-        {AReditProtectedObjectName || form.operation == 'Добавить'
-          ? <FTextArea
-            id='name'
-            placeholder='Наименование'
-            value={inputProtectedObjectName ? inputProtectedObjectName : ''}
-            onChange={setInputProtectedObjectName}
-            key={form.key}
-          />
-          : <p className="text-black text-xl font-bold">{inputProtectedObjectName}</p>}
-      </div>
-
-      {/* Адрес */}
-      <div className="form-item w-full mt-2 flex flex-col sm:flex-row">
-        <label className="text-lg pr-2">Адрес</label>
-        {AReditProtectedObjectAddress || form.operation == 'Добавить'
-          ? <FTextArea
-            id='address'
-            placeholder='Адрес'
-            value={inputProtectedObjectAddress ? inputProtectedObjectAddress : ''}
-            onChange={setInputProtectedObjectAddress}
-            key={form.key}
-          />
-          : <p className="text-black text-xl font-bold">{inputProtectedObjectAddress}</p>}
-      </div>
-
-      {/* Фото */}
-      {AReditProtectedObjectPhoto || form.operation == 'Добавить' &&
-        <div className="form-item flex items-center w-full mt-2">
-          <label className="text-lg pr-4">Фото</label>
-          <FInputImageFile
-            setUri={setInputProtectedObjectPhoto}
-            key={form.key}
-          />
-        </div>}
-
-      {/* Описание и Сим карты */}
-      {form.operation == 'Добавить' || (serverData && !isMutatingFromServer) ?
-
-        <div className="flex flex-col w-full">
-
-          {/* Сим карты */}
-          {(form.operation == 'Добавить' || AReditProtectedObjectSimCard) &&
-            <div className="flex flex-col xl:flex-row xl:space-x-4">
-
-              {/* Сим 1 */}
-              <div className="form-item flex items-center w-full mt-2 space-x-2">
-                <label className="text-lg min-w-fit">Сим 1</label>
-                <FInputTelephone
-                  placeholder='Номер'
-                  value={isUndefined(inputProtectedObjectSim1) ? (serverData?.sim1 ? serverData.sim1 : '') : inputProtectedObjectSim1 }
-                  onChange={ProtectedObjectSim1Change}
-                  key={form.key}
-                />
-                <FButtonWhite
-                  className="flex"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setSimCardFindForm({
-                      isOpen: true,
-                      target: 'sim1',
-                      value: isUndefined(inputProtectedObjectSim1) ? (serverData?.sim1 ? serverData.sim1 : '') : inputProtectedObjectSim1,
-                    })
-                  }}
-                >
-                  <CreditCardIcon
-                    className="h-6 w-6"
-                  />
-                </FButtonWhite>
-              </div>
-
-              {/* Сим 2 */}
-              <div className="form-item flex items-center w-full mt-2 space-x-2">
-                <label className="text-lg min-w-fit">Сим 2</label>
-                <FInputTelephone
-                  placeholder='Номер'
-                  value={isUndefined(inputProtectedObjectSim2) ? (serverData?.sim2 ? serverData.sim2 : '') : inputProtectedObjectSim2 }
-                  onChange={ProtectedObjectSim2Change}
-                  key={form.key}
-                />
-                <FButtonWhite
-                  className="flex"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setSimCardFindForm({
-                      isOpen: true,
-                      target: 'sim2',
-                      value: isUndefined(inputProtectedObjectSim2) ? (serverData?.sim2 ? serverData.sim2 : '') : inputProtectedObjectSim2,
-                    })
-                  }}
-                >
-                  <CreditCardIcon
-                    className="h-6 w-6"
-                  />
-                </FButtonWhite>
-              </div>
-
-              {/* Статус ошибки */}
-              {errorProtectedObjectDublicateSim &&
-              <div className="form-item">
-                <span className="text-color_C italic break-words">
-                  Дублирование сим-карт
-                </span>
-              </div>}
-              
-            </div>}
-
-          {/* Описание */}
-          <div className="form-item w-full mt-2">
-            <label className="text-lg">Описание</label>
-            {AReditProtectedObjectDescription || form.operation == 'Добавить'
-              ? <FTextArea
-                id='description'
-                className={'h-60'}
-                placeholder='Описание'
-                value={inputProtectedObjectDescription ? inputProtectedObjectDescription : serverData ? serverData.description : ''}
-                onChange={setInputProtectedObjectDescription}
-                key={form.key}
-              />
-              : <div
-                className='relative rounded-xl overflow-auto whitespace-pre-line bg-slate-200 text-neutral-800 border-[1px] border-slate-600'
-              >
-                <p
-                  className="text-sm p-2 
-                  overscroll-contain overflow-auto max-h-60 mx-4 bg-white"
-                >
-                  {serverData ? serverData.description : ''}
-                </p>
-              </div>}
-          </div>
-
-        </div>
-        :
-        <div className="form-item w-full mt-4 flex justify-center h-60">
-          <svg fill='none' className="w-52 h-52 animate-spin" viewBox="0 0 32 32" xmlns='http://www.w3.org/2000/svg'>
-            <path clipRule='evenodd'
-              d='M15.165 8.53a.5.5 0 01-.404.58A7 7 0 1023 16a.5.5 0 011 0 8 8 0 11-9.416-7.874.5.5 0 01.58.404z'
-              fill='currentColor' fillRule='evenodd' />
-          </svg>
-        </div>
-      }
-
-      {/* Статус ошибки */}
-      <div className="form-item">
-        <span className="text-color_C italic break-words">
-          {error}
-        </span>
-      </div>
-
-      {/* Кнопки */}
-      {AReditProtectedObject &&
-        <div className="ml-auto mt-4">
-
-          <FButtonRed
-            className=""
-            disabled={!(form.isOpen && (operation == 'Добавить' ?
-              (isInputValidateProtectedObjectNumber
-                && inputProtectedObjectName) :
-              (!isMutatingFromServer && (
-                isInputValidateProtectedObjectNumber
-                || (inputProtectedObjectName != form.protectedObject?.name)
-                || (inputProtectedObjectAddress != form.protectedObject?.address)
-                || (inputProtectedObjectDescription != form.protectedObject?.description)
-                || inputProtectedObjectPhoto != null
-                || isInputValidateProtectedObjectSim1
-                || isInputValidateProtectedObjectSim2
-              ))
-            ))}
-            onClick={(e) => operation == 'Добавить' ? submitAdd(e,
-              inputProtectedObjectNumber,
-              inputProtectedObjectName,
-              inputProtectedObjectAddress,
-              inputProtectedObjectPhoto,
-              inputProtectedObjectDescription,
-              inputProtectedObjectSim1,
-              inputProtectedObjectSim2,
-            ) : submitEdit(e,
-              AReditProtectedObjectNumber ? inputProtectedObjectNumber : undefined,
-              AReditProtectedObjectName ? inputProtectedObjectName : undefined,
-              AReditProtectedObjectAddress ? inputProtectedObjectAddress : undefined,
-              AReditProtectedObjectPhoto ? inputProtectedObjectPhoto : undefined,
-              AReditProtectedObjectDescription ? inputProtectedObjectDescription : undefined,
-              AReditProtectedObjectSimCard ? inputProtectedObjectSim1 : undefined,
-              AReditProtectedObjectSimCard ? inputProtectedObjectSim2 : undefined,
-            )}
+        {/* {Изображение аватара для мобильного} */}
+        {(inputProtectedObjectPhoto || serverData?.protectedObject?.photo) &&
+          <div
+            className="w-full flex md:hidden items-center justify-center mb-4 select-none"
           >
-            {operation}
-          </FButtonRed>
+            <Image
+              className="object-cover w-44 h-44 rounded-full"
+              width={176}
+              height={176}
+              src={inputProtectedObjectPhoto ? inputProtectedObjectPhoto : serverData?.protectedObject?.photo}
+              alt=""
+            />
+          </div>
+        }
+
+        {/* Номер */}
+        <div className='flex w-full form-item items-center min-w-[150px] max-w-[150px]'>
+
+          <label className="text-lg pr-2">Номер</label>
+
+          {AReditProtectedObjectNumber || form.operation == 'Добавить'
+            ? <FInputProtectedObjectNumber
+              id='guard-post-number'
+              placeholder='###'
+              value={inputProtectedObjectNumber ? inputProtectedObjectNumber : ''}
+              onChange={ProtectedObjectNumberChange}
+              key={form.key}
+            />
+            : <p className="text-black text-xl font-bold">{inputProtectedObjectNumber}</p>}
+
+        </div>
+
+        {/* Наименование */}
+        <div className="form-item w-full flex flex-col sm:flex-row">
+          <label className="text-lg pr-2">Наименование</label>
+          {AReditProtectedObjectName || form.operation == 'Добавить'
+            ? <FTextArea
+              id='name'
+              placeholder='Наименование'
+              value={inputProtectedObjectName ? inputProtectedObjectName : ''}
+              onChange={setInputProtectedObjectName}
+              key={form.key}
+            />
+            : <p className="text-black text-xl font-bold">{inputProtectedObjectName}</p>}
+        </div>
+
+        {/* Адрес */}
+        <div className="form-item w-full mt-2 flex flex-col sm:flex-row">
+          <label className="text-lg pr-2">Адрес</label>
+          {AReditProtectedObjectAddress || form.operation == 'Добавить'
+            ? <FTextArea
+              id='address'
+              placeholder='Адрес'
+              value={inputProtectedObjectAddress ? inputProtectedObjectAddress : ''}
+              onChange={setInputProtectedObjectAddress}
+              key={form.key}
+            />
+            : <p className="text-black text-xl font-bold">{inputProtectedObjectAddress}</p>}
+        </div>
+
+        {/* Фото */}
+        {AReditProtectedObjectPhoto || form.operation == 'Добавить' &&
+          <div className="form-item flex items-center w-full mt-2">
+            <label className="text-lg pr-4">Фото</label>
+            <FInputImageFile
+              setUri={setInputProtectedObjectPhoto}
+              key={form.key}
+            />
+          </div>}
+
+        {/* Сим карты */}
+        <div className="flex flex-col w-full min-w-max">
+          <div className="flex flex-col xl:flex-row xl:space-x-4">
+            {AReditProtectedObjectSimCard || form.operation == 'Добавить'
+              ? (<>
+                {/* Сим 1 */}
+                <div className="form-item flex items-center w-full mt-2 space-x-2">
+                  <label className="text-lg min-w-fit">Сим 1</label>
+                  <FInputTelephone
+                    placeholder='Номер'
+                    value={inputProtectedObjectSim1 && !isUndefined(inputProtectedObjectSim1) ? inputProtectedObjectSim1 : ''}
+                    onChange={ProtectedObjectSim1Change}
+                    key={form.key}
+                  />
+                  <FButtonWhite
+                    className="flex"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setSimCardFindForm({
+                        isOpen: true,
+                        target: 'sim1',
+                        value: isUndefined(inputProtectedObjectSim1) ? (serverData?.sim1 ? serverData.sim1 : '') : inputProtectedObjectSim1,
+                      })
+                    }}
+                  >
+                    <CreditCardIcon
+                      className="h-6 w-6"
+                    />
+                  </FButtonWhite>
+                </div>
+
+                {/* Сим 2 */}
+                <div className="form-item flex items-center w-full mt-2 space-x-2">
+                  <label className="text-lg min-w-fit">Сим 2</label>
+                  <FInputTelephone
+                    placeholder='Номер'
+                    value={inputProtectedObjectSim2 && !isUndefined(inputProtectedObjectSim2) ? inputProtectedObjectSim2 : ''}
+                    onChange={ProtectedObjectSim2Change}
+                    key={form.key}
+                  />
+                  <FButtonWhite
+                    className="flex"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setSimCardFindForm({
+                        isOpen: true,
+                        target: 'sim2',
+                        value: isUndefined(inputProtectedObjectSim2) ? (serverData?.sim2 ? serverData.sim2 : '') : inputProtectedObjectSim2,
+                      })
+                    }}
+                  >
+                    <CreditCardIcon
+                      className="h-6 w-6"
+                    />
+                  </FButtonWhite>
+                </div>
+              </>) : (<>
+                {/* Сим 1 */}
+                <div className="form-item flex items-center w-full mt-2 space-x-2">
+                  <label className="text-lg min-w-fit">Сим 1</label>
+                  <p className="text-sm p-2 overscroll-contain overflow-auto max-h-60 mx-4 bg-white">
+                    value={inputProtectedObjectSim1 && !isUndefined(inputProtectedObjectSim1) ? inputProtectedObjectSim1 : ''}
+                  </p>
+                </div>
+
+                {/* Сим 2 */}
+                <div className="form-item flex items-center w-full mt-2 space-x-2">
+                  <label className="text-lg min-w-fit">Сим 2</label>
+                  <p className="text-sm p-2 overscroll-contain overflow-auto max-h-60 mx-4 bg-white">
+                    value={inputProtectedObjectSim2 && !isUndefined(inputProtectedObjectSim2) ? inputProtectedObjectSim2 : ''}
+                  </p>
+                </div>
+              </>)}
+
+          </div>
+        </div>
+
+        {/* Описание */}
+        <div className="form-item w-full mt-2">
+          <label className="text-lg">Описание</label>
+          {AReditProtectedObjectDescription || form.operation == 'Добавить'
+            ? <FTextArea
+              id='description'
+              className={'h-60'}
+              placeholder='Описание'
+              value={inputProtectedObjectDescription ? inputProtectedObjectDescription : ''}
+              onChange={setInputProtectedObjectDescription}
+              key={form.key}
+            />
+            : <div
+              className='relative rounded-xl overflow-auto whitespace-pre-line bg-slate-200 text-neutral-800 border-[1px] border-slate-600'
+            >
+              <p className="text-sm p-2 overscroll-contain overflow-auto max-h-60 mx-4 bg-white">
+                {inputProtectedObjectDescription ? inputProtectedObjectDescription : ''}
+              </p>
+            </div>}
+        </div>
+
+        {/* Статус ошибки */}
+        <div className="form-item">
+          <span className="text-color_C italic break-words">
+            {error}
+          </span>
+        </div>
+
+      </div>
+
+      {/* {Изображение аватара для компьютера, кнопки управления} */}
+      <div
+        className="flex flex-col select-none items-end w-full justify-between md:items-center md:w-fit md:p-4 
+        md:ml-4 md:border-t-8  md:border-red-700  md:rounded-md  md:bg-color_C"
+      >
+
+        {/* {Изображение аватара} */}
+        <div
+          className="w-full hidden md:flex items-center justify-center mb-4 select-none"
+        >
+          {(inputProtectedObjectPhoto || serverData?.protectedObject?.photo) &&
+            <Image
+              className="object-cover w-44 h-44 rounded-full"
+              width={176}
+              height={176}
+              src={inputProtectedObjectPhoto ? inputProtectedObjectPhoto : serverData?.protectedObject?.photo}
+              alt=""
+            />
+          }
+        </div>
+
+        {/* Кнопки */}
+        <div
+          className="flex flex-col"
+        >
+
+          {AReditProtectedObject &&
+            <FButtonRed
+              className="mb-4"
+              disabled={!(form.isOpen && (operation == 'Добавить' ?
+                (isInputValidateProtectedObjectNumber
+                  && inputProtectedObjectName) :
+                (!isMutatingFromServer && (
+                  isInputValidateProtectedObjectNumber
+                  || (inputProtectedObjectName != form.protectedObject?.name)
+                  || (inputProtectedObjectAddress != form.protectedObject?.address)
+                  || (inputProtectedObjectDescription != form.protectedObject?.description)
+                  || inputProtectedObjectPhoto != null
+                  || isInputValidateProtectedObjectSim1
+                  || isInputValidateProtectedObjectSim2
+                ))
+              ))}
+              onClick={(e) => operation == 'Добавить' ? submitAdd(e,
+                inputProtectedObjectNumber,
+                inputProtectedObjectName,
+                inputProtectedObjectAddress,
+                inputProtectedObjectPhoto,
+                inputProtectedObjectDescription,
+                inputProtectedObjectSim1,
+                inputProtectedObjectSim2,
+              ) : submitEdit(e,
+                AReditProtectedObjectNumber ? inputProtectedObjectNumber : undefined,
+                AReditProtectedObjectName ? inputProtectedObjectName : undefined,
+                AReditProtectedObjectAddress ? inputProtectedObjectAddress : undefined,
+                AReditProtectedObjectPhoto ? inputProtectedObjectPhoto : undefined,
+                AReditProtectedObjectDescription ? inputProtectedObjectDescription : undefined,
+                AReditProtectedObjectSimCard ? inputProtectedObjectSim1 : undefined,
+                AReditProtectedObjectSimCard ? inputProtectedObjectSim2 : undefined,
+              )}
+            >
+              {operation}
+            </FButtonRed>
+          }
 
           <FButtonWhite
-            className="ml-4"
+            className=""
             onClick={() => setForm({ isOpen: false })}
           >
             Закрыть
           </FButtonWhite>
 
-        </div>}
+        </div>
+      </div>
 
       {/* {Форма добавления/редактирования пультовой объекта} */}
       <FSimCardFindForm

@@ -1,22 +1,17 @@
 import { FModalForm } from '../FModalForm';
 import { useState, useEffect } from 'react';
+import useSWRMutation from 'swr/mutation';
 
-import { FTextArea } from "../../levelE_low/FTextArea";
-import { FInputImageFile } from "../../levelE_low/FInputImageFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
-import { FSelect } from "../../levelE_low/FSelect";
-import { FSelectShifts } from "../../levelE_low/FSelectShifts";
-import useSWRMutation from 'swr/mutation';
-import { fetchAuthMethod } from "../../../middleware/requests";
-
-import { equalArrays } from '../../../src/utils/arrayUtils';
-import { FInputText } from '../../levelE_low/FInputText';
-import { FInputIIN } from '../../levelE_low/FInputIIN';
 import { FInputTelephone } from '../../levelE_low/FInputTelephone';
 import { FInputICCID } from '../../levelE_low/FInputICCID';
+import Image from "next/legacy/image";
 
-export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submitEdit, users }) {
+import { fetchAuthMethod } from "../../../middleware/requests";
+import { getDateStamp } from '../../../src/utils/dateUtils';
+
+export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submitEdit }) {
 
   /*--Использование глобальных данных--------------------------------------------------------------------*/
   const [operation, setOperation] = useState('');
@@ -25,9 +20,6 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
   /*--Определение правил доступа-------------------------------------------------------------------------*/
   // const AReditSimCardManager = !accessRules.includes('editSimCard/apiBlock/manager');
   // const AReditSimCardRate = !accessRules.includes('editSimCard/apiBlock/rate');
-
-  /*--Провайдер Формы редактирования-------------------------------------------------------------------------*/
-  const [inputSimCardProvider, setInputSimCardProvider] = useState();
 
   /*--Абонентский номер------ Формы редактирования-------------------------------------------------------*/
   const [inputSimCardMSISDN, setInputSimCardMSISDN] = useState('');
@@ -45,7 +37,7 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
       else
         setInputValidateSimCardMSISDN(true);
     } else {
-      setInputValidateSimCardMSISDN(validate && (value != form.simCard?.msisdn));
+      setInputValidateSimCardMSISDN(validate && (value != serverData?.simCard?.msisdn));
     }
   }
 
@@ -62,41 +54,80 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
       else
         setInputValidateSimCardICCID(true);
     } else {
-      setInputValidateSimCardICCID(validate && (value != form.guard?.iccid));
+      setInputValidateSimCardICCID(validate && (value != serverData?.simCard?.iccid));
     }
   }
 
-  /*-------------------------------------------------------------------------------------------------------
-      Чистка/Обновление инпутов
-  -------------------------------------------------------------------------------------------------------*/
+  /*--Провайдер Формы редактирования-------------------------------------------------------------------------*/
+  const [inputSimCardProvider, setInputSimCardProvider] = useState();
+
+  /*--История Формы редактирования-------------------------------------------------------------------------*/
+  const [inputSimCardProtectedObjects, setInputSimCardProtectedObjects] = useState(null);
+
+  /*--Запрос данных на сервере---------------------------------------------------------------------*/
+  const {
+    data: serverData,
+    isMutating: isMutatingFromServer,
+    trigger: triggerFromServer,
+    reset: resetServerData
+  } = useSWRMutation('/method/modal/getSimCardEditForm', fetchAuthMethod);
+
+  useEffect(() => {
+    if (serverData?.simCard) {
+      console.log(serverData.simCard);
+      setInputSimCardMSISDN(serverData.simCard.msisdn);
+      setInputSimCardICCID(serverData.simCard.iccid);
+      setInputSimCardProvider(serverData.simCard.provider);
+      setInputSimCardProtectedObjects(serverData.simCard.protectedObjects);
+    } else {
+      setInputValidateSimCardMSISDN(operation == 'Добавить');
+      setInputValidateSimCardICCID(operation == 'Добавить');
+    }
+    return () => {
+      setInputSimCardMSISDN(null);
+      setInputValidateSimCardMSISDN(false);
+      setInputSimCardICCID(null);
+      setInputValidateSimCardICCID(false);
+      setInputSimCardProvider(null);
+      setInputSimCardProtectedObjects(null)
+    }
+  }, [serverData]);
+
+  /*--Чистка/Обновление инпутов--------------------------------------------------------------------------*/
   useEffect(() => {
     if (form.error) {
       setError(form.error);
     } else if (form.isOpen) {
 
       setOperation(form.operation);
-      setInputSimCardMSISDN(form.simCard?.msisdn);
-      setInputValidateSimCardMSISDN(form.operation == 'Добавить');
-      setInputSimCardICCID(form.simCard?.iccid);
-      setInputValidateSimCardICCID(form.operation == 'Добавить');
-      setInputSimCardProvider(form.simCard?.provider);
+
+      triggerFromServer({
+        _id: form.simCard?._id
+      });
+
       setError(null);
+
+    } else {
+      resetServerData();
     }
   }, [form])
 
-  /*-------------------------------------------------------------------------------------------------------
-  -------------------------------------------------------------------------------------------------------*/
+  /*-----------------------------------------------------------------------------------------------------*/
 
   return (
     <FModalForm
-      title={`${operation} сим-карту`}
-      widthForm='w-full lg:w-1/2 mx-6'
+
+      title={operation == 'Добавить' ? 'Добавить данные сим-карты' : 'Данные сим-карты'}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
+      isModalFormLoading={!serverData || isMutatingFromServer}
+      isModalFormError={error}
+      // className="flex flex-col items-center md:flex-row md:items-stretch p-4 w-full overflow-y-auto max-h-[90vh]"
       className="flex flex-col items-start p-4 w-full overflow-y-auto max-h-[90vh]"
+      widthForm='min-w-min'
     >
+
       {/* Абон. номер */}
-      
       <div className="form-item flex items-center">
         <label className="text-lg flex-none pr-2">Абон. номер</label>
         <FInputTelephone
@@ -108,7 +139,7 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
       </div>
 
       {/* Серийный номер */}
-      <div className="form-item flex items-center mt-4 w-full">
+      <div className="form-item flex flex-col md:flex-row items-start mt-4 w-full">
         <label className="text-lg flex-none pr-2">Серийный номер</label>
         <FInputICCID
           placeholder='Серийный номер'
@@ -119,10 +150,56 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
       </div>
 
       {/* Провайдер */}
-      {inputSimCardProvider && 
-      <div className="form-item w-full mt-4">
-        <label className="text-lg">Провайдер <b>{inputSimCardProvider}</b></label>
-      </div>}
+      {inputSimCardProvider &&
+        <div className="form-item w-full mt-4">
+          <label className="text-lg">Провайдер <b>{inputSimCardProvider}</b></label>
+        </div>}
+
+      {/* История расположения */}
+      {inputSimCardProtectedObjects?.length > 0 && <>
+        <label className='text-lg md:hidden'>Использовалась на объектах: </label>
+        <table className="min-w-full border-collapse block md:table text-sm mt-1">
+          <thead className="block md:table-header-group select-none">
+            <tr className="border md:border-none block md:table-row absolute -top-full md:top-auto -left-full md:left-auto md:relative
+            font-bold text-left">
+              <th className="block md:border-r md:table-cell py-1 px-2">Использовалась на объектах:</th>
+              <th className="block md:border-r md:table-cell py-1 px-2">Установлена:</th>
+              <th className="block md:table-cell py-1 px-2">Снята:</th>
+            </tr>
+          </thead>
+
+          <tbody className="block md:table-row-group">
+            {inputSimCardProtectedObjects.map((value, index) => {
+
+              const bodyRowFillColor = index & 1 ? 'bg-white' : 'bg-slate-100';
+
+              return <tr className={`rounded-md md:border-none block md:table-row mt-1 ${bodyRowFillColor}`}
+              >
+
+                <td className="md:border-r pr-1 text-left block md:table-cell">
+                  {value.protectedObject &&
+                    <span >
+                      Объект №{[
+                        value.protectedObject?.number,
+                        value.protectedObject?.name,
+                        value.protectedObject?.address
+                      ].filter(Boolean).join(', ')}
+                    </span>}
+                </td>
+
+                <td className="md:border-r px-1 text-left block md:table-cell">
+                  {value.mounted && <span><b className='md:hidden'>Установлена: </b>{(new Date(value.mounted)).toLocaleDateString()}</span>}
+                </td>
+
+                <td className="text-left px-1 block md:table-cell">
+                  {value.unmounted && <span><b className='md:hidden'>Снята: </b>{(new Date(value.unmounted)).toLocaleDateString()}</span>}
+                </td>
+
+              </tr>
+            })}
+          </tbody>
+
+        </table></>}
 
       {/* Статус ошибки */}
       <div className="form-item">
@@ -141,7 +218,7 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
               && isInputValidateSimCardICCID) :
             (isInputValidateSimCardMSISDN
               || isInputValidateSimCardICCID
-              || (inputSimCardProvider != form.simCard?.provider)
+              || (inputSimCardProvider != serverData?.simCard?.provider)
             )
           ))}
           onClick={(e) => operation == 'Добавить' ? submitAdd(e,
@@ -165,6 +242,7 @@ export function FSimCardEditForm({ accessRules, form, setForm, submitAdd, submit
         </FButtonWhite>
 
       </div>
+
     </FModalForm>
   )
 }
