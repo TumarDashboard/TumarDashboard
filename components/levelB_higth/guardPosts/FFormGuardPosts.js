@@ -78,7 +78,7 @@ const sortingTableCallback = (a, b, rule, invert) => {
 }
 
 export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts, 
-  setTableGuardPosts, setTableGuardPostsArchive, guardsData }) {
+  setTableGuardPosts, setTableGuardPostsArchive, guardsData, users }) {
   /*----Использование глобальных данных-------------------------------------------------------------------------------*/
   const router = useRouter();
 
@@ -850,7 +850,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
         setForm={setGuardPostEditForm}
         submitAdd={guardPostAdd}
         submitEdit={guardPostEdit}
-        // users={users}
+        users={users}
       />
 
       {/* {Форма удаления физ. поста} */}
@@ -884,6 +884,8 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
           });
         }}
         optionGuards={guards}
+        // users={users}
+        // guardPosts={tableGuardPosts}
         MOBXui={MOBXui}
         errorCallback={errorCallback}
       />

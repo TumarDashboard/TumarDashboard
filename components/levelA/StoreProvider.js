@@ -27,9 +27,7 @@ export function StoreProvider({ isFirstMount, children, initialState: initialDat
   // var { MOBXuser, MOBXui, error } = refreshStore(initialData, mobxUser?.isAuth == true);
   var { MOBXuser, MOBXui } = refreshStore(initialData, mobxUser?.isAuth == true);
 
-  return <StoreContext.Provider 
-      value={{MOBXuser, MOBXui}}
-    >
+  return <StoreContext.Provider value={{MOBXuser, MOBXui}}>
 
     {children}
 

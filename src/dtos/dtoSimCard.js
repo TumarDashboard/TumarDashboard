@@ -19,7 +19,6 @@ export default class DTOSimCard {
         this.msisdn = model.msisdn;
         this.iccid = model.iccid;
         this.provider = model.provider;
-        this.protectedObjects = model.protectedObjects;
     }
 
 }
@@ -38,7 +37,6 @@ export class DTOSimCardArchive {
         this.msisdn = model.msisdn;
         this.iccid = model.iccid;
         this.provider = model.provider;
-        this.protectedObjects = model.protectedObjects;
     }
 
 }

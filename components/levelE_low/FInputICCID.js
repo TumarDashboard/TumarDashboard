@@ -20,9 +20,9 @@ export function FInputICCID({ id, className, onChange, placeholder, ...props }) 
                 name={id}
                 placeholder={placeholder}
                 onChange={handleChange}
-                className={`${className} border border-gray-300 block w-56
+                className={`${className} border border-gray-300 block w-full
                     focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
-                    rounded-md shadow-sm disabled:bg-gray-100
+                    rounded-md shadow-sm disabled:bg-gray-100 
                     `}
                 {...props}
             />

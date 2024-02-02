@@ -16,6 +16,17 @@ export function FSimCardFindForm({ accessRules, form, setForm, submit }) {
   // const AReditSimCardManager = !accessRules.includes('editSimCard/apiBlock/manager');
   // const AReditSimCardRate = !accessRules.includes('editSimCard/apiBlock/rate');
 
+  /*--Запрос данных на сервере---------------------------------------------------------------------*/
+  const {
+    data: serverData,
+    isMutating: isMutatingFromServer,
+    trigger: triggerFromServer,
+    reset: resetServerData,
+    error: error
+  } = useSWRMutation('/method/modal/getSimCardFindForm', fetchAuthMethod,{
+    throwOnError: false
+  });
+
   /*----Фильтрация таблицы-------------------------------------------------------------------------------*/
   const [inputFilterText, setInputFilterText] = useState([]);
   const filterringTimeout = useRef();
@@ -24,37 +35,16 @@ export function FSimCardFindForm({ accessRules, form, setForm, submit }) {
 
     const filter = text?.toLowerCase().replaceAll(/[^\w]/g, '');
 
-    if (filter && filter.length > 3)
+    if(filter && filter.length > 3)
       triggerFromServer(filter);
 
   }
 
   /*--Выбранные данные-----------------------------------------------------------------------------------*/
-
+  
   const [inputChecked, setInputChecked] = useState();
 
   const [inputSelected, setInputSelected] = useState();
-
-  /*--Запрос данных на сервере---------------------------------------------------------------------*/
-  const {
-    data: serverData,
-    isMutating: isMutatingFromServer,
-    trigger: triggerFromServer,
-    reset: resetServerData,
-    error: error
-  } = useSWRMutation('/method/modal/getSimCardFindForm', fetchAuthMethod, {
-    throwOnError: false
-  });
-
-  useEffect(() => {
-    console.log(serverData);
-    if (serverData?.length > 0) {
-      setInputSelected(serverData.find((value => value.msisdn == inputFilterText)))
-    }
-    return () => {
-      setInputSelected();
-    }
-  }, [serverData]);
 
   /*--Чистка/Обновление инпутов--------------------------------------------------------------------------*/
   useEffect(() => {
@@ -90,55 +80,10 @@ export function FSimCardFindForm({ accessRules, form, setForm, submit }) {
 
       {/* Выбранный элемент */}
       {inputSelected &&
-        <div className="form-item flex flex-col w-full items-start pb-2">
-          <label className="text-sm flex flex-wrap break-all">Выбрано: <b>{inputSelected.msisdn}</b>({inputSelected.iccid})</label>
-
-          {/* История расположения */}
-          {inputSelected.protectedObjects?.length > 0 && <>
-            <label className='text-sm font-bold md:hidden mt-1'>Использовалась на объектах: </label>
-            <table className="min-w-full border-collapse block md:table text-xs">
-
-              <thead className="block md:table-header-group select-none">
-                <tr className="border md:border-none block md:table-row absolute -top-full md:top-auto -left-full md:left-auto md:relative
-                  font-bold text-left">
-                  <th className="block md:border-r md:table-cell py-1 px-2">Использовалась на объектах:</th>
-                  <th className="block md:border-r md:table-cell py-1 px-2">Установлена:</th>
-                  <th className="block md:table-cell py-1 px-2">Снята:</th>
-                </tr>
-              </thead>
-
-              <tbody className="block md:table-row-group">
-                {inputSelected.protectedObjects.map((value, index) => {
-
-                  const bodyRowFillColor = index & 1 ? 'bg-white' : 'bg-slate-100';
-
-                  return <tr className={`rounded-md md:border-none block md:table-row mt-1 ${bodyRowFillColor}`}>
-
-                    <td className="md:border-r pr-1 text-left block md:table-cell">
-                      {value.protectedObject &&
-                        <span >
-                          Объект №{[
-                            value.protectedObject?.number,
-                            value.protectedObject?.name,
-                            value.protectedObject?.address
-                          ].filter(Boolean).join(', ')}
-                        </span>}
-                    </td>
-
-                    <td className="md:border-r px-1 text-left block md:table-cell">
-                      {value.mounted && <span><b className='md:hidden'>Установлена: </b>{(new Date(value.mounted)).toLocaleDateString()}</span>}
-                    </td>
-
-                    <td className="text-left px-1 block md:table-cell">
-                      {value.unmounted && <span><b className='md:hidden'>Снята: </b>{(new Date(value.unmounted)).toLocaleDateString()}</span>}
-                    </td>
-
-                  </tr>
-                })}
-              </tbody>
-
-            </table></>}
-        </div>}
+      <div className="form-item flex items-center">
+        <label className="text-lg flex-none pr-2">Выбрано:</label>
+        <p><b>{inputSelected.msisdn}</b> | {inputSelected.iccid}</p>
+      </div>}
 
       {/* Фильтр и кнопка выбора */}
       <div className="form-item flex items-center w-full space-x-2">
@@ -169,36 +114,36 @@ export function FSimCardFindForm({ accessRules, form, setForm, submit }) {
       </div>
 
       {/* Таблица данных сервера */}
-      {serverData?.length > 0 &&
-        <fieldset className="form-item w-full mt-4">
-          {serverData.map((element, index) => {
+      {serverData?.length>0 && 
+      <fieldset className="form-item w-full mt-4">
+        {serverData.map((element, index)=>{
 
-            const bodyRowFillColor = index & 1 ? 'bg-white' : 'bg-slate-100';
+          const bodyRowFillColor = index & 1 ? 'bg-white' : 'bg-slate-100';
 
-            return <div
-              className={`flex w-full items-center hover:bg-slate-200 rounded-xl ${bodyRowFillColor}`}
-              key={element._id}
+          return <div
+            className={`flex w-full items-center hover:bg-slate-200 rounded-xl ${bodyRowFillColor}`}
+            key={element._id}
+          >
+            <input 
+              type="radio"
+              id={"radio"+element._id}
+              className='mx-4'
+              onChange={(e)=>{
+                setInputChecked(index);
+                setInputSelected(element);
+              }}
+              checked={inputChecked==index}
+            />
+            <label
+              htmlFor={"radio"+element._id}
+              className="flex w-full justify-around text-xs flex-col sm:flex-row my-1"
             >
-              <input
-                type="radio"
-                id={"radio" + element._id}
-                className='mx-4'
-                onChange={(e) => {
-                  setInputChecked(index);
-                  setInputSelected(element);
-                }}
-                checked={inputChecked == index}
-              />
-              <label
-                htmlFor={"radio" + element._id}
-                className="flex w-full justify-around text-xs flex-col sm:flex-row my-1"
-              >
-                <b>{element.msisdn}</b>
-                <p>{element.iccid}</p>
-              </label>
-            </div>
-          })}
-        </fieldset>}
+              <b>{element.msisdn}</b>
+              <p>{element.iccid}</p>
+            </label>
+          </div>
+        })}
+      </fieldset>}
 
       {/* Статус ошибки */}
       <div className="form-item">

@@ -38,8 +38,3 @@ npm install framer-motion@latest
 
 npx @next/codemod@latest new-link
 npx @next/codemod@latest next-image-to-legacy-image
-
-следует чаще использовать 
-_id: {
-    $toString: "$guardPost._id"
-},

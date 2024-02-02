@@ -1,18 +1,19 @@
 import { FModalForm } from '../FModalForm';
 import { useState, useEffect } from 'react';
-import useSWRMutation from 'swr/mutation';
-
 import { FInputImageFile } from "../../levelE_low/FInputImageFile";
 import { FButtonRed } from "../../levelE_low/FButtonRed";
 import { FButtonWhite } from "../../levelE_low/FButtonWhite";
 import { FSelect } from "../../levelE_low/FSelect";
+import Image from "next/legacy/image";
+import useSWR from 'swr';
+import useSWRMutation from 'swr/mutation';
+import useSWRImmutable from 'swr/immutable';
+import { fetchAuthMethod } from "../../../middleware/requests";
+
+import { equalArrays } from '../../../src/utils/arrayUtils';
 import { FInputInitials, inputInitialsValidate } from '../../levelE_low/FInputInitials';
 import { FInputTelephone } from '../../levelE_low/FInputTelephone';
 import { FInputIIN } from '../../levelE_low/FInputIIN';
-import Image from "next/legacy/image";
-
-import { fetchAuthMethod } from "../../../middleware/requests";
-import { equalArrays } from '../../../src/utils/arrayUtils';
 
 export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
 
@@ -33,7 +34,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
       else
         setInputValidateGuardSurname(false);
     } else {
-      setInputValidateGuardSurname(validate && (value != serverData?.guard?.surname));
+      setInputValidateGuardSurname(validate && (value != form.guard?.surname));
     }
   }
 
@@ -50,7 +51,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
       else
         setInputValidateGuardfirstName(false);
     } else {
-      setInputValidateGuardfirstName(validate && (value != serverData?.guard?.firstName));
+      setInputValidateGuardfirstName(validate && (value != form.guard?.firstName));
     }
   }
 
@@ -68,9 +69,9 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
         setInputValidateGuardPatronymic(true);
     } else {
       if (value)
-        setInputValidateGuardPatronymic(validate && (value != serverData?.guard?.patronymic));
+        setInputValidateGuardPatronymic(validate && (value != form.guard?.patronymic));
       else
-        setInputValidateGuardPatronymic(value != serverData?.guard?.patronymic);
+        setInputValidateGuardPatronymic(value != form.guard?.patronymic);
     }
   }
 
@@ -90,7 +91,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
       else
         setInputValidateGuardTelephone(true);
     } else {
-      setInputValidateGuardTelephone(validate && (value != serverData?.guard?.telephone));
+      setInputValidateGuardTelephone(validate && (value != form.guard?.telephone));
     }
   }
 
@@ -107,14 +108,19 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
       else
         setInputValidateGuardIIN(true);
     } else {
-      setInputValidateGuardIIN(validate && (value != serverData?.guard?.IIN));
+      setInputValidateGuardIIN(validate && (value != form.guard?.IIN));
     }
   }
 
+  /*--Запрос данных на сервере---------------------------------------------------------------------*/
+
+  const {
+    data: optionGuardPosts,
+    isMutating: isMutatingFromServer,
+    trigger: triggerFromServer,
+  } = useSWRMutation('/method/modal/getGuardEditForm', fetchAuthMethod);
+
   /*--Физ.посты Формы редактирования---------------------------------------------------------------------*/
-
-  const [optionsGuardPosts, setOptionsGuardPosts] = useState([{ value: 'EMPTY', label: 'Отсутствует' }]);
-
   const [inputGuardGuardPosts, setInputGuardGuardPosts] = useState([]);
 
   const guardPostChange = (e) => {
@@ -131,67 +137,27 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
     setInputGuardGuardPosts(positions);
   }
 
-  /*--Запрос данных на сервере---------------------------------------------------------------------*/
-
-  const {
-    data: serverData,
-    isMutating: isMutatingFromServer,
-    trigger: triggerFromServer,
-    reset: resetServerData
-  } = useSWRMutation('/method/modal/getGuardEditForm', fetchAuthMethod, {
-    onError: (e) => setError(e)
-  });
-
-  useEffect(() => {
-    if (serverData?.guard) {
-      setInputGuardSurname(serverData.guard.surname);
-      setInputGuardfirstName(serverData.guard.firstName);
-      setInputGuardPatronymic(serverData.guard.patronymic);
-      setInputGuardUIAvatarsSrc(null);
-      setInputGuardTelephone(serverData.guard.telephone);
-      setInputGuardIIN(serverData.guard.iin);
-      setInputGuardGuardPosts(serverData.guard.guardPosts || []);
-    }else{
-      setInputValidateGuardPatronymic(operation == 'Добавить');
-      setInputValidateGuardTelephone(operation == 'Добавить');
-      setInputValidateGuardIIN(operation == 'Добавить');
-      GuardSurnameChange(form?.guard?.surname, inputInitialsValidate(form?.guard?.surname));
-    }
-    if (serverData?.optionsGuardPosts) {
-      setOptionsGuardPosts(serverData.optionsGuardPosts);
-    }
-    return () => {
-      setInputGuardSurname(null);
-      setInputValidateGuardSurname(false)
-      setInputGuardfirstName(null);
-      setInputValidateGuardfirstName(false);
-      setInputGuardPatronymic(null);
-      setInputValidateGuardPatronymic(false);
-      setInputGuardUIAvatarsSrc(null);
-      setInputGuardTelephone(null);
-      setInputValidateGuardTelephone(false);
-      setInputGuardIIN(null);
-      setInputValidateGuardIIN(false);
-      setInputGuardGuardPosts([]);
-    }
-  }, [serverData]);
-
   /*--Чистка/Обновление инпутов--------------------------------------------------------------------------*/
   useEffect(() => {
     if (form.error) {
       setError(form.error);
     } else if (form.isOpen) {
-
-      setError(null);
-
-      triggerFromServer({
-        _id: form.guard?._id
-      });
+      triggerFromServer();
 
       setOperation(form.operation);
-      
-    }else{
-      resetServerData();
+      GuardSurnameChange(form.guard?.surname, inputInitialsValidate(form.guard?.surname));
+      setInputGuardfirstName(form.guard?.firstName);
+      setInputValidateGuardfirstName(false);
+      setInputGuardPatronymic(form.guard?.patronymic);
+      setInputValidateGuardPatronymic(form.operation == 'Добавить');
+      setInputGuardUIAvatarsSrc(null);
+      setInputGuardTelephone(form.guard?.telephone);
+      setInputValidateGuardTelephone(form.operation == 'Добавить');
+      setInputGuardIIN(form.guard?.iin);
+      setInputValidateGuardIIN(form.operation == 'Добавить');
+      setInputGuardGuardPosts(form.guard?.guardPosts || []);
+
+      setError(null);
     }
   }, [form])
 
@@ -199,33 +165,91 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
 
   return (
     <FModalForm
-      title={operation == 'Добавить' ? 'Добавить данные охранника' : 'Данные охранника'}
+      title={`${operation} данные охранника`}
       isModalFormOpen={form.isOpen}
       setIsModalFormOpen={setForm}
-      isModalFormLoading={!serverData || isMutatingFromServer}
-      isModalFormError={error}
-      className="flex flex-col items-center md:flex-row md:items-stretch p-4 w-full overflow-y-auto max-h-[90vh]"
+      className="flex flex-col md:flex-row items-center md:items-start p-4 w-full overflow-y-auto max-h-[90vh]"
       widthForm='min-w-min'
     >
 
-      {/* {Панель информации} */}
+      {/* {Изображение аватара, кнопки управления} */}
       <div
-        className="flex-initial flex flex-col space-y-4 w-full md:max-w-xl bg-white rounded-md"
+        className="flex-none md:order-last md:ml-4 flex flex-col border-t-8 border-red-700 rounded-md bg-color_C"
       >
-        {/* {Изображение аватара для мобильного} */}
-        {(inputGuardUIAvatarsSrc || serverData?.guard?.uiAvatarsSrc) &&
+
+        {/* {Изображение аватара} */}
+        {(inputGuardUIAvatarsSrc || form.guard?.uiAvatarsSrc) &&
           <div
-            className="w-full flex md:hidden items-center justify-center mb-4 select-none"
+            className="w-full flex items-center justify-center p-4 select-none"
           >
             <Image
               className="object-cover w-44 h-44 rounded-full"
               width={176}
               height={176}
-              src={inputGuardUIAvatarsSrc ? inputGuardUIAvatarsSrc : serverData?.guard?.uiAvatarsSrc}
+              src={inputGuardUIAvatarsSrc ? inputGuardUIAvatarsSrc : form.guard?.uiAvatarsSrc}
               alt=""
             />
           </div>
         }
+
+        {/* {Кнопки управления для компьютера} */}
+        <div
+          className="flex-1 p-4 hidden md:inline-flex items-center justify-center flex-col select-none"
+        >
+
+          <FButtonRed
+            className="hidden md:inline-flex m-4"
+            disabled={!(form.isOpen && (operation == 'Добавить' ?
+              (isInputValidateGuardSurname
+                && isInputValidateGuardfirstName
+                && isInputValidateGuardPatronymic
+                && isInputValidateGuardTelephone) :
+              (!isMutatingFromServer && ( 
+                isInputValidateGuardSurname
+                || isInputValidateGuardfirstName
+                || isInputValidateGuardPatronymic
+                || isInputValidateGuardTelephone
+                || isInputValidateGuardIIN
+                || (!equalArrays(inputGuardGuardPosts, form.guard?.guardPosts))
+                || inputGuardUIAvatarsSrc != null
+              ))
+            ))}
+            onClick={(e) => operation == 'Добавить' ? submitAdd(e,
+              inputGuardSurname,
+              inputGuardfirstName,
+              inputGuardPatronymic,
+              inputGuardUIAvatarsSrc,
+              inputGuardTelephone,
+              inputGuardIIN,
+              inputGuardGuardPosts
+            ) : submitEdit(e,
+              inputGuardSurname,
+              inputGuardfirstName,
+              inputGuardPatronymic,
+              inputGuardUIAvatarsSrc,
+              inputGuardTelephone,
+              inputGuardIIN,
+              inputGuardGuardPosts
+            )}
+          >
+            {operation}
+          </FButtonRed>
+
+          <FButtonWhite
+            className="hidden md:inline-flex m-4"
+            onClick={() => setForm({ isOpen: false })}
+          >
+            Закрыть
+          </FButtonWhite>
+
+        </div>
+
+      </div>
+
+      {/* {Панель информации} */}
+      <div
+        className="flex-initial flex flex-col space-y-4 w-full md:max-w-xl bg-white rounded-md"
+      >
 
         {/* Фамилия */}
         <div className="form-item w-full flex items-center">
@@ -300,17 +324,28 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
         </div>
 
         {/* Физ. посты */}
-        <div className="form-item w-full mt-4">
-          <label className="text-lg pr-4">Физ. посты</label>
-          <FSelect
-            options={optionsGuardPosts}
-            onChange={guardPostChange}
-            value={inputGuardGuardPosts}
-            key={form.key}
-            disabled={isMutatingFromServer}
-            multiple
-          />
-        </div>
+        {isMutatingFromServer ?
+          <div className="form-item w-full mt-4 flex justify-center">
+            <svg fill='none' className="w-32 h-32 animate-spin" viewBox="0 0 32 32" xmlns='http://www.w3.org/2000/svg'>
+              <path clipRule='evenodd'
+                d='M15.165 8.53a.5.5 0 01-.404.58A7 7 0 1023 16a.5.5 0 011 0 8 8 0 11-9.416-7.874.5.5 0 01.58.404z'
+                fill='currentColor' fillRule='evenodd' />
+            </svg>
+          </div>
+          :
+          <div className="form-item w-full mt-4">
+            <label className="text-lg pr-4">Физ. посты</label>
+            <FSelect
+              options={optionGuardPosts}
+              onChange={guardPostChange}
+              value={inputGuardGuardPosts}
+              key={form.key}
+              disabled={isMutatingFromServer}
+              multiple
+            />
+          </div>
+        }
+
 
         {/* Статус ошибки */}
         <div className="form-item">
@@ -319,50 +354,24 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
           </span>
         </div>
 
-      </div>
-
-      {/* {Изображение аватара для компьютера, кнопки управления} */}
-      <div
-        className="flex flex-col select-none items-end w-full justify-between md:items-center md:w-fit md:p-4 
-        md:ml-4 md:border-t-8  md:border-red-700  md:rounded-md  md:bg-color_C"
-      >
-
-        {/* {Изображение аватара} */}
-        <div
-          className="w-full hidden md:flex items-center justify-center mb-4 select-none"
-        >
-          {(inputGuardUIAvatarsSrc || serverData?.guard?.uiAvatarsSrc) &&
-            <Image
-              className="object-cover w-44 h-44 rounded-full"
-              width={176}
-              height={176}
-              src={inputGuardUIAvatarsSrc ? inputGuardUIAvatarsSrc : serverData?.guard?.uiAvatarsSrc}
-              alt=""
-            />
-          }
-        </div>
-
-        {/* {Кнопки управления} */}
-        <div
-          className="flex flex-col"
-        >
+        {/* Кнопки */}
+        <div className="form-item md:hidden self-end flex flex-col space-y-4 select-none">
 
           <FButtonRed
-            className="mb-4"
+            className=""
             disabled={!(form.isOpen && (operation == 'Добавить' ?
               (isInputValidateGuardSurname
                 && isInputValidateGuardfirstName
                 && isInputValidateGuardPatronymic
                 && isInputValidateGuardTelephone) :
-              (!isMutatingFromServer && (
-                isInputValidateGuardSurname
+              (isInputValidateGuardSurname
                 || isInputValidateGuardfirstName
                 || isInputValidateGuardPatronymic
                 || isInputValidateGuardTelephone
                 || isInputValidateGuardIIN
                 || (!equalArrays(inputGuardGuardPosts, form.guard?.guardPosts))
                 || inputGuardUIAvatarsSrc != null
-              ))
+              )
             ))}
             onClick={(e) => operation == 'Добавить' ? submitAdd(e,
               inputGuardSurname,
@@ -386,7 +395,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
           </FButtonRed>
 
           <FButtonWhite
-            className=""
+            className="ml-4"
             onClick={() => setForm({ isOpen: false })}
           >
             Закрыть

@@ -1806,9 +1806,9 @@ export function timesheetExcellForMonthBuh(responce, date) {
       let rate = guardPost.rate;
       let isFinished = guardPost.isFinished;
 
-      // if (!totalHoursCount) {
-      //   console.log('%o', guardPost.timesheetShifts);
-      // }
+      if (!totalHoursCount) {
+        console.log('%o', guardPost.timesheetShifts);
+      }
 
       let guardPostSumm = round10(totalHoursCount * rate, 2);
       isOverRate = isOverRate && guardPostSumm && isFinished;

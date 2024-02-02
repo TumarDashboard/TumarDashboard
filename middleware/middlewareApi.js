@@ -38,9 +38,6 @@ export async function middlewareApi(request) {
 
     if (userData) {
 
-      responce.headers.set('userDataID', userData.id);
-      responce.headers.set('userDataPositions', userData.positions);
-
       if (!userData.isActivated) {
 
         return MiddlewareError.UnauthorizedError();
@@ -57,10 +54,6 @@ export async function middlewareApi(request) {
 
       if (apiMethodAccessBlock.apiBlock) {
         responce.headers.set('apiblock', apiMethodAccessBlock.apiBlock);
-      }
-
-      if (apiMethodAccessBlock.userCompare) {
-        responce.headers.set('userCompare', apiMethodAccessBlock.userCompare);
       }
 
       return responce;
