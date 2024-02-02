@@ -251,7 +251,7 @@ export function FGuardPostPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
                   id="start"
                   name="start"
                   min="2022-01"
-                  max="2023-12"
+                  // max="2023-12"
                   onChange={(e) => setInputTimesheetDate(e.target.value)}
                   value={inputTimesheetDate}
                   className='border border-gray-300 p-0
