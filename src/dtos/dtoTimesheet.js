@@ -93,6 +93,10 @@ export const getTimesheetPrint = async (guardPost, month) => {
     return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrint', { guardPost, month });
 }
 
+export const getTimesheetPrintForMonthHours = async (guardPost, month) => {
+    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthHours', { guardPost, month });
+}
+
 
 export const getTimesheetPrintForDay = async (date) => {
     return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForDay', { date });

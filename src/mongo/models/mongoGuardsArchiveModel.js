@@ -44,6 +44,11 @@ export const MongooseSchema = new mongoose.Schema({
   guardPosts:{
     type:[mongoose.Schema.Types.ObjectId],
     ref: 'GuardPosts'
+  },
+
+  isOfficial: {
+    type: Boolean,
+    default: false
   }
 
 }, { timestamps: true })

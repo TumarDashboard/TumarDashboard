@@ -1,4 +1,4 @@
-import { object, lazy, string, number } from "yup";
+import { object, lazy, string, number, boolean } from "yup";
 import { fetchAuthMethod } from "../../middleware/requests";
 import { mapValue } from "../utils/arrayUtils";
 import { isINNIndividual } from "../utils/dataUtils";
@@ -16,6 +16,7 @@ export default class DTOGuard {
     telephone;
     iin;
     guardPosts;
+    isOfficial;
 
     constructor(model) {
         this._id = model._id;
@@ -26,6 +27,7 @@ export default class DTOGuard {
         this.telephone = model.telephone;
         this.iin = model.iin;
         this.guardPosts = model.guardPosts;
+        this.isOfficial = model.isOfficial;
     }
 
 }
@@ -79,6 +81,10 @@ export const validateYup = (dtoGuardPost, options) => {
                         .required('Не указан ИИН')
                 }
 
+                if (key === 'isOfficial') {
+                    return boolean()
+                }
+
             }
         })
     ));
@@ -87,12 +93,12 @@ export const validateYup = (dtoGuardPost, options) => {
 
 }
 
-export const createGuard = async (surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, guardPosts) => {
-    return await fetchAuthMethod('/method/guard/createGuard', { surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, guardPosts });
+export const createGuard = async (surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, guardPosts, isOfficial) => {
+    return await fetchAuthMethod('/method/guard/createGuard', { surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, guardPosts, isOfficial });
 }
 
-export const editGuard = async (id, surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, guardPosts) => {
-    return await fetchAuthMethod('/method/guard/editGuard', { id, surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, guardPosts });
+export const editGuard = async (id, surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, guardPosts, isOfficial) => {
+    return await fetchAuthMethod('/method/guard/editGuard', { id, surname, firstName, patronymic, uiAvatarsSrc, telephone, iin, guardPosts, isOfficial });
 }
 
 export const deleteGuard = async (idGuard, idUser, reason) => {

@@ -11,6 +11,7 @@ import { FTimesheetTableSelectGuardForm } from '../levelD_modal/timesheetTable/F
 import { FTimesheetTableSelectShiftForm } from '../levelD_modal/timesheetTable/FTimesheetTableSelectShiftForm';
 import { FInputMonth } from '../levelE_low/FInputMonth';
 import { FSelect } from '../levelE_low/FSelect';
+import { FPositionHRM } from "../levelZ_variable/FPositionItemList";
 
 var pointTimeout = null;
 
@@ -38,6 +39,8 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
   /*-------------------------------------------------------------------------------------------------------
       Использование глобальных данных
   -------------------------------------------------------------------------------------------------------*/
+
+  const isHR = MOBXuser?.user?.positions?.includes(FPositionHRM);
 
   const [guards, setGuards] = useState(guardsData);
 
@@ -734,28 +737,32 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
                         {/* <div
                           className='w-fit'
                         > */}
-                          {ARchangeTimesheet && ARchangeTimesheetRate &&
-                            <input
-                              id='guard-post-rate'
-                              type="number"
-                              name='guard-post-rate'
-                              placeholder='Тариф'
-                              value={inputGuardPostRate ? inputGuardPostRate : ''}
-                              onChange={(e) => {
-                                setTimesheetChanged(false);
-                                setInputGuardPostRate(parseFloat(e.target.value));
-                              }}
-                              className="border border-gray-300 block w-32
-                              focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
-                              rounded-md shadow-sm disabled:bg-gray-100"
-                            />}
+                          {isHR && (
+                            <>
+                              {ARchangeTimesheet && ARchangeTimesheetRate &&
+                                <input
+                                  id='guard-post-rate'
+                                  type="number"
+                                  name='guard-post-rate'
+                                  placeholder='Тариф'
+                                  value={inputGuardPostRate ? inputGuardPostRate : ''}
+                                  onChange={(e) => {
+                                    setTimesheetChanged(false);
+                                    setInputGuardPostRate(parseFloat(e.target.value));
+                                  }}
+                                  className="border border-gray-300 block w-32
+                                  focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
+                                  rounded-md shadow-sm disabled:bg-gray-100"
+                                />}
 
-                          {!(ARchangeTimesheet && ARchangeTimesheetRate) && inputGuardPostRate &&
-                            <span
-                              className="block w-fit text-white font-bold text-center"
-                            >
-                              Тариф {inputGuardPostRate}тг.
-                            </span>}
+                              {!(ARchangeTimesheet && ARchangeTimesheetRate) && inputGuardPostRate &&
+                                <span
+                                  className="block w-fit text-white font-bold text-center"
+                                >
+                                  Тариф {inputGuardPostRate}тг.
+                                </span>}
+                            </>
+                          )}
                         {/* </div> */}
 
                       </>}

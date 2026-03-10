@@ -13,6 +13,7 @@ import { deleteGuardPost, editGuardPost } from '../../../src/dtos/dtoGuardPost';
 import FTimesheetHorizontal from '../../levelC_middle/FTimesheetTableHorizontal';
 import { FGuardPostDeleteForm } from '../../levelD_modal/guardPost/FGuardPostDeleteForm';
 import { FGuardPostEditForm } from '../../levelD_modal/guardPost/FGuardPostEditForm';
+import { FPositionHRM } from "../../levelZ_variable/FPositionItemList";
 
 const inputs = {
   initial: {
@@ -46,6 +47,7 @@ export default function FFormGuardPostID({ accessRules, userData, guardPost, gua
   const router = useRouter();
 
   const { MOBXuser, MOBXui } = useStore();
+  const isHR = MOBXuser?.user?.positions?.includes(FPositionHRM);
   const [guardPostData, setGuardPostData] = useState(guardPost);
 
   /*----------------------------------------------------------------------------------------------------------------------------
@@ -325,7 +327,7 @@ export default function FFormGuardPostID({ accessRules, userData, guardPost, gua
             </div>}
 
           {/* Тариф */}
-          {guardPostData.rate &&
+          {isHR && guardPostData.rate &&
             <div className='form-item w-full items-center'>
               <span className="break-all md:break-normal"><b className='inline-block'>Тариф:</b> {guardPostData.rate}</span>
             </div>}

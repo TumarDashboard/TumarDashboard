@@ -20,6 +20,7 @@ import { FGuardPostSelectGuardForm } from '../../levelD_modal/guardPost/FGuardPo
 import { FGuardPostShowGuardForm } from '../../levelD_modal/guardPost/FGuardPostShowGuardForm';
 import { changeTimesheetToday2 } from '../../../src/dtos/dtoTimesheet';
 import { FTooltip } from '../../levelE_low/FTooltip';
+import { FPositionHRM } from "../../levelZ_variable/FPositionItemList";
 
 const inputs = {
   initial: {
@@ -83,6 +84,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
   const router = useRouter();
 
   const { MOBXuser, MOBXui } = useStore();
+  const isHR = MOBXuser?.user?.positions?.includes(FPositionHRM);
 
   // const [error, setError] = useState('');
 
@@ -108,7 +110,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
     { value: 'callsign', label: 'Позывной' },
     { value: 'name', label: 'Наименование' },
     { value: 'address', label: 'Адрес' },
-    AReditGuardPost && AReditGuardPostRate ? { value: 'rate', label: 'Тариф' } : null,
+    isHR ? { value: 'rate', label: 'Тариф' } : null,
     { value: 'manager', label: 'НСО' },
     { value: 'guards', label: 'Охранники' },
   ].filter(Boolean);
@@ -712,7 +714,7 @@ export default function FFormGuardPosts({ accessRules, userData, tableGuardPosts
                 </td>
 
                 {/* {Тариф} */}
-                {AReditGuardPost && AReditGuardPostRate && <td className="px-1 md:p-2 md:border text-left block md:table-cell items-center">
+                {isHR && <td className="px-1 md:p-2 md:border text-left block md:table-cell items-center">
                   {guardPost.rate &&
                     <span className="break-all md:break-normal">
                       <b className='md:hidden'>Тариф</b> {guardPost.rate}

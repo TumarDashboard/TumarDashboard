@@ -99,22 +99,28 @@ export default function FFormGuards({ accessRules, tableGuards, setTableGuards, 
   }
 
   /*--Фильтрация таблицы---------------------------------------------------------------------------------*/
-  const [inputFilterText, setInputFilterText] = useState([]);
+  const [inputFilterText, setInputFilterText] = useState('');
+  const [filterType, setFilterType] = useState('all');
   const filterringTimeout = useRef();
 
-  const filteringTable = (text) => {
+  const filteringTable = (text, fType) => {
+    
+    let result = tableGuards;
 
-    const filtersArray = text.toLowerCase().split(' ');
+    if (fType === 'official') {
+      result = result.filter(v => v.isOfficial);
+    } else if (fType === 'unofficial') {
+      result = result.filter(v => !v.isOfficial);
+    }
 
-    setRenderTableGuards(
-
-      tableGuards.filter(value => {
-
+    if (text) {
+      const filtersArray = text.toLowerCase().split(' ');
+      result = result.filter(value => {
         const parametrsArray = [
           value.surname,
           value.firstName,
           value.patronymic,
-          ...value.telephone,
+          ...(value.telephone || []),
           value.manager?.surname,
           value.manager?.firstName,
         ].filter(Boolean);
@@ -127,15 +133,17 @@ export default function FFormGuards({ accessRules, tableGuards, setTableGuards, 
             }
           }
         }
-
         return false;
+      });
+    }
 
-      })
-
-    );
-
+    setRenderTableGuards([...result]);
     setSortingRule(null);
+  }
 
+  const onChangeFilterType = (newType) => {
+     setFilterType(newType);
+     filteringTable(inputFilterText, newType);
   }
 
   /*--Модальное окно Формы редактирования----------------------------------------------------------------*/
@@ -151,7 +159,8 @@ export default function FFormGuards({ accessRules, tableGuards, setTableGuards, 
     inputGuardUIAvatarsSrc,
     inputGuardTelephone,
     inputGuardIIN,
-    inputGuardGuardPosts) => {
+    inputGuardGuardPosts,
+    inputGuardIsOfficial) => {
 
     event.preventDefault();
 
@@ -167,7 +176,8 @@ export default function FFormGuards({ accessRules, tableGuards, setTableGuards, 
         inputGuardUIAvatarsSrc,
         inputGuardTelephone,
         inputGuardIIN,
-        inputGuardGuardPosts
+        inputGuardGuardPosts,
+        inputGuardIsOfficial
       );
 
       // Обновляем таблицу в памяти
@@ -205,7 +215,8 @@ export default function FFormGuards({ accessRules, tableGuards, setTableGuards, 
     inputGuardUIAvatarsSrc,
     inputGuardTelephone,
     inputGuardIIN,
-    inputGuardGuardPosts) => {
+    inputGuardGuardPosts,
+    inputGuardIsOfficial) => {
 
     event.preventDefault();
 
@@ -222,7 +233,8 @@ export default function FFormGuards({ accessRules, tableGuards, setTableGuards, 
         inputGuardUIAvatarsSrc,
         inputGuardTelephone,
         inputGuardIIN,
-        inputGuardGuardPosts
+        inputGuardGuardPosts,
+        inputGuardIsOfficial
       );
 
       // Обновляем таблицу в памяти
@@ -389,8 +401,19 @@ export default function FFormGuards({ accessRules, tableGuards, setTableGuards, 
 
         {/* Фильтр, кнопка чистки фильтра */}
         <div
-          className='flex-0 w-full flex'
+          className='flex-0 w-full flex flex-col md:flex-row md:space-x-4 space-y-2 md:space-y-0 text-black'
         >
+
+          {/* Фильтр по Официальности */}
+          <select 
+             className="w-full md:w-auto p-2 border-none rounded-md outline-none bg-color_I placeholder-color_C"
+             value={filterType}
+             onChange={(e) => onChangeFilterType(e.target.value)}
+          >
+             <option value="all">Все охранники</option>
+             <option value="official">Официальные</option>
+             <option value="unofficial">Неофициальные</option>
+          </select>
 
           {/* Фильтр */}
           <FFilterText
@@ -398,11 +421,11 @@ export default function FFormGuards({ accessRules, tableGuards, setTableGuards, 
             onChange={(e) => {
               setInputFilterText(e.target.value);
               filterringTimeout.current && clearTimeout(filterringTimeout.current);
-              filterringTimeout.current = setTimeout(() => filteringTable(e.target.value), 500);
+              filterringTimeout.current = setTimeout(() => filteringTable(e.target.value, filterType), 500);
             }}
             onClear={() => {
               setInputFilterText('');
-              setRenderTableGuards([...tableGuards]);
+              filteringTable('', filterType);
             }}
           />
 
@@ -468,7 +491,10 @@ export default function FFormGuards({ accessRules, tableGuards, setTableGuards, 
                     />}
 
                     {/* {Инициалы} */}
-                    <p className="text-black ml-1 text-xl font-bold">{[guard.surname, guard.firstName].join(' ')}</p>
+                    <div className="flex flex-col items-start ml-1">
+                      <p className="text-black text-xl font-bold">{[guard.surname, guard.firstName].join(' ')}</p>
+                      {guard.isOfficial && <span className="mt-1 text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-800 rounded-full border border-green-300">Официальный</span>}
+                    </div>
 
                   </div>
                 </td>

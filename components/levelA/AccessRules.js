@@ -84,6 +84,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/guardPost/editGuardPost', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
             { position: positions.FPositionNSO, apiBlock: ['rate', 'manager'], userCompare: ['manager'] }
         ]
     },
@@ -110,6 +111,7 @@ export const FApiMethodAccessRules = [
         url: '/dashboard/protectedObjects\$', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
             { position: positions.FPositionING },
             { position: positions.FPositionTHN },
         ]
@@ -118,6 +120,7 @@ export const FApiMethodAccessRules = [
         url: '/dashboard/protectedObjects/archive\$', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
             { position: positions.FPositionING },
             { position: positions.FPositionTHN },
         ]
@@ -126,6 +129,7 @@ export const FApiMethodAccessRules = [
         url: /^\/dashboard\/protectedObjects(?=.)/, access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
             { position: positions.FPositionING },
             { position: positions.FPositionTHN },
         ]
@@ -140,6 +144,7 @@ export const FApiMethodAccessRules = [
         url: '/api/method/protectedObject/editProtectedObject', access: [
             { position: positions.FPositionZDIR }, 
             { position: positions.FPositionING },
+            { position: positions.FPositionHRM },
             { position: positions.FPositionTHN, apiBlock: ['number', 'name', 'address', 'photo', 'description'] },
         ]
     },
@@ -164,6 +169,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/protectedObject/searchProtectedObject', access: [
             { position: positions.FPositionZDIR }, 
+            { position: positions.FPositionHRM },
             { position: positions.FPositionING },
             { position: positions.FPositionTHN },
         ]
@@ -268,7 +274,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/timesheet/changeTimesheet', access: [
             { position: positions.FPositionZDIR },
-            { position: positions.FPositionHRM, apiBlock: ['rate', 'manager'] },
+            { position: positions.FPositionHRM, apiBlock: ['manager'] },
             { position: positions.FPositionNSO, apiBlock: ['rate', 'manager'], userCompare: ['guardPostManager'] }
         ]
     },
@@ -309,6 +315,15 @@ export const FApiMethodAccessRules = [
     },
     {
         url: '/api/method/timesheet/getTimesheetPrint', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionBUH },
+            { position: positions.FPositionNSO },
+        ]
+    },
+    {
+        url: '/api/method/timesheet/getTimesheetPrintForMonthHours', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
             { position: positions.FPositionHRM },
@@ -431,6 +446,7 @@ export const FApiMethodAccessRules = [
     {
         url: '/api/method/modal/getProtectedObjectEditForm', access: [
             { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
             { position: positions.FPositionING },
             { position: positions.FPositionTHN },
         ]

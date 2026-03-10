@@ -112,6 +112,20 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
     }
   }
 
+  /*--Официальное трудоустройство Формы редактирования-------------------------------------------------------*/
+  const [inputGuardIsOfficial, setInputGuardIsOfficial] = useState(false);
+
+  const [isInputValidateGuardIsOfficial, setInputValidateGuardIsOfficial] = useState(true);
+
+  const GuardIsOfficialChange = (value) => {
+    setInputGuardIsOfficial(value);
+    if (operation == 'Добавить') {
+      setInputValidateGuardIsOfficial(true);
+    } else {
+      setInputValidateGuardIsOfficial(value != form.guard?.isOfficial);
+    }
+  }
+
   /*--Запрос данных на сервере---------------------------------------------------------------------*/
 
   const {
@@ -155,6 +169,8 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
       setInputValidateGuardTelephone(form.operation == 'Добавить');
       setInputGuardIIN(form.guard?.iin);
       setInputValidateGuardIIN(form.operation == 'Добавить');
+      setInputGuardIsOfficial(form.guard?.isOfficial || false);
+      setInputValidateGuardIsOfficial(form.operation == 'Добавить');
       setInputGuardGuardPosts(form.guard?.guardPosts || []);
 
       setError(null);
@@ -210,6 +226,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
                 || isInputValidateGuardPatronymic
                 || isInputValidateGuardTelephone
                 || isInputValidateGuardIIN
+                || isInputValidateGuardIsOfficial
                 || (!equalArrays(inputGuardGuardPosts, form.guard?.guardPosts))
                 || inputGuardUIAvatarsSrc != null
               ))
@@ -221,7 +238,8 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
               inputGuardUIAvatarsSrc,
               inputGuardTelephone,
               inputGuardIIN,
-              inputGuardGuardPosts
+              inputGuardGuardPosts,
+              inputGuardIsOfficial
             ) : submitEdit(e,
               inputGuardSurname,
               inputGuardfirstName,
@@ -229,7 +247,8 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
               inputGuardUIAvatarsSrc,
               inputGuardTelephone,
               inputGuardIIN,
-              inputGuardGuardPosts
+              inputGuardGuardPosts,
+              inputGuardIsOfficial
             )}
           >
             {operation}
@@ -323,6 +342,19 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
 
         </div>
 
+        {/* Официальное трудоустройство */}
+        <div className="form-item w-full mt-4 flex items-center">
+          <label className="text-lg pr-4 cursor-pointer flex items-center text-black font-bold select-none">
+            <input 
+              type="checkbox" 
+              className="mr-2 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
+              checked={inputGuardIsOfficial} 
+              onChange={(e) => GuardIsOfficialChange(e.target.checked)} 
+            />
+            Официальный сотрудник
+          </label>
+        </div>
+
         {/* Физ. посты */}
         {isMutatingFromServer ?
           <div className="form-item w-full mt-4 flex justify-center">
@@ -369,6 +401,7 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
                 || isInputValidateGuardPatronymic
                 || isInputValidateGuardTelephone
                 || isInputValidateGuardIIN
+                || isInputValidateGuardIsOfficial
                 || (!equalArrays(inputGuardGuardPosts, form.guard?.guardPosts))
                 || inputGuardUIAvatarsSrc != null
               )
@@ -380,7 +413,8 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
               inputGuardUIAvatarsSrc,
               inputGuardTelephone,
               inputGuardIIN,
-              inputGuardGuardPosts
+              inputGuardGuardPosts,
+              inputGuardIsOfficial
             ) : submitEdit(e,
               inputGuardSurname,
               inputGuardfirstName,
@@ -388,7 +422,8 @@ export function FGuardEditForm({ form, setForm, submitAdd, submitEdit }) {
               inputGuardUIAvatarsSrc,
               inputGuardTelephone,
               inputGuardIIN,
-              inputGuardGuardPosts
+              inputGuardGuardPosts,
+              inputGuardIsOfficial
             )}
           >
             {operation}

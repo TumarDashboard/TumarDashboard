@@ -4,12 +4,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'color_A': '#170305',
-        'color_B': '#2E1114',
-        'color_C': '#501B1D',
-        'color_D': '#64485C',
-        'color_E': '#83677B',
-        'color_F': '#ADADAD',
+        'color_A': '#0f172a', /* Slate 900 */
+        'color_B': '#3b82f6', /* Blue 500 */
+        'color_C': '#60a5fa', /* Blue 400 */
+        'color_D': '#93c5fd', /* Blue 300 */
+        'color_E': '#bfdbfe', /* Blue 200 */
+        'color_F': '#e2e8f0', /* Slate 200 */
         'color_G': '#FFFFFF',
       },
       fontFamily: {

@@ -12,14 +12,17 @@ import {
   getTimesheetPrintForDay,
   getTimesheetPrintForMonthBuh,
   getTimesheetPrintForMonthFull,
-  getTimesheetPrintForMonthPart
+  getTimesheetPrintForMonthPart,
+  getTimesheetPrintForMonthHours
 } from '../../../src/dtos/dtoTimesheet';
 import { getCurrentDateStamp, getCurrentMonth } from '../../../src/utils/dateUtils';
+import { FPositionHRM } from "../../../components/levelZ_variable/FPositionItemList";
 
 const DTForDay = 'DTForDay';
 const DTForMonthPart = 'DTForMonthPart';
 const DTForMonthFull = 'DTForMonthFull';
 const DTForMonthBuh = 'DTForMonthBuh';
+const DTForMonthHours = 'DTForMonthHours';
 const PRForAllGuardPosts = 'PRForAllGuardPosts';
 
 const getInputDate = (operation) => {
@@ -35,6 +38,9 @@ const getInputDate = (operation) => {
       return getCurrentMonth();
 
     case DTForMonthBuh:
+      return getCurrentMonth();
+
+    case DTForMonthHours:
       return getCurrentMonth();
 
     case PRForAllGuardPosts:
@@ -82,6 +88,13 @@ const getTimesheet = async (operation, guardPosts, date, manager) => {
         documentName: 'Платёжная ведомость-' + date + '.xlsx'
       };
 
+    case DTForMonthHours:
+      if (!guardPosts) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о физ. постах');
+      return {
+        responce: await getTimesheetPrintForMonthHours(guardPosts.map(value => value._id), date),
+        documentName: 'Табель-часы-' + date + '.xlsx'
+      };
+
     case PRForAllGuardPosts:
       return {
         responce: await reportGuardPosts(),
@@ -105,17 +118,22 @@ export function FGuardPostPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
   const ARgetTimesheetPrintForMonthPart = accessRules.includes('getTimesheetPrintForMonthPart');
   const ARgetTimesheetPrintForMonthFull = accessRules.includes('getTimesheetPrintForMonthFull');
   const ARgetTimesheetPrintForMonthFullBuh = accessRules.includes('getTimesheetPrintForMonthBuh');
+  const ARgetTimesheetPrintForMonthHours = accessRules.includes('getTimesheetPrintForMonthHours');
   const ARreportGuardPosts = accessRules.includes('reportGuardPosts');
 
   /*--Операция-------------------------------------------------------------------------------------------*/
   const [error, setError] = useState('');
 
+  /*--Вычисление прав для выгрузки--*/
+  const isHR = MOBXuser?.user?.positions?.includes(FPositionHRM);
+
   /*--Данные по типу проводимой операции-----------------------------------------------------------------*/
   const FOperationItemList = [
     ARgetTimesheetPrintForDay ? { label: "Отчёт за день", value: DTForDay } : null,
     ARgetTimesheetPrintForMonthPart ? { label: "Отчёт за месяц - частичный", value: DTForMonthPart } : null,
-    ARgetTimesheetPrintForMonthFull ? { label: "Отчёт за месяц - полный", value: DTForMonthFull } : null,
-    ARgetTimesheetPrintForMonthFullBuh ? { label: "Платёжная ведомость", value: DTForMonthBuh } : null,
+    (isHR && ARgetTimesheetPrintForMonthFull) ? { label: "Отчёт за месяц - полный", value: DTForMonthFull } : null,
+    ARgetTimesheetPrintForMonthHours ? { label: "Отчёт за месяц - только часы", value: DTForMonthHours } : null,
+    (isHR && ARgetTimesheetPrintForMonthFullBuh) ? { label: "Платёжная ведомость", value: DTForMonthBuh } : null,
     ARreportGuardPosts ? { label: "Список физ. постов", value: PRForAllGuardPosts } : null,
   ].filter(Boolean);
 
@@ -237,16 +255,12 @@ export function FGuardPostPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
           {selectedOperation != PRForAllGuardPosts &&
             <div className="form-item flex items-center md:mr-4">
               <label className="text-lg pr-4 select-none">{
-                selectedOperation == DTForDay ? 'Дата' :
-                  selectedOperation == DTForMonthPart ? 'Месяц' :
-                    selectedOperation == DTForMonthPart ? 'Месяц' : 'Месяц'
+                selectedOperation == DTForDay ? 'Дата' : 'Месяц'
               }</label>
               <div className='flex justify-center'>
                 <input
                   type={
-                    selectedOperation == DTForDay ? 'date' :
-                      selectedOperation == DTForMonthPart ? 'month' :
-                        selectedOperation == DTForMonthPart ? 'month' : 'month'
+                    selectedOperation == DTForDay ? 'date' : 'month'
                   }
                   id="start"
                   name="start"
