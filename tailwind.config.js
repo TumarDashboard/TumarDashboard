@@ -4,12 +4,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'color_A': '#0f172a', /* Slate 900 */
-        'color_B': '#3b82f6', /* Blue 500 */
-        'color_C': '#60a5fa', /* Blue 400 */
-        'color_D': '#93c5fd', /* Blue 300 */
-        'color_E': '#bfdbfe', /* Blue 200 */
-        'color_F': '#e2e8f0', /* Slate 200 */
+        'color_A': '#064e3b', /* Emerald 900 */
+        'color_B': '#10b981', /* Emerald 500 */
+        'color_C': '#34d399', /* Emerald 400 */
+        'color_D': '#6ee7b7', /* Emerald 300 */
+        'color_E': '#a7f3d0', /* Emerald 200 */
+        'color_F': '#d1fae5', /* Emerald 100 */
         'color_G': '#FFFFFF',
       },
       fontFamily: {
