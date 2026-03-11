@@ -90,7 +90,8 @@ export const FApiMethodAccessRules = [
     },
     {
         url: '/api/method/guardPost/deleteGuardPost', access: [
-            { position: positions.FPositionZDIR }
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
         ]
     },
     {

@@ -52,13 +52,13 @@ const getInputDate = (operation) => {
   }
 }
 
-const getTimesheet = async (operation, guardPosts, date, manager) => {
+const getTimesheet = async (operation, guardPosts, date, manager, customHeaders) => {
   if (!date) throw ApiError.BadRequest('Отсутствуют необходимые данные: дата');
   switch (operation) {
 
     case DTForDay:
       return {
-        responce: await getTimesheetPrintForDay(date),
+        responce: await getTimesheetPrintForDay(date, customHeaders),
         documentName: 'Список охранников-' + date + '.xlsx'
       };
 
@@ -72,26 +72,26 @@ const getTimesheet = async (operation, guardPosts, date, manager) => {
       ].filter(Boolean).join(' ') : null;
 
       return {
-        responce: await getTimesheetPrintForMonthPart(date, manager.id),
+        responce: await getTimesheetPrintForMonthPart(date, manager.id, customHeaders),
         documentName: `Табель ${NSOinitials} ${date}.xlsx`
       };
 
     case DTForMonthFull:
       return {
-        responce: await getTimesheetPrintForMonthFull(date),
+        responce: await getTimesheetPrintForMonthFull(date, customHeaders),
         documentName: 'Табель-' + date + '.xlsx'
       };
 
     case DTForMonthBuh:
       return {
-        responce: await getTimesheetPrintForMonthBuh(date),
+        responce: await getTimesheetPrintForMonthBuh(date, customHeaders),
         documentName: 'Платёжная ведомость-' + date + '.xlsx'
       };
 
     case DTForMonthHours:
       if (!guardPosts) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о физ. постах');
       return {
-        responce: await getTimesheetPrintForMonthHours(guardPosts.map(value => value._id), date),
+        responce: await getTimesheetPrintForMonthHours(guardPosts.map(value => value._id), date, customHeaders),
         documentName: 'Табель-часы-' + date + '.xlsx'
       };
 
@@ -104,7 +104,7 @@ const getTimesheet = async (operation, guardPosts, date, manager) => {
     default:
       if (!guardPosts) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о физ. постах');
       return {
-        responce: await getTimesheetPrint(guardPosts.map(value => value._id), date),
+        responce: await getTimesheetPrint(guardPosts.map(value => value._id), date, customHeaders),
         documentName: 'Табель-' + date + '.xlsx'
       };
 
@@ -148,6 +148,20 @@ export function FGuardPostPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
     setError('');
   }
 
+  /*--Пользовательские данные для шапки--*/
+  const [customHeaders, setCustomHeaders] = useState({
+    companyName: '',
+    directorName: '',
+    zDirName: '',
+    hrmName: '',
+    buhName: ''
+  });
+
+  const handleCustomHeaderChange = (e) => {
+    const { name, value } = e.target;
+    setCustomHeaders(prev => ({ ...prev, [name]: value }));
+  };
+
   /*--Выбор месяца---------------------------------------------------------------------------------------*/
   const [inputTimesheetDate, setInputTimesheetDate] = useState('');
 
@@ -169,7 +183,10 @@ export function FGuardPostPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
 
     try {
 
-      const { responce, documentName } = await getTimesheet(selectedOperation, guardPosts, inputTimesheetDate, MOBXuser?.user);
+      // Очищаем пустые значения в customHeaders перед отправкой
+      const cleanCustomHeaders = Object.fromEntries(Object.entries(customHeaders).filter(([_, v]) => v.trim() !== ''));
+
+      const { responce, documentName } = await getTimesheet(selectedOperation, guardPosts, inputTimesheetDate, MOBXuser?.user, cleanCustomHeaders);
       // console.log(responce);
       const googleDriveFileID = responce.headers.get('googleDriveFileID');
 
@@ -248,6 +265,40 @@ export function FGuardPostPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
             disabled={FOperationItemList.length == 1}
           />
         </div>
+
+        {/* Дополнительные поля для HR (замена шапки и подписантов) */}
+        {isHR && selectedOperation !== PRForAllGuardPosts && (
+          <div className="flex flex-col w-full mb-4 mt-2 p-4 border border-gray-200 rounded-md bg-gray-50">
+            <h3 className="text-md font-bold mb-2 text-gray-700">Настройки шапки и подписантов (ОК)</h3>
+            <p className="text-xs text-gray-500 mb-4">Оставьте пустым для использования значений по умолчанию.</p>
+            
+            <div className="flex flex-col md:flex-row gap-4 mb-2">
+              <div className="flex flex-col w-full md:w-1/2">
+                <label className="text-sm text-gray-600 mb-1">Наименование компании</label>
+                <input type="text" name="companyName" value={customHeaders.companyName} onChange={handleCustomHeaderChange} className="border border-gray-300 rounded p-1 text-sm focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200" placeholder='Тұмар Гранд Секьюрити' />
+              </div>
+              <div className="flex flex-col w-full md:w-1/2">
+                <label className="text-sm text-gray-600 mb-1">ФИО Директора (для Утверждаю)</label>
+                <input type="text" name="directorName" value={customHeaders.directorName} onChange={handleCustomHeaderChange} className="border border-gray-300 rounded p-1 text-sm focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200" placeholder='Ким А.А.' />
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4 mb-2">
+              <div className="flex flex-col w-full md:w-1/3">
+                <label className="text-sm text-gray-600 mb-1">Зам. Директора</label>
+                <input type="text" name="zDirName" value={customHeaders.zDirName} onChange={handleCustomHeaderChange} className="border border-gray-300 rounded p-1 text-sm focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200" placeholder='Автоматически' />
+              </div>
+              <div className="flex flex-col w-full md:w-1/3">
+                <label className="text-sm text-gray-600 mb-1">Бухгалтер</label>
+                <input type="text" name="buhName" value={customHeaders.buhName} onChange={handleCustomHeaderChange} className="border border-gray-300 rounded p-1 text-sm focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200" placeholder='Автоматически' />
+              </div>
+              <div className="flex flex-col w-full md:w-1/3">
+                <label className="text-sm text-gray-600 mb-1">Инспектор ОК</label>
+                <input type="text" name="hrmName" value={customHeaders.hrmName} onChange={handleCustomHeaderChange} className="border border-gray-300 rounded p-1 text-sm focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200" placeholder='Автоматически' />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Месяц и Кнопка выгрузки */}
         <div className='flex flex-col md:flex-row w-full '>

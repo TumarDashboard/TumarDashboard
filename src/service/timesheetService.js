@@ -790,7 +790,7 @@ class TimesheetService {
             });
 
             //Извлечение параметров для формирования
-            const { guardPost, month } = timesheetsData;
+            const { guardPost, month, customHeaders } = timesheetsData;
 
             if (!guardPost || !month) {
                 throw ApiError.BadRequest(`Отсутствуют данные для формирования: guardPost или month`);
@@ -1022,11 +1022,16 @@ class TimesheetService {
                 throw ApiError.FileCreateError('Данные отсутствуют')
             }
 
+            // Извлечение параметров для формирования
+
+            //Check initials condition
+            // ... (skipped code) ...
+
             // Добавляем данные о пользователях
             const usersOnPosition = await userService.getUsersInitialsWithPositions([FPositionZDIR, FPositionHRM, FPositionBUH]);
 
             // Формируем документ из полученных данных
-            const document = timesheetPrintServer(responce, usersOnPosition, date);
+            const document = timesheetPrintServer(responce, usersOnPosition, date, customHeaders);
 
             const documentName = `Табель-${month}-${getCurrentTimeStamp()}-old.xlsx`
 
@@ -1058,7 +1063,7 @@ class TimesheetService {
             });
 
             //Извлечение параметров для формирования
-            const { guardPost, month } = timesheetsData;
+            const { guardPost, month, customHeaders } = timesheetsData;
 
             if (!guardPost || !month) {
                 throw ApiError.BadRequest(`Отсутствуют данные для формирования: guardPost или month`);
@@ -1294,7 +1299,7 @@ class TimesheetService {
             const usersOnPosition = await userService.getUsersInitialsWithPositions([FPositionZDIR, FPositionHRM, FPositionBUH]);
 
             // Формируем документ из полученных данных
-            const document = timesheetPrintServerHoursOnly(responce, usersOnPosition, date);
+            const document = timesheetPrintServerHoursOnly(responce, usersOnPosition, date, customHeaders);
 
             const documentName = `Табель-часы-${month}-${getCurrentTimeStamp()}-old.xlsx`
 

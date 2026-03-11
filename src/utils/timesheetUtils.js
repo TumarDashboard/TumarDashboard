@@ -199,7 +199,7 @@ const Style = {
   BorderThin: { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } }
 }
 
-export function timesheetPrintServer(responce, usersData, date) {
+export function timesheetPrintServer(responce, usersData, date, customHeaders = {}) {
 
   const daysTimesheet = getDaysFromMonth(date);
   const daysCount = daysTimesheet.length;
@@ -217,6 +217,12 @@ export function timesheetPrintServer(responce, usersData, date) {
       NSOdata.patronymic?.length > 0 ? NSOdata.patronymic.charAt(0) + '.' : null,
     ].filter(Boolean).join(' ') : null;
 
+    const currentCompanyName = customHeaders.companyName || companyName;
+    const currentDirectorName = customHeaders.directorName || 'Ким А.А.';
+    const zDirName = customHeaders.zDirName || usersData[FPositionZDIR];
+    const buhName = customHeaders.buhName || usersData[FPositionBUH];
+    const hrmName = customHeaders.hrmName || usersData[FPositionHRM];
+
     const worksheet = ExcelJSWorkbook.addWorksheet(NSOinitials ? NSOinitials : "без НСО", {
       pageSetup: {
         paperSize: 9,
@@ -228,10 +234,10 @@ export function timesheetPrintServer(responce, usersData, date) {
         }
       },
       headerFooter: {
-        oddHeader: `&L&IТабель сотрудников ТОО "${companyName}" за ${date.toLocaleDateString('ru-KZ', { year: 'numeric', month: 'long' })}${NSOinitials ? "&R&IНСО " + NSOinitials : ''}`,
-        oddFooter: `&LЗаместитель Директора______________${usersData[FPositionZDIR]}
-Начальник службы охраны____________${NSOinitials ? NSOinitials : ''}&CБухгалтер_________________${usersData[FPositionBUH]}
-Инспектор ОК______________${usersData[FPositionHRM]}&U&RДата формирования: &D
+        oddHeader: `&L&IТабель сотрудников ТОО "${currentCompanyName}" за ${date.toLocaleDateString('ru-KZ', { year: 'numeric', month: 'long' })}${NSOinitials ? "&R&IНСО " + NSOinitials : ''}`,
+        oddFooter: `&LЗаместитель Директора______________${zDirName}
+Начальник службы охраны____________${NSOinitials ? NSOinitials : ''}&CБухгалтер_________________${buhName}
+Инспектор ОК______________${hrmName}&U&RДата формирования: &D
 страница &P из &N`
       }
     });
@@ -247,14 +253,14 @@ export function timesheetPrintServer(responce, usersData, date) {
     customCell = worksheet.getCell(1, headerCellCenter);
     customCell.font = Style.FontDefaultBold;
     customCell.alignment = Style.AlignmentMiddleRightWrapText;
-    customCell.value = `Утверждаю \r\n Директор ТОО \r\n "${companyName}" \r\n _______________Ким А.А.`;
+    customCell.value = `Утверждаю \r\n Директор ТОО \r\n "${currentCompanyName}" \r\n _______________${currentDirectorName}`;
     worksheet.mergeCells(1, headerCellCenter, 1, columns);
     worksheet.getRow(1).height = (defaultFontSize + 5) * 4;
 
     customCell = worksheet.getCell(2, 1);
     customCell.font = Style.FontDefaultBold;
     customCell.alignment = Style.AlignmentMiddleCenter;
-    customCell.value = `Табель сотрудников ТОО "${companyName}"`;
+    customCell.value = `Табель сотрудников ТОО "${currentCompanyName}"`;
     worksheet.mergeCells(2, 1, 2, columns);
 
     customCell = worksheet.getCell(3, 1);
@@ -559,7 +565,7 @@ export function timesheetPrintServer(responce, usersData, date) {
 
 }
 
-export function timesheetPrintServerHoursOnly(responce, usersData, date) {
+export function timesheetPrintServerHoursOnly(responce, usersData, date, customHeaders = {}) {
 
   const daysTimesheet = getDaysFromMonth(date);
   const daysCount = daysTimesheet.length;
@@ -576,6 +582,12 @@ export function timesheetPrintServerHoursOnly(responce, usersData, date) {
       NSOdata.patronymic?.length > 0 ? NSOdata.patronymic.charAt(0) + '.' : null,
     ].filter(Boolean).join(' ') : null;
 
+    const currentCompanyName = customHeaders.companyName || companyName;
+    const currentDirectorName = customHeaders.directorName || 'Ким А.А.';
+    const zDirName = customHeaders.zDirName || usersData[FPositionZDIR];
+    const buhName = customHeaders.buhName || usersData[FPositionBUH];
+    const hrmName = customHeaders.hrmName || usersData[FPositionHRM];
+
     const worksheet = ExcelJSWorkbook.addWorksheet(NSOinitials ? NSOinitials : "без НСО", {
       pageSetup: {
         paperSize: 9,
@@ -587,8 +599,8 @@ export function timesheetPrintServerHoursOnly(responce, usersData, date) {
         }
       },
       headerFooter: {
-        oddHeader: `&L&IТабель сотрудников ТОО "${companyName}" за ${date.toLocaleDateString('ru-KZ', { year: 'numeric', month: 'long' })}${NSOinitials ? "&R&IНСО " + NSOinitials : ''}`,
-        oddFooter: `&LЗаместитель Директора______________${usersData[FPositionZDIR]}\nНачальник службы охраны____________${NSOinitials ? NSOinitials : ''}&CБухгалтер_________________${usersData[FPositionBUH]}\nИнспектор ОК______________${usersData[FPositionHRM]}&U&RДата формирования: &D\nстраница &P из &N`
+        oddHeader: `&L&IТабель сотрудников ТОО "${currentCompanyName}" за ${date.toLocaleDateString('ru-KZ', { year: 'numeric', month: 'long' })}${NSOinitials ? "&R&IНСО " + NSOinitials : ''}`,
+        oddFooter: `&LЗаместитель Директора______________${zDirName}\nНачальник службы охраны____________${NSOinitials ? NSOinitials : ''}&CБухгалтер_________________${buhName}\nИнспектор ОК______________${hrmName}&U&RДата формирования: &D\nстраница &P из &N`
       }
     });
 
@@ -603,14 +615,14 @@ export function timesheetPrintServerHoursOnly(responce, usersData, date) {
     customCell = worksheet.getCell(1, headerCellCenter);
     customCell.font = Style.FontDefaultBold;
     customCell.alignment = Style.AlignmentMiddleRightWrapText;
-    customCell.value = `Утверждаю \r\n Директор ТОО \r\n "${companyName}" \r\n _______________Ким А.А.`;
+    customCell.value = `Утверждаю \r\n Директор ТОО \r\n "${currentCompanyName}" \r\n _______________${currentDirectorName}`;
     worksheet.mergeCells(1, headerCellCenter, 1, columns);
     worksheet.getRow(1).height = (defaultFontSize + 5) * 4;
 
     customCell = worksheet.getCell(2, 1);
     customCell.font = Style.FontDefaultBold;
     customCell.alignment = Style.AlignmentMiddleCenter;
-    customCell.value = `Табель сотрудников ТОО "${companyName}"`;
+    customCell.value = `Табель сотрудников ТОО "${currentCompanyName}"`;
     worksheet.mergeCells(2, 1, 2, columns);
 
     customCell = worksheet.getCell(3, 1);
@@ -985,7 +997,7 @@ export function timesheetExcellForDay(responce, date) {
 
 }
 
-export function timesheetExcellForMonthPart(NSOinitials, guardPosts, usersData, date) {
+export function timesheetExcellForMonthPart(NSOinitials, guardPosts, usersData, date, customHeaders = {}) {
 
   // Переменные
   const daysTimesheet = getDaysFromMonth(date);
@@ -999,6 +1011,12 @@ export function timesheetExcellForMonthPart(NSOinitials, guardPosts, usersData, 
   // Workbook create
   var ExcelJSWorkbook = new ExcelJS.Workbook();
 
+  const currentCompanyName = customHeaders.companyName || companyName;
+  const currentDirectorName = customHeaders.directorName || 'Ким А.А.';
+  const zDirName = customHeaders.zDirName || usersData[FPositionZDIR];
+  const buhName = customHeaders.buhName || usersData[FPositionBUH];
+  const hrmName = customHeaders.hrmName || usersData[FPositionHRM];
+
   // Worksheet create
   const worksheet = ExcelJSWorkbook.addWorksheet(NSOinitials ? NSOinitials : "без НСО", {
     pageSetup: {
@@ -1011,10 +1029,10 @@ export function timesheetExcellForMonthPart(NSOinitials, guardPosts, usersData, 
       }
     },
     headerFooter: {
-      oddHeader: `&L&IТабель сотрудников ТОО "${companyName}" за ${date.toLocaleDateString('ru-KZ', { year: 'numeric', month: 'long' })}${NSOinitials ? "&R&IНСО " + NSOinitials : ''}`,
-      oddFooter: `&LЗаместитель Директора______________${usersData[FPositionZDIR]}
-Начальник службы охраны____________${NSOinitials ? NSOinitials : ''}&CБухгалтер_________________${usersData[FPositionBUH]}
-Инспектор ОК______________${usersData[FPositionHRM]}&U&RДата формирования: &D
+      oddHeader: `&L&IТабель сотрудников ТОО "${currentCompanyName}" за ${date.toLocaleDateString('ru-KZ', { year: 'numeric', month: 'long' })}${NSOinitials ? "&R&IНСО " + NSOinitials : ''}`,
+      oddFooter: `&LЗаместитель Директора______________${zDirName}
+Начальник службы охраны____________${NSOinitials ? NSOinitials : ''}&CБухгалтер_________________${buhName}
+Инспектор ОК______________${hrmName}&U&RДата формирования: &D
 страница &P из &N`
     }
   });
@@ -1050,7 +1068,7 @@ export function timesheetExcellForMonthPart(NSOinitials, guardPosts, usersData, 
     customCell = worksheet.getCell(1, headerCellCenter);
     customCell.font = Style.FontDefaultBold;
     customCell.alignment = Style.AlignmentMiddleRightWrapText;
-    customCell.value = `Утверждаю \r\n Директор ТОО \r\n "${companyName}" \r\n _______________Ким А.А.`;
+    customCell.value = `Утверждаю \r\n Директор ТОО \r\n "${currentCompanyName}" \r\n _______________${currentDirectorName}`;
     worksheet.mergeCells(1, headerCellCenter, 1, columns);
     worksheet.getRow(1).height = (defaultFontSize + 5) * 4;
 
@@ -1058,7 +1076,7 @@ export function timesheetExcellForMonthPart(NSOinitials, guardPosts, usersData, 
     customCell = worksheet.getCell(2, 1);
     customCell.font = Style.FontDefaultBold;
     customCell.alignment = Style.AlignmentMiddleCenter;
-    customCell.value = `Табель сотрудников ТОО "${companyName}"`;
+    customCell.value = `Табель сотрудников ТОО "${currentCompanyName}"`;
     worksheet.mergeCells(2, 1, 2, columns);
     
     // Оглавление страницы 2
@@ -1441,7 +1459,7 @@ export function timesheetExcellForMonthPart(NSOinitials, guardPosts, usersData, 
 
 
 
-export function timesheetExcellForMonthFull(responce, usersData, date) {  
+export function timesheetExcellForMonthFull(responce, usersData, date, customHeaders = {}) {  
 
   // Переменные книги
   const daysTimesheet = getDaysFromMonth(date);
@@ -1454,6 +1472,12 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
 
   // Workbook create
   const ExcelJSWorkbook = new ExcelJS.Workbook();
+
+  const currentCompanyName = customHeaders.companyName || companyName;
+  const currentDirectorName = customHeaders.directorName || 'Ким А.А.';
+  const zDirName = customHeaders.zDirName || usersData[FPositionZDIR];
+  const buhName = customHeaders.buhName || usersData[FPositionBUH];
+  const hrmName = customHeaders.hrmName || usersData[FPositionHRM];
 
   // Данные отчета по охранникам
   for (const NSOdata of responce) {
@@ -1477,10 +1501,10 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
         }
       },
       headerFooter: {
-        oddHeader: `&L&IТабель сотрудников ТОО "${companyName}" за ${date.toLocaleDateString('ru-KZ', { year: 'numeric', month: 'long' })}${NSOinitials ? "&R&IНСО " + NSOinitials : ''}`,
-        oddFooter: `&LЗаместитель Директора______________${usersData[FPositionZDIR]}
-Начальник службы охраны____________${NSOinitials ? NSOinitials : ''}&CБухгалтер_________________${usersData[FPositionBUH]}
-Инспектор ОК______________${usersData[FPositionHRM]}&U&RДата формирования: &D
+        oddHeader: `&L&IТабель сотрудников ТОО "${currentCompanyName}" за ${date.toLocaleDateString('ru-KZ', { year: 'numeric', month: 'long' })}${NSOinitials ? "&R&IНСО " + NSOinitials : ''}`,
+        oddFooter: `&LЗаместитель Директора______________${zDirName}
+Начальник службы охраны____________${NSOinitials ? NSOinitials : ''}&CБухгалтер_________________${buhName}
+Инспектор ОК______________${hrmName}&U&RДата формирования: &D
 страница &P из &N`
       }
     });
@@ -1516,7 +1540,7 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
       customCell = worksheet.getCell(1, headerCellCenter);
       customCell.font = Style.FontDefaultBold;
       customCell.alignment = Style.AlignmentMiddleRightWrapText;
-      customCell.value = `Утверждаю \r\n Директор ТОО \r\n "${companyName}" \r\n _______________Ким А.А.`;
+      customCell.value = `Утверждаю \r\n Директор ТОО \r\n "${currentCompanyName}" \r\n _______________${currentDirectorName}`;
       worksheet.mergeCells(1, headerCellCenter, 1, columns);
       worksheet.getRow(1).height = (defaultFontSize + 5) * 4;
   
@@ -1524,7 +1548,7 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
       customCell = worksheet.getCell(2, 1);
       customCell.font = Style.FontDefaultBold;
       customCell.alignment = Style.AlignmentMiddleCenter;
-      customCell.value = `Табель сотрудников ТОО "${companyName}"`;
+      customCell.value = `Табель сотрудников ТОО "${currentCompanyName}"`;
       worksheet.mergeCells(2, 1, 2, columns);
       
       // Оглавление страницы 2
@@ -1948,11 +1972,13 @@ export function timesheetExcellForMonthFull(responce, usersData, date) {
 
 }
 
-export function timesheetExcellForMonthBuh(responce, date) {
+export function timesheetExcellForMonthBuh(responce, date, customHeaders = {}) {
 
   // Переменные листа
   const columns = 11;
   const tableBodyStartRow = 4;
+
+  const currentCompanyName = customHeaders.companyName || companyName;
 
   // Workbook and worksheet create
   const ExcelJSWorkbook = new ExcelJS.Workbook();
@@ -1997,7 +2023,7 @@ export function timesheetExcellForMonthBuh(responce, date) {
     let customCell = worksheet.getCell(1, 1);
     customCell.font = Style.FontDefaultBold;
     customCell.alignment = Style.AlignmentMiddleCenter;
-    customCell.value = `ТОО "${companyName}"`;
+    customCell.value = `ТОО "${currentCompanyName}"`;
     worksheet.mergeCells(1, 1, 1, columns);
 
     customCell = worksheet.getCell(2, 1);
