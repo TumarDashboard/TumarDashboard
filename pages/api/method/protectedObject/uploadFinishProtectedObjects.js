@@ -4,6 +4,10 @@ import { catchErrorsApi } from '../../../../middleware/exceptions';
 import service from '../../../../src/service/protectedObjectService';
 // import { setCookies } from '../../../middleware/cookies';
 
+export const config = {
+  maxDuration: 60,
+};
+
 export default catchErrorsApi( async (req, res) => {
 
     await checkCors(req,res,{

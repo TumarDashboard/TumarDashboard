@@ -649,27 +649,17 @@ class ProtectedObjectService {
             // сюда записываются данные о транзакциях
             const transactionData = [];
 
+            // Создаем Map для быстрого поиска существующих объектов по номеру
+            const currentObjectsMap = new Map();
+            for (const obj of currentProtectedObjects) {
+                currentObjectsMap.set(obj.number, obj);
+            }
+
             // Просматриваем среди данных на изменение найденные и подготовка к агрегации и транзакции
             for (const jsonProtectedObject of jsonProtectedObjects) {
 
-                // проверка наличия в облаке данных с имеющимися номерами
-                let existProtectedObject;
-
-                if (currentProtectedObjects.length > 0) {
-
-                    currentProtectedObjects = currentProtectedObjects.reduce((data, valueB) => {
-
-                        if (valueB.number == jsonProtectedObject.N) {
-                            existProtectedObject = valueB;
-                        } else {
-                            data.push(valueB)
-                        }
-
-                        return data;
-
-                    }, []);
-
-                }
+                // быстрый поиск в Map
+                const existProtectedObject = currentObjectsMap.get(jsonProtectedObject.N);
 
                 // переменные
                 const photo = existProtectedObject?.photo 
@@ -906,6 +896,8 @@ class ProtectedObjectService {
             const bulkArchiveData = [];
 
             //Удаление данных в гугл облаке-------------------------------------------------------------------------------
+            const googleDriveDeletions = [];
+
             for (const element of transactionData) {
                 switch (element.operation) {
 
@@ -928,7 +920,7 @@ class ProtectedObjectService {
                             });
 
                             //Удаление данных в гугл облаке-------------------------------------------------------------------------------
-                            await googleDrive.deleteProtectedObjectAvatar(element.archiveData.document._id);
+                            googleDriveDeletions.push(googleDrive.deleteProtectedObjectAvatar(element.archiveData.document._id));
 
                         }
                         break;
@@ -969,7 +961,7 @@ class ProtectedObjectService {
                             });
 
                             //Удаление данных в гугл облаке-------------------------------------------------------------------------------
-                            await googleDrive.deleteProtectedObjectAvatar(element.archiveData.document._id);
+                            googleDriveDeletions.push(googleDrive.deleteProtectedObjectAvatar(element.archiveData.document._id));
 
                         }
                         break;
@@ -977,6 +969,11 @@ class ProtectedObjectService {
                     default:
                         break;
                 }
+            }
+
+            // Выполнение параллельного удаления в Google Drive
+            if (googleDriveDeletions.length > 0) {
+                await Promise.allSettled(googleDriveDeletions);
             }
 
             // Внесение агрегационных данных-----------------------------------------------------------------------------
