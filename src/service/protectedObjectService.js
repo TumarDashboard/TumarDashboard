@@ -553,8 +553,10 @@ class ProtectedObjectService {
             // console.log('utf8ProtectedObjects: %o', utf8ProtectedObjects);
 
             const jsonProtectedObjects = JSON.parse(stringProtectedObjects);
-
-            // console.log('requestJson: %o', requestJson);
+            
+            if (!Array.isArray(jsonProtectedObjects)) {
+                throw ApiError.BadRequest("Некорректный формат данных в файле (ожидался массив объектов)");
+            }
 
             // Описание JSON документа-----------------------------------------------------------------------------------
             try {
@@ -652,14 +654,16 @@ class ProtectedObjectService {
             // Создаем Map для быстрого поиска существующих объектов по номеру
             const currentObjectsMap = new Map();
             for (const obj of currentProtectedObjects) {
-                currentObjectsMap.set(obj.number, obj);
+                if (obj.number !== undefined && obj.number !== null) {
+                    currentObjectsMap.set(String(obj.number), obj);
+                }
             }
 
             // Просматриваем среди данных на изменение найденные и подготовка к агрегации и транзакции
             for (const jsonProtectedObject of jsonProtectedObjects) {
 
-                // быстрый поиск в Map
-                const existProtectedObject = currentObjectsMap.get(jsonProtectedObject.N);
+                // быстрый поиск в Map (номер в файле приводим к строке)
+                const existProtectedObject = currentObjectsMap.get(String(jsonProtectedObject.N));
 
                 // переменные
                 const photo = existProtectedObject?.photo 

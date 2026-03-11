@@ -110,7 +110,12 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
         setRenderTableProtectedObjects(responce.protectedObjects);
       }
 
-      setTransactionData(responce.transactionData);
+      if (!responce.transactionData || responce.transactionData.length === 0) {
+          setError("Файл успешно проанализирован, но изменений не обнаружено (база данных уже актуальна)");
+          setTransactionData([]);
+      } else {
+          setTransactionData(responce.transactionData);
+      }
 
       setInputProtectedObjectFile(null);
 
