@@ -158,7 +158,7 @@ class GoogleDrive {
 
     await OAUTH2Client.checkAuth();
 
-    const existsFile = await this.findFile(`'${process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_GUARDPOSTS}' in parents and name contains '${mongoProtectedObjectID}'`);
+    const existsFile = await this.findFile(`'${process.env.NEXT_PUBLIC_GOOGLE_DRIVE_FOLDER_ID_TUMAR_PROTECTEDOBJECTS}' in parents and name contains '${mongoProtectedObjectID}'`);
 
     if (existsFile) {
       this.deleteFile(existsFile);

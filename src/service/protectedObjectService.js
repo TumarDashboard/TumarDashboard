@@ -920,7 +920,14 @@ class ProtectedObjectService {
                             });
 
                             //Удаление данных в гугл облаке-------------------------------------------------------------------------------
-                            googleDriveDeletions.push(googleDrive.deleteProtectedObjectAvatar(element.archiveData.document._id));
+                            if (element.archiveData.document.photo && element.archiveData.document.photo.includes('id=')) {
+                                const fileId = element.archiveData.document.photo.split('id=')[1];
+                                if (fileId) {
+                                    googleDriveDeletions.push(googleDrive.deleteFile(fileId));
+                                }
+                            } else {
+                                googleDriveDeletions.push(googleDrive.deleteProtectedObjectAvatar(element.archiveData.document._id));
+                            }
 
                         }
                         break;
@@ -961,7 +968,14 @@ class ProtectedObjectService {
                             });
 
                             //Удаление данных в гугл облаке-------------------------------------------------------------------------------
-                            googleDriveDeletions.push(googleDrive.deleteProtectedObjectAvatar(element.archiveData.document._id));
+                            if (element.archiveData.document.photo && element.archiveData.document.photo.includes('id=')) {
+                                const fileId = element.archiveData.document.photo.split('id=')[1];
+                                if (fileId) {
+                                    googleDriveDeletions.push(googleDrive.deleteFile(fileId));
+                                }
+                            } else {
+                                googleDriveDeletions.push(googleDrive.deleteProtectedObjectAvatar(element.archiveData.document._id));
+                            }
 
                         }
                         break;
