@@ -253,7 +253,7 @@ export function FProtectedObjectPrintForm({ accessRules, form, setForm, MOBXui, 
         </div>
 
         {/* Дополнительные поля для HR (замена шапки и подписантов) */}
-        {isHR && selectedOperation !== PRForAllProtectedObjects && (
+        {isHR && (
           <div className="flex flex-col w-full mb-4 mt-2 p-4 border border-gray-200 rounded-md bg-gray-50">
             <h3 className="text-md font-bold mb-2 text-gray-700">Настройки шапки и подписантов (ОК)</h3>
             <p className="text-xs text-gray-500 mb-4">Оставьте пустым для использования значений по умолчанию.</p>
@@ -306,7 +306,6 @@ export function FProtectedObjectPrintForm({ accessRules, form, setForm, MOBXui, 
                   id="start"
                   name="start"
                   min="2022-01"
-                  max="2023-12"
                   onChange={(e) => setInputTimesheetDate(e.target.value)}
                   value={inputTimesheetDate}
                   className='border border-gray-300 p-0
