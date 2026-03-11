@@ -147,12 +147,21 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
       // console.log(inputProtectedObjectFile);
       const transaction = transactionData.reduce((result, value, index) => {
+        // Если ручной выбор сделан, отправляем его
         if (selectedTransactionResult[index] > 0) {
           result.push({
             ...value,
             operation: selectedTransactionResult[index]
           })
+        } 
+        // Иначе, если это автоматическая операция (Addition, Update, Unaffected),
+        // отправляем её как есть, так как она не требует ручного выбора
+        else if (value.operation !== FUDTransactionReplacement && value.operation !== FUDTransactionArchive) {
+          result.push({
+             ...value
+          })
         }
+
         return result
       }, []);
 
@@ -287,7 +296,11 @@ export function FProtectedObjectUploadForm({ accessRules, form, setForm, MOBXui,
 
             <FButtonWhiteSmall
               className={'w-full mb-1'}
-              disabled={selectedTransactionResult.count == 0}
+              disabled={
+                // Отключаем, если нет действий для отправки (count == 0 && нет автоматических операций)
+                selectedTransactionResult.count === 0 &&
+                !transactionData.some(t => t.operation !== FUDTransactionReplacement && t.operation !== FUDTransactionArchive)
+              }
               onClick={transactionFinishProtectedObjects}
             >
               Завершить транзакцию
