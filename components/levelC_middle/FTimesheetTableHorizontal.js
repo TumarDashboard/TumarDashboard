@@ -27,11 +27,8 @@ export default function FTimesheetTableHorizontal({ accessRules, userData, MOBXu
   -------------------------------------------------------------------------------------------------------*/
 
   let letARchangeTimesheet = accessRules.includes('changeTimesheet');
-  let letARchangeTimesheetAll = accessRules.includes('changeTimesheet/userCompare/userCompare');
-
-  const ARchangeTimesheet = ((letARchangeTimesheet && !letARchangeTimesheetAll)
-    || (letARchangeTimesheet && guardPost.manager._id === MOBXuser.user.id)
-    || (letARchangeTimesheet && guardPost.manager._id === userData.id));
+  const ARchangeTimesheetAll = !accessRules.includes('changeTimesheet/userCompare/guardPostManager');
+  const ARchangeTimesheet = accessRules.includes('changeTimesheet') && (ARchangeTimesheetAll || (guardPost.manager?._id == MOBXuser.user.id) || (guardPost.manager?._id == userData.id));
 
   const ARchangeTimesheetManager = !accessRules.includes('changeTimesheet/apiBlock/manager');
   const ARchangeTimesheetRate = !accessRules.includes('changeTimesheet/apiBlock/rate');
