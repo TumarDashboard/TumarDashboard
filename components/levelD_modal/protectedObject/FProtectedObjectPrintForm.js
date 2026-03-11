@@ -305,7 +305,7 @@ export function FProtectedObjectPrintForm({ accessRules, form, setForm, MOBXui, 
                   }
                   id="start"
                   name="start"
-                  min="2022-01"
+                  min={selectedOperation == DTForDay ? "2022-01-01" : "2022-01"}
                   onChange={(e) => setInputTimesheetDate(e.target.value)}
                   value={inputTimesheetDate}
                   className='border border-gray-300 p-0

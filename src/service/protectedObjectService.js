@@ -938,7 +938,7 @@ class ProtectedObjectService {
                             bulkWriteData.push({
                                 updateOne: {
                                     filter: {
-                                        _id: element.archiveData.document._id,
+                                        _id: mongoose.Types.ObjectId(element.archiveData.document._id),
                                     },
                                     update: {
                                         name: element.insertData.document.name ? element.insertData.document.name : null,
