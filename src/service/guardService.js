@@ -57,17 +57,6 @@ class GuardService {
                 throw ApiError.BadRequest(`Инициалы ${candidate.firstName} ${candidate.surname} уже использовались для создания`);
             }
 
-            const candidateDeleted = await mongoGuardsArchiveModel.findOne({ $or: candidateCondition }).lean();
-
-            if (candidateDeleted) {
-                
-                if(guardData.iin && guardData.iin == candidateDeleted.iin ){
-                    throw ApiError.BadRequest(`ИИН ${candidateDeleted.iin} уже использовались для создания ${candidateDeleted.firstName} ${candidateDeleted.surname}, после чего были деактивированы`);
-                }
-
-                throw ApiError.BadRequest(`Инициалы ${candidateDeleted.firstName} ${candidateDeleted.surname} уже использовались для создания, после чего были деактивированы`);
-            }
-
             //cast guardPosts id from string to id
             let guardPosts = guardData.guardPosts;
             if( guardData.guardPosts == 'EMPTY' ){
