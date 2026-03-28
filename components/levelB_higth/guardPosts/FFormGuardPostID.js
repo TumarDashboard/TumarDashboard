@@ -1,4 +1,4 @@
-import { PencilSquareIcon, ArrowUturnLeftIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { PencilSquareIcon, ArrowUturnLeftIcon, TrashIcon, DocumentArrowDownIcon } from '@heroicons/react/24/solid';
 import { motion } from "framer-motion";
 import Image from "next/legacy/image";
 import { useRouter } from "next/router";
@@ -13,6 +13,7 @@ import { deleteGuardPost, editGuardPost } from '../../../src/dtos/dtoGuardPost';
 import FTimesheetHorizontal from '../../levelC_middle/FTimesheetTableHorizontal';
 import { FGuardPostDeleteForm } from '../../levelD_modal/guardPost/FGuardPostDeleteForm';
 import { FGuardPostEditForm } from '../../levelD_modal/guardPost/FGuardPostEditForm';
+import { FGuardPostPrintForm } from '../../levelD_modal/guardPost/FGuardPostPrintForm';
 import { FPositionHRM } from "../../levelZ_variable/FPositionItemList";
 
 const inputs = {
@@ -109,6 +110,13 @@ export default function FFormGuardPostID({ accessRules, userData, guardPost, gua
       Модальное окно Формы удаления Физ. поста
   -------------------------------------------------------------------------------------------------------*/
   const [guardPostDeleteForm, setGuardPostDeleteForm] = useState({
+    isOpen: false
+  });
+
+  /*----------------------------------------------------------------------------------------------------------------------------
+  ----Модальное окно Формы выгрузки отчётов----------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------------------------*/
+  const [timesheetPrintForm, setTimesheetPrintForm] = useState({
     isOpen: false
   });
 
@@ -230,6 +238,23 @@ export default function FFormGuardPostID({ accessRules, userData, guardPost, gua
 
           {/* {Кнопки управления физ. постом} */}
           <div className='flex'>
+
+            {/* {Кнопка выгрузки отчётов} */}
+            {ARgetTimesheet &&
+              <FButtonRed
+                className="mr-2 flex"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setTimesheetPrintForm({
+                    isOpen: true,
+                    key: Math.random().toString(36)
+                  })
+                }}
+              >
+                <DocumentArrowDownIcon
+                  className="h-4 w-4"
+                />
+              </FButtonRed>}
 
             {/* {Кнопка редактирования} */}
             {((AReditGuardPost && AReditGuardPostAll)
@@ -365,6 +390,17 @@ export default function FFormGuardPostID({ accessRules, userData, guardPost, gua
         form={guardPostDeleteForm}
         setForm={setGuardPostDeleteForm}
         submit={guardPostDeleteFormSubmit}
+      />
+
+      {/* {Форма выгрузки отчётов по данному физ. посту} */}
+      <FGuardPostPrintForm
+        accessRules={accessRules}
+        form={timesheetPrintForm}
+        setForm={setTimesheetPrintForm}
+        MOBXui={MOBXui}
+        MOBXuser={MOBXuser}
+        errorCallback={errorCallback}
+        guardPosts={[guardPostData]}
       />
 
     </motion.div>
