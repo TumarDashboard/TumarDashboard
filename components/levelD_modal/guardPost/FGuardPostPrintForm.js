@@ -1,5 +1,5 @@
 import { ShareIcon } from '@heroicons/react/24/solid';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FModalForm } from '../FModalForm';
 
 import { FButtonRed } from "../../levelE_low/FButtonRed";
@@ -12,6 +12,7 @@ import {
   getTimesheetPrintForDay,
   getTimesheetPrintForMonthBuh,
   getTimesheetPrintForMonthFull,
+  getTimesheetPrintForMonthFullSplit,
   getTimesheetPrintForMonthPart,
   getTimesheetPrintForMonthHours
 } from '../../../src/dtos/dtoTimesheet';
@@ -21,8 +22,10 @@ import { FPositionHRM } from "../../../components/levelZ_variable/FPositionItemL
 const DTForDay = 'DTForDay';
 const DTForMonthPart = 'DTForMonthPart';
 const DTForMonthFull = 'DTForMonthFull';
+const DTForMonthFullSplit = 'DTForMonthFullSplit';
 const DTForMonthBuh = 'DTForMonthBuh';
 const DTForMonthHours = 'DTForMonthHours';
+const DTForMonthHoursByCallsign = 'DTForMonthHoursByCallsign';
 const PRForAllGuardPosts = 'PRForAllGuardPosts';
 
 const getInputDate = (operation) => {
@@ -37,10 +40,16 @@ const getInputDate = (operation) => {
     case DTForMonthFull:
       return getCurrentMonth();
 
+    case DTForMonthFullSplit:
+      return getCurrentMonth();
+
     case DTForMonthBuh:
       return getCurrentMonth();
 
     case DTForMonthHours:
+      return getCurrentMonth();
+
+    case DTForMonthHoursByCallsign:
       return getCurrentMonth();
 
     case PRForAllGuardPosts:
@@ -52,7 +61,7 @@ const getInputDate = (operation) => {
   }
 }
 
-const getTimesheet = async (operation, guardPosts, date, manager, customHeaders) => {
+const getTimesheet = async (operation, guardPosts, date, manager, customHeaders, selectedCallsignId) => {
   if (!date) throw ApiError.BadRequest('Отсутствуют необходимые данные: дата');
   switch (operation) {
 
@@ -82,6 +91,12 @@ const getTimesheet = async (operation, guardPosts, date, manager, customHeaders)
         documentName: 'Табель-' + date + '.xlsx'
       };
 
+    case DTForMonthFullSplit:
+      return {
+        responce: await getTimesheetPrintForMonthFullSplit(date, customHeaders),
+        documentName: 'Табель-ОФ-Неоф-' + date + '.xlsx'
+      };
+
     case DTForMonthBuh:
       return {
         responce: await getTimesheetPrintForMonthBuh(date, customHeaders),
@@ -94,6 +109,19 @@ const getTimesheet = async (operation, guardPosts, date, manager, customHeaders)
         responce: await getTimesheetPrintForMonthHours(guardPosts.map(value => value._id), date, customHeaders),
         documentName: 'Табель-часы-' + date + '.xlsx'
       };
+
+    case DTForMonthHoursByCallsign: {
+      if (!guardPosts) throw ApiError.BadRequest('Отсутствуют необходимые данные: данные о физ. постах');
+      if (!selectedCallsignId) throw ApiError.BadRequest('Отсутствуют необходимые данные: не выбран позывной');
+
+      const selectedPost = guardPosts.find(gp => gp._id === selectedCallsignId);
+      const callsignLabel = selectedPost ? (selectedPost.callsign || selectedPost.name || '№' + selectedPost.number) : selectedCallsignId;
+
+      return {
+        responce: await getTimesheetPrintForMonthHours([selectedCallsignId], date, customHeaders),
+        documentName: `Табель-часы-${callsignLabel}-${date}.xlsx`
+      };
+    }
 
     case PRForAllGuardPosts:
       return {
@@ -117,6 +145,7 @@ export function FGuardPostPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
   const ARgetTimesheetPrintForDay = accessRules.includes('getTimesheetPrintForDay');
   const ARgetTimesheetPrintForMonthPart = accessRules.includes('getTimesheetPrintForMonthPart');
   const ARgetTimesheetPrintForMonthFull = accessRules.includes('getTimesheetPrintForMonthFull');
+  const ARgetTimesheetPrintForMonthFullSplit = accessRules.includes('getTimesheetPrintForMonthFullSplit');
   const ARgetTimesheetPrintForMonthFullBuh = accessRules.includes('getTimesheetPrintForMonthBuh');
   const ARgetTimesheetPrintForMonthHours = accessRules.includes('getTimesheetPrintForMonthHours');
   const ARreportGuardPosts = accessRules.includes('reportGuardPosts');
@@ -132,7 +161,9 @@ export function FGuardPostPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
     ARgetTimesheetPrintForDay ? { label: "Отчёт за день", value: DTForDay } : null,
     ARgetTimesheetPrintForMonthPart ? { label: "Отчёт за месяц - частичный", value: DTForMonthPart } : null,
     (isHR && ARgetTimesheetPrintForMonthFull) ? { label: "Отчёт за месяц - полный", value: DTForMonthFull } : null,
+    (isHR && ARgetTimesheetPrintForMonthFullSplit) ? { label: "Отчёт за месяц - ОФ/Неоф", value: DTForMonthFullSplit } : null,
     ARgetTimesheetPrintForMonthHours ? { label: "Отчёт за месяц - только часы", value: DTForMonthHours } : null,
+    ARgetTimesheetPrintForMonthHours ? { label: "Отчёт за месяц - по позывному", value: DTForMonthHoursByCallsign } : null,
     (isHR && ARgetTimesheetPrintForMonthFullBuh) ? { label: "Платёжная ведомость", value: DTForMonthBuh } : null,
     ARreportGuardPosts ? { label: "Список физ. постов", value: PRForAllGuardPosts } : null,
   ].filter(Boolean);
@@ -162,7 +193,21 @@ export function FGuardPostPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
     setCustomHeaders(prev => ({ ...prev, [name]: value }));
   };
 
-  /*--Выбор месяца---------------------------------------------------------------------------------------*/
+  /*--Выбор позывного для фильтрации--------------------------------------------------------------------*/
+  const [selectedCallsignId, setSelectedCallsignId] = useState('');
+
+  const callsignOptions = useMemo(() => {
+    if (!guardPosts) return [];
+    return guardPosts
+      .filter(gp => gp.callsign || gp.number)
+      .sort((a, b) => (a.number || 0) - (b.number || 0))
+      .map(gp => ({
+        label: [gp.number ? '№' + gp.number : null, gp.callsign, gp.name].filter(Boolean).join(', '),
+        value: gp._id
+      }));
+  }, [guardPosts]);
+
+  /*--Выбор месяц��---------------------------------------------------------------------------------------*/
   const [inputTimesheetDate, setInputTimesheetDate] = useState('');
 
   /*--Функция выгрузки документа-------------------------------------------------------------------------*/
@@ -186,7 +231,7 @@ export function FGuardPostPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
       // Очищаем пустые значения в customHeaders перед отправкой
       const cleanCustomHeaders = Object.fromEntries(Object.entries(customHeaders).filter(([_, v]) => v.trim() !== ''));
 
-      const { responce, documentName } = await getTimesheet(selectedOperation, guardPosts, inputTimesheetDate, MOBXuser?.user, cleanCustomHeaders);
+      const { responce, documentName } = await getTimesheet(selectedOperation, guardPosts, inputTimesheetDate, MOBXuser?.user, cleanCustomHeaders, selectedCallsignId);
       // console.log(responce);
       const googleDriveFileID = responce.headers.get('googleDriveFileID');
 
@@ -243,6 +288,13 @@ export function FGuardPostPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
     }
   }, [form])
 
+  // Устанавливаем первый позывной при смене операции на DTForMonthHoursByCallsign
+  useEffect(() => {
+    if (selectedOperation === DTForMonthHoursByCallsign && callsignOptions.length > 0 && !selectedCallsignId) {
+      setSelectedCallsignId(callsignOptions[0].value);
+    }
+  }, [selectedOperation, callsignOptions])
+
   /*-----------------------------------------------------------------------------------------------------*/
 
   return (
@@ -266,12 +318,26 @@ export function FGuardPostPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
           />
         </div>
 
+        {/* Выбор позывного для выгрузки по позывному */}
+        {selectedOperation === DTForMonthHoursByCallsign && (
+          <div className="flex flex-row items-center form-item mb-2 w-full">
+            <label className="text-lg pr-4 select-none">Позывной</label>
+            <FSelect
+              className='flex-1 pl-2 pr-8 py-0'
+              options={callsignOptions}
+              onChange={(e) => setSelectedCallsignId(e.target.value)}
+              value={selectedCallsignId}
+              disabled={callsignOptions.length <= 1}
+            />
+          </div>
+        )}
+
         {/* Дополнительные поля для HR (замена шапки и подписантов) */}
         {isHR && selectedOperation !== PRForAllGuardPosts && (
           <div className="flex flex-col w-full mb-4 mt-2 p-4 border border-gray-200 rounded-md bg-gray-50">
             <h3 className="text-md font-bold mb-2 text-gray-700">Настройки шапки и подписантов (ОК)</h3>
             <p className="text-xs text-gray-500 mb-4">Оставьте пустым для использования значений по умолчанию.</p>
-            
+
             <div className="flex flex-col md:flex-row gap-4 mb-2">
               <div className="flex flex-col w-full md:w-1/2">
                 <label className="text-sm text-gray-600 mb-1">Наименование компании</label>
@@ -319,17 +385,17 @@ export function FGuardPostPrintForm({ accessRules, form, setForm, MOBXui, MOBXus
                   onChange={(e) => setInputTimesheetDate(e.target.value)}
                   value={inputTimesheetDate}
                   className='border border-gray-300 p-0
-                    focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50 
+                    focus:border-red-300 focus:outline-none focus:ring focus:ring-red-200 focus:ring-opacity-50
                     rounded-md shadow-sm disabled:bg-gray-100 open:bg-black
                     text-black font-bold text-center'
                 />
               </div>
             </div>
           }
-          
+
           <div className="form-item flex items-center justify-end md:justify-start w-full mt-4 md:mt-0">
             <FButtonRed
-              disabled={!inputTimesheetDate}
+              disabled={!inputTimesheetDate || (selectedOperation === DTForMonthHoursByCallsign && !selectedCallsignId)}
               onClick={timesheetChangeHandle}
             >
               Выгрузить

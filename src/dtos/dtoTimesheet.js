@@ -110,6 +110,10 @@ export const getTimesheetPrintForMonthFull = async (month, customHeaders) => {
     return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthFull', { month, customHeaders });
 }
 
+export const getTimesheetPrintForMonthFullSplit = async (month, customHeaders) => {
+    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthFullSplit', { month, customHeaders });
+}
+
 export const getTimesheetPrintForMonthBuh = async (month, customHeaders) => {
     return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthBuh', { month, customHeaders });
 }

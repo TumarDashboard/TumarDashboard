@@ -355,6 +355,14 @@ export const FApiMethodAccessRules = [
         ]
     },
     {
+        url: '/api/method/timesheet/getTimesheetPrintForMonthFullSplit', access: [
+            { position: positions.FPositionDIR },
+            { position: positions.FPositionZDIR },
+            { position: positions.FPositionHRM },
+            { position: positions.FPositionBUH },
+        ]
+    },
+    {
         url: '/api/method/timesheet/getTimesheetPrintForMonthBuh', access: [
             { position: positions.FPositionDIR },
             { position: positions.FPositionZDIR },
