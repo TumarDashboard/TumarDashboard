@@ -170,12 +170,19 @@ class GuardService {
         ] }).lean();
 
         if (candidateDeleted) {
-            
-            if(guardData.iin && guardData.iin == candidateDeleted.iin ){
-                throw ApiError.BadRequest(`ИИН ${candidateDeleted.iin} уже использовались для данных сотрудника  ${candidateDeleted.firstName} ${candidateDeleted.surname}, после чего были деактивированы`);
-            }
 
-            throw ApiError.BadRequest(`Инициалы ${candidateDeleted.firstName} ${candidateDeleted.surname} уже использовались для данных другого сотрудника, после чего были деактивированы`);
+            // Если архивная запись принадлежит тому же человеку (совпадает и ИИН, и ФИО) — разрешаем редактирование
+            const isSamePerson = candidateDeleted.surname === guardData.surname
+                && candidateDeleted.firstName === guardData.firstName
+                && guardData.iin && candidateDeleted.iin === guardData.iin;
+
+            if (!isSamePerson) {
+                if(guardData.iin && guardData.iin == candidateDeleted.iin ){
+                    throw ApiError.BadRequest(`ИИН ${candidateDeleted.iin} уже использовались для данных сотрудника  ${candidateDeleted.firstName} ${candidateDeleted.surname}, после чего были деактивированы`);
+                }
+
+                throw ApiError.BadRequest(`Инициалы ${candidateDeleted.firstName} ${candidateDeleted.surname} уже использовались для данных другого сотрудника, после чего были деактивированы`);
+            }
         }
         //Абдулла Нурлыбек
         //Update model
