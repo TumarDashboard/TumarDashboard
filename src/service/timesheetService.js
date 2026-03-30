@@ -1332,7 +1332,7 @@ class TimesheetService {
 
             //Извлечение параметров для формирования-------------------------------------------------------
 
-            const { date } = timesheetsData;
+            const { date, guardPost } = timesheetsData;
 
             if (!date) {
                 throw ApiError.BadRequest(`Отсутствуют данные для формирования: date`);
@@ -1344,10 +1344,17 @@ class TimesheetService {
             //Check initials condition---------------------------------------------------------------------
             await mongoConnect();
 
+            // Формируем фильтр по guardPost (опционально)
+            const guardPostMatch = {};
+            if (guardPost && guardPost.length > 0) {
+                guardPostMatch.guardPost = { $in: guardPost.map(el => mongoose.Types.ObjectId(el)) };
+            }
+
             // Сначала запрашиваем данные из таблицы с ГРАФИКАМИ СМЕН--------------------------------------
             const responceTimesheetsGuards = await mongoTimesheetsGuardsModel.aggregate([
                 {
                     $match: {
+                        ...guardPostMatch,
                         month: month,
                         timesheetDays: day
                     }
@@ -1859,21 +1866,24 @@ class TimesheetService {
             });
 
             //Извлечение параметров для формирования
-            const { month, customHeaders } = timesheetsData;
+            const { month, customHeaders, guardPost } = timesheetsData;
 
             const date = new Date(month);
 
             //Check initials condition
             await mongoConnect();
 
-            // Формируем ObjectID из списка guardPost на фильтр
-            // const guardPosts = guardPost.map(function (el) { return mongoose.Types.ObjectId(el) });
+            // Формируем фильтр по guardPost (опционально)
+            const guardPostMatch = {};
+            if (guardPost && guardPost.length > 0) {
+                guardPostMatch.guardPost = { $in: guardPost.map(el => mongoose.Types.ObjectId(el)) };
+            }
 
             // Сначала запрашиваем данные из таблицы с ГРАФИКАМИ СМЕН
             const responceTimesheetsGuards = await mongoTimesheetsGuardsModel.aggregate([
                 {
                     $match: {
-                        // guardPost: { $in: guardPosts },
+                        ...guardPostMatch,
                         month: date
                     }
                 },
@@ -1968,7 +1978,7 @@ class TimesheetService {
             const responceTimesheetsGuardPost = await mongoTimesheetsGuardPostModel.aggregate([
                 {
                     $match: {
-                        // guardPost: { $in: guardPosts },
+                        ...guardPostMatch,
                         month: date,
                         manager: { $exists: true, $ne: null }
                     }
@@ -2059,7 +2069,7 @@ class TimesheetService {
 
             // Запрашиваем данные физ поста на искомый ПЕРИОД по данным ФИЗ. ПОСТОВ без НСО
             const responceTimesheetsGuardPostEmptyManager = await mongoTimesheetsGuardPostModel.find({
-                // guardPost: { $in: guardPosts },
+                ...guardPostMatch,
                 month: date,
                 manager: null
             }).lean();
@@ -2130,17 +2140,24 @@ class TimesheetService {
             });
 
             //Извлечение параметров для формирования
-            const { month, customHeaders } = timesheetsData;
+            const { month, customHeaders, guardPost } = timesheetsData;
 
             const date = new Date(month);
 
             //Check initials condition
             await mongoConnect();
 
+            // Формируем фильтр по guardPost (опционально)
+            const guardPostMatch = {};
+            if (guardPost && guardPost.length > 0) {
+                guardPostMatch.guardPost = { $in: guardPost.map(el => mongoose.Types.ObjectId(el)) };
+            }
+
             // Сначала запрашиваем данные из таблицы с ГРАФИКАМИ СМЕН (с isOfficial)
             const responceTimesheetsGuards = await mongoTimesheetsGuardsModel.aggregate([
                 {
                     $match: {
+                        ...guardPostMatch,
                         month: date
                     }
                 },
@@ -2251,6 +2268,7 @@ class TimesheetService {
 
             // Запрашиваем тарифы из mongoTimesheetsGuardPostModel
             const responceTimesheetsGuardPost = await mongoTimesheetsGuardPostModel.find({
+                ...guardPostMatch,
                 month: date
             }).lean();
 
@@ -2311,17 +2329,24 @@ class TimesheetService {
             });
 
             //Извлечение параметров для формирования
-            const { month } = timesheetsData;
+            const { month, guardPost } = timesheetsData;
 
             const date = new Date(month);
 
             //Check initials condition
             await mongoConnect();
 
+            // Формируем фильтр по guardPost (опционально)
+            const guardPostMatch = {};
+            if (guardPost && guardPost.length > 0) {
+                guardPostMatch.guardPost = { $in: guardPost.map(el => mongoose.Types.ObjectId(el)) };
+            }
+
             // Сначала запрашиваем данные из таблицы с ГРАФИКАМИ СМЕН
             const {responceTimesheetsGuards, responceGuardPostsTimesheets} = (await mongoTimesheetsGuardsModel.aggregate([
                 {
                     $match: {
+                        ...guardPostMatch,
                         month: date
                     }
                 },

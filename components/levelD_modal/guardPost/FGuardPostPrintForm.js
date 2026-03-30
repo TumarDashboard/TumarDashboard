@@ -67,7 +67,7 @@ const getTimesheet = async (operation, guardPosts, date, manager, customHeaders,
 
     case DTForDay:
       return {
-        responce: await getTimesheetPrintForDay(date, customHeaders),
+        responce: await getTimesheetPrintForDay(date, customHeaders, guardPosts ? guardPosts.map(value => value._id) : undefined),
         documentName: 'Список охранников-' + date + '.xlsx'
       };
 
@@ -87,19 +87,19 @@ const getTimesheet = async (operation, guardPosts, date, manager, customHeaders,
 
     case DTForMonthFull:
       return {
-        responce: await getTimesheetPrintForMonthFull(date, customHeaders),
+        responce: await getTimesheetPrintForMonthFull(date, customHeaders, guardPosts ? guardPosts.map(value => value._id) : undefined),
         documentName: 'Табель-' + date + '.xlsx'
       };
 
     case DTForMonthFullSplit:
       return {
-        responce: await getTimesheetPrintForMonthFullSplit(date, customHeaders),
+        responce: await getTimesheetPrintForMonthFullSplit(date, customHeaders, guardPosts ? guardPosts.map(value => value._id) : undefined),
         documentName: 'Табель-ОФ-Неоф-' + date + '.xlsx'
       };
 
     case DTForMonthBuh:
       return {
-        responce: await getTimesheetPrintForMonthBuh(date, customHeaders),
+        responce: await getTimesheetPrintForMonthBuh(date, customHeaders, guardPosts ? guardPosts.map(value => value._id) : undefined),
         documentName: 'Платёжная ведомость-' + date + '.xlsx'
       };
 

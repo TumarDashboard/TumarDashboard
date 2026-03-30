@@ -98,22 +98,22 @@ export const getTimesheetPrintForMonthHours = async (guardPost, month, customHea
 }
 
 
-export const getTimesheetPrintForDay = async (date, customHeaders) => {
-    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForDay', { date, customHeaders });
+export const getTimesheetPrintForDay = async (date, customHeaders, guardPost) => {
+    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForDay', { date, customHeaders, guardPost });
 }
 
 export const getTimesheetPrintForMonthPart = async (month, guardPostManager, customHeaders) => {
     return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthPart', { month, guardPostManager, customHeaders });
 }
 
-export const getTimesheetPrintForMonthFull = async (month, customHeaders) => {
-    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthFull', { month, customHeaders });
+export const getTimesheetPrintForMonthFull = async (month, customHeaders, guardPost) => {
+    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthFull', { month, customHeaders, guardPost });
 }
 
-export const getTimesheetPrintForMonthFullSplit = async (month, customHeaders) => {
-    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthFullSplit', { month, customHeaders });
+export const getTimesheetPrintForMonthFullSplit = async (month, customHeaders, guardPost) => {
+    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthFullSplit', { month, customHeaders, guardPost });
 }
 
-export const getTimesheetPrintForMonthBuh = async (month, customHeaders) => {
-    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthBuh', { month, customHeaders });
+export const getTimesheetPrintForMonthBuh = async (month, customHeaders, guardPost) => {
+    return await fetchAuthFileMethod('/method/timesheet/getTimesheetPrintForMonthBuh', { month, customHeaders, guardPost });
 }
