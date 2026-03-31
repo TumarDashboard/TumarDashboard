@@ -83,7 +83,7 @@ export default async function handler(req, res) {
           const val = parseInt(s);
           return sum + (isNaN(val) ? 0 : val);
         }, 0) : 0;
-        const salary = rate ? totalHours * rate : 0;
+        const salary = rate ? Math.round(totalHours * rate) : 0;
 
         return {
           guardId: guard._id.toString(),
@@ -95,7 +95,7 @@ export default async function handler(req, res) {
           daysWorked,
           shiftsWorked,
           totalHours,
-          salary: Math.round(salary),
+          salary,
         };
       }).filter(Boolean);
 
