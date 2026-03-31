@@ -75,10 +75,14 @@ export default async function handler(req, res) {
 
         // Count worked days (timesheetDays contains day numbers that were worked)
         const daysWorked = entry.timesheetDays ? entry.timesheetDays.length : 0;
-        // Count shifts
+        // Count shifts (non-empty entries)
         const shiftsWorked = entry.timesheetShifts ? entry.timesheetShifts.filter(s => s && s !== '').length : 0;
-        // Calculate hours (assuming each shift = rate applies per hour, using shifts as count)
-        const totalHours = shiftsWorked;
+        // Sum actual hours from shifts (each timesheetShifts entry is hours for that day)
+        // This matches TumarDashboard Excel: hoursCount = SUM of shift values
+        const totalHours = entry.timesheetShifts ? entry.timesheetShifts.reduce((sum, s) => {
+          const val = parseInt(s);
+          return sum + (isNaN(val) ? 0 : val);
+        }, 0) : 0;
         const salary = rate ? totalHours * rate : 0;
 
         return {
