@@ -30,10 +30,12 @@ export function getPositionWithCode( value ){
 
 export function getPositionWithCodeList( valueList ){
     var result = [];
+    if (!valueList || !Array.isArray(valueList)) return result;
     valueList.forEach(value => {
-        let label = getPositionWithCode(value).label;
-        if( label )
-            result.push(label)
+        if (!value) return;
+        let position = getPositionWithCode(value);
+        if( position && position.label )
+            result.push(position.label)
     });
     return result;
 }
