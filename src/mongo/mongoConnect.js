@@ -3,17 +3,33 @@ import mongoose from 'mongoose'
 mongoose.set('strictQuery', false);
 mongoose.set('bufferTimeoutMS', 30000);
 
-export default async function mongoConnect() {
+let connectionPromise = null;
 
-  if (mongoose.connection.readyState >= 1) {
-    return
+export default async function mongoConnect() {
+  // Already connected
+  if (mongoose.connection.readyState === 1) {
+    return;
   }
-  
-  await mongoose.connect(process.env.NEXT_PRIVATE_MONGODB_URI, {
+
+  // Connection in progress - wait for it
+  if (connectionPromise) {
+    await connectionPromise;
+    return;
+  }
+
+  // Start new connection
+  connectionPromise = mongoose.connect(process.env.NEXT_PRIVATE_MONGODB_URI, {
     serverSelectionTimeoutMS: 30000,
     connectTimeoutMS: 30000,
     socketTimeoutMS: 45000,
   });
-  console.log('MongoDB connected successfully');
-  
+
+  try {
+    await connectionPromise;
+    console.log('MongoDB connected successfully to', mongoose.connection.host);
+  } catch (error) {
+    connectionPromise = null;
+    console.error('MongoDB connection error:', error.message);
+    throw error;
+  }
 }
