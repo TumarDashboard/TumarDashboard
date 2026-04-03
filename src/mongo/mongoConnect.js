@@ -8,6 +8,10 @@ export default async function mongoConnect() {
     return
   }
   
-  return mongoose.connect(process.env.NEXT_PRIVATE_MONGODB_URI);
+  return mongoose.connect(process.env.NEXT_PRIVATE_MONGODB_URI, {
+    serverSelectionTimeoutMS: 30000,
+    connectTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+  });
   
 }
