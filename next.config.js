@@ -102,8 +102,8 @@ module.exports = async (phase, { defaultConfig }) => {
 
     } else {
 
-        nextConfig.env.NEXT_PUBLIC_API_URL = 'https://tumar-dashboard-delta.vercel.app';
-        nextConfig.env.NEXT_PUBLIC_CLIENT_URL = 'https://tumar-dashboard-delta.vercel.app';
+        nextConfig.env.NEXT_PUBLIC_API_URL = 'https://tumar-dashboard.vercel.app';
+        nextConfig.env.NEXT_PUBLIC_CLIENT_URL = 'https://tumar-dashboard.vercel.app';
         // nextConfig.env.NEXT_PUBLIC_API_URL = 'https://mtmdashboard.vercel.app';
         // nextConfig.env.NEXT_PUBLIC_CLIENT_URL = 'https://mtmdashboard.vercel.app';
 
